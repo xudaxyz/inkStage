@@ -1,0 +1,57 @@
+{
+  "properties": [
+    {
+      "name": "mybatis.mapper-locations",
+      "type": "java.lang.String",
+      "description": "MyBatis Mapper XML 文件路径.",
+      "defaultValue": "classpath:mapper/**/*.xml"
+    },
+    {
+      "name": "mybatis.type-aliases-package",
+      "type": "java.lang.String",
+      "description": "MyBatis 实体类别名包路径."
+    },
+    {
+      "name": "mybatis.configuration.map-underscore-to-camel-case",
+      "type": "java.lang.Boolean",
+      "description": "开启下划线到驼峰命名的自动转换.",
+      "defaultValue": true
+    },
+    {
+      "name": "mybatis.configuration.cache-enabled",
+      "type": "java.lang.Boolean",
+      "description": "开启 MyBatis全局缓存.",
+      "defaultValue": true
+    },
+    {
+      "name": "mybatis.configuration.lazy-loading-enabled",
+      "type": "java.lang.Boolean",
+      "description": "开启懒加载.",
+      "defaultValue": false
+    },
+    {
+      "name": "mybatis.configuration.aggressive-lazy-loading",
+      "type": "java.lang.Boolean",
+      "description": "指定 MyBatis激进懒加载.",
+      "defaultValue": false
+    },
+    {
+      "name": "mybatis.configuration.log-impl",
+      "type": "java.lang.String",
+      "description": "指定 MyBatis日志实现类.",
+      "defaultValue": "org.apache.ibatis.logging.slf4j.Slf4jImpl"
+    },
+    {
+      "name": "mybatis.type-handlers-package",
+      "type": "java.lang.String",
+      "description": "指定 MyBatis类型处理器包路径.",
+      "defaultValue": "com.inkstage.config.mybatis"
+    },
+    {
+      "name": "mybatis.configuration.default-enum-type-handler",
+      "type": "java.lang.String",
+      "description": "指定 MyBatis默认枚举类型处理器.",
+      "defaultValue": "com.inkstage.common.handler.EnumTypeHandler"
+    }
+  ]
+}

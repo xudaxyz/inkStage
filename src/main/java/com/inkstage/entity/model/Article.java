@@ -1,0 +1,136 @@
+package com.inkstage.entity.model;
+
+import com.inkstage.entity.base.BaseEntity;
+import com.inkstage.enums.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
+import java.io.Serial;
+import java.time.LocalDateTime;
+
+/**
+ * 文章实体类
+ */
+@Data
+@EqualsAndHashCode(callSuper = true)
+public class Article extends BaseEntity {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 文章标题
+     */
+    private String title;
+
+    /**
+     * 文章摘要
+     */
+    private String summary;
+
+    /**
+     * 文章内容
+     */
+    private String content;
+
+    /**
+     * 文章HTML内容（Markdown转换结果）
+     */
+    private String contentHtml;
+
+    /**
+     * 文章封面图URL
+     */
+    private String coverImage;
+
+
+    /**
+     * 作者ID
+     */
+    private Long userId;
+
+    /**
+     * 文章作者的名称
+     */
+    private String authorName;
+
+    /**
+     * 分类ID
+     */
+    private Long categoryId;
+
+    /**
+     * 状态（0:草稿,1:已发布,2:待审核,3:已下架）
+     */
+    private ArticleStatus status;
+
+    /**
+     * 发布时间
+     */
+    private LocalDateTime publishTime;
+
+    /**
+     * 阅读量
+     */
+    private Integer readCount;
+
+    /**
+     * 点赞数
+     */
+    private Integer likeCount;
+
+    /**
+     * 评论数
+     */
+    private Integer commentCount;
+
+    /**
+     * 收藏数
+     */
+    private Integer collectionCount;
+
+    /**
+     * 分享数
+     */
+    private Integer shareCount;
+
+    /**
+     * 是否置顶（0:否,1:是）
+     */
+    private TopStatus top;
+
+    /**
+     * 是否推荐（0:否,1:是）
+     */
+    private RecommendStatus recommended;
+
+    /**
+     * 可见性状态：0-私有, 1-公开, 2-仅关注者可见
+     */
+    private VisibleStatus visible;
+
+    /**
+     * 允许评论状态：0-不允许, 1-允许
+     */
+    private AllowStatus allowComment;
+
+    /**
+     * 允许转发状态：0-不允许, 1-允许
+     */
+    private AllowStatus allowForward;
+
+    /**
+     * 是否原创（0:转载,1:原创）
+     */
+    private OriginalStatus original;
+
+    /**
+     * 转载来源URL
+     */
+    private String originalUrl;
+
+    /**
+     * 最后一次编辑的时间
+     */
+    private LocalDateTime lastEditTime;
+}
