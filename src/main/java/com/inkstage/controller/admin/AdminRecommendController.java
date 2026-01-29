@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台推荐与发现功能管理Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/recommend")
+@RequestMapping("/admin/recommend")
 @RequiredArgsConstructor
 public class AdminRecommendController {
 

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 前台文章Controller
  */
 @RestController
-@RequestMapping("/api/v1/front/article")
+@RequestMapping("/front/article")
 @RequiredArgsConstructor
 public class ArticleController {
 

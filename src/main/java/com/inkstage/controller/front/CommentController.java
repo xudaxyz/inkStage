@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 前台评论Controller
  */
 @RestController
-@RequestMapping("/api/v1/front/comment")
+@RequestMapping("/front/comment")
 @RequiredArgsConstructor
 public class CommentController {
 

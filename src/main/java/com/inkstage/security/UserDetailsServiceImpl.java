@@ -1,4 +1,4 @@
-package com.inkstage.service.impl;
+package com.inkstage.security;
 
 import com.inkstage.common.model.ResponseMessage;
 import com.inkstage.entity.model.User;
@@ -10,8 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 /**
  * 用户详情服务实现类
@@ -26,14 +24,25 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @NonNull
     @Override
     public UserDetails loadUserByUsername(@NonNull String username) throws UsernameNotFoundException {
-        // 根据用户名查询用户
-        User user = userService.getUserByUsername(username);
+        // 根据账号类型查询用户
+        User user;
+        if (username.contains("@")) {
+            // 邮箱
+            user = userService.getUserByEmail(username);
+        } else if (username.matches("^1[3-9]\\d{9}$")) {
+            // 手机号
+            user = userService.getUserByPhone(username);
+        } else {
+            // 用户名
+            user = userService.getUserByUsername(username);
+        }
+
         if (user == null) {
-            log.error("用户名不存在: {}", username);
-            throw new UsernameNotFoundException(ResponseMessage.USERNAME_NOT_FOUND.getMessage() + ": " + username);
+            log.error("用户不存在: {}", username);
+            throw new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND.getMessage() + ": " + username);
         }
 
         // 构建UserDetails对象，目前返回空权限集合
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), List.of());
+        return new UserDetailsImpl(user);
     }
 }

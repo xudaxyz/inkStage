@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台反馈Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/feedback")
+@RequestMapping("/admin/feedback")
 @RequiredArgsConstructor
 public class AdminFeedbackController {
 

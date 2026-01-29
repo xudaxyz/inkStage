@@ -87,6 +87,10 @@ public class Result<T> implements Serializable {
         return new Result<>(ResponseCode.SUCCESS, ResponseMessage.SUCCESS, data);
     }
 
+    public static <T> Result<T> success(ResponseMessage responseMessage) {
+        return new Result<>(ResponseCode.SUCCESS, responseMessage, null);
+    }
+
     public static <T> Result<T> success(T data, ResponseMessage message) {
         return new Result<>(ResponseCode.SUCCESS, message, data);
     }

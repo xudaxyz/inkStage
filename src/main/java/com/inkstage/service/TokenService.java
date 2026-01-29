@@ -1,6 +1,6 @@
 package com.inkstage.service;
 
-import com.inkstage.dto.OAuth2RegisterDTO;
+import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.vo.TokenResponse;
 
@@ -10,11 +10,11 @@ import com.inkstage.vo.TokenResponse;
 public interface TokenService {
 
     /**
-     * 为新注册用户生成令牌
+     * 为用户生成令牌（支持登录和注册）
      *
-     * @param user              新注册的用户
-     * @param oAuth2RegisterDTO 注册请求参数
+     * @param user     用户
+     * @param authDTO  认证请求DTO
      * @return 包含访问令牌和刷新令牌的响应
      */
-    TokenResponse generateTokenForUser(User user, OAuth2RegisterDTO oAuth2RegisterDTO);
+    TokenResponse generateTokenForUser(User user, AuthDTO authDTO);
 }

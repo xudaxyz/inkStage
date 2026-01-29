@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 前台举报Controller
  */
 @RestController
-@RequestMapping("/api/v1/front/report")
+@RequestMapping("/front/report")
 @RequiredArgsConstructor
 public class ReportController {
 

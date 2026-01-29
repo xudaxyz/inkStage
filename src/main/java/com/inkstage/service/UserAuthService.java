@@ -1,6 +1,6 @@
 package com.inkstage.service;
 
-import com.inkstage.dto.OAuth2RegisterDTO;
+import com.inkstage.dto.AuthDTO;
 import com.inkstage.vo.TokenResponse;
 
 /**
@@ -11,9 +11,17 @@ public interface UserAuthService {
     /**
      * 用户注册
      *
-     * @param oAuth2RegisterDTO OAuth2注册参数
+     * @param authDTO 认证请求DTO
      * @return 注册结果，包含令牌信息
      */
-    TokenResponse register(OAuth2RegisterDTO oAuth2RegisterDTO);
+    TokenResponse register(AuthDTO authDTO);
+
+    /**
+     * 用户登录
+     *
+     * @param authDTO 认证请求DTO
+     * @return 登录结果，包含令牌信息
+     */
+    TokenResponse login(AuthDTO authDTO);
 
 }

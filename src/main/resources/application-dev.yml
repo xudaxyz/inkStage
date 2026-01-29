@@ -72,18 +72,20 @@ spring:
 
   # Mail配置
   mail:
-    host: smtp.qq.com
-    port: 587
-    username: your-email@qq.com
-    password: your-email-password
+    host: smtp.163.com
+    port: 465
+    username: inkstage@163.com
+    password: LRrqgV9VFpQ9sM9c # 授权密码
     default-encoding: UTF-8
     properties:
       mail:
         smtp:
           auth: true
-          starttls:
+          ssl:
             enable: true
-            required: true
+          timeout: 10000
+          connectiontimeout: 10000
+          writetimeout: 10000
 
 
   # 权限规则配置
@@ -160,7 +162,7 @@ minio:
   # 秘密密钥
   secret-key: minioadmin
   # 默认桶名称
-  bucket-name: inkstage-bucket
+  bucket-name: inkstage-bucket # 默认桶名称（创建桶时记得将桶设置为public）
   # 是否使用 SSL
   secure: false
   # 预签名URL过期时间(秒) 1天

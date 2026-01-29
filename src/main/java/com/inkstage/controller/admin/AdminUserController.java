@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台用户Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/user")
+@RequestMapping("/admin/user")
 @RequiredArgsConstructor
 public class AdminUserController {
 

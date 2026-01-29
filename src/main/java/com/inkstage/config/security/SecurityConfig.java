@@ -56,10 +56,8 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许公开API请求
-                        .requestMatchers("/api/v1/front/public/**").permitAll()
-                        .requestMatchers("/api/v1/front/auth/register", "/api/v1/front/auth/login").permitAll()
-                        // 允许注册接口匿名访问
-                        .requestMatchers("/auth/register", "/auth/send-code").permitAll()
+                        .requestMatchers("/front/public/**").permitAll()
+                        .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()
                 )

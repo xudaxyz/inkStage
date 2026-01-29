@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台邮件模板Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/notification/email-templates")
+@RequestMapping("/admin/notification/email-templates")
 @RequiredArgsConstructor
 public class EmailTemplateController {
 

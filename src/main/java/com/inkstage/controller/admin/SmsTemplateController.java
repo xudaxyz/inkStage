@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台短信模板Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/notification/sms-templates")
+@RequestMapping("/admin/notification/sms-templates")
 @RequiredArgsConstructor
 public class SmsTemplateController {
 

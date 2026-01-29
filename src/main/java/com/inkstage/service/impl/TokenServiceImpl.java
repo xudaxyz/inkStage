@@ -1,7 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.dto.OAuth2RegisterDTO;
+import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
+import com.inkstage.service.FileService;
 import com.inkstage.service.TokenService;
 import com.inkstage.vo.TokenResponse;
 import com.inkstage.vo.UserInfo;
@@ -27,14 +28,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TokenServiceImpl implements TokenService {
 
+    private final FileService fileService;
     private final JwtEncoder jwtEncoder;
 
     @Override
-    public TokenResponse generateTokenForUser(User user, OAuth2RegisterDTO oAuth2RegisterDTO) {
+    public TokenResponse generateTokenForUser(User user, AuthDTO authDTO) {
         log.info("生成用户: {} 令牌", user.getUsername());
 
         // 解析权限范围
-        Set<String> scopes = resolveScopes(oAuth2RegisterDTO.getScope());
+        Set<String> scopes = resolveScopes(authDTO.getScope());
 
         // 设置用户权限
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
@@ -46,7 +48,7 @@ public class TokenServiceImpl implements TokenService {
         JwtClaimsSet accessTokenClaims = JwtClaimsSet.builder()
                 .issuer("inkstage-2026-access") // 令牌颁发者
                 .subject(user.getId().toString()) // 用户ID
-                .audience(Collections.singletonList(oAuth2RegisterDTO.getClient_id())) // 客户端ID
+                .audience(Collections.singletonList(authDTO.getClientId())) // 客户端ID
                 .issuedAt(now) // 颁发时间
                 .expiresAt(expiresAt) // 过期时间
                 .notBefore(now) // 生效时间
@@ -66,7 +68,7 @@ public class TokenServiceImpl implements TokenService {
         JwtClaimsSet refreshTokenClaims = JwtClaimsSet.builder()
                 .issuer("inkstage-2026-refresh")
                 .subject(user.getId().toString())
-                .audience(Collections.singletonList(oAuth2RegisterDTO.getClient_id()))
+                .audience(Collections.singletonList(authDTO.getClientId()))
                 .issuedAt(now)
                 .expiresAt(refreshExpiresAt)
                 .notBefore(now)
@@ -84,16 +86,29 @@ public class TokenServiceImpl implements TokenService {
         tokenResponse.setExpires_in(Math.toIntExact(expiresAt.getEpochSecond() - now.getEpochSecond()));
         tokenResponse.setScope(String.join(" ", scopes));
 
+        // 确保用户相关图片URL完整
+        fileService.ensureUserImgIsFullUrl(user);
         // 设置用户信息
+        UserInfo userInfo = assembleUserInfo(user);
+        tokenResponse.setUserInfo(userInfo);
+
+        log.info("用户: {} 令牌生成完成", user.getUsername());
+        return tokenResponse;
+    }
+
+    private UserInfo assembleUserInfo(User user) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
         userInfo.setName(user.getUsername());
         userInfo.setEmail(user.getEmail());
         userInfo.setAvatar(user.getAvatar());
-        tokenResponse.setUserInfo(userInfo);
-
-        log.info("用户: {} 令牌生成完成", user.getUsername());
-        return tokenResponse;
+        userInfo.setNickname(user.getNickname());
+        userInfo.setCoverImage(user.getCoverImage());
+        userInfo.setSignature(user.getSignature());
+        userInfo.setGender(user.getGender());
+        userInfo.setBirthDate(user.getBirthDate());
+        userInfo.setLocation(user.getLocation());
+        return userInfo;
     }
 
     /**

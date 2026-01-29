@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 后台举报Controller
  */
 @RestController
-@RequestMapping("/api/v1/admin/report")
+@RequestMapping("/admin/report")
 @RequiredArgsConstructor
 public class AdminReportController {
 

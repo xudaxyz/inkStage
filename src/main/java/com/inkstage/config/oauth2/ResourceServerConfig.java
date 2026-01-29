@@ -18,14 +18,14 @@ public class ResourceServerConfig {
 
     /**
      * JWT解码器
-     * 使用本地RSA公钥，解决JWKS端点401错误
+     * 使用本地RSA公钥
      *
      * @param rsaKeyPair RSA密钥对
      * @return JwtDecoder实例
      */
     @Bean
     public JwtDecoder jwtDecoder(KeyPair rsaKeyPair) {
-        // 使用本地公钥直接创建JwtDecoder，避免访问远程JWKS端点
+        // 使用本地公钥直接创建JwtDecoder
         RSAPublicKey publicKey = (RSAPublicKey) rsaKeyPair.getPublic();
         return NimbusJwtDecoder.withPublicKey(publicKey).build();
     }
@@ -37,15 +37,6 @@ public class ResourceServerConfig {
      */
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        // 配置权限前缀
-        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
-        // 配置权限声明名称
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
-
-        JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
-
-        return jwtAuthenticationConverter;
+        return new CustomJwtAuthenticationConverter();
     }
 }

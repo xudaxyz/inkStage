@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证码 - InkStage</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: #4a6cf7;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .content p {
+            margin: 0 0 20px 0;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        .verify-code {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .verify-code .code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4a6cf7;
+            letter-spacing: 4px;
+        }
+
+        .verify-code .hint {
+            font-size: 14px;
+            color: #6c757d;
+            margin-top: 10px;
+        }
+
+        .tips {
+            background-color: #f8f9fa;
+            border-left: 4px solid #4a6cf7;
+            padding: 0 15px;
+            margin-top: 30px;
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>InkStage验证服务</h1>
+    </div>
+    <div class="content">
+        <p>您好，</p>
+        <p>您正在进行${purpose}操作，需要验证您的邮箱。请使用以下验证码完成验证：</p>
+
+        <div class="verify-code">
+            <div class="code">${verifyCode}</div>
+            <div class="hint">验证码有效期：${expireTime}分钟</div>
+        </div>
+
+        <p>如果您没有发起此操作，请忽略此邮件。</p>
+
+        <div class="tips">
+            <p>• 验证码仅在有效期内有效</p>
+            <p>• 请勿向他人透露验证码</p>
+            <p>• 如遇问题，请联系客服</p>
+        </div>
+    </div>
+    <div class="footer">
+        <p>© ${currentYear} InkStage. 保留所有权利。</p>
+    </div>
+</div>
+</body>
+</html>

@@ -46,6 +46,16 @@
         SELECT <include refid="columns"/> FROM user WHERE username = #{username} AND deleted = 0
     </select>
 
+    <!-- 根据邮箱查询用户 -->
+    <select id="selectByEmail" resultMap="ResultMap">
+        SELECT <include refid="columns"/> FROM user WHERE email = #{email} AND deleted = 0
+    </select>
+
+    <!-- 根据手机号查询用户 -->
+    <select id="selectByPhone" resultMap="ResultMap">
+        SELECT <include refid="columns"/> FROM user WHERE phone = #{phone} AND deleted = 0
+    </select>
+
     <!-- 新增用户 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.User" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (
@@ -64,4 +74,44 @@
             #{privacy}, #{status}, #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
+
+    <!-- 根据主键更新用户信息（选择性更新） -->
+    <update id="updateByPrimaryKeySelective" parameterType="com.inkstage.entity.model.User">
+        UPDATE user
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="nickname != null">nickname = #{nickname},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="emailVerified != null">email_verified = #{emailVerified},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="phoneVerified != null">phone_verified = #{phoneVerified},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="signature != null">signature = #{signature},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
+            <if test="location != null">location = #{location},</if>
+            <if test="website != null">website = #{website},</if>
+            <if test="followCount != null">follow_count = #{followCount},</if>
+            <if test="followerCount != null">follower_count = #{followerCount},</if>
+            <if test="articleCount != null">article_count = #{articleCount},</if>
+            <if test="commentCount != null">comment_count = #{commentCount},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+            <if test="lastLoginIp != null">last_login_ip = #{lastLoginIp},</if>
+            <if test="registerIp != null">register_ip = #{registerIp},</if>
+            <if test="registerTime != null">register_time = #{registerTime},</if>
+            <if test="privacy != null">privacy = #{privacy},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据主键查询用户 -->
+    <select id="selectByPrimaryKey" resultMap="ResultMap">
+        SELECT <include refid="columns"/> FROM user WHERE id = #{id} AND deleted = 0
+    </select>
 </mapper>
