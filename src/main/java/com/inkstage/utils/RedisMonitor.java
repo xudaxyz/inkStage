@@ -98,11 +98,11 @@ public class RedisMonitor {
             Set<String> keys = redisTemplate.keys(pattern);
             if (keys != null && !keys.isEmpty()) {
                 long deleteCount = redisTemplate.delete(keys);
-                log.info("清理过期键数量: {}，模式: {}", deleteCount, pattern);
+                log.info("清理过期键数量: {}, 模式: {}", deleteCount, pattern);
                 return deleteCount;
             }
         } catch (Exception e) {
-            log.error("清理过期键失败，模式: {}", pattern, e);
+            log.error("清理过期键失败, 模式: {}", pattern, e);
         }
         return 0;
     }
@@ -125,11 +125,11 @@ public class RedisMonitor {
                         deleteCount++;
                     }
                 }
-                log.info("清理无过期时间键数量: {}，模式: {}", deleteCount, pattern);
+                log.info("清理无过期时间键数量: {}, 模式: {}", deleteCount, pattern);
                 return deleteCount;
             }
         } catch (Exception e) {
-            log.error("清理无过期时间键失败，模式: {}", pattern, e);
+            log.error("清理无过期时间键失败, 模式: {}", pattern, e);
         }
         return 0;
     }

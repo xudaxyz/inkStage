@@ -22,28 +22,29 @@ public interface FileService {
      *
      * @param file       上传的文件
      * @param bucketName 存储桶名称
-     * @param objectName 对象名称（文件路径）
-     * @param expiry     URL有效期（秒）
+     * @param objectName 对象名称(文件路径)
+     * @param expiry     URL有效期(秒)
      * @return 文件访问URL
      */
     String uploadFile(MultipartFile file, String bucketName, String objectName, long expiry);
 
     /**
-     * 获取文件的预签名URL
+     * 上传文件到Minio(使用默认桶)
      *
-     * @param bucketName 存储桶名称
-     * @param objectName 对象名称（文件路径）
-     * @param expiry     URL有效期（秒）
-     * @return 预签名URL
+     * @param file       要上传的文件
+     * @param objectName 对象名称
+     * @param expiry     URL有效期(秒)
+     * @return 文件访问URL
      */
-    String getPresignedUrl(String bucketName, String objectName, long expiry);
+    String uploadFile(MultipartFile file, String objectName, long expiry);
+
 
     /**
      * 上传用户封面图
      *
      * @param file   上传的文件
      * @param userId 用户ID
-     * @param expiry URL有效期（秒）
+     * @param expiry URL有效期(秒)
      * @return 文件访问URL
      */
     String uploadCoverImage(MultipartFile file, Long userId, long expiry);
@@ -53,10 +54,27 @@ public interface FileService {
      *
      * @param file   上传的文件
      * @param userId 用户ID
-     * @param expiry URL有效期（秒）
+     * @param expiry URL有效期(秒)
      * @return 文件访问URL
      */
     String uploadAvatar(MultipartFile file, Long userId, long expiry);
+
+    /**
+     * 上传文章封面图
+     *
+     * @param file   上传的文件
+     * @param userId 用户ID
+     * @param expiry URL有效期(秒)
+     * @return 文件访问URL
+     */
+    String uploadArticleCoverImage(MultipartFile file, Long userId, long expiry);
+
+    /**
+     * 删除文件
+     *
+     * @param objectName 对象名称(文件路径)
+     */
+    void deleteFile(String objectName);
 
     /**
      * 确保User对象中的头像、封面图等字段是完整的预签名URL
@@ -64,5 +82,4 @@ public interface FileService {
      * @param user 用户对象
      */
     void ensureUserImgIsFullUrl(User user);
-
 }

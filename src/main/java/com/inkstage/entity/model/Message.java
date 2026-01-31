@@ -49,17 +49,17 @@ public class Message extends BaseEntity {
     private MessageType type;
 
     /**
-     * 附件URL（图片或文件）
+     * 附件URL(图片或文件)
      */
     private String attachmentUrl;
 
     /**
-     * 对话ID，由sender_id和receiver_id生成的唯一标识
+     * 对话ID, 由sender_id和receiver_id生成的唯一标识
      */
     private String conversationId;
 
     /**
-     * 对话内消息序号，用于保证消息顺序
+     * 对话内消息序号, 用于保证消息顺序
      */
     private Long sequenceId;
 }

@@ -25,32 +25,32 @@ public class UserAuth extends BaseEntity {
     private Long userId;
 
     /**
-     * 认证类型（username,password,email,phone,GitHub,qq,WeChat等）
+     * 认证类型(username,password,email,phone,GitHub,qq,WeChat等)
      */
     private String authType;
 
     /**
-     * 认证标识（用户名,邮箱,手机号,第三方用户ID）
+     * 认证标识(用户名,邮箱,手机号,第三方用户ID)
      */
     private String authIdentifier;
 
     /**
-     * 认证凭证（密码哈希,第三方access_token）
+     * 认证凭证(密码哈希,第三方access_token)
      */
     private String authCredential;
 
     /**
-     * 凭证过期时间（如第三方access_token过期时间）
+     * 凭证过期时间(如第三方access_token过期时间)
      */
     private LocalDateTime credentialExpiredAt;
 
     /**
-     * 是否为主认证方式（0:否,1:是）
+     * 是否为主认证方式(0:否,1:是)
      */
     private DefaultStatus primaryAuth;
 
     /**
-     * 是否启用该认证方式（0:禁用,1:启用）
+     * 是否启用该认证方式(0:禁用,1:启用)
      */
     private StatusEnum enabled;
 

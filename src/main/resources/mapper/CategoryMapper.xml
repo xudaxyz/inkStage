@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.CategoryMapper">
+    <!-- 基础结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Category">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="slug" property="slug" />
+        <result column="parent_id" property="parentId" />
+        <result column="sort_order" property="sortOrder" />
+        <result column="description" property="description" />
+        <result column="article_count" property="articleCount" />
+        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
+        <result column="deleted_time" property="deletedTime" />
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, name, slug, parent_id, sort_order, description, article_count, status, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 获取所有分类 -->
+    <select id="selectAll" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM category
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+    <!-- 根据ID获取分类 -->
+    <select id="selectById" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM category
+        WHERE id = #{id}
+    </select>
+
+    <!-- 获取所有激活状态的分类 -->
+    <select id="selectActiveCategories" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM category
+        WHERE status = 1
+        ORDER BY sort_order ASC, id ASC
+    </select>
+
+</mapper>

@@ -1,6 +1,6 @@
 package com.inkstage.security;
 
-import com.inkstage.common.model.ResponseMessage;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -42,7 +42,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             throw new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND.getMessage() + ": " + username);
         }
 
-        // 构建UserDetails对象，目前返回空权限集合
+        // 构建UserDetails对象, 目前返回空权限集合
         return new UserDetailsImpl(user);
     }
 }

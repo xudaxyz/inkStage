@@ -43,7 +43,7 @@ public class CollectionFolder extends BaseEntity {
     private Integer sortOrder;
 
     /**
-     * 是否默认文件夹（0:否,1:是）
+     * 是否默认文件夹(0:否,1:是)
      */
     private DefaultStatus defaultFolder;
 }

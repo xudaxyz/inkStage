@@ -1,6 +1,6 @@
 package com.inkstage.vo;
 
-import com.inkstage.enums.Gender;
+import com.inkstage.enums.user.Gender;
 import lombok.Data;
 
 import java.time.LocalDate;

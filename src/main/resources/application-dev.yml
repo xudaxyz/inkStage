@@ -128,7 +128,7 @@ mybatis:
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.inkstage.entity
   # 注册自定义类型处理器
-  type-handlers-package: com.inkstage.config.mybatis
+  type-handlers-package: com.inkstage.handler
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true
@@ -136,7 +136,7 @@ mybatis:
     aggressive-lazy-loading: false
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
     # 配置默认的枚举类型处理器，处理大部分整数类型枚举
-    default-enum-type-handler: com.inkstage.config.mybatis.EnumCodeTypeHandler
+    default-enum-type-handler: com.inkstage.handler.EnumCodeTypeHandler
 
 # PageHelper配置
 pagehelper:

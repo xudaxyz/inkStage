@@ -7,7 +7,7 @@ import lombok.Getter;
  */
 @Getter
 public enum AllowStatus implements EnumCode {
-    NOT_ALLOWED(0, "不允许"),
+    PROHIBITED(0, "禁止"),
     ALLOWED(1, "允许");
 
     private final Integer code;

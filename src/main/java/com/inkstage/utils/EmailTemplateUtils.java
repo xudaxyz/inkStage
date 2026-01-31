@@ -24,7 +24,7 @@ public class EmailTemplateUtils {
     /**
      * 加载并渲染邮件模板
      *
-     * @param templatePath 模板路径（相对于resources/templates目录）
+     * @param templatePath 模板路径(相对于resources/templates目录)
      * @param variables    变量映射
      * @return 渲染后的HTML内容
      * @throws IOException 模板加载失败时抛出

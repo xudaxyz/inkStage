@@ -29,7 +29,7 @@ public class UserContext {
     }
 
     /**
-     * 获取当前用户ID（可选）
+     * 获取当前用户ID(可选)
      *
      * @return 当前用户ID的Optional对象
      */
@@ -45,7 +45,7 @@ public class UserContext {
     /**
      * 检查用户是否已认证
      *
-     * @return 如果用户已认证，返回true；否则返回false
+     * @return 如果用户已认证, 返回true；否则返回false
      */
     public static boolean isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

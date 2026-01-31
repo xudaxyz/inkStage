@@ -1097,7 +1097,7 @@ public class RedisUtil {
             }
         } catch (Exception e) {
             log.error("Error batch checking Redis key existence", e);
-            // 发生异常时，所有键都标记为不存在
+            // 发生异常时, 所有键都标记为不存在
             for (String key : keys) {
                 result.put(key, false);
             }

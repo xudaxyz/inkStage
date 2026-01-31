@@ -5,7 +5,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 
 /**
  * 自定义JWT认证转换器
- * 完善JWT认证转换，确保正确处理用户信息
+ * 完善JWT认证转换, 确保正确处理用户信息
  */
 public class CustomJwtAuthenticationConverter extends JwtAuthenticationConverter {
 

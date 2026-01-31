@@ -1,6 +1,6 @@
 package com.inkstage.dto.front;
 
-import com.inkstage.enums.Gender;
+import com.inkstage.enums.user.Gender;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 

@@ -1,7 +1,7 @@
 package com.inkstage.controller.front;
 
-import com.inkstage.common.model.ResponseMessage;
-import com.inkstage.common.model.Result;
+import com.inkstage.common.ResponseMessage;
+import com.inkstage.common.Result;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.dto.SendCodeDTO;
 import com.inkstage.service.UserAuthService;
@@ -30,7 +30,7 @@ public class AuthController {
      * 用户注册
      *
      * @param authDTO 认证请求DTO
-     * @return 注册结果，包含令牌信息
+     * @return 注册结果, 包含令牌信息
      */
     @PostMapping("/register")
     public Result<TokenResponse> register(@RequestBody AuthDTO authDTO) {
@@ -46,7 +46,7 @@ public class AuthController {
      * 用户登录
      *
      * @param authDTO 认证请求DTO
-     * @return 登录结果，包含令牌信息
+     * @return 登录结果, 包含令牌信息
      */
     @PostMapping("/login")
     public Result<TokenResponse> login(@RequestBody AuthDTO authDTO) {

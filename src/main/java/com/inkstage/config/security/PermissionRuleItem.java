@@ -15,17 +15,17 @@ public class PermissionRuleItem {
     private String name;
 
     /**
-     * 路径模式，支持Ant风格通配符
+     * 路径模式, 支持Ant风格通配符
      */
     private String pattern;
 
     /**
-     * HTTP方法，多个方法用逗号分隔
+     * HTTP方法, 多个方法用逗号分隔
      */
     private String methods;
 
     /**
-     * 所需权限，多个权限用空格分隔
+     * 所需权限, 多个权限用空格分隔
      */
     private String requiredScopes;
 

@@ -50,12 +50,12 @@ public class Feedback extends BaseEntity {
     private String evidenceUrls;
 
     /**
-     * 是否匿名（0:否,1:是）
+     * 是否匿名(0:否,1:是)
      */
     private DefaultStatus anonymous;
 
     /**
-     * 反馈状态（0:待处理,1:处理中,2:已解决,3:已驳回,4:已关闭）
+     * 反馈状态(0:待处理,1:处理中,2:已解决,3:已驳回,4:已关闭)
      */
     private FeedbackStatus status;
 

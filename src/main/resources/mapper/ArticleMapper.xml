@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ArticleMapper">
+    <!-- 基础结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Article">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="content" property="content"/>
+        <result column="content_html" property="contentHtml"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="user_id" property="userId"/>
+        <result column="author_name" property="authorName"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.article.ArticleStatus" />
+        <result column="publish_time" property="publishTime"/>
+        <result column="read_count" property="readCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="collection_count" property="collectionCount"/>
+        <result column="share_count" property="shareCount"/>
+        <result column="top" property="top" javaType="com.inkstage.enums.article.TopStatus"/>
+        <result column="recommended" property="recommended"
+                javaType="com.inkstage.enums.article.RecommendStatus"/>
+        <result column="visible" property="visible" javaType="com.inkstage.enums.VisibleStatus" />
+        <result column="allow_comment" property="allowComment"
+                javaType="com.inkstage.enums.AllowStatus"/>
+        <result column="allow_forward" property="allowForward"
+                javaType="com.inkstage.enums.AllowStatus"/>
+        <result column="original" property="original" javaType="com.inkstage.enums.article.OriginalStatus"/>
+        <result column="original_url" property="originalUrl"/>
+        <result column="last_edit_time" property="lastEditTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, title, summary, content, content_html, cover_image, user_id, author_name, category_id, status, publish_time,
+        read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
+        allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <select id="selectById" resultMap="ResultMap">
+        select
+        <include refid="baseColumns"/>
+        from article where id = #{id} and deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="com.inkstage.entity.model.Article" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article
+        (title, summary, content, content_html, cover_image, user_id, author_name, category_id, status, publish_time,
+        read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
+        allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time)
+        VALUES
+        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{authorName}, #{categoryId}, #{status}, #{publishTime},
+        #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended}, #{visible}, #{allowComment},
+        #{allowForward}, #{original}, #{originalUrl}, #{lastEditTime},  #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+    </insert>
+
+    <update id="update" parameterType="com.inkstage.entity.model.Article">
+        update article
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="summary != null">summary = #{summary},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="contentHtml != null">content_html = #{contentHtml},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="authorName != null">author_name = #{authorName},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="readCount != null">read_count = #{readCount},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="commentCount != null">comment_count = #{commentCount},</if>
+            <if test="collectionCount != null">collection_count = #{collectionCount},</if>
+            <if test="shareCount != null">share_count = #{shareCount},</if>
+            <if test="top != null">top = #{top},</if>
+            <if test="recommended != null">recommended = #{recommended},</if>
+            <if test="visible != null">visible = #{visible},</if>
+            <if test="allowComment != null">allow_comment = #{allowComment},</if>
+            <if test="allowForward != null">allow_forward = #{allowForward},</if>
+            <if test="original != null">original = #{original},</if>
+            <if test="originalUrl != null">original_url = #{originalUrl},</if>
+            <if test="lastEditTime != null">last_edit_time = #{lastEditTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime}</if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        update article set deleted = 1 where id = #{id}
+    </delete>
+
+
+</mapper>

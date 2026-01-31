@@ -2,6 +2,7 @@ package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.*;
+import com.inkstage.enums.PushedStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -43,7 +44,7 @@ public class Notification extends BaseEntity {
     private String readTime;
 
     /**
-     * 关联ID（如文章ID、评论ID、私信ID等）
+     * 关联ID(如文章ID、评论ID、私信ID等)
      */
     private Long relatedId;
 
@@ -53,7 +54,7 @@ public class Notification extends BaseEntity {
     private ReportTargetType relatedType;
 
     /**
-     * 发送通知的用户ID（系统通知为0）
+     * 发送通知的用户ID(系统通知为0)
      */
     private Long senderId;
 
@@ -73,12 +74,12 @@ public class Notification extends BaseEntity {
     private Priority priority;
 
     /**
-     * 操作链接（用于直接跳转到相关内容）
+     * 操作链接(用于直接跳转到相关内容)
      */
     private String actionUrl;
 
     /**
-     * 额外数据（用于存储通知相关的扩展信息）
+     * 额外数据(用于存储通知相关的扩展信息)
      */
     private String extraData;
 }

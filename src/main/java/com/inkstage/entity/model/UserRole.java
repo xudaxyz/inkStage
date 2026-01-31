@@ -39,7 +39,7 @@ public class UserRole extends BaseEntity {
     private LocalDateTime assignedAt;
 
     /**
-     * 角色过期时间（NULL表示永久有效）
+     * 角色过期时间(NULL表示永久有效)
      */
     private LocalDateTime expiresAt;
 

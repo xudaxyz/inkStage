@@ -29,17 +29,17 @@ public class Role extends BaseEntity {
     private String description;
 
     /**
-     * 是否为系统角色（0:否,1:是，系统角色不可删除）
+     * 是否为系统角色(0:否,1:是, 系统角色不可删除)
      */
     private DefaultStatus systemRole;
 
     /**
-     * 角色等级（数值越大，权限越高）
+     * 角色等级(数值越大, 权限越高)
      */
     private Integer level;
 
     /**
-     * 状态（0:禁用,1:正常）
+     * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
 }

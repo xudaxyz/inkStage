@@ -1,4 +1,4 @@
-package com.inkstage.common.model;
+package com.inkstage.common;
 
 import lombok.Data;
 
@@ -29,7 +29,7 @@ public class Result<T> implements Serializable {
      */
     private T data;
     /**
-     * 响应时间戳 - Unix时间戳（毫秒）
+     * 响应时间戳 - Unix时间戳(毫秒)
      */
     private Long timestamp;
 

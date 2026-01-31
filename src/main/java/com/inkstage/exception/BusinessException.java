@@ -1,7 +1,7 @@
-package com.inkstage.common.exception;
+package com.inkstage.exception;
 
-import com.inkstage.common.model.ResponseCode;
-import com.inkstage.common.model.ResponseMessage;
+import com.inkstage.common.ResponseCode;
+import com.inkstage.common.ResponseMessage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

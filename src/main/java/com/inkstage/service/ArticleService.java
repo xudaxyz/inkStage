@@ -1,8 +1,39 @@
 package com.inkstage.service;
 
+import com.inkstage.dto.front.ArticleCreateDTO;
+
 /**
  * 文章服务接口
  */
 public interface ArticleService {
+
+    /**
+     * 创建文章
+     *
+     * @param articleCreateDTO 文章创建DTO
+     * @param userId           用户ID
+     * @return 文章ID
+     */
+    Long createArticle(ArticleCreateDTO articleCreateDTO, Long userId);
+
+
+    /**
+     * 保存草稿
+     *
+     * @param articleId               文章ID(如果为null则创建新草稿)
+     * @param articleCreateDTO 文章DTO
+     * @param userId           用户ID
+     * @return 文章ID
+     */
+    Long saveDraft(Long articleId, ArticleCreateDTO articleCreateDTO, Long userId);
+
+    /**
+     * 删除文章
+     *
+     * @param id     文章ID
+     * @param userId 用户ID
+     * @return 是否成功
+     */
+    boolean deleteArticle(Long id, Long userId);
 
 }

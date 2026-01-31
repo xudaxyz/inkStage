@@ -56,7 +56,7 @@ public class AuthorizationServerConfig {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
-                // 启用password授权类型，用于用户名密码注册后直接获取令牌
+                // 启用password授权类型, 用于用户名密码注册后直接获取令牌
                 .authorizationGrantType(new AuthorizationGrantType("password"))
                 .redirectUri("http://localhost:8081/login/oauth2/code/inkstage-client")
                 .postLogoutRedirectUri("http://localhost:8081")
@@ -103,7 +103,7 @@ public class AuthorizationServerConfig {
                             // 允许所有授权服务器端点
                             .anyRequest().permitAll()
                     )
-                    // 禁用CSRF保护（适用于密码授权类型）
+                    // 禁用CSRF保护(适用于密码授权类型)
                     .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/**"))
                     // 无状态会话
                     .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -119,7 +119,7 @@ public class AuthorizationServerConfig {
 
     /**
      * JWK源
-     * 使用统一密钥管理的KeyPair，避免每次生成新密钥
+     * 使用统一密钥管理的KeyPair, 避免每次生成新密钥
      *
      * @param keyPair 统一密钥管理的KeyPair实例
      * @return JWKSource实例

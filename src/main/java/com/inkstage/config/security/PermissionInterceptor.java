@@ -1,7 +1,7 @@
 package com.inkstage.config.security;
 
-import com.inkstage.common.exception.BusinessException;
-import com.inkstage.common.model.ResponseCode;
+import com.inkstage.exception.BusinessException;
+import com.inkstage.common.ResponseCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;

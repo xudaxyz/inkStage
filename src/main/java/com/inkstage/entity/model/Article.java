@@ -2,6 +2,7 @@ package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.*;
+import com.inkstage.enums.article.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -34,7 +35,7 @@ public class Article extends BaseEntity {
     private String content;
 
     /**
-     * 文章HTML内容（Markdown转换结果）
+     * 文章HTML内容(Markdown转换结果)
      */
     private String contentHtml;
 
@@ -42,7 +43,6 @@ public class Article extends BaseEntity {
      * 文章封面图URL
      */
     private String coverImage;
-
 
     /**
      * 作者ID
@@ -60,7 +60,7 @@ public class Article extends BaseEntity {
     private Long categoryId;
 
     /**
-     * 状态（0:草稿,1:已发布,2:待审核,3:已下架）
+     * 状态(0:草稿,1:已发布,2:待审核,3:已下架)
      */
     private ArticleStatus status;
 
@@ -95,12 +95,12 @@ public class Article extends BaseEntity {
     private Integer shareCount;
 
     /**
-     * 是否置顶（0:否,1:是）
+     * 是否置顶(0:否,1:是)
      */
     private TopStatus top;
 
     /**
-     * 是否推荐（0:否,1:是）
+     * 是否推荐(0:否,1:是)
      */
     private RecommendStatus recommended;
 
@@ -120,7 +120,7 @@ public class Article extends BaseEntity {
     private AllowStatus allowForward;
 
     /**
-     * 是否原创（0:转载,1:原创）
+     * 是否原创(0:转载,1:原创)
      */
     private OriginalStatus original;
 

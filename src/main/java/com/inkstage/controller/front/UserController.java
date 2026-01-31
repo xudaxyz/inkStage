@@ -1,7 +1,7 @@
 package com.inkstage.controller.front;
 
-import com.inkstage.common.model.ResponseMessage;
-import com.inkstage.common.model.Result;
+import com.inkstage.common.ResponseMessage;
+import com.inkstage.common.Result;
 import com.inkstage.dto.front.UserProfileDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;

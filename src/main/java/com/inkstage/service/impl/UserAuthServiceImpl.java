@@ -1,16 +1,16 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.exception.BusinessException;
-import com.inkstage.common.model.ResponseMessage;
+import com.inkstage.exception.BusinessException;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.AuthTypeConstant;
 import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
-import com.inkstage.enums.AuthType;
+import com.inkstage.enums.auth.AuthType;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.StatusEnum;
-import com.inkstage.enums.UserStatus;
+import com.inkstage.enums.user.UserStatus;
 import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.service.TokenService;
 import com.inkstage.service.UserAuthService;
@@ -52,9 +52,9 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final RedisUtil redisUtil;
     private final AuthenticationManager authenticationManager;
 
-    // 注册频率限制（秒）
+    // 注册频率限制(秒)
     private static final int REGISTER_RATE_LIMIT_SECONDS = 300;
-    // 登录失败限制（秒）
+    // 登录失败限制(秒)
     private static final int LOGIN_FAIL_LIMIT_SECONDS = 300;
     // 最大登录失败次数
     private static final int MAX_LOGIN_FAIL_TIMES = 10;

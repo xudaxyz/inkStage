@@ -24,7 +24,7 @@ public class ArticleReadStat extends BaseEntity {
     private Long articleId;
 
     /**
-     * 用户ID（未登录用户为NULL）
+     * 用户ID(未登录用户为NULL)
      */
     private Long userId;
 
@@ -44,12 +44,12 @@ public class ArticleReadStat extends BaseEntity {
     private LocalDateTime viewTime;
 
     /**
-     * 阅读时长（秒）
+     * 阅读时长(秒)
      */
     private Integer readDuration;
 
     /**
-     * 是否完整阅读（0:否,1:是）
+     * 是否完整阅读(0:否,1:是)
      */
     private StatusEnum complete;
 }

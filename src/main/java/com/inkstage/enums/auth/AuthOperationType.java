@@ -1,7 +1,8 @@
-package com.inkstage.enums;
+package com.inkstage.enums.auth;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 /**
@@ -21,7 +22,7 @@ public enum AuthOperationType implements EnumCode {
     }
 
     /**
-     * 自定义反序列化方法，忽略大小写
+     * 自定义反序列化方法, 忽略大小写
      */
     @JsonCreator
     public static AuthOperationType fromString(String value) {
@@ -33,11 +34,11 @@ public enum AuthOperationType implements EnumCode {
                 return authOperationType;
             }
         }
-        throw new IllegalArgumentException("Invalid AuthOperationType: " + value);
+        throw new IllegalArgumentException("无效的 AuthOperationType: " + value);
     }
 
     /**
-     * 自定义序列化方法，返回枚举名称
+     * 自定义序列化方法, 返回枚举名称
      */
     @JsonValue
     public String toValue() {

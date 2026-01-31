@@ -1,10 +1,10 @@
-package com.inkstage.common.model;
+package com.inkstage.common;
 
 import lombok.Getter;
 
 /**
  * 响应状态码枚举
- * 遵循restful API设计规范，采用HTTP状态码作为基础
+ * 遵循restful API设计规范, 采用HTTP状态码作为基础
  */
 @Getter
 public enum ResponseCode {

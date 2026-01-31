@@ -24,7 +24,7 @@ public class TokenResponse {
     private String refresh_token;
 
     /**
-     * 过期时间（秒）
+     * 过期时间(秒)
      */
     private Integer expires_in;
 

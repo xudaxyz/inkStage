@@ -28,7 +28,7 @@ public class Column extends BaseEntity {
     private String name;
 
     /**
-     * 专栏别名（URL友好）
+     * 专栏别名(URL友好)
      */
     private String slug;
 
@@ -58,7 +58,7 @@ public class Column extends BaseEntity {
     private Integer sortOrder;
 
     /**
-     * 状态（0:禁用,1:正常）
+     * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
 }

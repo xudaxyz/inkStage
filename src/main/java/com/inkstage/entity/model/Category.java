@@ -23,12 +23,12 @@ public class Category extends BaseEntity {
     private String name;
     
     /**
-     * 分类别名（URL友好）
+     * 分类别名(URL友好)
      */
     private String slug;
     
     /**
-     * 父分类ID（0表示顶级分类）
+     * 父分类ID(0表示顶级分类)
      */
     private Long parentId;
     
@@ -48,7 +48,7 @@ public class Category extends BaseEntity {
     private Integer articleCount;
     
     /**
-     * 状态（0:禁用,1:正常）
+     * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
 }

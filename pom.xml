@@ -38,6 +38,7 @@
         <jspecify.version>1.0.0</jspecify.version>
         <minio.version>8.6.0</minio.version>
         <okhttp.version>4.12.0</okhttp.version>
+        <flexmark.version>0.64.8</flexmark.version>
         <commons-logging.version>1.2</commons-logging.version>
         <maven.compiler.version>3.14.0</maven.compiler.version>
     </properties>
@@ -157,6 +158,12 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>com.vladsch.flexmark</groupId>
+            <artifactId>flexmark-all</artifactId>
+            <version>${flexmark.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

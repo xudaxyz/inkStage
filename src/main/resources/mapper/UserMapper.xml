@@ -4,35 +4,35 @@
 
     <!-- 结果映射 -->
     <resultMap id="ResultMap" type="com.inkstage.entity.model.User">
-        <id property="id" column="id" />
-        <result property="username" column="username" />
-        <result property="password" column="password" />
-        <result property="nickname" column="nickname" />
-        <result property="email" column="email" />
-        <result property="emailVerified" column="email_verified" />
-        <result property="phone" column="phone" />
-        <result property="phoneVerified" column="phone_verified" />
-        <result property="avatar" column="avatar" />
-        <result property="coverImage" column="cover_image" />
-        <result property="signature" column="signature" />
-        <result property="gender" column="gender" />
-        <result property="birthDate" column="birth_date" />
-        <result property="location" column="location" />
-        <result property="website" column="website" />
-        <result property="followCount" column="follow_count" />
-        <result property="followerCount" column="follower_count" />
-        <result property="articleCount" column="article_count" />
-        <result property="commentCount" column="comment_count" />
-        <result property="likeCount" column="like_count" />
-        <result property="lastLoginTime" column="last_login_time" />
-        <result property="lastLoginIp" column="last_login_ip" />
-        <result property="registerIp" column="register_ip" />
-        <result property="registerTime" column="register_time" />
-        <result property="privacy" column="privacy" />
-        <result property="status" column="status" />
-        <result property="createTime" column="create_time" />
-        <result property="updateTime" column="update_time" />
-        <result property="deleted" column="deleted" />
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="nickname" property="nickname"/>
+        <result column="email" property="email"/>
+        <result column="email_verified" property="emailVerified" javaType="com.inkstage.enums.VerificationStatus"/>
+        <result column="phone" property="phone"/>
+        <result column="phone_verified" property="phoneVerified" javaType="com.inkstage.enums.VerificationStatus"/>
+        <result column="avatar" property="avatar"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="signature" property="signature"/>
+        <result column="gender" property="gender" javaType="com.inkstage.enums.user.Gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="location" property="location"/>
+        <result column="website" property="website"/>
+        <result column="follow_count" property="followCount"/>
+        <result column="follower_count" property="followerCount"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_login_ip" property="lastLoginIp"/>
+        <result column="register_ip" property="registerIp"/>
+        <result column="register_time" property="registerTime"/>
+        <result column="privacy" property="privacy" javaType="com.inkstage.enums.VisibleStatus"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
     </resultMap>
 
     <sql id="columns">
@@ -43,35 +43,41 @@
 
     <!-- 根据用户名查询用户 -->
     <select id="selectByUsername" resultMap="ResultMap">
-        SELECT <include refid="columns"/> FROM user WHERE username = #{username} AND deleted = 0
+        SELECT
+        <include refid="columns"/>
+        FROM user WHERE username = #{username} AND deleted = 0
     </select>
 
     <!-- 根据邮箱查询用户 -->
     <select id="selectByEmail" resultMap="ResultMap">
-        SELECT <include refid="columns"/> FROM user WHERE email = #{email} AND deleted = 0
+        SELECT
+        <include refid="columns"/>
+        FROM user WHERE email = #{email} AND deleted = 0
     </select>
 
     <!-- 根据手机号查询用户 -->
     <select id="selectByPhone" resultMap="ResultMap">
-        SELECT <include refid="columns"/> FROM user WHERE phone = #{phone} AND deleted = 0
+        SELECT
+        <include refid="columns"/>
+        FROM user WHERE phone = #{phone} AND deleted = 0
     </select>
 
     <!-- 新增用户 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.User" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user (
-            username, password, nickname, email, email_verified,
-            phone, phone_verified, avatar, cover_image, signature,
-            gender, birth_date, location, website, follow_count,
-            follower_count, article_count, comment_count, like_count,
-            last_login_time, last_login_ip, register_ip, register_time,
-            privacy, status, create_time, update_time, deleted
+        username, password, nickname, email, email_verified,
+        phone, phone_verified, avatar, cover_image, signature,
+        gender, birth_date, location, website, follow_count,
+        follower_count, article_count, comment_count, like_count,
+        last_login_time, last_login_ip, register_ip, register_time,
+        privacy, status, create_time, update_time, deleted
         ) VALUES (
-            #{username}, #{password}, #{nickname}, #{email}, #{emailVerified},
-            #{phone}, #{phoneVerified}, #{avatar}, #{coverImage}, #{signature},
-            #{gender}, #{birthDate}, #{location}, #{website}, #{followCount},
-            #{followerCount}, #{articleCount}, #{commentCount}, #{likeCount},
-            #{lastLoginTime}, #{lastLoginIp}, #{registerIp}, #{registerTime},
-            #{privacy}, #{status}, #{createTime}, #{updateTime}, #{deleted}
+        #{username}, #{password}, #{nickname}, #{email}, #{emailVerified},
+        #{phone}, #{phoneVerified}, #{avatar}, #{coverImage}, #{signature},
+        #{gender}, #{birthDate}, #{location}, #{website}, #{followCount},
+        #{followerCount}, #{articleCount}, #{commentCount}, #{likeCount},
+        #{lastLoginTime}, #{lastLoginIp}, #{registerIp}, #{registerTime},
+        #{privacy}, #{status}, #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
 
@@ -112,6 +118,8 @@
 
     <!-- 根据主键查询用户 -->
     <select id="selectByPrimaryKey" resultMap="ResultMap">
-        SELECT <include refid="columns"/> FROM user WHERE id = #{id} AND deleted = 0
+        SELECT
+        <include refid="columns"/>
+        FROM user WHERE id = #{id} AND deleted = 0
     </select>
 </mapper>

@@ -44,12 +44,12 @@ public class Report extends BaseEntity {
     private String reason;
 
     /**
-     * 举报证据（JSON格式，包含图片、视频等链接）
+     * 举报证据(JSON格式, 包含图片、视频等链接)
      */
     private String evidence;
 
     /**
-     * 是否匿名举报（0:否,1:是）
+     * 是否匿名举报(0:否,1:是)
      */
     private DefaultStatus anonymous;
 

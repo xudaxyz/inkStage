@@ -1,8 +1,8 @@
-package com.inkstage.common.exception;
+package com.inkstage.exception;
 
-import com.inkstage.common.model.ResponseCode;
-import com.inkstage.common.model.ResponseMessage;
-import com.inkstage.common.model.Result;
+import com.inkstage.common.ResponseCode;
+import com.inkstage.common.ResponseMessage;
+import com.inkstage.common.Result;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +87,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 处理HTTP消息不可读异常（如JSON格式错误）
+     * 处理HTTP消息不可读异常(如JSON格式错误)
      *
      * @param e       HTTP消息不可读异常
      * @param request HTTP请求
@@ -98,7 +98,7 @@ public class GlobalExceptionHandler {
     public Result<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
         String requestId = generateRequestId();
         log.error("[{}] HttpMessageNotReadableException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
-        return Result.error(ResponseCode.BAD_REQUEST, "请求体格式错误，无法解析");
+        return Result.error(ResponseCode.BAD_REQUEST, "请求体格式错误, 无法解析");
     }
 
     /**
@@ -153,7 +153,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * 生成请求ID，后续用于追踪请求
+     * 生成请求ID, 后续用于追踪请求
      *
      * @return 请求ID
      */

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 实体类基类，包含所有实体类的公共字段
+ * 实体类基类, 包含所有实体类的公共字段
  */
 @Data
 public class BaseEntity implements Serializable {
@@ -32,7 +32,7 @@ public class BaseEntity implements Serializable {
     private LocalDateTime updateTime;
 
     /**
-     * 是否已删除（0:未删除,1:已删除）
+     * 是否已删除(0:未删除,1:已删除)
      */
     private DeleteStatus deleted;
 

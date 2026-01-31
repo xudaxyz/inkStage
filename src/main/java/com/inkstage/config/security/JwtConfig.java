@@ -17,7 +17,7 @@ import java.util.Base64;
 
 /**
  * JWT密钥管理配置类
- * 实现统一的密钥管理，支持多种密钥配置方式
+ * 实现统一的密钥管理, 支持多种密钥配置方式
  */
 @Slf4j
 @Configuration
@@ -32,7 +32,7 @@ public class JwtConfig {
     }
 
     /**
-     * 创建KeyPair Bean，支持多种密钥配置方式：
+     * 创建KeyPair Bean, 支持多种密钥配置方式：
      * 1. 优先使用配置文件中的Base64编码密钥
      * 2. 其次使用密钥文件
      * 3. 最后动态生成密钥对

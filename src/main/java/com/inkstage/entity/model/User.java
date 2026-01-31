@@ -1,8 +1,8 @@
 package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.Gender;
-import com.inkstage.enums.UserStatus;
+import com.inkstage.enums.user.Gender;
+import com.inkstage.enums.user.UserStatus;
 import com.inkstage.enums.VerificationStatus;
 import com.inkstage.enums.VisibleStatus;
 import lombok.Data;
@@ -43,7 +43,7 @@ public class User extends BaseEntity {
     private String email;
 
     /**
-     * 邮箱是否已验证（0:未验证,1:已验证）
+     * 邮箱是否已验证(0:未验证,1:已验证)
      */
     private VerificationStatus emailVerified;
 
@@ -53,7 +53,7 @@ public class User extends BaseEntity {
     private String phone;
 
     /**
-     * 手机号是否已验证（0:未验证,1:已验证）
+     * 手机号是否已验证(0:未验证,1:已验证)
      */
     private VerificationStatus phoneVerified;
 
@@ -73,7 +73,7 @@ public class User extends BaseEntity {
     private String signature;
 
     /**
-     * 性别（0:未知,1:男,2:女）
+     * 性别(0:未知,1:男,2:女)
      */
     private Gender gender;
 
@@ -143,7 +143,7 @@ public class User extends BaseEntity {
     private VisibleStatus privacy;
 
     /**
-     * 状态（0:禁用,1:正常,2:待审核）
+     * 状态(0:禁用,1:正常,2:待审核)
      */
     private UserStatus status;
 }

@@ -1,16 +1,12 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.exception.BusinessException;
-import com.inkstage.common.model.ResponseMessage;
 import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
-import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
-import io.minio.http.Method;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,7 +16,6 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 文件服务实现类
@@ -45,7 +40,7 @@ public class FileServiceImpl implements FileService {
     };
 
     /**
-     * 最大文件大小（5MB）
+     * 最大文件大小(5MB)
      */
     private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
 
@@ -96,7 +91,7 @@ public class FileServiceImpl implements FileService {
                             .build()
             );
 
-            // 只返回相对路径，不包含完整URL前缀
+            // 只返回相对路径, 不包含完整URL前缀
             return objectName;
         } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
             log.error("上传文件失败: {}", e.getMessage(), e);
@@ -105,41 +100,36 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public String getPresignedUrl(String bucketName, String objectName, long expiry) {
-        try {
-            // 生成7天有效期的预签名URL
-            return minioClient.getPresignedObjectUrl(
-                    GetPresignedObjectUrlArgs.builder()
-                            .bucket(bucketName)
-                            .object(objectName)
-                            .method(Method.GET)
-                            .expiry(Math.toIntExact(expiry), TimeUnit.SECONDS)
-                            .build()
-            );
-        } catch (Exception e) {
-            log.error("获取预签名URL失败: {}", e.getMessage(), e);
-            throw new BusinessException(ResponseMessage.FILE_URL_FAILED);
-        }
+    public String uploadFile(MultipartFile file, String objectName, long expiry) {
+        return uploadFile(file, minioProperties.getBucketName(), objectName, expiry);
     }
+
 
     @Override
     public String uploadCoverImage(MultipartFile file, Long userId, long expiry) {
         String bucketName = minioProperties.getBucketName();
-        String objectName = generateObjectName("covers", userId, file.getOriginalFilename());
+        String objectName = generateObjectName("user-covers", userId, file.getOriginalFilename());
         return uploadFile(file, bucketName, objectName, expiry);
     }
 
     @Override
     public String uploadAvatar(MultipartFile file, Long userId, long expiry) {
         String bucketName = minioProperties.getBucketName();
-        String objectName = generateObjectName("avatars", userId, file.getOriginalFilename());
+        String objectName = generateObjectName("user-avatars", userId, file.getOriginalFilename());
+        return uploadFile(file, bucketName, objectName, expiry);
+    }
+
+    @Override
+    public String uploadArticleCoverImage(MultipartFile file, Long userId, long expiry) {
+        String bucketName = minioProperties.getBucketName();
+        String objectName = generateObjectName("article-covers", userId, file.getOriginalFilename());
         return uploadFile(file, bucketName, objectName, expiry);
     }
 
     /**
      * 生成唯一的对象名称
      *
-     * @param prefix           前缀（covers/avatars）
+     * @param prefix           前缀(covers/avatars)
      * @param userId           用户ID
      * @param originalFilename 原始文件名
      * @return 生成的对象名称
@@ -150,16 +140,16 @@ public class FileServiceImpl implements FileService {
         // 获取文件扩展名
         String extension = getFileExtension(originalFilename);
 
-        // 构建对象名称，直接使用前缀、用户名和uuid生成的图片名称
-        return String.format("%s/%d/%s%s",
-                prefix, userId, uuid, extension);
+        // 构建对象名称, 直接使用用户名、前缀和uuid生成的图片名称
+        return String.format("%d/%s/%s%s",
+                userId, prefix, uuid, extension);
     }
 
     /**
      * 获取文件扩展名
      *
      * @param filename 文件名
-     * @return 文件扩展名（包含.）
+     * @return 文件扩展名(包含.)
      */
     private String getFileExtension(String filename) {
         if (filename == null || !filename.contains(".")) {
@@ -185,7 +175,7 @@ public class FileServiceImpl implements FileService {
         }
 
         if (!isAllowed) {
-            throw new IllegalArgumentException("只允许上传图片文件（jpg, jpeg, png, gif, webp）");
+            throw new IllegalArgumentException("只允许上传图片文件(jpg, jpeg, png, gif, webp)");
         }
     }
 
@@ -197,6 +187,23 @@ public class FileServiceImpl implements FileService {
     private void validateFileSize(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new IllegalArgumentException("文件大小不能超过5MB");
+        }
+    }
+
+    @Override
+    public void deleteFile(String objectName) {
+        try {
+            // 从MinIO删除文件
+            minioClient.removeObject(
+                    io.minio.RemoveObjectArgs.builder()
+                            .bucket(minioProperties.getBucketName())
+                            .object(objectName)
+                            .build()
+            );
+            log.info("删除文件成功: {}/{}", minioProperties.getBucketName(), objectName);
+        } catch (MinioException | IOException | NoSuchAlgorithmException | InvalidKeyException e) {
+            log.error("删除文件失败: {}", e.getMessage(), e);
+            throw new RuntimeException("删除文件失败", e);
         }
     }
 

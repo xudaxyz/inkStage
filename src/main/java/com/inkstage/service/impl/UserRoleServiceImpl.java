@@ -4,7 +4,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.StatusEnum;
-import com.inkstage.enums.UserRoleEnum;
+import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     @Override
     public void createUserRole(User user) {
-        // 为新注册用户分配默认角色（普通用户，ID为1）
+        // 为新注册用户分配默认角色(普通用户)
         UserRole userRole = new UserRole();
         userRole.setUserId(user.getId());
         userRole.setRoleId(UserRoleEnum.USER.getCode());

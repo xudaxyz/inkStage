@@ -10,7 +10,7 @@ import com.inkstage.vo.TokenResponse;
 public interface TokenService {
 
     /**
-     * 为用户生成令牌（支持登录和注册）
+     * 为用户生成令牌(支持登录和注册)
      *
      * @param user     用户
      * @param authDTO  认证请求DTO

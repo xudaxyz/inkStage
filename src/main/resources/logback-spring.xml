@@ -10,9 +10,9 @@
 
     <!-- 配置文件输出 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>logs/inkstage.log</file>
+        <file>/doc/logs/inkstage.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>doc/logs/inkstage-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
+            <fileNamePattern>/doc/logs/inkstage-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <maxFileSize>100MB</maxFileSize>
             <maxHistory>30</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>

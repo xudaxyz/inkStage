@@ -37,7 +37,7 @@ public interface UserMapper {
     void insert(User user);
 
     /**
-     * 根据主键更新用户信息（选择性更新）
+     * 根据主键更新用户信息(选择性更新)
      * @param user 用户信息
      */
     void updateByPrimaryKeySelective(User user);

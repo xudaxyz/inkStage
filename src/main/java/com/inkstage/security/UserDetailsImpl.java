@@ -1,7 +1,7 @@
 package com.inkstage.security;
 
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.UserStatus;
+import com.inkstage.enums.user.UserStatus;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;

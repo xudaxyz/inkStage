@@ -40,7 +40,7 @@ public class SecurityConfig {
     @Bean
     @Order(100)
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
-        // 禁用CSRF保护，适用于前后端分离架构
+        // 禁用CSRF保护, 适用于前后端分离架构
         http
                 // 启用CORS支持
                 .cors(cors -> cors.configurationSource(request -> {
@@ -64,7 +64,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable
                 )
                 .sessionManagement(session -> session
-                        // 无状态会话，适用于前后端分离架构
+                        // 无状态会话, 适用于前后端分离架构
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 // 启用OAuth2资源服务器支持

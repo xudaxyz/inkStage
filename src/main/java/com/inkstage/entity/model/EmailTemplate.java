@@ -24,12 +24,12 @@ public class EmailTemplate extends BaseEntity {
     private String name;
 
     /**
-     * 模板编码（唯一）
+     * 模板编码(唯一)
      */
     private String code;
 
     /**
-     * 模板类型（0:系统通知,1:活动通知,2:重要更新,3:其他）
+     * 模板类型(0:系统通知,1:活动通知,2:重要更新,3:其他)
      */
     private TemplateType type;
 
@@ -39,17 +39,17 @@ public class EmailTemplate extends BaseEntity {
     private String subject;
 
     /**
-     * 邮件内容（支持HTML）
+     * 邮件内容(支持HTML)
      */
     private String content;
 
     /**
-     * 模板变量（JSON格式）
+     * 模板变量(JSON格式)
      */
     private String variables;
 
     /**
-     * 状态（0:禁用,1:启用）
+     * 状态(0:禁用,1:启用)
      */
     private StatusEnum status;
 

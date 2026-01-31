@@ -1,9 +1,10 @@
-package com.inkstage.enums;
+package com.inkstage.enums.article;
 
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 @Getter
-public enum RecommendStatus implements EnumCode{
+public enum RecommendStatus implements EnumCode {
     RECOMMENDED(1, "已推荐"),
     NOT_RECOMMENDED(0, "未推荐");
 

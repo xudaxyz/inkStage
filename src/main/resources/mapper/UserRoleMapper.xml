@@ -7,6 +7,10 @@
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
         <result property="roleId" column="role_id"/>
+        <result property="assignedBy" column="assigned_by"/>
+        <result property="assignedAt" column="assigned_at"/>
+        <result property="expiresAt" column="expires_at"/>
+        <result property="status" column="status" javaType="com.inkstage.enums.StatusEnum"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="deleted" column="deleted"/>
@@ -15,9 +19,10 @@
     <!-- 新增用户角色关联 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.UserRole" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO user_role (
-        user_id, role_id, create_time, update_time, deleted
+        user_id, role_id, assigned_by, assigned_at, expires_at, status, create_time, update_time, deleted
         ) VALUES (
-        #{userId}, #{roleId}, #{createTime}, #{updateTime}, #{deleted}
+        #{userId}, #{roleId}, #{assignedBy}, #{assignedAt}, #{expiresAt}, #{status}, #{createTime}, #{updateTime},
+        #{deleted}
         )
     </insert>
 </mapper>

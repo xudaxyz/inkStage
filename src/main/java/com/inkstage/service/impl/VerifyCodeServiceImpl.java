@@ -1,7 +1,7 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.exception.BusinessException;
-import com.inkstage.common.model.ResponseMessage;
+import com.inkstage.exception.BusinessException;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.AuthTypeConstant;
 import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.SendCodeDTO;
@@ -42,15 +42,15 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
     @Value("${spring.mail.username}")
     private String fromEmail;
 
-    // 验证码有效期（分钟）
+    // 验证码有效期(分钟)
     private static final int CODE_EXPIRY_MINUTES = 5;
     // 验证码长度
     private static final int CODE_LENGTH = 6;
-    // 发送频率限制（秒）
+    // 发送频率限制(秒)
     private static final int SEND_RATE_LIMIT_SECONDS = 60;
     // 邮件发送重试次数
     private static final int EMAIL_SEND_RETRY_COUNT = 3;
-    // 邮件发送重试间隔（毫秒）
+    // 邮件发送重试间隔(毫秒)
     private static final long EMAIL_SEND_RETRY_INTERVAL = 1000;
     // Redis key前缀
 
@@ -96,7 +96,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         String storedCode = redisUtil.get(codeKey, String.class);
 
         if (code.equals(storedCode)) {
-            // 验证成功后删除验证码，防止重复使用
+            // 验证成功后删除验证码, 防止重复使用
             redisUtil.delete(codeKey);
             return true;
         }
@@ -115,7 +115,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
     }
 
     /**
-     * 发送邮箱验证码（带重试机制）
+     * 发送邮箱验证码(带重试机制)
      */
     private boolean sendEmailCode(String email, String code, String purpose) {
         for (int retryCount = 0; retryCount < EMAIL_SEND_RETRY_COUNT; retryCount++) {
@@ -149,9 +149,9 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
                 log.info("邮箱验证码发送成功：{}", email);
                 return true;
             } catch (MessagingException | IOException e) {
-                log.error("邮箱验证码发送失败（第{}次）：{}，错误信息：{}", retryCount + 1, email, e.getMessage(), e);
+                log.error("邮箱验证码发送失败(第{}次)：{}, 错误信息：{}", retryCount + 1, email, e.getMessage(), e);
 
-                // 不是最后一次重试，进行重试
+                // 不是最后一次重试, 进行重试
                 if (retryCount < EMAIL_SEND_RETRY_COUNT - 1) {
                     // 重试间隔
                     try {
@@ -162,13 +162,13 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
                     }
                 }
             } catch (Exception e) {
-                log.error("邮箱验证码发送失败：{}，错误信息：{}", email, e.getMessage(), e);
+                log.error("邮箱验证码发送失败：{}, 错误信息：{}", email, e.getMessage(), e);
                 throw new BusinessException(ResponseMessage.VERIFY_CODE_SEND_FAILED);
             }
         }
 
         // 所有重试都失败
-        log.error("邮箱验证码发送失败，已达到最大重试次数：{}", email);
+        log.error("邮箱验证码发送失败, 已达到最大重试次数：{}", email);
         throw new BusinessException(ResponseMessage.VERIFY_CODE_SEND_FAILED);
     }
 
@@ -179,7 +179,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         try {
             // 这里应该集成短信服务提供商的API
             // 例如：阿里云短信服务、腾讯云短信服务等
-            log.info("'{}'短信验证码发送成功：{}，验证码：{}", purpose, phone, code);
+            log.info("'{}'短信验证码发送成功：{}, 验证码：{}", purpose, phone, code);
             // 模拟发送成功
             return true;
         } catch (Exception e) {

@@ -4,7 +4,7 @@ import lombok.Getter;
 
 /**
  * 公告类型
- * 0:系统公告,1:活动通知,2:维护通知）
+ * 0:系统公告,1:活动通知,2:维护通知)
  */
 @Getter
 public enum AnnouncementType implements EnumCode {

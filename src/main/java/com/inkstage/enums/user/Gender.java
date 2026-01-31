@@ -1,7 +1,8 @@
-package com.inkstage.enums;
+package com.inkstage.enums.user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 @Getter
@@ -41,7 +42,7 @@ public enum Gender implements EnumCode {
     }
 
     /**
-     * 自定义反序列化方法，忽略大小写
+     * 自定义反序列化方法, 忽略大小写
      */
     @JsonCreator
     public static Gender fromString(String value) {
@@ -57,7 +58,7 @@ public enum Gender implements EnumCode {
     }
 
     /**
-     * 自定义序列化方法，返回枚举名称
+     * 自定义序列化方法, 返回枚举名称
      */
     @JsonValue
     public String toValue() {

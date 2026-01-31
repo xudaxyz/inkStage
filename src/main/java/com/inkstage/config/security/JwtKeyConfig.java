@@ -11,7 +11,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 
 /**
  * JWT配置类
- * 配置JwtEncoder，用于生成JWT令牌
+ * 配置JwtEncoder, 用于生成JWT令牌
  * 用于读取application.yml中的JWT配置
  */
 @Data
@@ -55,7 +55,7 @@ public class JwtKeyConfig {
     private Long refreshExpiration = 2592000L;
 
     /**
-     * 配置JwtEncoder Bean，用于生成JWT令牌
+     * 配置JwtEncoder Bean, 用于生成JWT令牌
      * 依赖于AuthorizationServerConfig提供的JWKSource
      *
      * @param jwkSource JWKSource实例

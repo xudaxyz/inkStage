@@ -18,7 +18,7 @@ public class ReportType extends BaseEntity {
     private String name;
     
     /**
-     * 举报类型编码（唯一）
+     * 举报类型编码(唯一)
      */
     private String code;
     

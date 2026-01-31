@@ -23,7 +23,7 @@ public class Tag extends BaseEntity {
     private String name;
     
     /**
-     * 标签别名（URL友好）
+     * 标签别名(URL友好)
      */
     private String slug;
     
@@ -43,7 +43,7 @@ public class Tag extends BaseEntity {
     private Integer usageCount;
     
     /**
-     * 状态（0:禁用,1:正常）
+     * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
 }

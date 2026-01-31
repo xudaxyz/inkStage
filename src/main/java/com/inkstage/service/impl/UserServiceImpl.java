@@ -1,14 +1,14 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.exception.BusinessException;
-import com.inkstage.common.model.ResponseMessage;
+import com.inkstage.exception.BusinessException;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.IPUtil;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
-import com.inkstage.enums.Gender;
-import com.inkstage.enums.UserStatus;
+import com.inkstage.enums.user.Gender;
+import com.inkstage.enums.user.UserStatus;
 import com.inkstage.enums.VerificationStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.mapper.UserMapper;

@@ -766,4 +766,29 @@ CREATE TABLE `tag_recommendation` (
   KEY `idx_score` (`score`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='标签推荐关系表';
 
+-- ----------------------------
+-- 7. 初始化数据
+-- ----------------------------
+
+-- 初始化分类数据
+INSERT INTO `category` (`name`, `slug`, `parent_id`, `sort_order`, `description`, `status`) VALUES
+('技术', 'tech', 0, 1, '技术相关文章', 1),
+('生活', 'life', 0, 2, '生活相关文章', 1),
+('职场', 'career', 0, 3, '职场相关文章', 1),
+('学习', 'study', 0, 4, '学习相关文章', 1),
+('其他', 'other', 0, 5, '其他类型文章', 1);
+
+-- 初始化标签数据
+INSERT INTO `tag` (`name`, `slug`, `description`, `status`) VALUES
+('Java', 'java', 'Java 编程语言', 1),
+('Spring Boot', 'spring-boot', 'Spring Boot 框架', 1),
+('前端', 'frontend', '前端开发', 1),
+('后端', 'backend', '后端开发', 1),
+('数据库', 'database', '数据库技术', 1),
+('算法', 'algorithm', '算法与数据结构', 1),
+('编程', 'programming', '编程相关', 1),
+('生活感悟', 'life-thought', '生活感悟', 1),
+('职场经验', 'career-experience', '职场经验分享', 1),
+('学习方法', 'learning-method', '学习方法分享', 1);
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -10,7 +10,7 @@ import java.util.Properties;
 
 /**
  * 邮件配置类
- * 手动声明 JavaMailSender Bean，解决 IDE 错误提示问题
+ * 手动声明 JavaMailSender Bean, 解决 IDE 错误提示问题
  */
 @Configuration
 public class MailConfig {

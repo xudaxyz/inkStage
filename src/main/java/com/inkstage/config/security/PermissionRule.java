@@ -63,7 +63,7 @@ public class PermissionRule {
             return false;
         }
 
-        // 检查路径是否匹配（同时支持Ant风格和正则表达式）
+        // 检查路径是否匹配(同时支持Ant风格和正则表达式)
         return pathMatcher.match(pattern, requestPath) ||
                 patternRegex.matcher(requestPath).matches();
     }

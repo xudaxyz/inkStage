@@ -2,7 +2,7 @@ package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.ReviewStatus;
-import com.inkstage.enums.TopStatus;
+import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -30,7 +30,7 @@ public class Comment extends BaseEntity {
     private Long userId;
 
     /**
-     * 父评论ID（0表示主评论）
+     * 父评论ID(0表示主评论)
      */
     private Long parentId;
 
@@ -55,17 +55,17 @@ public class Comment extends BaseEntity {
     private Integer replyCount;
 
     /**
-     * 状态（0:待审核,1:已通过,2:已拒绝）
+     * 状态(0:待审核,1:已通过,2:已拒绝)
      */
     private ReviewStatus status;
 
     /**
-     * 是否置顶（0:否,1:是）
+     * 是否置顶(0:否,1:是)
      */
     private TopStatus top;
 
     /**
-     * 置顶顺序（数值越大，优先级越高）
+     * 置顶顺序(数值越大, 优先级越高)
      */
     private Integer topOrder;
 

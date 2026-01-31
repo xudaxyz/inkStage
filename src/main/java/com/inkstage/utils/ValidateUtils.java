@@ -13,22 +13,22 @@ public class ValidateUtils {
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)+$";
 
     /**
-     * 手机号正则表达式（中国大陆）
+     * 手机号正则表达式(中国大陆)
      */
     private static final String PHONE_REGEX = "^1[3-9]\\d{9}$";
 
     /**
-     * 身份证号正则表达式（18位）
+     * 身份证号正则表达式(18位)
      */
     private static final String ID_CARD_REGEX = "^[1-9]\\d{5}(18|19|20)\\d{2}((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$";
 
     /**
-     * 用户名正则表达式（字母、数字、下划线，4-20位）
+     * 用户名正则表达式(字母、数字、下划线, 4-20位)
      */
     private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]{4,20}$";
 
     /**
-     * 密码正则表达式（至少8位，包含字母和数字）
+     * 密码正则表达式(至少8位, 包含字母和数字)
      */
     private static final String PASSWORD_REGEX = "^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d@$!%*?&]{8,}$";
 
@@ -56,7 +56,7 @@ public class ValidateUtils {
     }
 
     /**
-     * 验证手机号格式（中国大陆）
+     * 验证手机号格式(中国大陆)
      *
      * @param phone 手机号
      * @return 是否合法
@@ -69,7 +69,7 @@ public class ValidateUtils {
     }
 
     /**
-     * 验证身份证号格式（18位）
+     * 验证身份证号格式(18位)
      *
      * @param idCard 身份证号
      * @return 是否合法

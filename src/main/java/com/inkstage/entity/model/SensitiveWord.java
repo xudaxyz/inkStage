@@ -34,7 +34,7 @@ public class SensitiveWord extends BaseEntity {
     private Priority level;
 
     /**
-     * 状态（0:禁用,1:正常）
+     * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
 }

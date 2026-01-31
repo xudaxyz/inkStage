@@ -1,5 +1,6 @@
-package com.inkstage.enums;
+package com.inkstage.enums.user;
 
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 @Getter

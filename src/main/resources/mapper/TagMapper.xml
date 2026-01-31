@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.TagMapper">
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Tag">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="slug" property="slug" />
+        <result column="description" property="description" />
+        <result column="article_count" property="articleCount" />
+        <result column="usage_count" property="usageCount" />
+        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
+        <result column="deleted_time" property="deletedTime" />
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, name, slug, description, article_count, usage_count, status, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 获取所有标签 -->
+    <select id="selectAll" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" />  FROM tag
+        ORDER BY usage_count DESC, id ASC
+    </select>
+
+    <!-- 根据ID获取标签 -->
+    <select id="selectById" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM tag
+        WHERE id = #{id}
+    </select>
+
+    <!-- 获取所有激活状态的标签 -->
+    <select id="selectActiveTags" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM tag
+        WHERE status = 1
+        ORDER BY usage_count DESC, id ASC
+    </select>
+
+    <!-- 根据文章ID获取关联的标签 -->
+    <select id="selectByArticleId" resultMap="ResultMap">
+        SELECT t.* FROM tag t
+        JOIN article_tag at ON t.id = at.tag_id
+        WHERE at.article_id = #{articleId}
+        ORDER BY t.usage_count DESC, t.id ASC
+    </select>
+
+    <!-- 插入文章与标签的关联 -->
+    <insert id="insertArticleTag">
+        INSERT INTO article_tag (article_id, tag_id, created_at, updated_at)
+        VALUES (#{articleId}, #{tagId}, NOW(), NOW())
+    </insert>
+
+    <!-- 删除文章的所有标签关联 -->
+    <delete id="deleteArticleTagsByArticleId">
+        DELETE FROM article_tag
+        WHERE article_id = #{articleId}
+    </delete>
+
+</mapper>
