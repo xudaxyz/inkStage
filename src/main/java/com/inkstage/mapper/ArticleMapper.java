@@ -2,6 +2,7 @@ package com.inkstage.mapper;
 
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -46,6 +47,14 @@ public interface ArticleMapper {
      * @return 文章实体
      */
     Article selectById(Long id);
+
+    /**
+     * 根据ID查询文章详情VO对象
+     *
+     * @param id 文章ID
+     * @return 文章详情VO对象
+     */
+    ArticleDetailVO selectDetailById(Long id);
 
     /**
      * 查询文章列表

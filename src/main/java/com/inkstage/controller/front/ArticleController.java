@@ -6,6 +6,7 @@ import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.front.ArticleDetailVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/article")
+@RequestMapping("/front/article")
 @RequiredArgsConstructor
 public class ArticleController {
 
@@ -79,6 +80,19 @@ public class ArticleController {
     }
 
     /**
+     * 获取文章详情
+     *
+     * @param id 文章ID
+     * @return 文章详情VO
+     */
+    @GetMapping("/{id}")
+    public Result<ArticleDetailVO> getArticleDetail(@PathVariable Long id) {
+        log.info("获取文章详情，文章ID: {}", id);
+        ArticleDetailVO articleDetail = articleService.getArticleDetail(id);
+        return Result.success(articleDetail, "文章详情获取成功");
+    }
+
+    /**
      * 检查文章DTO参数
      *
      * @param articleCreateDTO 文章创建DTO
@@ -101,6 +115,5 @@ public class ArticleController {
             throw new BusinessException(ResponseMessage.TAG_COUNT_EXCEEDED, "10");
         }
     }
-
 }
 

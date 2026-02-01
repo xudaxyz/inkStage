@@ -111,7 +111,7 @@
         <result column="like_count" property="likeCount"/>
         <result column="comment_count" property="commentCount"/>
         <!-- 作者信息 -->
-        <result column="user_id" property="id"/>
+        <result column="user_id" property="userId"/>
         <result column="author_name" property="authorName"/>
         <result column="avatar" property="avatar"/>
         <!-- 分类信息 -->
@@ -176,6 +176,42 @@
             <if test="query.keyword != null and query.keyword != ''">
                 AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
             </if>
+    </select>
+
+
+    <select id="selectDetailById" resultType="com.inkstage.vo.front.ArticleDetailVO">
+        SELECT
+        a.id,
+        a.title,
+        a.content,
+        a.content_html,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.allow_comment,
+        a.allow_forward,
+        a.original,
+        a.original_url,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.collection_count,
+        a.share_count,
+        a.user_id as user_id,
+        a.author_name,
+        u.avatar,
+        u.article_count,
+        u.follow_count,
+        u.follower_count,
+        a.category_id,
+        c.name as category_name
+        FROM article a
+        LEFT JOIN user u ON a.user_id = u.id
+        LEFT JOIN category c ON a.category_id = c.id
+        WHERE a.id = #{id} AND a.deleted = 0
     </select>
 
 </mapper>

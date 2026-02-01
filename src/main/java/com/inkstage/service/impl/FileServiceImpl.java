@@ -4,6 +4,7 @@ import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
+import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
@@ -85,6 +86,17 @@ public class FileServiceImpl implements FileService {
             String fullAvatarUrl = convertToFullUrl(articleListVO.getAvatar());
             articleListVO.setAvatar(fullAvatarUrl);
         }
+    }
+
+    @Override
+    public void ensureArticleDetailIsFullUrl(ArticleDetailVO articleDetailVO) {
+        if (articleDetailVO == null) {
+            return;
+        }
+        String fullCoverImageUrl = convertToFullUrl(articleDetailVO.getCoverImage());
+        articleDetailVO.setCoverImage(fullCoverImageUrl);
+        String fullAvatarUrl = convertToFullUrl(articleDetailVO.getAvatar());
+        articleDetailVO.setAvatar(fullAvatarUrl);
     }
 
     @Override

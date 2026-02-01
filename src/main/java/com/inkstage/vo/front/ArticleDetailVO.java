@@ -1,8 +1,10 @@
 package com.inkstage.vo.front;
 
+import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.AllowStatus;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.enums.user.Gender;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -43,21 +45,6 @@ public class ArticleDetailVO {
      * 封面图URL
      */
     private String coverImage;
-
-    /**
-     * 作者信息
-     */
-    private AuthorInfoVO author;
-
-    /**
-     * 分类信息
-     */
-    private CategoryInfoVO category;
-
-    /**
-     * 标签列表
-     */
-    private List<String> tags;
 
     /**
      * 文章状态
@@ -134,26 +121,53 @@ public class ArticleDetailVO {
      */
     private Boolean isCollected;
 
+    // 作者相关信息
     /**
-     * 作者信息VO
+     * 作者ID
      */
-    @Data
-    public static class AuthorInfoVO {
-        private Long id;
-        private String name;
-        private String avatar;
-        private Integer articleCount;
-        private Integer fanCount;
-        private Boolean isFollowing;
-    }
+    private Long userId;
+    /**
+     * 作者昵称
+     */
+    private String authorName;
 
     /**
-     * 分类信息VO
+     * 作者头像
      */
-    @Data
-    public static class CategoryInfoVO {
-        private Long id;
-        private String name;
-        private String icon;
-    }
+    private String avatar;
+
+    /**
+     * 个性签名
+     */
+    private String signature;
+
+    /**
+     * 性别(0:未知,1:男,2:女)
+     */
+    private Gender gender;
+
+    /**
+     * 作者文章数
+     */
+    private Integer articleCount;
+
+    /**
+     * 作者粉丝数
+     */
+    private Integer followerCount;
+
+    //分类信息
+    /**
+     * 分类ID
+     */
+    private Long categoryId;
+    /**
+     * 分类名称
+     */
+    private String categoryName;
+
+    /**
+     * 标签列表
+     */
+    private List<Tag> tags;
 }

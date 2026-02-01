@@ -3,6 +3,7 @@ package com.inkstage.service;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
+import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 
 /**
@@ -46,5 +47,13 @@ public interface ArticleService {
      * @return 分页结果
      */
     PageResult<ArticleListVO> getArticles(ArticleQueryDTO queryDTO);
+
+    /**
+     * 获取文章详情
+     *
+     * @param id 文章ID
+     * @return 文章详情
+     */
+    ArticleDetailVO getArticleDetail(Long id);
 
 }

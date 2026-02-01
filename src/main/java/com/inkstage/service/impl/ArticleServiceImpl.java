@@ -6,6 +6,7 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
@@ -13,6 +14,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TagService;
+import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -163,6 +165,26 @@ public class ArticleServiceImpl implements ArticleService {
             log.error("获取文章列表失败, 查询参数: {}", queryDTO, e);
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
+    }
+
+    @Override
+    public ArticleDetailVO getArticleDetail(Long id) {
+        log.info("获取文章详情, 文章ID: {}", id);
+
+        // 查询文章详情
+        ArticleDetailVO articleDetailVO = articleMapper.selectDetailById(id);
+        if (articleDetailVO == null) {
+            log.warn("文章不存在, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
+        }
+
+        // 查询文章标签
+        List<Tag> tagList = tagService.getTagsByArticleId(id);
+        articleDetailVO.setTags(tagList);
+        fileService.ensureArticleDetailIsFullUrl(articleDetailVO);
+
+        log.info("获取文章详情成功, 文章ID: {}", id);
+        return articleDetailVO;
     }
 
 
