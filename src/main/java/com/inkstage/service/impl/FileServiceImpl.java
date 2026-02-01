@@ -4,6 +4,7 @@ import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
+import com.inkstage.vo.front.ArticleListVO;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -70,6 +72,19 @@ public class FileServiceImpl implements FileService {
         String fullCoverImageUrl = convertToFullUrl(user.getCoverImage());
         user.setAvatar(fullAvatarUrl);
         user.setCoverImage(fullCoverImageUrl);
+    }
+
+    @Override
+    public void ensureImageAreFullUrl(List<ArticleListVO> articleList) {
+        if (articleList == null || articleList.isEmpty()) {
+            return;
+        }
+        for (ArticleListVO articleListVO : articleList) {
+            String fullCoverImageUrl = convertToFullUrl(articleListVO.getCoverImage());
+            articleListVO.setCoverImage(fullCoverImageUrl);
+            String fullAvatarUrl = convertToFullUrl(articleListVO.getAvatar());
+            articleListVO.setAvatar(fullAvatarUrl);
+        }
     }
 
     @Override

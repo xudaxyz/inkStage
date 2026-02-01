@@ -1,11 +1,10 @@
 package com.inkstage.vo.front;
 
-import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.enums.article.ArticleStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 文章列表VO
@@ -34,19 +33,29 @@ public class ArticleListVO {
     private String coverImage;
 
     /**
-     * 作者信息
+     * 作者id
      */
-    private AuthorInfoVO author;
+    private Long userId;
 
     /**
-     * 分类信息
+     * 作者名称
      */
-    private CategoryInfoVO category;
+    private String authorName;
 
     /**
-     * 标签列表
+     * 作者头像
      */
-    private List<String> tags;
+    private String avatar;
+
+    /**
+     * 分类ID
+     */
+    private Long categoryId;
+
+    /**
+     * 分类名称
+     */
+    private String categoryName;
 
     /**
      * 文章状态
@@ -83,27 +92,4 @@ public class ArticleListVO {
      */
     private Integer commentCount;
 
-    /**
-     * 收藏数
-     */
-    private Integer collectionCount;
-
-    /**
-     * 作者信息VO
-     */
-    @Data
-    public static class AuthorInfoVO {
-        private Long id;
-        private String name;
-        private String avatar;
-    }
-
-    /**
-     * 分类信息VO
-     */
-    @Data
-    public static class CategoryInfoVO {
-        private Long id;
-        private String name;
-    }
 }

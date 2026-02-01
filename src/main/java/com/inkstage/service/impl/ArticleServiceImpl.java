@@ -1,15 +1,19 @@
 package com.inkstage.service.impl;
 
 
+import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
+import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleService;
+import com.inkstage.service.FileService;
 import com.inkstage.service.TagService;
+import com.inkstage.vo.front.ArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +33,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     private final ArticleMapper articleMapper;
     private final TagService tagService;
+    private final FileService fileService;
 
     @Override
     @Transactional
@@ -125,6 +130,38 @@ public class ArticleServiceImpl implements ArticleService {
         } catch (Exception e) {
             log.error("删除文章失败, 文章ID: {}, 用户ID: {}", id, userId, e);
             throw new BusinessException(ResponseMessage.ARTICLE_DELETE_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    public PageResult<ArticleListVO> getArticles(ArticleQueryDTO queryDTO) {
+        try {
+            log.info("获取文章列表, 查询参数: {}", queryDTO);
+
+            // 计算偏移量
+            int offset = (queryDTO.getPage() - 1) * queryDTO.getPageSize();
+            queryDTO.setOffset(offset);
+
+            // 查询文章列表
+            List<ArticleListVO> articleList = articleMapper.selectArticleList(queryDTO);
+            // 确保文章相关图片正常显示
+            fileService.ensureImageAreFullUrl(articleList);
+            // 查询总记录数
+            long total = articleMapper.countArticleList(queryDTO);
+
+            // 构建分页结果
+            PageResult<ArticleListVO> pageResult = PageResult.build(
+                    articleList,
+                    total,
+                    queryDTO.getPage(),
+                    queryDTO.getPageSize()
+            );
+
+            log.info("获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPage(), queryDTO.getPageSize());
+            return pageResult;
+        } catch (Exception e) {
+            log.error("获取文章列表失败, 查询参数: {}", queryDTO, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
 

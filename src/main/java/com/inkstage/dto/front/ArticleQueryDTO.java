@@ -20,6 +20,10 @@ public class ArticleQueryDTO {
     private Integer pageSize = 10;
 
     /**
+     * 页大小
+     */
+    private Integer offset = 0;
+    /**
      * 分类ID
      */
     private Long categoryId;
@@ -27,7 +31,7 @@ public class ArticleQueryDTO {
     /**
      * 标签
      */
-    private String tag;
+    private Long tagId;
 
     /**
      * 文章状态

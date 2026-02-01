@@ -56,7 +56,9 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许公开API请求
-                        .requestMatchers("/front/public/**").permitAll()
+                        .requestMatchers("/index/**").permitAll()
+                        .requestMatchers("/front/article/**").permitAll()
+                        .requestMatchers("/front/tag/**", "/front/category/**").permitAll()
                         .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()

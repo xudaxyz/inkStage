@@ -86,7 +86,8 @@ public enum ResponseMessage {
     TAG_COUNT_EXCEEDED("标签数量不能超过{}个"),
     TITLE_IS_EMPTY("文章标题不能为空"),
     CONTENT_IS_EMPTY("文章内容不能为空"),
-    ARTICLE_DELETE_FAILED("创建文章失败{}");
+    ARTICLE_DELETE_FAILED("创建文章失败{}"),
+    ARTICLE_LIST_NOT_FOUND("文章列表不存在");
 
     private final String message;
 

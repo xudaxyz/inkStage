@@ -1,7 +1,10 @@
 package com.inkstage.service;
 
 import com.inkstage.entity.model.User;
+import com.inkstage.vo.front.ArticleListVO;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 文件服务接口
@@ -82,4 +85,10 @@ public interface FileService {
      * @param user 用户对象
      */
     void ensureUserImgIsFullUrl(User user);
+
+    /**
+     * 确保ArticleListVO对象中的图片字段是完整的预签名URL
+     * @param articleList 文章列表VO
+     */
+    void ensureImageAreFullUrl(List<ArticleListVO> articleList);
 }
