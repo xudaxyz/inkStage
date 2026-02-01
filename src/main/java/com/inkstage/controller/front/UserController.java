@@ -61,6 +61,7 @@ public class UserController {
     @PreAuthorize("isAuthenticated()")
     public Result<UserInfo> updateProfile(@RequestBody @Valid UserProfileDTO userProfileDTO) {
         try {
+            log.info("更新个人资料DTO: {}", userProfileDTO);
             // 从UserContext中获取当前用户ID
             String userId = UserContext.getCurrentUserId();
             User user = new User();
