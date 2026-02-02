@@ -1,5 +1,8 @@
 package com.inkstage.utils;
 
+import com.inkstage.entity.model.User;
+import com.inkstage.security.UserDetailsImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -11,6 +14,7 @@ import java.util.Optional;
  * 用户上下文工具类
  * 提供统一的用户信息获取方式
  */
+@Slf4j
 public class UserContext {
 
     /**
@@ -19,27 +23,66 @@ public class UserContext {
      * @return 当前用户ID
      * @throws AccessDeniedException 如果用户未认证
      */
-    public static String getCurrentUserId() {
+    public static Long getCurrentUserId() {
+        log.info("从用户上下文中获取用户ID");
+        UserDetailsImpl currentUserDetails = getCurrentUserDetails();
+        return currentUserDetails.getUser().getId();
+    }
+
+
+    /**
+     * 获取当前用户详情
+     *
+     * @return UserDetailsImpl对象
+     * @throws AccessDeniedException 如果用户未认证或类型不匹配
+     */
+    public static UserDetailsImpl getCurrentUserDetails() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication instanceof AnonymousAuthenticationToken) {
-            throw new AccessDeniedException("User not authenticated");
+            throw new AccessDeniedException("用户未认证");
         }
-        return authentication.getName();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetailsImpl) {
+            return (UserDetailsImpl) principal;
+        }
+        throw new AccessDeniedException("用户认证失败");
     }
 
     /**
-     * 获取当前用户ID(可选)
+     * 获取当前用户详情(可选)
      *
-     * @return 当前用户ID的Optional对象
+     * @return UserDetailsImpl的Optional对象
      */
-    public static Optional<String> getCurrentUserIdOptional() {
+    public static Optional<UserDetailsImpl> getCurrentUserDetailsOptional() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication instanceof AnonymousAuthenticationToken) {
             return Optional.empty();
         }
-        return Optional.of(authentication.getName());
+        if (authentication.getPrincipal() instanceof UserDetailsImpl) {
+            return Optional.of((UserDetailsImpl) authentication.getPrincipal());
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * 获取当前用户对象
+     *
+     * @return User对象
+     * @throws AccessDeniedException 如果用户未认证或类型不匹配
+     */
+    public static User getCurrentUser() {
+        return getCurrentUserDetails().getUser();
+    }
+
+    /**
+     * 获取当前用户对象(可选)
+     *
+     * @return User的Optional对象
+     */
+    public static Optional<User> getCurrentUserOptional() {
+        return getCurrentUserDetailsOptional().map(UserDetailsImpl::getUser);
     }
 
     /**

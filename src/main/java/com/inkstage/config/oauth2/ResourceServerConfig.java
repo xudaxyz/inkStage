@@ -1,11 +1,16 @@
 package com.inkstage.config.oauth2;
 
+import com.inkstage.service.UserCacheService;
+import com.inkstage.service.UserService;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 
 import java.security.KeyPair;
 import java.security.interfaces.RSAPublicKey;
@@ -14,7 +19,11 @@ import java.security.interfaces.RSAPublicKey;
  * OAuth2资源服务器配置类
  */
 @Configuration
+@RequiredArgsConstructor
 public class ResourceServerConfig {
+
+    private final UserService userService;
+    private final UserCacheService userCacheService;
 
     /**
      * JWT解码器
@@ -33,10 +42,10 @@ public class ResourceServerConfig {
     /**
      * JWT认证转换器
      *
-     * @return JwtAuthenticationConverter实例
+     * @return Converter<Jwt, AbstractAuthenticationToken>实例
      */
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
-        return new CustomJwtAuthenticationConverter();
+    public Converter<@NotNull Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
+        return new CustomJwtAuthenticationConverter(userService, userCacheService);
     }
 }

@@ -7,6 +7,7 @@ import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
@@ -14,6 +15,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TagService;
+import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import lombok.RequiredArgsConstructor;
@@ -39,11 +41,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
-    public Long createArticle(ArticleCreateDTO articleCreateDTO, Long userId) {
+    public Long createArticle(ArticleCreateDTO articleCreateDTO) {
+        // 从上下文获取用户信息
+        log.info("从上下文中获取当前用户信息");
+        User currentUser = UserContext.getCurrentUser();
         try {
-            log.info("创建文章, 用户ID: {}, 标题: {}", userId, articleCreateDTO.getTitle());
+            log.info("创建文章, 用户ID: {}, 标题: {}", currentUser.getId(), articleCreateDTO.getTitle());
 
-            Article article = buildArticle(articleCreateDTO, userId);
+            Article article = buildArticle(articleCreateDTO, currentUser);
             articleMapper.insert(article);
 
             // 处理标签关联
@@ -52,7 +57,7 @@ public class ArticleServiceImpl implements ArticleService {
             log.info("文章创建成功, 文章ID: {}", article.getId());
             return article.getId();
         } catch (Exception e) {
-            log.error("创建文章失败, 用户ID: {}, 标题: {}", userId, articleCreateDTO.getTitle(), e);
+            log.error("创建文章失败, 用户ID: {}, 标题: {}", currentUser.getId(), articleCreateDTO.getTitle(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_PUBLISH_FAILED, e.getMessage());
         }
     }
@@ -60,12 +65,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
-    public Long saveDraft(Long id, ArticleCreateDTO dto, Long userId) {
+    public Long saveDraft(Long id, ArticleCreateDTO dto) {
+        // 从上下文获取用户信息
+        User currentUser = UserContext.getCurrentUser();
         try {
             if (id == null) {
-                log.info("创建新草稿, 用户ID: {}", userId);
+                log.info("创建新草稿, 用户ID: {}", currentUser.getId());
                 // 创建新草稿
-                Article article = buildArticle(dto, userId);
+                Article article = buildArticle(dto, currentUser);
                 article.setStatus(ArticleStatus.DRAFT);
                 article.setPublishTime(null);
                 articleMapper.insert(article);
@@ -76,15 +83,15 @@ public class ArticleServiceImpl implements ArticleService {
                 log.info("新草稿创建成功, 草稿ID: {}", article.getId());
                 return article.getId();
             } else {
-                log.info("更新草稿, 草稿ID: {}, 用户ID: {}", id, userId);
+                log.info("更新草稿, 草稿ID: {}, 用户ID: {}", id, currentUser.getId());
                 // 更新现有草稿
                 Article existingArticle = articleMapper.selectById(id);
-                if (existingArticle == null || !existingArticle.getUserId().equals(userId)) {
-                    log.warn("更新草稿失败, 草稿不存在或无权限, 草稿ID: {}, 用户ID: {}", id, userId);
+                if (existingArticle == null || !existingArticle.getUserId().equals(currentUser.getId())) {
+                    log.warn("更新草稿失败, 草稿不存在或无权限, 草稿ID: {}, 用户ID: {}", id, currentUser.getId());
                     return null;
                 }
 
-                Article article = buildArticle(dto, userId);
+                Article article = buildArticle(dto, currentUser);
                 article.setId(id);
                 article.setStatus(ArticleStatus.DRAFT);
                 article.setPublishTime(null);
@@ -97,7 +104,7 @@ public class ArticleServiceImpl implements ArticleService {
 
                 int updateResult = articleMapper.update(article);
                 if (updateResult == 0) {
-                    log.warn("草稿更新失败, 草稿ID: {}, 用户ID: {}", id, userId);
+                    log.warn("草稿更新失败, 草稿ID: {}, 用户ID: {}", id, currentUser.getId());
                     return null;
                 }
 
@@ -108,7 +115,7 @@ public class ArticleServiceImpl implements ArticleService {
                 return id;
             }
         } catch (Exception e) {
-            log.error("保存草稿失败, 草稿ID: {}, 用户ID: {}", id, userId, e);
+            log.error("保存草稿失败, 草稿ID: {}, 用户ID: {}", id, currentUser.getId(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_DRAFT_FAILED, e.getMessage());
         }
     }
@@ -116,21 +123,23 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional
-    public boolean deleteArticle(Long id, Long userId) {
+    public boolean deleteArticle(Long id) {
+        // 从上下文获取用户信息
+        User currentUser = UserContext.getCurrentUser();
         try {
-            log.info("开始删除文章, 文章ID: {}, 用户ID: {}", id, userId);
+            log.info("开始删除文章, 文章ID: {}, 用户ID: {}", id, currentUser.getId());
 
-            boolean deleted = articleMapper.deleteById(id, userId) > 0;
+            boolean deleted = articleMapper.deleteById(id, currentUser.getId()) > 0;
 
             if (deleted) {
                 log.info("文章删除成功, 文章ID: {}", id);
             } else {
-                log.warn("文章删除失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", id, userId);
+                log.warn("文章删除失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", id, currentUser.getId());
             }
 
             return deleted;
         } catch (Exception e) {
-            log.error("删除文章失败, 文章ID: {}, 用户ID: {}", id, userId, e);
+            log.error("删除文章失败, 文章ID: {}, 用户ID: {}", id, currentUser.getId(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_DELETE_FAILED, e.getMessage());
         }
     }
@@ -191,7 +200,7 @@ public class ArticleServiceImpl implements ArticleService {
     /**
      * 构建文章实体
      */
-    private Article buildArticle(ArticleCreateDTO dto, Long userId) {
+    private Article buildArticle(ArticleCreateDTO dto, User user) {
         Article article = new Article();
         article.setTitle(dto.getTitle());
         article.setContent(dto.getContent());
@@ -205,7 +214,8 @@ public class ArticleServiceImpl implements ArticleService {
         }
         article.setSummary(summary);
         article.setCoverImage(dto.getCoverImage());
-        article.setUserId(userId);
+        article.setUserId(user.getId());
+        article.setAuthorName(user.getNickname());
         article.setCategoryId(dto.getCategoryId());
         article.setStatus(dto.getStatus());
         article.setVisible(dto.getVisible());

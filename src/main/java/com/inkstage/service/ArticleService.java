@@ -15,10 +15,9 @@ public interface ArticleService {
      * 创建文章
      *
      * @param articleCreateDTO 文章创建DTO
-     * @param userId           用户ID
      * @return 文章ID
      */
-    Long createArticle(ArticleCreateDTO articleCreateDTO, Long userId);
+    Long createArticle(ArticleCreateDTO articleCreateDTO);
 
 
     /**
@@ -26,19 +25,17 @@ public interface ArticleService {
      *
      * @param articleId        文章ID(如果为null则创建新草稿)
      * @param articleCreateDTO 文章DTO
-     * @param userId           用户ID
      * @return 文章ID
      */
-    Long saveDraft(Long articleId, ArticleCreateDTO articleCreateDTO, Long userId);
+    Long saveDraft(Long articleId, ArticleCreateDTO articleCreateDTO);
 
     /**
      * 删除文章
      *
-     * @param id     文章ID
-     * @param userId 用户ID
+     * @param id 文章ID
      * @return 是否成功
      */
-    boolean deleteArticle(Long id, Long userId);
+    boolean deleteArticle(Long id);
 
     /**
      * 获取文章列表
@@ -51,9 +48,9 @@ public interface ArticleService {
     /**
      * 获取文章详情
      *
-     * @param id 文章ID
+     * @param articleId 文章ID
      * @return 文章详情
      */
-    ArticleDetailVO getArticleDetail(Long id);
+    ArticleDetailVO getArticleDetail(Long articleId);
 
 }

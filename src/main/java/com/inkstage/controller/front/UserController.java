@@ -36,8 +36,8 @@ public class UserController {
     public Result<UserInfo> getProfile() {
         try {
             // 从UserContext中获取当前用户ID
-            String userId = UserContext.getCurrentUserId();
-            User user = userService.getUserById(Long.valueOf(userId));
+            Long userId = UserContext.getCurrentUserId();
+            User user = userService.getUserById(userId);
             if (user != null) {
                 // 构建UserInfo对象
                 UserInfo userInfo = assembleUserInfo(user);
@@ -60,13 +60,11 @@ public class UserController {
     @PutMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public Result<UserInfo> updateProfile(@RequestBody @Valid UserProfileDTO userProfileDTO) {
+        log.info("更新个人资料DTO: {}", userProfileDTO);
         try {
-            log.info("更新个人资料DTO: {}", userProfileDTO);
-            // 从UserContext中获取当前用户ID
-            String userId = UserContext.getCurrentUserId();
             User user = new User();
             // 设置用户信息
-            user.setId(Long.valueOf(userId));
+            user.setId(UserContext.getCurrentUserId());
             user.setNickname(userProfileDTO.getNickname());
             user.setGender(userProfileDTO.getGender());
 

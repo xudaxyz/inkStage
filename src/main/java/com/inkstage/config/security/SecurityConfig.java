@@ -1,9 +1,12 @@
 package com.inkstage.config.security;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -13,7 +16,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -29,7 +32,7 @@ public class SecurityConfig {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final JwtAuthenticationConverter jwtAuthenticationConverter;
+    private final Converter<@NotNull Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter;
 
     /**
      * 安全过滤器链
@@ -57,7 +60,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许公开API请求
                         .requestMatchers("/index/**").permitAll()
-                        .requestMatchers("/front/article/**").permitAll()
                         .requestMatchers("/front/tag/**", "/front/category/**").permitAll()
                         .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()
                         // 其他请求需要认证

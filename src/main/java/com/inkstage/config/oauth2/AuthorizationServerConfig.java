@@ -22,6 +22,8 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 
@@ -148,5 +150,16 @@ public class AuthorizationServerConfig {
         return AuthorizationServerSettings.builder()
                 .issuer("Inkstage-2026")
                 .build();
+    }
+
+    /**
+     * 自定义令牌增强器
+     * 在JWT令牌中添加用户信息
+     *
+     * @return CustomTokenEnhancer实例
+     */
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> tokenCustomizer() {
+        return new CustomTokenEnhancer();
     }
 }

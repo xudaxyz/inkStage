@@ -35,8 +35,7 @@ public class UploadController {
     public Result<String> uploadCover(@RequestParam("image") MultipartFile file, @RequestParam(required = false) Long expiry) {
         try {
             // 从UserContext中获取当前用户ID
-            String userIdStr = UserContext.getCurrentUserId();
-            Long userId = Long.valueOf(userIdStr);
+            Long userId = UserContext.getCurrentUserId();
 
             // 调用文件服务上传封面图
             long expiryTime = expiry != null ? expiry : 604800; // 默认7天
@@ -66,8 +65,7 @@ public class UploadController {
     public Result<String> uploadAvatar(@RequestParam("avatar") MultipartFile file, @RequestParam(required = false) Long expiry) {
         try {
             // 从UserContext中获取当前用户ID
-            String userIdStr = UserContext.getCurrentUserId();
-            Long userId = Long.valueOf(userIdStr);
+            Long userId = UserContext.getCurrentUserId();
 
             // 调用文件服务上传头像
             long expiryTime = expiry != null ? expiry : 604800; // 默认7天
@@ -98,8 +96,7 @@ public class UploadController {
         try {
             log.info("上传文章封面图片:{}", file.getOriginalFilename());
             // 从UserContext中获取当前用户ID
-            String userIdStr = UserContext.getCurrentUserId();
-            long userId = Long.parseLong(userIdStr);
+            Long userId = UserContext.getCurrentUserId();
 
             // 调用文件服务上传文章封面图
             long expiryTime = expiry != null ? expiry : 604800; // 默认7天
@@ -123,8 +120,7 @@ public class UploadController {
     public Result<Boolean> deleteFile(@RequestParam("file") String fileName) {
         try {
             // 从UserContext中获取当前用户ID
-            String userIdStr = UserContext.getCurrentUserId();
-            Long userId = Long.valueOf(userIdStr);
+            Long userId = UserContext.getCurrentUserId();
 
             // 验证文件是否属于当前用户(简单验证：检查路径中是否包含用户ID)
             if (!fileName.contains(String.valueOf(userId))) {

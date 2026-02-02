@@ -5,7 +5,6 @@ import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleService;
-import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleDetailVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,18 +31,19 @@ public class ArticleController {
      * @param articleCreateDTO 文章创建DTO
      * @return 响应结果
      */
-    @PostMapping
+    @PostMapping("/create")
     @PreAuthorize("isAuthenticated()")
     public Result<Long> createArticle(@Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("创建文章DTO: {}", articleCreateDTO);
         // 检查文章DTO参数
         checkArticleDTO(articleCreateDTO);
 
-        String currentUserId = UserContext.getCurrentUserId();
-        Long userId = Long.parseLong(currentUserId);
-        // 暂时使用用户ID作为作者名称, 后续需要从用户服务获取
-        Long articleId = articleService.createArticle(articleCreateDTO, userId);
-        return Result.success(articleId, "文章创建成功");
+        Long articleId = articleService.createArticle(articleCreateDTO);
+        if (articleId != null) {
+            return Result.success(articleId, "文章创建成功");
+        } else {
+            return Result.error("文章创建失败");
+        }
     }
 
     /**
@@ -58,9 +58,7 @@ public class ArticleController {
     public Result<Long> saveDraft(@PathVariable(required = false) Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         // 检查文章DTO参数
         checkArticleDTO(articleCreateDTO);
-        String currentUserId = UserContext.getCurrentUserId();
-        Long userId = Long.parseLong(currentUserId);
-        Long articleId = articleService.saveDraft(id, articleCreateDTO, userId);
+        Long articleId = articleService.saveDraft(id, articleCreateDTO);
         return articleId != null ? Result.success(articleId, "草稿保存成功") : Result.error("草稿保存失败");
     }
 
@@ -73,9 +71,7 @@ public class ArticleController {
     @DeleteMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deleteArticle(@PathVariable Long id) {
-        String currentUserId = UserContext.getCurrentUserId();
-        Long userId = Long.parseLong(currentUserId);
-        boolean success = articleService.deleteArticle(id, userId);
+        boolean success = articleService.deleteArticle(id);
         return success ? Result.success(true, "文章删除成功") : Result.error("文章删除失败");
     }
 
