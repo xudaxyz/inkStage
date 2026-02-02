@@ -156,7 +156,7 @@ public class ArticleServiceImpl implements ArticleService {
             // 查询文章列表
             List<ArticleListVO> articleList = articleMapper.selectArticleList(queryDTO);
             // 确保文章相关图片正常显示
-            fileService.ensureImageAreFullUrl(articleList);
+            fileService.ensureArticleImageAreFullUrl(articleList);
             // 查询总记录数
             long total = articleMapper.countArticleList(queryDTO);
 

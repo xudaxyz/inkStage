@@ -4,6 +4,7 @@ import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
+import com.inkstage.vo.front.ArticleCommentVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import io.minio.MinioClient;
@@ -76,7 +77,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void ensureImageAreFullUrl(List<ArticleListVO> articleList) {
+    public void ensureArticleImageAreFullUrl(List<ArticleListVO> articleList) {
         if (articleList == null || articleList.isEmpty()) {
             return;
         }
@@ -85,6 +86,27 @@ public class FileServiceImpl implements FileService {
             articleListVO.setCoverImage(fullCoverImageUrl);
             String fullAvatarUrl = convertToFullUrl(articleListVO.getAvatar());
             articleListVO.setAvatar(fullAvatarUrl);
+        }
+    }
+
+    @Override
+    public void ensureCommentImageAreFullUrl(List<ArticleCommentVO> commentVOs) {
+        if (commentVOs == null || commentVOs.isEmpty()) {
+            return;
+        }
+        for (ArticleCommentVO commentVO : commentVOs) {
+            // 顶层评论头像
+            String topAvatarUrl = convertToFullUrl(commentVO.getAvatar());
+            commentVO.setAvatar(topAvatarUrl);
+            // 子评论头像
+            List<ArticleCommentVO> replies = commentVO.getReplies();
+            if (replies != null && !replies.isEmpty()) {
+                for (ArticleCommentVO reply : replies) {
+                    String fullAvatarUrl = convertToFullUrl(reply.getAvatar());
+                    reply.setAvatar(fullAvatarUrl);
+                }
+            }
+
         }
     }
 

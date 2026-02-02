@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.CommentMapper">
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Comment">
+        <id property="id" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="content" column="content"/>
+        <result property="floor" column="floor"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="replyCount" column="reply_count"/>
+        <result property="status" column="status" javaType="com.inkstage.enums.ReviewStatus"/>
+        <result property="top" column="top" javaType="com.inkstage.enums.article.TopStatus"/>
+        <result property="topOrder" column="top_order"/>
+        <result property="reviewUserId" column="review_user_id"/>
+        <result property="reviewTime" column="review_time"/>
+        <result property="reviewReason" column="review_reason"/>
+        <result property="ipAddress" column="ip_address"/>
+        <result property="userAgent" column="user_agent"/>
+        <result property="mentionUserIds" column="mention_user_ids"/>
+        <result property="reportCount" column="report_count"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
+    <!-- 基础查询列 -->
+    <sql id="baseColumns">
+        id
+        , article_id, user_id, parent_id, content, floor, like_count, reply_count, status, top,
+          top_order, review_user_id, review_time, review_reason, ip_address, user_agent, mention_user_ids,
+          report_count, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 根据文章ID查询评论列表 -->
+    <select id="selectCommentsByArticleId" resultType="com.inkstage.vo.front.ArticleCommentVO">
+        SELECT
+        c.id,
+        c.parent_id,
+        c.content,
+        c.floor,
+        c.like_count,
+        c.reply_count,
+        c.status,
+        c.top,
+        c.top_order,
+        c.create_time,
+        c.update_time,
+        c.article_id,
+        c.user_id,
+        c.deleted,
+        u.nickname,
+        u.avatar,
+        u.gender,
+        u.status
+        FROM
+        comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE
+        c.deleted = 0
+        AND c.article_id = #{query.articleId}
+        ORDER BY
+        <choose>
+            <when test="query.sortBy != null and query.sortBy == 'hot'">
+                top_order DESC, like_count DESC, create_time DESC
+            </when>
+            <when test="query.sortBy != null and query.sortBy == 'new'">
+                create_time DESC, top_order DESC
+            </when>
+            <otherwise>
+                top_order DESC, like_count DESC, create_time DESC
+            </otherwise>
+        </choose>
+        LIMIT #{query.pageSize} OFFSET #{query.offset}
+    </select>
+
+    <!-- 根据文章ID查询评论总数 -->
+    <select id="countCommentsByArticleId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE deleted = 0 AND article_id = #{query.articleId}
+    </select>
+
+    <!-- 插入评论 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.Comment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO comment
+        (
+            article_id,
+            parent_id,
+            content,
+            floor,
+            user_id,
+            like_count,
+            reply_count,
+            status,
+            top,
+            top_order,
+            create_time,
+            update_time
+        )
+        VALUES
+        (
+            #{articleId},
+            #{parentId},
+            #{content},
+            #{floor},
+            #{userId},
+            #{likeCount},
+            #{replyCount},
+            #{status},
+            #{top},
+            #{topOrder},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- 根据ID更新评论 -->
+    <update id="updateById" parameterType="com.inkstage.entity.model.Comment">
+        UPDATE comment
+        SET
+            content = #{content},
+            update_time = NOW()
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </update>
+
+    <!-- 根据ID删除评论 -->
+    <update id="deleteById" parameterType="java.lang.Long">
+        UPDATE comment
+        SET
+            deleted = 1,
+            deleted_time = NOW()
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </update>
+
+    <!-- 根据ID查询评论 -->
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="ResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM comment
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </select>
+
+    <!-- 查询文章的最大楼层号 -->
+    <select id="selectMaxFloorByArticleId" parameterType="java.lang.Long" resultType="java.lang.Integer">
+        SELECT
+            MAX(CAST(floor AS UNSIGNED)) as max_floor
+        FROM comment
+        WHERE
+            article_id = #{articleId}
+            AND deleted = 0
+    </select>
+
+    <!-- 更新评论的回复数 -->
+    <update id="updateReplyCount">
+        UPDATE comment
+        SET
+            reply_count = #{replyCount},
+            update_time = NOW()
+        WHERE
+            id = #{commentId}
+            AND deleted = 0
+    </update>
+
+</mapper>

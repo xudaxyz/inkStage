@@ -44,7 +44,7 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
         Map<String, Object> claims = jwt.getClaims();
 
         // 获取用户ID
-        String userId = null;
+        String userId;
         if (claims.containsKey("user_id")) {
             userId = claims.get("user_id").toString();
         } else {
