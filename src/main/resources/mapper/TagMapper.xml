@@ -49,7 +49,7 @@
 
     <!-- 插入文章与标签的关联 -->
     <insert id="insertArticleTag">
-        INSERT INTO article_tag (article_id, tag_id, created_at, updated_at)
+        INSERT INTO article_tag (article_id, tag_id, create_time, update_time)
         VALUES (#{articleId}, #{tagId}, NOW(), NOW())
     </insert>
 

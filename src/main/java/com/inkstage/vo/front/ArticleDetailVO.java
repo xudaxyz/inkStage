@@ -4,6 +4,7 @@ import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.AllowStatus;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.enums.article.OriginalStatus;
 import com.inkstage.enums.user.Gender;
 import lombok.Data;
 
@@ -69,7 +70,7 @@ public class ArticleDetailVO {
     /**
      * 是否原创
      */
-    private Boolean original;
+    private OriginalStatus original;
 
     /**
      * 原创链接

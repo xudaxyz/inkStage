@@ -53,4 +53,13 @@ public interface ArticleService {
      */
     ArticleDetailVO getArticleDetail(Long articleId);
 
+    /**
+     * 更新文章
+     *
+     * @param articleId 文章ID
+     * @param articleCreateDTO 文章更新DTO
+     * @return 是否成功
+     */
+    boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO);
+
 }

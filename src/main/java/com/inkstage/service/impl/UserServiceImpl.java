@@ -4,7 +4,9 @@ import com.inkstage.exception.BusinessException;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.IPUtil;
+import com.inkstage.utils.RedisUtil;
 import com.inkstage.constant.InkConstant;
+import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.user.Gender;
@@ -18,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 用户服务实现类
@@ -29,6 +32,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
+    private final RedisUtil redisUtil;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -124,6 +128,12 @@ public class UserServiceImpl implements UserService {
         try {
             user.setUpdateTime(LocalDateTime.now());
             userMapper.updateByPrimaryKeySelective(user);
+            
+            // 清除用户信息缓存
+            String cacheKey = RedisKeyConstants.buildUserKey(user.getId());
+            redisUtil.delete(cacheKey);
+            log.info("清除用户信息缓存, 缓存键: {}", cacheKey);
+            
             log.info("用户更新成功: {}", user.getId());
             return user;
         } catch (Exception e) {
@@ -134,9 +144,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(Long id) {
-        User user = userMapper.selectByPrimaryKey(id);
-        // 确保用户头像和封面图的URL是完整的
-        fileService.ensureUserImgIsFullUrl(user);
+        // 生成缓存键
+        String cacheKey = RedisKeyConstants.buildUserKey(id);
+
+        // 尝试从缓存获取
+        User user = redisUtil.get(cacheKey, User.class);
+        if (user != null) {
+            log.info("从缓存获取用户信息成功, 缓存键: {}", cacheKey);
+            return user;
+        }
+
+        // 从数据库获取
+        user = userMapper.selectByPrimaryKey(id);
+        if (user != null) {
+            // 确保用户头像和封面图的URL是完整的
+            fileService.ensureUserImgIsFullUrl(user);
+            
+            // 更新缓存
+            redisUtil.set(cacheKey, user, 2, TimeUnit.HOURS);
+            log.info("更新用户信息缓存, 缓存键: {}", cacheKey);
+        }
         return user;
     }
 }

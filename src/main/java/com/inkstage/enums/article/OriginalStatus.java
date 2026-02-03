@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 public enum OriginalStatus implements EnumCode {
     REPRINT(0, "转载"),
-    ORIGINAL(1, "原创");
+    ORIGINAL(1, "原创"),
+    OTHER(2, "其他");
 
     private final Integer code;
     private final String desc;

@@ -45,6 +45,7 @@
         c.reply_count,
         c.status,
         c.top,
+        c.mention_user_ids,
         c.top_order,
         c.create_time,
         c.update_time,

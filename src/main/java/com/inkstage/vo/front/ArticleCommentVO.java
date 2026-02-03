@@ -57,6 +57,11 @@ public class ArticleCommentVO {
     private Integer topOrder;
 
     /**
+     * @ 提及的用户ID列表
+     */
+    private String mentionUserIds;
+
+    /**
      * 创建时间
      */
     private LocalDateTime createTime;

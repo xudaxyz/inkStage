@@ -27,4 +27,9 @@ public class CommentDTO {
      * 评论内容
      */
     private String content;
+
+    /**
+     * @ 提及的用户ID列表
+     */
+    private String mentionUserIds;
 }

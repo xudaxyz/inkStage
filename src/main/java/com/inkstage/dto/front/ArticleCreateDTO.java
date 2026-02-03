@@ -4,6 +4,7 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.AllowStatus;
 import com.inkstage.enums.article.OriginalStatus;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.enums.article.TopStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -86,4 +87,9 @@ public class ArticleCreateDTO {
      * 原创链接
      */
     private String originalUrl;
+
+    /**
+     * 置顶状态
+     */
+    private TopStatus top;
 }

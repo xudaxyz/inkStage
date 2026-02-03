@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
+import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
@@ -15,6 +16,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TagService;
+import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
@@ -22,9 +24,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 文章服务实现类
@@ -34,10 +38,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
 
-
     private final ArticleMapper articleMapper;
     private final TagService tagService;
     private final FileService fileService;
+    private final RedisUtil redisUtil;
 
     @Override
     @Transactional
@@ -132,6 +136,15 @@ public class ArticleServiceImpl implements ArticleService {
             boolean deleted = articleMapper.deleteById(id, currentUser.getId()) > 0;
 
             if (deleted) {
+                // 清除文章详情缓存
+                String detailCacheKey = RedisKeyConstants.buildCacheKey("article:detail", id.toString());
+                redisUtil.delete(detailCacheKey);
+                log.info("清除文章详情缓存, 缓存键: {}", detailCacheKey);
+
+                // 清除文章列表缓存
+                redisUtil.deletePattern("cache:article:list:*");
+                log.info("清除文章列表缓存");
+
                 log.info("文章删除成功, 文章ID: {}", id);
             } else {
                 log.warn("文章删除失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", id, currentUser.getId());
@@ -149,6 +162,22 @@ public class ArticleServiceImpl implements ArticleService {
         try {
             log.info("获取文章列表, 查询参数: {}", queryDTO);
 
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:list",
+                    queryDTO.getPage() + ":" + queryDTO.getPageSize() + ":" +
+                            (queryDTO.getCategoryId() != null ? queryDTO.getCategoryId() : "null") + ":" +
+                            (queryDTO.getTagId() != null ? queryDTO.getTagId() : "null")
+            );
+
+            // 尝试从缓存获取
+            PageResult<ArticleListVO> pageResult = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (pageResult != null) {
+                log.info("从缓存获取文章列表成功, 缓存键: {}", cacheKey);
+                return pageResult;
+            }
+
             // 计算偏移量
             int offset = (queryDTO.getPage() - 1) * queryDTO.getPageSize();
             queryDTO.setOffset(offset);
@@ -161,12 +190,16 @@ public class ArticleServiceImpl implements ArticleService {
             long total = articleMapper.countArticleList(queryDTO);
 
             // 构建分页结果
-            PageResult<ArticleListVO> pageResult = PageResult.build(
+            pageResult = PageResult.build(
                     articleList,
                     total,
                     queryDTO.getPage(),
                     queryDTO.getPageSize()
             );
+
+            // 更新缓存
+            redisUtil.set(cacheKey, pageResult, 30, TimeUnit.MINUTES);
+            log.info("更新文章列表缓存, 缓存键: {}", cacheKey);
 
             log.info("获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPage(), queryDTO.getPageSize());
             return pageResult;
@@ -180,8 +213,18 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleDetailVO getArticleDetail(Long id) {
         log.info("获取文章详情, 文章ID: {}", id);
 
+        // 生成缓存键
+        String cacheKey = RedisKeyConstants.buildCacheKey("article:detail", id.toString());
+
+        // 尝试从缓存获取
+        ArticleDetailVO articleDetailVO = redisUtil.get(cacheKey, ArticleDetailVO.class);
+        if (articleDetailVO != null) {
+            log.info("从缓存获取文章详情成功, 缓存键: {}", cacheKey);
+            return articleDetailVO;
+        }
+
         // 查询文章详情
-        ArticleDetailVO articleDetailVO = articleMapper.selectDetailById(id);
+        articleDetailVO = articleMapper.selectDetailById(id);
         if (articleDetailVO == null) {
             log.warn("文章不存在, 文章ID: {}", id);
             throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
@@ -192,8 +235,66 @@ public class ArticleServiceImpl implements ArticleService {
         articleDetailVO.setTags(tagList);
         fileService.ensureArticleDetailIsFullUrl(articleDetailVO);
 
+        // 更新缓存
+        redisUtil.set(cacheKey, articleDetailVO, 30, TimeUnit.MINUTES);
+        log.info("更新文章详情缓存, 缓存键: {}", cacheKey);
+
         log.info("获取文章详情成功, 文章ID: {}", id);
         return articleDetailVO;
+    }
+
+    @Override
+    @Transactional
+    public boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO) {
+        // 从上下文获取用户信息
+        User currentUser = UserContext.getCurrentUser();
+        try {
+            log.info("更新文章, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
+
+            // 检查文章是否存在且属于当前用户
+            Article existingArticle = articleMapper.selectById(articleId);
+            if (existingArticle == null || !existingArticle.getUserId().equals(currentUser.getId())) {
+                log.warn("更新文章失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
+                return false;
+            }
+
+            // 构建更新后的文章实体
+            existingArticle.setTitle(articleCreateDTO.getTitle());
+            existingArticle.setContent(articleCreateDTO.getContent());
+            existingArticle.setSummary(articleCreateDTO.getSummary());
+            existingArticle.setCategoryId(articleCreateDTO.getCategoryId());
+            existingArticle.setAllowComment(articleCreateDTO.getAllowComment());
+            existingArticle.setOriginal(articleCreateDTO.getOriginal());
+            existingArticle.setOriginalUrl(articleCreateDTO.getOriginalUrl());
+            existingArticle.setLastEditTime(LocalDateTime.now());
+            existingArticle.setVisible(articleCreateDTO.getVisible());
+            existingArticle.setAllowForward(articleCreateDTO.getAllowForward());
+            existingArticle.setTop(articleCreateDTO.getTop());
+            existingArticle.setUpdateTime(LocalDateTime.now());
+
+            // 更新文章
+            int updateResult = articleMapper.update(existingArticle);
+            if (updateResult <= 0) {
+                log.warn("文章更新失败, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
+                return false;
+            }
+
+            // 处理标签关联
+            handleArticleTags(articleId, articleCreateDTO.getTagIds());
+
+            // 清除文章详情缓存
+            String detailCacheKey = RedisKeyConstants.buildCacheKey("article:detail", articleId.toString());
+            redisUtil.delete(detailCacheKey);
+
+            // 清除文章列表缓存
+            redisUtil.deletePattern("cache:article:list:*");
+
+            log.info("文章更新成功, 文章ID: {}", articleId);
+            return true;
+        } catch (Exception e) {
+            log.error("更新文章失败, 文章ID: {}, 用户ID: {}, 标题: {}", articleId, currentUser.getId(), articleCreateDTO.getTitle(), e);
+            throw new BusinessException(ResponseMessage.ARTICLE_UPDATE_FAILED, e.getMessage());
+        }
     }
 
 
@@ -288,5 +389,137 @@ public class ArticleServiceImpl implements ArticleService {
 
         // 保存文章标签关联
         tagService.saveArticleTags(articleId, tagIds);
+    }
+
+    /**
+     * 增加文章阅读数
+     *
+     * @param articleId 文章ID
+     * @return 增加后的阅读数
+     */
+    public Long incrementArticleReadCount(Long articleId) {
+        try {
+            // 生成Redis计数器键
+            String readCountKey = RedisKeyConstants.buildHotDataKey("article", articleId + ":read");
+
+            // 增加Redis计数器
+            Long count = redisUtil.increment(readCountKey);
+            if (count != null) {
+                log.info("文章阅读数增加成功, 文章ID: {}, 阅读数: {}", articleId, count);
+
+                // 异步更新数据库（这里简化处理，实际项目中应使用@Async或消息队列）
+                // articleMapper.updateReadCount(articleId, count);
+
+                return count;
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("增加文章阅读数失败, 文章ID: {}", articleId, e);
+            return null;
+        }
+    }
+
+    /**
+     * 增加文章点赞数
+     *
+     * @param articleId 文章ID
+     * @return 增加后的点赞数
+     */
+    public Long incrementArticleLikeCount(Long articleId) {
+        return incrementArticleCount(articleId, "like");
+    }
+
+    /**
+     * 增加文章评论数
+     *
+     * @param articleId 文章ID
+     * @return 增加后的评论数
+     */
+    public Long incrementArticleCommentCount(Long articleId) {
+        return incrementArticleCount(articleId, "comment");
+    }
+
+    /**
+     * 增加文章收藏数
+     *
+     * @param articleId 文章ID
+     * @return 增加后的收藏数
+     */
+    public Long incrementArticleCollectionCount(Long articleId) {
+        return incrementArticleCount(articleId, "collection");
+    }
+
+    /**
+     * 增加文章分享数
+     *
+     * @param articleId 文章ID
+     * @return 增加后的分享数
+     */
+    public Long incrementArticleShareCount(Long articleId) {
+        return incrementArticleCount(articleId, "share");
+    }
+
+    /**
+     * 增加文章计数的通用方法
+     *
+     * @param articleId 文章ID
+     * @param countType 计数类型
+     * @return 增加后的计数值
+     */
+    private Long incrementArticleCount(Long articleId, String countType) {
+        try {
+            // 生成Redis计数器键
+            String countKey = RedisKeyConstants.buildHotDataKey("article", articleId + ":" + countType);
+
+            // 增加Redis计数器
+            Long count = redisUtil.increment(countKey);
+            if (count != null) {
+                log.info("文章{}数增加成功, 文章ID: {}, 计数: {}", countType, articleId, count);
+
+                // 异步更新数据库（这里简化处理，实际项目中应使用@Async或消息队列）
+                // 根据countType调用不同的更新方法
+
+                return count;
+            }
+            return null;
+        } catch (Exception e) {
+            log.error("增加文章{}数失败, 文章ID: {}", countType, articleId, e);
+            return null;
+        }
+    }
+
+    /**
+     * 获取文章计数
+     *
+     * @param articleId 文章ID
+     * @param countType 计数类型
+     * @return 计数值
+     */
+    public Long getArticleCount(Long articleId, String countType) {
+        try {
+            // 生成Redis计数器键
+            String countKey = RedisKeyConstants.buildHotDataKey("article", articleId + ":" + countType);
+
+            // 获取Redis计数器值
+            Object value = redisUtil.get(countKey);
+            if (value != null) {
+                if (value instanceof Long) {
+                    return (Long) value;
+                } else if (value instanceof String) {
+                    try {
+                        return Long.parseLong((String) value);
+                    } catch (NumberFormatException e) {
+                        log.error("解析文章计数值失败, 文章ID: {}, 计数类型: {}", articleId, countType, e);
+                    }
+                }
+            }
+
+            // 如果Redis中不存在，从数据库获取并更新到Redis
+            // 这里简化处理，实际项目中应从数据库查询
+            return 0L;
+        } catch (Exception e) {
+            log.error("获取文章{}数失败, 文章ID: {}", countType, articleId, e);
+            return 0L;
+        }
     }
 }

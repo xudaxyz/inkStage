@@ -47,6 +47,27 @@ public class ArticleController {
     }
 
     /**
+     * 更新文章
+     *
+     * @param id 文章ID
+     * @param articleCreateDTO 文章更新DTO
+     * @return 响应结果
+     */
+    @PutMapping("/update/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Boolean> updateArticle(@PathVariable("id") Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
+        log.info("更新文章DTO: {}, 文章ID: {}", articleCreateDTO, id);
+        // 检查文章DTO参数
+        checkArticleDTO(articleCreateDTO);
+        boolean success = articleService.updateArticle(id, articleCreateDTO);
+        if (success) {
+            return Result.success("文章更新成功");
+        } else {
+            return Result.error("文章更新失败");
+        }
+    }
+
+    /**
      * 保存草稿
      *
      * @param id               文章ID(可选)
