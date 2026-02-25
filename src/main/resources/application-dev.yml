@@ -92,27 +92,27 @@ spring:
   security:
     permission-rules:
       - name: front-read
-        pattern: /api/v1/front/**
+        pattern: /front/**
         methods: GET
         required-scopes: read
       - name: front-write
-        pattern: /api/v1/front/**
+        pattern: /front/**
         methods: POST,PUT,DELETE,PATCH
         required-scopes: write
       - name: admin-read
-        pattern: /api/v1/admin/**
+        pattern: /admin/**
         methods: GET
         required-scopes: admin
       - name: admin-write
-        pattern: /api/v1/admin/**
+        pattern: /admin/**
         methods: POST,PUT,DELETE,PATCH
         required-scopes: admin
       - name: public
-        pattern: /api/v1/front/public/**
+        pattern: /front/public/**
         methods: GET,POST,PUT,DELETE,PATCH
         required-scopes: ""
       - name: auth
-        pattern: /api/v1/front/auth/**
+        pattern: /front/auth/**
         methods: GET,POST,PUT,DELETE,PATCH
         required-scopes: ""
 

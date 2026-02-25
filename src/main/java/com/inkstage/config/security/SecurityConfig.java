@@ -60,6 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         // 允许公开API请求
                         .requestMatchers("/index/**").permitAll()
+                        .requestMatchers("/front/ranking/**").permitAll()
                         .requestMatchers("/front/article/**", "/front/comment/**").permitAll()
                         .requestMatchers("/front/tag/**", "/front/category/**").permitAll()
                         .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()

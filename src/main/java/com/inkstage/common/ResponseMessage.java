@@ -87,11 +87,15 @@ public enum ResponseMessage {
     TITLE_IS_EMPTY("文章标题不能为空"),
     CONTENT_IS_EMPTY("文章内容不能为空"),
     ARTICLE_DELETE_FAILED("创建文章失败{}"),
-    ARTICLE_LIST_NOT_FOUND("文章列表不存在"), NO_COMMENTS("暂无评论"),
-    COMMENT_CREATE_FAILED("创建评论失败"), COMMENT_UPDATE_FAILED("更新评论失败"),
-    COMMENT_DELETE_FAILED("删除评论失败"), COMMENT_CONTENT_EMPTY("评论内容不能为空"),
+    ARTICLE_LIST_NOT_FOUND("文章列表不存在"),
+    NO_COMMENTS("暂无评论"),
+    COMMENT_CREATE_FAILED("创建评论失败"),
+    COMMENT_UPDATE_FAILED("更新评论失败"),
+    COMMENT_DELETE_FAILED("删除评论失败"),
+    COMMENT_CONTENT_EMPTY("评论内容不能为空"),
     COMMENT_NOT_FOUND("评论不存在"),
-    UPDATED_FORBIDDEN("无更新权限"), DELETED_FORBIDDEN("无删除权限");
+    UPDATED_FORBIDDEN("无更新权限"),
+    DELETED_FORBIDDEN("无删除权限");
 
     private final String message;
 
