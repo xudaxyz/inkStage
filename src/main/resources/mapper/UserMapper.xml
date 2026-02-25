@@ -122,4 +122,18 @@
         <include refid="columns"/>
         FROM user WHERE id = #{id} AND deleted = 0
     </select>
+
+    <!-- 查询热门用户 -->
+    <select id="selectHotUsers" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user
+        WHERE deleted = 0
+        AND status = 1 <!-- 正常状态 -->
+        ORDER BY
+            follower_count DESC,
+            article_count DESC,
+            like_count DESC
+        LIMIT #{limit}
+    </select>
 </mapper>

@@ -156,7 +156,7 @@ cors:
 # Minio 配置
 minio:
   # Minio 服务端点
-  endpoint: http://localhost:9000  # 生产环境应使用内网IP
+  endpoint: http://172.26.16.229:9000  # 生产环境应使用内网IP
   # 访问密钥
   access-key: minioadmin
   # 秘密密钥

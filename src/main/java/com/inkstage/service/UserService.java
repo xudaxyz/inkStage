@@ -1,7 +1,9 @@
 package com.inkstage.service;
 
 import com.inkstage.entity.model.User;
-import com.inkstage.vo.UserInfo;
+import com.inkstage.vo.front.HotUserVO;
+
+import java.util.List;
 
 /**
  * 用户Service接口
@@ -70,4 +72,13 @@ public interface UserService {
      * @return 用户信息
      */
     User getUserById(Long id);
+
+    /**
+     * 获取热门用户
+     *
+     * @param limit 限制数量
+     * @return 热门用户列表
+     */
+    List<HotUserVO> getHotUsers(Integer limit);
+
 }

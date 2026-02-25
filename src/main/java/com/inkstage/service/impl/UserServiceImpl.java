@@ -15,11 +15,14 @@ import com.inkstage.enums.VerificationStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.UserService;
+import com.inkstage.vo.front.HotUserVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -165,5 +168,54 @@ public class UserServiceImpl implements UserService {
             log.info("更新用户信息缓存, 缓存键: {}", cacheKey);
         }
         return user;
+    }
+
+    @Override
+    public List<HotUserVO> getHotUsers(Integer limit) {
+        try {
+            log.info("获取热门用户, limit: {}", limit);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "user:hot",
+                    limit.toString()
+            );
+
+            // 尝试从缓存获取
+            List<HotUserVO> hotUsers = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (hotUsers != null) {
+                log.info("从缓存获取热门用户成功, 缓存键: {}", cacheKey);
+                return hotUsers;
+            }
+
+            // 查询热门用户
+            // 这里简化处理，实际项目中应根据粉丝数、文章数、获赞数等综合排序
+            List<User> users = userMapper.selectHotUsers(limit);
+            
+            // 转换为HotUserVO
+            hotUsers = users.stream().map(user -> {
+                HotUserVO vo = new HotUserVO();
+                vo.setId(user.getId());
+                vo.setNickname(user.getNickname());
+                vo.setAvatar(user.getAvatar());
+                vo.setArticleCount(user.getArticleCount());
+                vo.setFollowerCount(user.getFollowerCount());
+                vo.setLikeCount(user.getLikeCount());
+                return vo;
+            }).toList();
+
+            fileService.ensureHotUserImgAreFullUrl(hotUsers);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, hotUsers, 30, TimeUnit.MINUTES);
+            log.info("更新热门用户缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取热门用户成功, 数量: {}", hotUsers.size());
+            return hotUsers;
+        } catch (Exception e) {
+            log.error("获取热门用户失败, limit: {}", limit, e);
+            throw new BusinessException(ResponseMessage.ERROR, e.getMessage());
+        }
     }
 }

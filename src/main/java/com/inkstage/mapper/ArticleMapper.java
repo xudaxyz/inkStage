@@ -72,4 +72,20 @@ public interface ArticleMapper {
      */
     long countArticleList(@Param("query") ArticleQueryDTO queryDTO);
 
+    /**
+     * 查询热门文章
+     *
+     * @param limit 限制数量
+     * @return 热门文章列表
+     */
+    List<ArticleListVO> selectHotArticles(@Param("limit") Integer limit);
+
+    /**
+     * 查询最新文章
+     *
+     * @param limit 限制数量
+     * @return 最新文章列表
+     */
+    List<ArticleListVO> selectLatestArticles(@Param("limit") Integer limit);
+
 }

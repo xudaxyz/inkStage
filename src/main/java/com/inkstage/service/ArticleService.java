@@ -6,6 +6,8 @@ import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 
+import java.util.List;
+
 /**
  * 文章服务接口
  */
@@ -61,5 +63,22 @@ public interface ArticleService {
      * @return 是否成功
      */
     boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO);
+
+    /**
+     * 获取热门文章
+     *
+     * @param limit 限制数量
+     * @param timeRange 时间范围：day, week, month
+     * @return 热门文章列表
+     */
+    List<ArticleListVO> getHotArticles(Integer limit, String timeRange);
+
+    /**
+     * 获取最新文章
+     *
+     * @param limit 限制数量
+     * @return 最新文章列表
+     */
+    List<ArticleListVO> getLatestArticles(Integer limit);
 
 }

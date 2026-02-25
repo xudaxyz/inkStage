@@ -522,4 +522,76 @@ public class ArticleServiceImpl implements ArticleService {
             return 0L;
         }
     }
+
+    @Override
+    public List<ArticleListVO> getHotArticles(Integer limit, String timeRange) {
+        try {
+            log.info("获取热门文章, limit: {}, timeRange: {}", limit, timeRange);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:hot",
+                    limit + ":" + timeRange
+            );
+
+            // 尝试从缓存获取
+            List<ArticleListVO> hotArticles = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (hotArticles != null) {
+                log.info("从缓存获取热门文章成功, 缓存键: {}", cacheKey);
+                return hotArticles;
+            }
+
+            // 查询热门文章
+            // 这里简化处理，实际项目中应根据时间范围和热度算法查询
+            // 暂时从数据库查询已发布的文章，并按阅读数排序
+            hotArticles = articleMapper.selectHotArticles(limit);
+            fileService.ensureArticleImageAreFullUrl(hotArticles);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, hotArticles, 30, TimeUnit.MINUTES);
+            log.info("更新热门文章缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取热门文章成功, 数量: {}", hotArticles.size());
+            return hotArticles;
+        } catch (Exception e) {
+            log.error("获取热门文章失败, limit: {}, timeRange: {}", limit, timeRange, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    public List<ArticleListVO> getLatestArticles(Integer limit) {
+        try {
+            log.info("获取最新文章, limit: {}", limit);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:latest",
+                    limit.toString()
+            );
+
+            // 尝试从缓存获取
+            List<ArticleListVO> latestArticles = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (latestArticles != null) {
+                log.info("从缓存获取最新文章成功, 缓存键: {}", cacheKey);
+                return latestArticles;
+            }
+
+            // 查询最新文章
+            latestArticles = articleMapper.selectLatestArticles(limit);
+            fileService.ensureArticleImageAreFullUrl(latestArticles);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, latestArticles, 30, TimeUnit.MINUTES);
+            log.info("更新最新文章缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取最新文章成功, 数量: {}", latestArticles.size());
+            return latestArticles;
+        } catch (Exception e) {
+            log.error("获取最新文章失败, limit: {}", limit, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
 }

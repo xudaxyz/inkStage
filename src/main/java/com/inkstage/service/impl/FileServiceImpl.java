@@ -7,6 +7,7 @@ import com.inkstage.service.FileService;
 import com.inkstage.vo.front.ArticleCommentVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.HotUserVO;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
@@ -119,6 +120,17 @@ public class FileServiceImpl implements FileService {
         articleDetailVO.setCoverImage(fullCoverImageUrl);
         String fullAvatarUrl = convertToFullUrl(articleDetailVO.getAvatar());
         articleDetailVO.setAvatar(fullAvatarUrl);
+    }
+
+    @Override
+    public void ensureHotUserImgAreFullUrl(List<HotUserVO> hotUsers) {
+        if (hotUsers == null || hotUsers.isEmpty()) {
+            return;
+        }
+        for (HotUserVO hotUser : hotUsers) {
+            String fullAvatarUrl = convertToFullUrl(hotUser.getAvatar());
+            hotUser.setAvatar(fullAvatarUrl);
+        }
     }
 
     @Override

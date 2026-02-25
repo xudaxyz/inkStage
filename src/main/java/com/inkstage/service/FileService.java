@@ -4,6 +4,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.vo.front.ArticleCommentVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.HotUserVO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -108,4 +109,11 @@ public interface FileService {
      * @param articleDetailVO 文章详情VO
      */
     void ensureArticleDetailIsFullUrl(ArticleDetailVO articleDetailVO);
+
+    /**
+     * 确保HotUserVO对象中的图片字段是完整的预签名URL
+     *
+     * @param hotUsers 热门用户列表VO
+     */
+    void ensureHotUserImgAreFullUrl(List<HotUserVO> hotUsers);
 }

@@ -4,6 +4,8 @@ import com.inkstage.entity.model.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * 用户Mapper接口
  */
@@ -48,4 +50,11 @@ public interface UserMapper {
      * @return 用户信息
      */
     User selectByPrimaryKey(@Param("id") Long id);
+
+    /**
+     * 查询热门用户
+     * @param limit 限制数量
+     * @return 热门用户列表
+     */
+    List<User> selectHotUsers(@Param("limit") Integer limit);
 }
