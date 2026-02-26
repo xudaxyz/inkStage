@@ -1,11 +1,13 @@
 package com.inkstage.controller.front;
 
+import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleService;
 import com.inkstage.vo.front.ArticleDetailVO;
+import com.inkstage.vo.front.ArticleListVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -131,6 +133,23 @@ public class ArticleController {
         if (tagsId != null && !tagsId.isEmpty() && tagsId.size() > 10) {
             throw new BusinessException(ResponseMessage.TAG_COUNT_EXCEEDED, "10");
         }
+    }
+
+    /**
+     * 获取指定用户的文章列表
+     *
+     * @param userId 用户ID
+     * @param page 页码
+     * @param size 每页大小
+     * @return 文章列表分页结果
+     */
+    @GetMapping("/user/{userId}")
+    public Result<PageResult<ArticleListVO>> getUserArticles(@PathVariable Long userId, 
+                                                           @RequestParam(defaultValue = "1") Integer page, 
+                                                           @RequestParam(defaultValue = "10") Integer size) {
+        log.info("获取用户文章列表, 用户ID: {}, 页码: {}, 每页大小: {}", userId, page, size);
+        PageResult<ArticleListVO> pageResult = articleService.getUserArticles(userId, page, size);
+        return Result.success(pageResult, "获取用户文章列表成功");
     }
 }
 

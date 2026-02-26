@@ -629,4 +629,53 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
+
+    @Override
+    public PageResult<ArticleListVO> getUserArticles(Long userId, Integer page, Integer size) {
+        try {
+            log.info("获取用户文章列表, 用户ID: {}, 页码: {}, 每页大小: {}", userId, page, size);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:user",
+                    userId + ":" + page + ":" + size
+            );
+
+            // 尝试从缓存获取
+            PageResult<ArticleListVO> pageResult = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (pageResult != null) {
+                log.info("从缓存获取用户文章列表成功, 缓存键: {}", cacheKey);
+                return pageResult;
+            }
+
+            // 计算偏移量
+            int offset = (page - 1) * size;
+
+            // 查询用户文章列表
+            List<ArticleListVO> articleList = articleMapper.selectUserArticles(userId, offset, size);
+            // 确保文章相关图片正常显示
+            fileService.ensureArticleImageAreFullUrl(articleList);
+            // 查询总记录数
+            long total = articleMapper.countUserArticles(userId);
+
+            // 构建分页结果
+            pageResult = PageResult.build(
+                    articleList,
+                    total,
+                    page,
+                    size
+            );
+
+            // 更新缓存
+            redisUtil.set(cacheKey, pageResult, 30, TimeUnit.MINUTES);
+            log.info("更新用户文章列表缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取用户文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, page, size);
+            return pageResult;
+        } catch (Exception e) {
+            log.error("获取用户文章列表失败, 用户ID: {}, 页码: {}, 每页大小: {}", userId, page, size, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
 }

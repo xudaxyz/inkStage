@@ -89,4 +89,14 @@ public interface ArticleService {
      */
     List<ArticleListVO> getBannerArticles(Integer limit);
 
+    /**
+     * 获取指定用户的文章列表
+     *
+     * @param userId 用户ID
+     * @param page 页码
+     * @param size 每页数量
+     * @return 分页结果
+     */
+    PageResult<ArticleListVO> getUserArticles(Long userId, Integer page, Integer size);
+
 }

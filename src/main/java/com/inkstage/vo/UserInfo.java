@@ -4,6 +4,7 @@ import com.inkstage.enums.user.Gender;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * 用户信息
@@ -59,4 +60,34 @@ public class UserInfo {
      * 所在地区
      */
     private String location;
+
+    /**
+     * 文章数
+     */
+    private Integer articleCount;
+
+    /**
+     * 点赞数
+     */
+    private Integer likeCount;
+
+    /**
+     * 评论数
+     */
+    private Integer commentCount;
+
+    /**
+     * 粉丝数
+     */
+    private Integer followerCount;
+
+    /**
+     * 关注数
+     */
+    private Integer followCount;
+
+    /**
+     * 注册时间
+     */
+    private LocalDateTime registerTime;
 }

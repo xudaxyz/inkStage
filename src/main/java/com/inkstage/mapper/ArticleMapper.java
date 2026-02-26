@@ -96,4 +96,22 @@ public interface ArticleMapper {
      */
     List<ArticleListVO> selectBannerArticles(@Param("limit") Integer limit);
 
+    /**
+     * 查询指定用户的文章列表
+     *
+     * @param userId 用户ID
+     * @param offset 偏移量
+     * @param size 每页大小
+     * @return 文章列表
+     */
+    List<ArticleListVO> selectUserArticles(@Param("userId") Long userId, @Param("offset") Integer offset, @Param("size") Integer size);
+
+    /**
+     * 查询指定用户的文章总数
+     *
+     * @param userId 用户ID
+     * @return 文章总数
+     */
+    long countUserArticles(@Param("userId") Long userId);
+
 }

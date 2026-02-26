@@ -85,6 +85,29 @@ public class UserController {
         }
     }
 
+    /**
+     * 获取指定用户的详细信息（公开信息）
+     *
+     * @param userId 用户ID
+     * @return 用户详细信息
+     */
+    @GetMapping("/profile/{userId}")
+    public Result<UserInfo> getUserProfile(@PathVariable Long userId) {
+        try {
+            User user = userService.getUserById(userId);
+            if (user != null) {
+                // 构建UserInfo对象
+                UserInfo userInfo = assembleUserInfo(user);
+                return Result.success(userInfo, ResponseMessage.SUCCESS);
+            } else {
+                return Result.error(ResponseMessage.USER_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            log.error("获取用户资料失败: {}", e.getMessage(), e);
+            return Result.error(ResponseMessage.ERROR);
+        }
+    }
+
     private UserInfo assembleUserInfo(User user) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
@@ -97,6 +120,12 @@ public class UserController {
         userInfo.setGender(user.getGender());
         userInfo.setBirthDate(user.getBirthDate());
         userInfo.setLocation(user.getLocation());
+        userInfo.setArticleCount(user.getArticleCount());
+        userInfo.setLikeCount(user.getLikeCount());
+        userInfo.setCommentCount(user.getCommentCount());
+        userInfo.setFollowerCount(user.getFollowerCount());
+        userInfo.setFollowCount(user.getFollowCount());
+        userInfo.setRegisterTime(user.getRegisterTime());
         return userInfo;
     }
 }
