@@ -114,4 +114,14 @@ public interface ArticleMapper {
      */
     long countUserArticles(@Param("userId") Long userId);
 
+    /**
+     * 查询作者相关文章（排除当前文章）
+     *
+     * @param userId 用户ID
+     * @param excludeArticleId 排除的文章ID
+     * @param limit 限制数量
+     * @return 相关文章列表
+     */
+    List<ArticleListVO> selectAuthorRelatedArticles(@Param("userId") Long userId, @Param("excludeArticleId") Long excludeArticleId, @Param("limit") Integer limit);
+
 }

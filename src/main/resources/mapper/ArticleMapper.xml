@@ -366,4 +366,40 @@
             AND a.status IN (1, 2) <!-- 已发布 -->
     </select>
 
+    <!-- 作者相关文章查询 -->
+    <select id="selectAuthorRelatedArticles" resultMap="ArticleListResultMap">
+        SELECT
+            a.id,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.status,
+            a.visible,
+            a.publish_time,
+            a.last_edit_time,
+            a.read_count,
+            a.like_count,
+            a.comment_count,
+            a.user_id,
+            a.author_name,
+            a.category_id,
+            u.avatar,
+            c.name as category_name
+        FROM
+            article a
+        LEFT JOIN
+            category c ON a.category_id = c.id
+        LEFT JOIN
+            user u ON a.user_id = u.id
+        WHERE
+            a.deleted = 0
+            AND a.user_id = #{userId}
+            AND a.id != #{excludeArticleId}
+            AND a.status IN (1, 2) <!-- 已发布 -->
+        ORDER BY
+            a.top DESC,
+            a.publish_time DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

@@ -151,5 +151,22 @@ public class ArticleController {
         PageResult<ArticleListVO> pageResult = articleService.getUserArticles(userId, page, size);
         return Result.success(pageResult, "获取用户文章列表成功");
     }
+
+    /**
+     * 获取作者相关文章（排除当前文章）
+     *
+     * @param userId 用户ID
+     * @param excludeArticleId 排除的文章ID
+     * @param limit 限制数量
+     * @return 相关文章列表
+     */
+    @GetMapping("/author/related")
+    public Result<List<ArticleListVO>> getAuthorRelatedArticles(@RequestParam Long userId, 
+                                                              @RequestParam Long excludeArticleId, 
+                                                              @RequestParam(defaultValue = "3") Integer limit) {
+        log.info("获取作者相关文章, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit);
+        List<ArticleListVO> relatedArticles = articleService.getAuthorRelatedArticles(userId, excludeArticleId, limit);
+        return Result.success(relatedArticles, "获取作者相关文章成功");
+    }
 }
 

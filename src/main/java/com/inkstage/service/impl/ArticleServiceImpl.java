@@ -678,4 +678,40 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
+
+    @Override
+    public List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
+        try {
+            log.info("获取作者相关文章, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:author:related",
+                    userId + ":" + excludeArticleId + ":" + limit
+            );
+
+            // 尝试从缓存获取
+            List<ArticleListVO> relatedArticles = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (relatedArticles != null) {
+                log.info("从缓存获取作者相关文章成功, 缓存键: {}", cacheKey);
+                return relatedArticles;
+            }
+
+            // 查询作者相关文章
+            relatedArticles = articleMapper.selectAuthorRelatedArticles(userId, excludeArticleId, limit);
+            // 确保文章相关图片正常显示
+            fileService.ensureArticleImageAreFullUrl(relatedArticles);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, relatedArticles, 30, TimeUnit.MINUTES);
+            log.info("更新作者相关文章缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取作者相关文章成功, 数量: {}", relatedArticles.size());
+            return relatedArticles;
+        } catch (Exception e) {
+            log.error("获取作者相关文章失败, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
 }

@@ -99,4 +99,14 @@ public interface ArticleService {
      */
     PageResult<ArticleListVO> getUserArticles(Long userId, Integer page, Integer size);
 
+    /**
+     * 获取作者相关文章（排除当前文章）
+     *
+     * @param userId 用户ID
+     * @param excludeArticleId 排除的文章ID
+     * @param limit 限制数量
+     * @return 相关文章列表
+     */
+    List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
+
 }
