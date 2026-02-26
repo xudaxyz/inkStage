@@ -594,4 +594,39 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
+
+    @Override
+    public List<ArticleListVO> getBannerArticles(Integer limit) {
+        try {
+            log.info("获取轮播图文章, limit: {}", limit);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:banner",
+                    limit.toString()
+            );
+
+            // 尝试从缓存获取
+            List<ArticleListVO> bannerArticles = redisUtil.get(cacheKey, new TypeReference<>() {
+            });
+            if (bannerArticles != null) {
+                log.info("从缓存获取轮播图文章成功, 缓存键: {}", cacheKey);
+                return bannerArticles;
+            }
+
+            // 查询轮播图文章
+            bannerArticles = articleMapper.selectBannerArticles(limit);
+            fileService.ensureArticleImageAreFullUrl(bannerArticles);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, bannerArticles, 30, TimeUnit.MINUTES);
+            log.info("更新轮播图文章缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取轮播图文章成功, 数量: {}", bannerArticles.size());
+            return bannerArticles;
+        } catch (Exception e) {
+            log.error("获取轮播图文章失败, limit: {}", limit, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
 }

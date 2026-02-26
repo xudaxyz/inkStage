@@ -81,4 +81,12 @@ public interface ArticleService {
      */
     List<ArticleListVO> getLatestArticles(Integer limit);
 
+    /**
+     * 获取轮播图文章
+     *
+     * @param limit 限制数量
+     * @return 轮播图文章列表
+     */
+    List<ArticleListVO> getBannerArticles(Integer limit);
+
 }

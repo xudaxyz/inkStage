@@ -282,4 +282,41 @@
         LIMIT #{limit}
     </select>
 
+    <!-- 轮播图文章查询 -->
+    <select id="selectBannerArticles" resultMap="ArticleListResultMap">
+        SELECT
+            a.id,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.status,
+            a.visible,
+            a.publish_time,
+            a.last_edit_time,
+            a.read_count,
+            a.like_count,
+            a.comment_count,
+            a.user_id,
+            a.author_name,
+            a.category_id,
+            u.avatar,
+            c.name as category_name
+        FROM
+            article a
+        LEFT JOIN
+            category c ON a.category_id = c.id
+        LEFT JOIN
+            user u ON a.user_id = u.id
+        WHERE
+            a.deleted = 0
+            AND a.status IN (1, 2) <!-- 已发布 -->
+            AND a.cover_image IS NOT NULL AND a.cover_image != '' <!-- 有封面图片 -->
+        ORDER BY
+            a.top DESC,
+            a.recommended DESC,
+            a.read_count DESC,
+            a.publish_time DESC
+        LIMIT #{limit}
+    </select>
+
 </mapper>

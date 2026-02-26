@@ -88,4 +88,12 @@ public interface ArticleMapper {
      */
     List<ArticleListVO> selectLatestArticles(@Param("limit") Integer limit);
 
+    /**
+     * 查询轮播图文章
+     *
+     * @param limit 限制数量
+     * @return 轮播图文章列表
+     */
+    List<ArticleListVO> selectBannerArticles(@Param("limit") Integer limit);
+
 }

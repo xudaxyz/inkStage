@@ -43,10 +43,11 @@ public class IndexController {
      * @return 响应结果
      */
     @GetMapping("/banner")
-    public Result<List<?>> getBannerArticles(@RequestParam(defaultValue = "3") Integer limit) {
-        // 这里简化处理，实际应该调用服务层方法获取轮播图文章
-        // 暂时返回空列表，后续需要实现具体逻辑
-        return Result.success(List.of());
+    public Result<List<ArticleListVO>> getBannerArticles(@RequestParam(defaultValue = "3") Integer limit) {
+        log.info("获取轮播图文章，limit: {}", limit);
+        List<ArticleListVO> bannerArticles = articleService.getBannerArticles(limit);
+        log.info("获取轮播图文章结果: {}", bannerArticles);
+        return Result.success(bannerArticles);
     }
 
     /**
