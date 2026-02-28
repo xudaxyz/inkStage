@@ -114,7 +114,7 @@ public class RedisUtil {
      * @param <T>     返回类型泛型
      * @return 类型安全的对象或null
      */
-    public <T> T get(String key, TypeReference<T> typeRef) {
+    public <T> T getWithType(String key, TypeReference<T> typeRef) {
         try {
             Object value = redisTemplate.opsForValue().get(key);
             if (value == null) {

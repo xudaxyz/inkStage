@@ -101,7 +101,7 @@ public interface ArticleMapper {
      *
      * @param userId 用户ID
      * @param offset 偏移量
-     * @param size 每页大小
+     * @param size   每页大小
      * @return 文章列表
      */
     List<ArticleListVO> selectUserArticles(@Param("userId") Long userId, @Param("offset") Integer offset, @Param("size") Integer size);
@@ -117,11 +117,90 @@ public interface ArticleMapper {
     /**
      * 查询作者相关文章（排除当前文章）
      *
-     * @param userId 用户ID
+     * @param userId           用户ID
      * @param excludeArticleId 排除的文章ID
-     * @param limit 限制数量
+     * @param limit            限制数量
      * @return 相关文章列表
      */
     List<ArticleListVO> selectAuthorRelatedArticles(@Param("userId") Long userId, @Param("excludeArticleId") Long excludeArticleId, @Param("limit") Integer limit);
 
+    /**
+     * 更新文章阅读数
+     *
+     * @param articleId 文章ID
+     * @param increment 增加/减少的阅读数
+     */
+    void updateReadCount(@Param("id") Long articleId, @Param("increment") int increment);
+
+    /**
+     * 更新文章点赞数
+     *
+     * @param articleId 文章ID
+     * @param offset    增加/减少的点赞数
+     */
+    void updateLikeCount(@Param("id") Long articleId, @Param("offset") int offset);
+
+    /**
+     * 更新文章评论数
+     *
+     * @param articleId 文章ID
+     * @param offset    增加/减少的评论数
+     */
+    void updateCommentCount(@Param("id") Long articleId, @Param("offset") int offset);
+
+    /**
+     * 更新文章收藏数
+     *
+     * @param articleId 文章ID
+     * @param offset    增加/减少的收藏数
+     */
+    void updateCollectionCount(@Param("id") Long articleId, @Param("offset") int offset);
+
+    /**
+     * 更新文章分享数
+     *
+     * @param articleId 文章ID
+     * @param offset    增加/减少的分享数
+     */
+    void updateShareCount(@Param("id") Long articleId, @Param("offset") int offset);
+
+    /**
+     * 根据文章ID获取阅读数
+     *
+     * @param articleId 文章ID
+     * @return 阅读数
+     */
+    Long getReadCount(@Param("articleId") Long articleId);
+
+    /**
+     * 根据文章ID获取点赞数
+     *
+     * @param articleId 文章ID
+     * @return 点赞数
+     */
+    Long getLikeCount(@Param("articleId") Long articleId);
+
+    /**
+     * 根据文章ID获取评论数
+     *
+     * @param articleId 文章ID
+     * @return 评论数
+     */
+    Long getCommentCount(@Param("articleId") Long articleId);
+
+    /**
+     * 根据文章ID获取收藏数
+     *
+     * @param articleId 文章ID
+     * @return 收藏数
+     */
+    Long getCollectionCount(@Param("articleId") Long articleId);
+
+    /**
+     * 根据文章ID获取分享数
+     *
+     * @param articleId 文章ID
+     * @return 分享数
+     */
+    Long getShareCount(@Param("articleId") Long articleId);
 }

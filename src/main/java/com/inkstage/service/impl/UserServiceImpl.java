@@ -131,12 +131,12 @@ public class UserServiceImpl implements UserService {
         try {
             user.setUpdateTime(LocalDateTime.now());
             userMapper.updateByPrimaryKeySelective(user);
-            
+
             // 清除用户信息缓存
             String cacheKey = RedisKeyConstants.buildUserKey(user.getId());
             redisUtil.delete(cacheKey);
             log.info("清除用户信息缓存, 缓存键: {}", cacheKey);
-            
+
             log.info("用户更新成功: {}", user.getId());
             return user;
         } catch (Exception e) {
@@ -162,7 +162,7 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             // 确保用户头像和封面图的URL是完整的
             fileService.ensureUserImgIsFullUrl(user);
-            
+
             // 更新缓存
             redisUtil.set(cacheKey, user, 2, TimeUnit.HOURS);
             log.info("更新用户信息缓存, 缓存键: {}", cacheKey);
@@ -182,8 +182,7 @@ public class UserServiceImpl implements UserService {
             );
 
             // 尝试从缓存获取
-            List<HotUserVO> hotUsers = redisUtil.get(cacheKey, new TypeReference<>() {
-            });
+            List<HotUserVO> hotUsers = redisUtil.getWithType(cacheKey, new TypeReference<>() {});
             if (hotUsers != null) {
                 log.info("从缓存获取热门用户成功, 缓存键: {}", cacheKey);
                 return hotUsers;
@@ -192,7 +191,7 @@ public class UserServiceImpl implements UserService {
             // 查询热门用户
             // 这里简化处理，实际项目中应根据粉丝数、文章数、获赞数等综合排序
             List<User> users = userMapper.selectHotUsers(limit);
-            
+
             // 转换为HotUserVO
             hotUsers = users.stream().map(user -> {
                 HotUserVO vo = new HotUserVO();

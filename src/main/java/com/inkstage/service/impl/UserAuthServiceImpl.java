@@ -31,6 +31,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.TimeUnit;
@@ -170,7 +171,7 @@ public class UserAuthServiceImpl implements UserAuthService {
             // 检查登录频率限制
             String clientIp = IPUtil.getClientIp();
             String failKey = RedisKeyConstants.buildLoginFailKey(clientIp);
-            Integer failCount = (Integer) redisUtil.get(failKey);
+            Integer failCount = redisUtil.getWithType(failKey, new TypeReference<>() {});
             if (failCount != null && failCount >= MAX_LOGIN_FAIL_TIMES) {
                 throw new BusinessException(ResponseMessage.LOGIN_TOO_FREQUENTLY);
             }

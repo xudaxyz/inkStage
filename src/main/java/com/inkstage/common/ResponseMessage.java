@@ -95,7 +95,8 @@ public enum ResponseMessage {
     COMMENT_CONTENT_EMPTY("评论内容不能为空"),
     COMMENT_NOT_FOUND("评论不存在"),
     UPDATED_FORBIDDEN("无更新权限"),
-    DELETED_FORBIDDEN("无删除权限");
+    DELETED_FORBIDDEN("无删除权限"),
+    USER_NOT_LOGGED_IN("用户未登录");
 
     private final String message;
 

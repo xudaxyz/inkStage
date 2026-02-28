@@ -11,6 +11,7 @@ import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.CommentMapper;
+import com.inkstage.service.CountService;
 import com.inkstage.service.CommentService;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.RedisUtil;
@@ -33,13 +34,14 @@ import java.util.concurrent.TimeUnit;
  * 评论服务实现类
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
+@Service
 public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
     private final FileService fileService;
     private final RedisUtil redisUtil;
+    private final CountService countService;
 
     @Override
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
@@ -52,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
         );
 
         // 尝试从缓存获取
-        PageResult<ArticleCommentVO> pageResult = redisUtil.get(cacheKey, new TypeReference<>() {
+        PageResult<ArticleCommentVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
         });
         if (pageResult != null) {
             log.info("从缓存获取评论列表成功, 缓存键: {}", cacheKey);
@@ -131,6 +133,9 @@ public class CommentServiceImpl implements CommentService {
             // 清除评论列表缓存
             String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list", comment.getArticleId() + ":*");
             redisUtil.deletePattern(commentListPattern);
+
+            // 增加文章评论数
+            countService.updateArticleCommentCount(comment.getArticleId(), updated);
         }
         return updated >= 1;
     }
@@ -198,6 +203,14 @@ public class CommentServiceImpl implements CommentService {
             }
         }
 
+        if (updated >= 1) {
+            // 减少文章评论数
+            countService.updateArticleCommentCount(comment.getArticleId(), -updated);
+
+            // 清除评论列表缓存
+            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list", comment.getArticleId() + ":*");
+            redisUtil.deletePattern(commentListPattern);
+        }
         return updated >= 1;
 
     }
@@ -325,5 +338,6 @@ public class CommentServiceImpl implements CommentService {
             return 0L;
         }
     }
+
 
 }

@@ -58,7 +58,7 @@ public interface ArticleService {
     /**
      * 更新文章
      *
-     * @param articleId 文章ID
+     * @param articleId        文章ID
      * @param articleCreateDTO 文章更新DTO
      * @return 是否成功
      */
@@ -67,7 +67,7 @@ public interface ArticleService {
     /**
      * 获取热门文章
      *
-     * @param limit 限制数量
+     * @param limit     限制数量
      * @param timeRange 时间范围：day, week, month
      * @return 热门文章列表
      */
@@ -93,8 +93,8 @@ public interface ArticleService {
      * 获取指定用户的文章列表
      *
      * @param userId 用户ID
-     * @param page 页码
-     * @param size 每页数量
+     * @param page   页码
+     * @param size   每页数量
      * @return 分页结果
      */
     PageResult<ArticleListVO> getUserArticles(Long userId, Integer page, Integer size);
@@ -102,11 +102,19 @@ public interface ArticleService {
     /**
      * 获取作者相关文章（排除当前文章）
      *
-     * @param userId 用户ID
+     * @param userId           用户ID
      * @param excludeArticleId 排除的文章ID
-     * @param limit 限制数量
+     * @param limit            限制数量
      * @return 相关文章列表
      */
     List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
+
+    /**
+     * 增加文章阅读数
+     *
+     * @param articleId 文章ID
+     * @param count     阅读数增量
+     */
+    void incrementArticleReadCount(Long articleId, int count);
 
 }

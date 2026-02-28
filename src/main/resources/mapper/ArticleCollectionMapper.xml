@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ArticleCollectionMapper">
+    
+    <!-- 插入收藏记录 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleCollection" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article_collection (article_id, user_id, folder_id, create_time, update_time, deleted, deleted_time)
+        VALUES (#{articleId}, #{userId}, #{folderId}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+    </insert>
+    
+    <!-- 根据文章ID和用户ID删除收藏记录 -->
+    <delete id="deleteByArticleIdAndUserId">
+        DELETE FROM article_collection
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </delete>
+    
+    <!-- 根据文章ID和用户ID查询收藏记录数 -->
+    <select id="countByArticleIdAndUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM article_collection
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </select>
+    
+</mapper>

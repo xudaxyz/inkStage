@@ -73,7 +73,14 @@ public class UserContext {
      * @throws AccessDeniedException 如果用户未认证或类型不匹配
      */
     public static User getCurrentUser() {
-        return getCurrentUserDetails().getUser();
+        try {
+            log.info("从用户上下文中获取用户对象");
+            UserDetailsImpl currentUserDetails = getCurrentUserDetails();
+            return currentUserDetails.getUser();
+        } catch (AccessDeniedException e) {
+            log.warn("用户未认证或未登录 {}", e.getMessage());
+            throw new AccessDeniedException(e.getMessage());
+        }
     }
 
     /**
@@ -82,6 +89,7 @@ public class UserContext {
      * @return User的Optional对象
      */
     public static Optional<User> getCurrentUserOptional() {
+        log.info("从用户上下文中获取可选的用户对象");
         return getCurrentUserDetailsOptional().map(UserDetailsImpl::getUser);
     }
 

@@ -198,7 +198,7 @@ CREATE TABLE `article_like` (
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` TINYINT DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
   `deleted_time` DATETIME COMMENT '删除时间',
-  UNIQUE KEY `uk_article_user` (`article_id`, `user_id`),
+  UNIQUE KEY `uk_article_user` (`id`, `article_id`, `user_id`, `deleted`),
   KEY `idx_article_id` (`article_id`),
   KEY `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='文章点赞表';
@@ -213,7 +213,7 @@ CREATE TABLE `article_collection` (
   `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` TINYINT DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
   `deleted_time` DATETIME COMMENT '删除时间',
-  UNIQUE KEY `uk_article_user` (`article_id`, `user_id`),
+  UNIQUE KEY `uk_article_user` (`id`, `article_id`, `user_id`, `deleted`),
   KEY `idx_article_id` (`article_id`),
   KEY `idx_user_id` (`user_id`),
   KEY `idx_folder_id` (`folder_id`)
