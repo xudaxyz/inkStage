@@ -4,12 +4,14 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
+import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleCollectionService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleService;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.MyArticleListVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -112,7 +114,11 @@ public class ArticleController {
     public Result<ArticleDetailVO> getArticleDetail(@PathVariable Long id) {
         log.info("获取文章详情，文章ID: {}", id);
         ArticleDetailVO articleDetail = articleService.getArticleDetail(id);
-        return Result.success(articleDetail, "文章详情获取成功");
+        if (articleDetail != null) {
+            return Result.success(articleDetail);
+        } else {
+            return Result.error(ResponseMessage.ARTICLE_NOT_FOUND);
+        }
     }
 
     /**
@@ -269,6 +275,27 @@ public class ArticleController {
         log.info("增加文章阅读数, 文章ID: {}", articleId);
         articleService.incrementArticleReadCount(articleId, 1);
         return Result.success();
+    }
+
+    /**
+     * 获取当前用户的文章列表
+     *
+     * @param articleStatus 我的文章状态
+     * @param keyword 搜索关键词
+     * @param page 页码
+     * @param size 每页大小
+     * @return 文章列表分页结果
+     */
+    @GetMapping("/my")
+    @PreAuthorize("isAuthenticated()")
+    public Result<PageResult<MyArticleListVO>> getMyArticles(
+            @RequestParam ArticleStatus articleStatus,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        log.info("获取当前用户文章列表, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus, keyword, page, size);
+        PageResult<MyArticleListVO> pageResult = articleService.getMyArticles(articleStatus, keyword, page, size);
+        return Result.success(pageResult);
     }
 
 }

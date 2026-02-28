@@ -7,10 +7,12 @@ import lombok.Getter;
 
 @Getter
 public enum ArticleStatus implements EnumCode {
-    DRAFT(0, "草稿"),
-    PENDING(1, "待审核"),
-    PUBLISHED(2, "已发布"),
-    OFFLINE(3, "已下架");
+    ALL(0, "全部"),
+    DRAFT(1, "草稿"),
+    PENDING(2, "待审核"),
+    PUBLISHED(3, "已发布"),
+    OFFLINE(4, "已下架"),
+    RECYCLE(5, "回收站");
 
     private final Integer code;
     private final String desc;

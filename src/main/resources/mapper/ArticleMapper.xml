@@ -13,7 +13,7 @@
         <result column="user_id" property="userId"/>
         <result column="author_name" property="authorName"/>
         <result column="category_id" property="categoryId"/>
-        <result column="status" property="status" javaType="com.inkstage.enums.article.ArticleStatus" />
+        <result column="status" property="status" javaType="com.inkstage.enums.article.ArticleStatus"/>
         <result column="publish_time" property="publishTime"/>
         <result column="read_count" property="readCount"/>
         <result column="like_count" property="likeCount"/>
@@ -23,7 +23,7 @@
         <result column="top" property="top" javaType="com.inkstage.enums.article.TopStatus"/>
         <result column="recommended" property="recommended"
                 javaType="com.inkstage.enums.article.RecommendStatus"/>
-        <result column="visible" property="visible" javaType="com.inkstage.enums.VisibleStatus" />
+        <result column="visible" property="visible" javaType="com.inkstage.enums.VisibleStatus"/>
         <result column="allow_comment" property="allowComment"
                 javaType="com.inkstage.enums.AllowStatus"/>
         <result column="allow_forward" property="allowForward"
@@ -55,9 +55,12 @@
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time)
         VALUES
-        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{authorName}, #{categoryId}, #{status}, #{publishTime},
-        #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended}, #{visible}, #{allowComment},
-        #{allowForward}, #{original}, #{originalUrl}, #{lastEditTime},  #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{authorName}, #{categoryId},
+        #{status}, #{publishTime},
+        #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended},
+        #{visible}, #{allowComment},
+        #{allowForward}, #{original}, #{originalUrl}, #{lastEditTime}, #{createTime}, #{updateTime}, #{deleted},
+        #{deletedTime})
     </insert>
 
     <update id="update" parameterType="com.inkstage.entity.model.Article">
@@ -122,60 +125,60 @@
     <!-- 文章列表查询 -->
     <select id="selectArticleList" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            <if test="query.categoryId != null and query.categoryId != 0">
-                AND a.category_id = #{query.categoryId}
-            </if>
-            <if test="query.keyword != null and query.keyword != ''">
-                AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
-            </if>
+        a.deleted = 0
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
         GROUP BY
-            a.id
+        a.id
         ORDER BY
-            a.top DESC,
-            a.recommended DESC
+        a.top DESC,
+        a.recommended DESC
         LIMIT #{query.offset}, #{query.pageSize}
     </select>
 
     <!-- 文章总数查询 -->
     <select id="countArticleList" resultType="java.lang.Long">
         SELECT
-            COUNT(DISTINCT a.id)
+        COUNT(DISTINCT a.id)
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         WHERE
-            a.deleted = 0
-            <if test="query.categoryId != null and query.categoryId != 0">
-                AND a.category_id = #{query.categoryId}
-            </if>
-            <if test="query.keyword != null and query.keyword != ''">
-                AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
-            </if>
+        a.deleted = 0
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
     </select>
 
 
@@ -217,189 +220,251 @@
     <!-- 热门文章查询 -->
     <select id="selectHotArticles" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            AND a.status IN (1,2) <!-- 已发布 -->
+        a.deleted = 0
+        AND a.status IN (1,2) <!-- 已发布 -->
         ORDER BY
-            a.read_count DESC,
-            a.like_count DESC,
-            a.comment_count DESC
+        a.read_count DESC,
+        a.like_count DESC,
+        a.comment_count DESC
         LIMIT #{limit}
     </select>
 
     <!-- 最新文章查询 -->
     <select id="selectLatestArticles" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            AND a.status IN (1, 2) <!-- 已发布 -->
+        a.deleted = 0
+        AND a.status IN (1, 2) <!-- 已发布 -->
         ORDER BY
-            a.publish_time DESC
+        a.publish_time DESC
         LIMIT #{limit}
     </select>
 
     <!-- 轮播图文章查询 -->
     <select id="selectBannerArticles" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            AND a.status IN (1, 2) <!-- 已发布 -->
-            AND a.cover_image IS NOT NULL AND a.cover_image != '' <!-- 有封面图片 -->
+        a.deleted = 0
+        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.cover_image IS NOT NULL AND a.cover_image != '' <!-- 有封面图片 -->
         ORDER BY
-            a.top DESC,
-            a.recommended DESC,
-            a.read_count DESC,
-            a.publish_time DESC
+        a.top DESC,
+        a.recommended DESC,
+        a.read_count DESC,
+        a.publish_time DESC
         LIMIT #{limit}
     </select>
 
     <!-- 用户文章列表查询 -->
     <select id="selectUserArticles" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            AND a.user_id = #{userId}
-            AND a.status IN (1, 2) <!-- 已发布 -->
+        a.deleted = 0
+        AND a.user_id = #{userId}
+        AND a.status IN (1, 2) <!-- 已发布 -->
         ORDER BY
-            a.top DESC,
-            a.publish_time DESC
+        a.top DESC,
+        a.publish_time DESC
         LIMIT #{offset}, #{size}
     </select>
 
     <!-- 用户文章总数查询 -->
     <select id="countUserArticles" resultType="java.lang.Long">
         SELECT
-            COUNT(DISTINCT a.id)
+        COUNT(DISTINCT a.id)
         FROM
-            article a
+        article a
         WHERE
-            a.deleted = 0
-            AND a.user_id = #{userId}
-            AND a.status IN (1, 2) <!-- 已发布 -->
+        a.deleted = 0
+        AND a.user_id = #{userId}
+        AND a.status IN (1, 2) <!-- 已发布 -->
     </select>
 
     <!-- 作者相关文章查询 -->
     <select id="selectAuthorRelatedArticles" resultMap="ArticleListResultMap">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.cover_image,
-            a.status,
-            a.visible,
-            a.publish_time,
-            a.last_edit_time,
-            a.read_count,
-            a.like_count,
-            a.comment_count,
-            a.user_id,
-            a.author_name,
-            a.category_id,
-            u.avatar,
-            c.name as category_name
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
         FROM
-            article a
+        article a
         LEFT JOIN
-            category c ON a.category_id = c.id
+        category c ON a.category_id = c.id
         LEFT JOIN
-            user u ON a.user_id = u.id
+        user u ON a.user_id = u.id
         WHERE
-            a.deleted = 0
-            AND a.user_id = #{userId}
-            AND a.id != #{excludeArticleId}
-            AND a.status IN (1, 2) <!-- 已发布 -->
+        a.deleted = 0
+        AND a.user_id = #{userId}
+        AND a.id != #{excludeArticleId}
+        AND a.status IN (1, 2) <!-- 已发布 -->
         ORDER BY
-            a.top DESC,
-            a.publish_time DESC
+        a.top DESC,
+        a.publish_time DESC
         LIMIT #{limit}
+    </select>
+
+    <!-- 文章列表结果映射 -->
+    <resultMap id="MyArticleListResultMap" type="com.inkstage.vo.front.MyArticleListVO">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="visible" property="visible"/>
+        <result column="original" property="original" javaType="com.inkstage.enums.article.OriginalStatus"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="read_count" property="readCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <!-- 作者信息 -->
+        <result column="user_id" property="userId"/>
+    </resultMap>
+    <!-- 当前用户文章列表查询 -->
+    <select id="selectMyArticles" resultMap="MyArticleListResultMap">
+        SELECT
+        id,
+        title,
+        summary,
+        user_id,
+        status,
+        visible,
+        original,
+        publish_time,
+        read_count,
+        like_count,
+        comment_count
+        FROM
+        article
+        WHERE
+        deleted = 0
+        AND user_id = #{userId}
+        <if test="articleStatus != null and articleStatus.code != 0">
+            AND status = #{articleStatus.code}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY
+        create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 当前用户文章总数查询 -->
+    <select id="countMyArticles" resultType="java.lang.Long">
+        SELECT
+        COUNT(DISTINCT a.id)
+        FROM
+        article a
+        WHERE
+        a.deleted = 0
+        AND a.user_id = #{userId}
+        <if test="articleStatus != null and articleStatus.code != 0">
+            AND status = #{articleStatus.code}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
     </select>
 
     <!-- 更新文章阅读数 -->

@@ -23,6 +23,7 @@ import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.MyArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -626,6 +627,56 @@ public class ArticleServiceImpl implements ArticleService {
             return relatedArticles;
         } catch (Exception e) {
             log.error("获取作者相关文章失败, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    public PageResult<MyArticleListVO> getMyArticles(ArticleStatus articleStatus, String keyword, Integer page, Integer size) {
+        try {
+            // 从上下文获取用户信息
+            User currentUser = UserContext.getCurrentUser();
+            log.info("获取当前用户文章列表, 用户ID: {}, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}",
+                    currentUser.getId(), articleStatus.getDesc(), keyword, page, size);
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:my",
+                    currentUser.getId() + ":" + articleStatus.getCode() + ":" + (keyword != null ? keyword : "null") + ":" + page + ":" + size
+            );
+
+            // 尝试从缓存获取
+            PageResult<MyArticleListVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (pageResult != null) {
+                log.info("从缓存获取当前用户文章列表成功, 缓存键: {}", cacheKey);
+                return pageResult;
+            }
+
+            // 计算偏移量
+            int offset = (page - 1) * size;
+
+            // 查询当前用户文章列表
+            List<MyArticleListVO> myArticleList = articleMapper.selectMyArticles(currentUser.getId(), articleStatus, keyword, offset, size);
+            // 查询总记录数
+            long total = articleMapper.countMyArticles(currentUser.getId(), articleStatus, keyword);
+
+            // 构建分页结果
+            pageResult = PageResult.build(
+                    myArticleList,
+                    total,
+                    page,
+                    size
+            );
+
+            // 更新缓存
+            redisUtil.set(cacheKey, pageResult, 30, TimeUnit.MINUTES);
+            log.info("更新当前用户文章列表缓存, 缓存键: {}", cacheKey);
+
+            log.info("获取当前用户文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, page, size);
+            return pageResult;
+        } catch (Exception e) {
+            log.error("获取当前用户文章列表失败, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus.getDesc(), keyword, page, size, e);
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }

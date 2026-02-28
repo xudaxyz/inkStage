@@ -2,8 +2,10 @@ package com.inkstage.mapper;
 
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.MyArticleListVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -123,6 +125,28 @@ public interface ArticleMapper {
      * @return 相关文章列表
      */
     List<ArticleListVO> selectAuthorRelatedArticles(@Param("userId") Long userId, @Param("excludeArticleId") Long excludeArticleId, @Param("limit") Integer limit);
+
+    /**
+     * 查询当前用户文章列表
+     *
+     * @param userId        用户ID
+     * @param articleStatus 文章状态
+     * @param keyword       搜索关键词
+     * @param offset        偏移量
+     * @param limit         限制数量
+     * @return 文章列表
+     */
+    List<MyArticleListVO> selectMyArticles(@Param("userId") Long userId, @Param("articleStatus") ArticleStatus articleStatus, @Param("keyword") String keyword, @Param("offset") int offset, @Param("limit") int limit);
+
+    /**
+     * 统计当前用户文章数量
+     *
+     * @param userId        用户ID
+     * @param articleStatus 文章状态
+     * @param keyword       搜索关键词
+     * @return 文章数量
+     */
+    long countMyArticles(@Param("userId") Long userId, @Param("articleStatus") ArticleStatus articleStatus, @Param("keyword") String keyword);
 
     /**
      * 更新文章阅读数

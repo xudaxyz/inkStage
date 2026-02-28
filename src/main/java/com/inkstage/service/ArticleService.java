@@ -3,8 +3,10 @@ package com.inkstage.service;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
+import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.MyArticleListVO;
 
 import java.util.List;
 
@@ -108,6 +110,17 @@ public interface ArticleService {
      * @return 相关文章列表
      */
     List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
+
+    /**
+     * 获取当前用户的文章列表，支持按状态过滤和搜索
+     *
+     * @param articleStatus    文章状态
+     * @param keyword   搜索关键词
+     * @param page      页码
+     * @param size      每页数量
+     * @return 分页结果
+     */
+    PageResult<MyArticleListVO> getMyArticles(ArticleStatus articleStatus, String keyword, Integer page, Integer size);
 
     /**
      * 增加文章阅读数

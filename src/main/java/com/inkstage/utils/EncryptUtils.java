@@ -35,4 +35,7 @@ public class EncryptUtils {
         }
         return PASSWORD_ENCODER.matches(rawPassword, encodedPassword);
     }
+
+    public static void main(String[] args) {
+    }
 }
