@@ -137,32 +137,28 @@ public class ArticleServiceImpl implements ArticleService {
     @Transactional
     public boolean deleteArticle(Long id) {
         // 从上下文获取用户信息
-        User currentUser = UserContext.getCurrentUser();
-        try {
-            log.info("开始删除文章, 文章ID: {}, 用户ID: {}", id, currentUser.getId());
+        Long currentUserId = UserContext.getCurrentUserId();
+        log.info("开始删除文章, 文章ID: {}, 用户ID: {}", id, currentUserId);
 
-            boolean deleted = articleMapper.deleteById(id, currentUser.getId()) > 0;
+        boolean deleted = articleMapper.deleteById(id, currentUserId) > 0;
 
-            if (deleted) {
-                // 清除文章详情缓存
-                String detailCacheKey = RedisKeyConstants.buildCacheKey("article:detail", id.toString());
-                redisUtil.delete(detailCacheKey);
-                log.info("清除文章详情缓存, 缓存键: {}", detailCacheKey);
+        if (deleted) {
+            // 清除文章详情缓存
+            String detailCacheKey = RedisKeyConstants.buildCacheKey("article:detail", id.toString());
+            redisUtil.delete(detailCacheKey);
+            log.info("清除文章详情缓存, 缓存键: {}", detailCacheKey);
 
-                // 清除文章列表缓存
-                redisUtil.deletePattern("cache:article:list:*");
-                log.info("清除文章列表缓存");
+            // 清除文章列表缓存
+            redisUtil.deletePattern("cache:article:list:*");
+            log.info("清除文章列表缓存");
+            clearMyArticleListCache(currentUserId);
 
-                log.info("文章删除成功, 文章ID: {}", id);
-            } else {
-                log.warn("文章删除失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", id, currentUser.getId());
-            }
-
-            return deleted;
-        } catch (Exception e) {
-            log.error("删除文章失败, 文章ID: {}, 用户ID: {}", id, currentUser.getId(), e);
-            throw new BusinessException(ResponseMessage.ARTICLE_DELETE_FAILED, e.getMessage());
+            log.info("文章删除成功, 文章ID: {}", id);
+        } else {
+            log.warn("文章删除失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", id, currentUserId);
         }
+
+        return deleted;
     }
 
     @Override
@@ -422,6 +418,34 @@ public class ArticleServiceImpl implements ArticleService {
         countService.updateArticleReadCount(articleId, count);
         // 清除文章详情缓存
         clearArticleDetailCache(articleId);
+    }
+
+    @Override
+    public boolean permanentDeleteArticle(Long id) {
+        Long currentUserId = UserContext.getCurrentUserId();
+        int result = articleMapper.permanentDeleteById(id, currentUserId);
+        // 清除缓存
+        if (result > 0) {
+            clearArticleDetailCache(id);
+            clearArticleListCache();
+            clearMyArticleListCache(currentUserId);
+        }
+        return result > 0;
+    }
+
+    private void clearMyArticleListCache(Long currentUserId) {
+        if (currentUserId != null) {
+            String myArticleListKey = RedisKeyConstants.buildCacheKey("article:my:", "*");
+            redisUtil.delete(myArticleListKey);
+            log.info("清除我的文章列表缓存完成");
+        }
+    }
+
+    private void clearArticleListCache() {
+        String articleListKey = RedisKeyConstants.buildCacheKey("article:list:", "*");
+        redisUtil.delete(articleListKey);
+        log.info("清除首页文章列表缓存完成");
+
     }
 
     /**

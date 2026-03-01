@@ -130,4 +130,10 @@ public interface ArticleService {
      */
     void incrementArticleReadCount(Long articleId, int count);
 
+    /**
+     * 彻底删除文章
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean permanentDeleteArticle(Long id);
 }

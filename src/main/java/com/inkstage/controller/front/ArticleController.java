@@ -82,7 +82,7 @@ public class ArticleController {
      * @param articleCreateDTO 文章DTO
      * @return 响应结果
      */
-    @PutMapping("/{id}/draft")
+    @PutMapping("/draft/{id}")
     @PreAuthorize("isAuthenticated()")
     public Result<Long> saveDraft(@PathVariable(required = false) Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         // 检查文章DTO参数
@@ -92,15 +92,28 @@ public class ArticleController {
     }
 
     /**
-     * 删除文章
+     * 删除文章(将文章移至回收站)
      *
      * @param id 文章ID
      * @return 响应结果
      */
-    @DeleteMapping("/{id}")
+    @PostMapping("/delete/{id}")
     @PreAuthorize("isAuthenticated()")
     public Result<Boolean> deleteArticle(@PathVariable Long id) {
         boolean success = articleService.deleteArticle(id);
+        return success ? Result.success(true, "文章已移至回收站") : Result.error("文章删除失败");
+    }
+
+    /**
+     * 彻底删除文章
+     *
+     * @param id 文章ID
+     * @return 响应结果
+     */
+    @PostMapping("/permanent-delete/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public Result<Boolean> permanentDeleteArticle(@PathVariable Long id) {
+        boolean success = articleService.permanentDeleteArticle(id);
         return success ? Result.success(true, "文章删除成功") : Result.error("文章删除失败");
     }
 

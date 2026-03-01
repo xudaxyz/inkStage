@@ -43,6 +43,15 @@ public interface ArticleMapper {
     int deleteById(@Param("id") Long id, @Param("userId") Long userId);
 
     /**
+     * 根据文章ID永久删除文章
+     *
+     * @param id     文章ID
+     * @param userId 用户ID
+     * @return 影响行数
+     */
+    int permanentDeleteById(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
      * 根据ID查询文章
      *
      * @param id 文章ID

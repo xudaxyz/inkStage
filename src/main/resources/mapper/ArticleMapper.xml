@@ -96,9 +96,15 @@
         where id = #{id}
     </update>
 
-    <delete id="deleteById">
+    <!--逻辑删除文章 - 移至回收站 -->
+    <update id="deleteById">
+        update article set status = 5 where id = #{id} and user_id = #{userId}
+    </update>
+
+    <delete id="permanentDeleteById">
         update article set deleted = 1 where id = #{id}
     </delete>
+
 
     <!-- 文章列表结果映射 -->
     <resultMap id="ArticleListResultMap" type="com.inkstage.vo.front.ArticleListVO">
