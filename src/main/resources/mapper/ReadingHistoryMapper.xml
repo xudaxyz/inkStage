@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ReadingHistoryMapper">
+
+    <resultMap id="readingHistoryMap" type="com.inkstage.entity.model.ReadingHistory">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="article_id" property="articleId"/>
+        <result column="progress" property="progress"/>
+        <result column="duration" property="duration"/>
+        <result column="last_read_time" property="lastReadTime"/>
+        <result column="scroll_position" property="scrollPosition"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <resultMap id="readingHistoryVOMap" type="com.inkstage.vo.front.ReadingHistoryVO">
+        <id column="rh_id" property="articleId"/>
+        <result column="title" property="title"/>
+        <result column="summary" property="summary"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="user_id" property="userId"/>
+        <result column="author_name" property="authorName"/>
+        <result column="avatar" property="avatar"/>
+        <result column="progress" property="progress"/>
+        <result column="duration" property="duration"/>
+        <result column="last_read_time" property="lastReadTime"/>
+        <result column="scroll_position" property="scrollPosition"/>
+        <result column="read_time" property="readTime"/>
+        <result column="read_date" property="readDate"/>
+    </resultMap>
+
+    <!-- 保存或更新阅读历史 -->
+    <insert id="saveOrUpdate" parameterType="com.inkstage.entity.model.ReadingHistory">
+        INSERT INTO reading_history (
+            user_id, article_id, progress, duration, last_read_time, scroll_position, create_time, update_time, deleted
+        ) VALUES (
+            #{userId}, #{articleId}, #{progress}, #{duration}, #{lastReadTime}, #{scrollPosition}, NOW(), NOW(), 0
+        ) ON DUPLICATE KEY UPDATE
+            progress = #{progress},
+            duration = #{duration},
+            last_read_time = #{lastReadTime},
+            scroll_position = #{scrollPosition},
+            update_time = NOW()
+    </insert>
+
+    <!-- 根据用户ID和文章ID查询阅读历史 -->
+    <select id="findByUserIdAndArticleId" resultMap="readingHistoryMap">
+        SELECT * FROM reading_history
+        WHERE user_id = #{userId} AND article_id = #{articleId} AND deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询阅读历史列表 -->
+    <select id="findByUserId" resultMap="readingHistoryMap">
+        SELECT * FROM reading_history
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY last_read_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 根据用户ID删除阅读历史 -->
+    <update id="deleteByUserIdAndArticleId">
+        UPDATE reading_history
+        SET deleted = 1, deleted_time = NOW()
+        WHERE user_id = #{userId} AND article_id = #{articleId}
+    </update>
+
+    <!-- 根据用户ID清空阅读历史 -->
+    <update id="deleteByUserId">
+        UPDATE reading_history
+        SET deleted = 1, deleted_time = NOW()
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 根据用户ID查询阅读历史总数 -->
+    <select id="countByUserId" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM reading_history
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <!-- 批量查询用户的阅读历史 -->
+    <select id="findByUserIdAndArticleIds" resultMap="readingHistoryMap">
+        SELECT * FROM reading_history
+        WHERE user_id = #{userId} AND article_id IN
+        <foreach collection="articleIds" item="articleId" open="(" separator="," close=")">
+            #{articleId}
+        </foreach>
+        AND deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询阅读历史列表（带文章和用户信息） -->
+    <select id="findByUserIdWithDetails" resultMap="readingHistoryVOMap">
+        SELECT 
+            rh.article_id as rh_id,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.user_id,
+            a.author_name,
+            u.avatar,
+            rh.progress,
+            rh.duration,
+            rh.last_read_time,
+            rh.scroll_position,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d %H:%i') as read_time,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d') as read_date
+        FROM reading_history rh
+        LEFT JOIN article a ON rh.article_id = a.id
+        LEFT JOIN user u ON a.user_id = u.id
+        WHERE rh.user_id = #{userId} AND rh.deleted = 0
+        ORDER BY rh.last_read_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 根据用户ID和文章ID查询阅读历史（带文章和用户信息） -->
+    <select id="findByUserIdAndArticleIdWithDetails" resultMap="readingHistoryVOMap">
+        SELECT 
+            rh.article_id as rh_id,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.user_id,
+            a.author_name,
+            u.avatar,
+            rh.progress,
+            rh.duration,
+            rh.last_read_time,
+            rh.scroll_position,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d %H:%i') as read_time,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d') as read_date
+        FROM reading_history rh
+        LEFT JOIN article a ON rh.article_id = a.id
+        LEFT JOIN user u ON a.user_id = u.id
+        WHERE rh.user_id = #{userId} AND rh.article_id = #{articleId} AND rh.deleted = 0
+    </select>
+
+    <!-- 批量查询用户的阅读历史（带文章和用户信息） -->
+    <select id="findByUserIdAndArticleIdsWithDetails" resultMap="readingHistoryVOMap">
+        SELECT 
+            rh.article_id as rh_id,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.user_id,
+            a.author_name,
+            u.avatar,
+            rh.progress,
+            rh.duration,
+            rh.last_read_time,
+            rh.scroll_position,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d %H:%i') as read_time,
+            DATE_FORMAT(rh.last_read_time, '%Y-%m-%d') as read_date
+        FROM reading_history rh
+        LEFT JOIN article a ON rh.article_id = a.id
+        LEFT JOIN user u ON a.user_id = u.id
+        WHERE rh.user_id = #{userId} AND rh.article_id IN
+        <foreach collection="articleIds" item="articleId" open="(" separator="," close=")">
+            #{articleId}
+        </foreach>
+        AND rh.deleted = 0
+    </select>
+
+</mapper>

@@ -209,8 +209,10 @@ CREATE TABLE `article_collection` (
   `article_id` BIGINT NOT NULL COMMENT '文章ID',
   `user_id` BIGINT NOT NULL COMMENT '用户ID',
   `folder_id` BIGINT NOT NULL COMMENT '收藏文件夹ID',
+  `status` TINYINT NOT NULL COMMENT '收藏状态（0:公开,1:私密）',
+  `collect_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '收藏时间',
   `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+  `update_time` DATETIME DEFAULT NULL CURRENT_TIMESTAMP COMMENT '更新时间',
   `deleted` TINYINT DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
   `deleted_time` DATETIME COMMENT '删除时间',
   UNIQUE KEY `uk_article_user` (`id`, `article_id`, `user_id`, `deleted`),
@@ -765,6 +767,28 @@ CREATE TABLE `tag_recommendation` (
   KEY `idx_related_tag_id` (`related_tag_id`),
   KEY `idx_score` (`score`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='标签推荐关系表';
+
+-- 阅读历史表（reading_history）
+CREATE TABLE `reading_history` (
+                                   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+                                   `user_id` bigint NOT NULL COMMENT '用户ID',
+                                   `article_id` bigint NOT NULL COMMENT '文章ID',
+                                   `progress` int DEFAULT '0' COMMENT '阅读进度（百分比）',
+                                   `duration` int DEFAULT '0' COMMENT '阅读时长（分钟）',
+                                   `last_read_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '最后阅读时间',
+                                   `scroll_position` int DEFAULT '0' COMMENT '滚动位置',
+                                   `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+                                   `update_time` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+                                   `deleted` tinyint DEFAULT '0' COMMENT '是否已删除(0:未删除,1:已删除)',
+                                   `deleted_time` datetime DEFAULT NULL COMMENT '删除时间',
+                                   PRIMARY KEY (`id`),
+                                   UNIQUE KEY `uk_user_article` (`user_id`,`article_id`),
+                                   KEY `idx_user_id` (`user_id`),
+                                   KEY `idx_article_id` (`article_id`),
+                                   KEY `idx_last_read_time` (`last_read_time`),
+                                   CONSTRAINT `fk_reading_history_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE,
+                                   CONSTRAINT `fk_reading_history_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='阅读历史表';
 
 -- ----------------------------
 -- 7. 初始化数据
