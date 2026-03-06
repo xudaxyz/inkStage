@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.CollectionFolderMapper">
+
+    <resultMap id="collectionFolderResultMap" type="com.inkstage.entity.model.CollectionFolder">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="default_folder" property="defaultFolder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="collectionFolderResultMap">
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        FROM collection_folder
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserIdAndName" resultMap="collectionFolderResultMap">
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        FROM collection_folder
+        WHERE user_id = #{userId} AND name = #{name}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO collection_folder (user_id, name, description, article_count, sort_order, default_folder, create_time, update_time)
+        VALUES (#{userId}, #{name}, #{description}, #{articleCount}, #{sortOrder}, #{defaultFolder}, #{createTime}, #{updateTime})
+    </insert>
+
+    <update id="update">
+        UPDATE collection_folder
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="articleCount != null">article_count = #{articleCount},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="defaultFolder != null">default_folder = #{defaultFolder},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateArticleCount">
+        UPDATE collection_folder
+        SET article_count = article_count + #{count}, update_time = NOW()
+        WHERE id = #{folderId}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM collection_folder
+        WHERE id = #{id}
+    </delete>
+
+    <select id="selectByUserId" resultMap="collectionFolderResultMap">
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        FROM collection_folder
+        WHERE user_id = #{userId}
+        ORDER BY default_folder DESC, sort_order ASC, create_time DESC
+    </select>
+
+</mapper>

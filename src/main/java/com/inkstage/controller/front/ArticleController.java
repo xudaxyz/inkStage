@@ -6,7 +6,6 @@ import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
-import com.inkstage.service.ArticleCollectionService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleService;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -31,7 +30,6 @@ public class ArticleController {
 
     private final ArticleService articleService;
     private final ArticleLikeService articleLikeService;
-    private final ArticleCollectionService articleCollectionService;
 
     /**
      * 创建/发布文章
@@ -234,48 +232,6 @@ public class ArticleController {
         return Result.success(isLiked, "获取点赞状态成功");
     }
 
-    /**
-     * 收藏文章
-     *
-     * @param articleId 文章ID
-     * @param folderId  文件夹ID
-     * @return 响应结果
-     */
-    @PostMapping("/collect/{articleId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> collectArticle(@PathVariable Long articleId, @RequestParam(defaultValue = "0") Long folderId) {
-        log.info("收藏文章, 文章ID: {}, 文件夹ID: {}", articleId, folderId);
-        boolean success = articleCollectionService.collectArticle(articleId, folderId);
-        return success ? Result.success(true, "收藏成功") : Result.error("收藏失败");
-    }
-
-    /**
-     * 取消收藏
-     *
-     * @param articleId 文章ID
-     * @return 响应结果
-     */
-    @DeleteMapping("/collect/{articleId}")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> unCollectArticle(@PathVariable Long articleId) {
-        log.info("取消收藏文章ID: {}", articleId);
-        boolean success = articleCollectionService.unCollectArticle(articleId);
-        return success ? Result.success(true, "取消收藏成功") : Result.error("取消收藏失败");
-    }
-
-    /**
-     * 检查文章是否已收藏
-     *
-     * @param articleId 文章ID
-     * @return 响应结果
-     */
-    @GetMapping("/collect/{articleId}/status")
-    @PreAuthorize("isAuthenticated()")
-    public Result<Boolean> checkArticleCollectStatus(@PathVariable Long articleId) {
-        log.info("检查用户文章收藏状态, 文章ID: {}", articleId);
-        boolean isCollected = articleCollectionService.isArticleCollected(articleId);
-        return Result.success(isCollected, "获取收藏状态成功");
-    }
 
     /**
      * 增加文章阅读数
@@ -294,9 +250,9 @@ public class ArticleController {
      * 获取当前用户的文章列表
      *
      * @param articleStatus 我的文章状态
-     * @param keyword 搜索关键词
-     * @param page 页码
-     * @param size 每页大小
+     * @param keyword       搜索关键词
+     * @param page          页码
+     * @param size          每页大小
      * @return 文章列表分页结果
      */
     @GetMapping("/my")

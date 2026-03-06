@@ -2,11 +2,23 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.inkstage.mapper.ArticleCollectionMapper">
-    
+    <resultMap id="ArticleCollectionMap" type="com.inkstage.entity.model.ArticleCollection" >
+        <id property="id" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="folderId" column="folder_id"/>
+        <result property="status" column="status" javaType="com.inkstage.enums.CollectionStatus"/>
+        <result property="collectTime" column="collect_time"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
+
     <!-- 插入收藏记录 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.ArticleCollection" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO article_collection (article_id, user_id, folder_id, create_time, update_time, deleted, deleted_time)
-        VALUES (#{articleId}, #{userId}, #{folderId}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+        INSERT INTO article_collection (article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time)
+        VALUES (#{articleId}, #{userId}, #{folderId}, #{status}, #{collectTime}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
     </insert>
     
     <!-- 根据文章ID和用户ID删除收藏记录 -->
@@ -19,6 +31,127 @@
     <select id="countByArticleIdAndUserId" resultType="java.lang.Integer">
         SELECT COUNT(*) FROM article_collection
         WHERE article_id = #{articleId} AND user_id = #{userId}
+    </select>
+    
+    <!-- 根据文章ID和用户ID查询收藏记录 -->
+    <select id="selectByArticleIdAndUserId" resultMap="ArticleCollectionMap">
+        SELECT id, article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time
+        FROM article_collection
+        WHERE article_id = #{articleId} AND user_id = #{userId}
+    </select>
+    
+    <!-- 更新收藏记录 -->
+    <update id="update" parameterType="com.inkstage.entity.model.ArticleCollection">
+        UPDATE article_collection
+        <set>
+            <if test="folderId != null">folder_id = #{folderId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <resultMap id="CollectionArticleVOMap" type="com.inkstage.vo.front.CollectionArticleVO">
+        <id property="collectionId" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="title" column="title"/>
+        <result property="summary" column="summary"/>
+        <result property="coverImage" column="cover_image"/>
+        <result property="articleStatus" column="article_status"/>
+        <result property="userId" column="user_id"/>
+        <result property="authorName" column="author_name"/>
+        <result property="avatar" column="avatar"/>
+        <result property="categoryId" column="category_id"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="publishTime" column="publish_time"/>
+        <result property="collectTime" column="collect_time"/>
+        <result property="readCount" column="read_count"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="commentCount" column="comment_count"/>
+        <result property="collectionStatus" column="collection_status"/>
+        <result property="originalStatus" column="original_status"/>
+        <result property="folderId" column="folder_id"/>
+        <result property="folderName" column="folder_name"/>
+
+    </resultMap>
+    
+    <!-- 查询用户收藏的文章列表 -->
+    <select id="selectCollectionArticles" resultMap="CollectionArticleVOMap">
+        SELECT
+            ac1.id,
+            ac1.article_id,
+            ac1.user_id,
+            ac1.collect_time,
+            ac1.folder_id,
+            ac1.status as collection_status,
+            a.title,
+            a.summary,
+            a.cover_image,
+            a.category_id,
+            a.status as article_status,
+            a.publish_time,
+            a.original as original_status,
+            a.read_count,
+            a.like_count,
+            a.comment_count,
+            u.avatar,
+            u.nickname as author_name,
+            c.name as category_name,
+            cf1.name as folder_name
+        FROM 
+            article_collection ac1
+        JOIN 
+            article a ON ac1.article_id = a.id
+        JOIN 
+            user u ON a.user_id = u.id
+        LEFT JOIN
+            category c ON a.category_id = c.id
+        LEFT JOIN
+            collection_folder cf1 ON ac1.folder_id = cf1.id
+        WHERE 
+            ac1.user_id = #{userId}
+            <if test="folderId != null">
+                AND ac1.folder_id = #{folderId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            AND a.deleted = 0
+        ORDER BY 
+            <choose>
+                <when test="sortBy == 'collectTime'">
+                    ac1.collect_time DESC
+                </when>
+                <when test="sortBy == 'likeCount'">
+                    a.like_count DESC
+                </when>
+                <when test="sortBy == 'readCount'">
+                    a.read_count DESC
+                </when>
+                <otherwise>
+                    ac1.collect_time DESC
+                </otherwise>
+            </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+    
+    <!-- 查询用户收藏的文章总数 -->
+    <select id="countCollectionArticles" resultType="java.lang.Long">
+        SELECT 
+            COUNT(*)
+        FROM 
+            article_collection ac
+        JOIN 
+            article a ON ac.article_id = a.id
+        WHERE 
+            ac.user_id = #{userId}
+            <if test="folderId != null">
+                AND ac.folder_id = #{folderId}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND a.title LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+            AND a.deleted = 0
     </select>
     
 </mapper>

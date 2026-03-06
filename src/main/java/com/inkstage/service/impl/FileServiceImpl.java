@@ -4,10 +4,7 @@ import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
-import com.inkstage.vo.front.ArticleCommentVO;
-import com.inkstage.vo.front.ArticleDetailVO;
-import com.inkstage.vo.front.ArticleListVO;
-import com.inkstage.vo.front.HotUserVO;
+import com.inkstage.vo.front.*;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.errors.MinioException;
@@ -130,6 +127,20 @@ public class FileServiceImpl implements FileService {
         for (HotUserVO hotUser : hotUsers) {
             String fullAvatarUrl = convertToFullUrl(hotUser.getAvatar());
             hotUser.setAvatar(fullAvatarUrl);
+        }
+    }
+
+    @Override
+    public void ensureCollectionArticleImgAreFullUrl(List<CollectionArticleVO> collectionArticlesVO) {
+        if (collectionArticlesVO == null || collectionArticlesVO.isEmpty()) {
+            return;
+        }
+        // 确保封面图和用户头像的URL是完整的
+        for (CollectionArticleVO collectionArticleVO : collectionArticlesVO) {
+            String fullCoverImageUrl = convertToFullUrl(collectionArticleVO.getCoverImage());
+            collectionArticleVO.setCoverImage(fullCoverImageUrl);
+            String fullAvatarUrl = convertToFullUrl(collectionArticleVO.getAvatar());
+            collectionArticleVO.setAvatar(fullAvatarUrl);
         }
     }
 

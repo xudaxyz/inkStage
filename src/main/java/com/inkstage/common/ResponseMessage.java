@@ -96,7 +96,9 @@ public enum ResponseMessage {
     COMMENT_NOT_FOUND("评论不存在"),
     UPDATED_FORBIDDEN("无更新权限"),
     DELETED_FORBIDDEN("无删除权限"),
-    USER_NOT_LOGGED_IN("用户未登录");
+    USER_NOT_LOGGED_IN("用户未登录"),
+    COLLECTION_DEFAULT_FOLDER_EXIST("默认收藏夹已存在"),
+    COLLECTION_FOLDER_EXIST("收藏夹{}已存在");
 
     private final String message;
 
