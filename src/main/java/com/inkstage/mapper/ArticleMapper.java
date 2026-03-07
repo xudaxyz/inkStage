@@ -236,4 +236,23 @@ public interface ArticleMapper {
      * @return 分享数
      */
     Long getShareCount(@Param("articleId") Long articleId);
+
+    /**
+     * 搜索文章
+     *
+     * @param keyword 搜索关键词
+     * @param sortBy 排序方式
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 文章列表
+     */
+    List<ArticleListVO> searchArticles(@Param("keyword") String keyword, @Param("sortBy") String sortBy, @Param("offset") int offset, @Param("limit") int limit);
+
+    /**
+     * 统计搜索文章数量
+     *
+     * @param keyword 搜索关键词
+     * @return 文章数量
+     */
+    long countSearchArticles(@Param("keyword") String keyword);
 }

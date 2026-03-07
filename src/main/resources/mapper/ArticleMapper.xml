@@ -165,7 +165,8 @@
         a.id
         ORDER BY
         a.top DESC,
-        a.recommended DESC
+        a.recommended DESC,
+        a.create_time DESC
         LIMIT #{query.offset}, #{query.pageSize}
     </select>
 
@@ -516,5 +517,77 @@
 
     <select id="getShareCount" resultType="java.lang.Long">
         SELECT share_count FROM article WHERE id = #{articleId} AND deleted = 0
+    </select>
+
+    <!-- 搜索文章查询 -->
+    <select id="searchArticles" resultMap="ArticleListResultMap">
+        SELECT
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
+        FROM
+        article a
+        LEFT JOIN
+        category c ON a.category_id = c.id
+        LEFT JOIN
+        user u ON a.user_id = u.id
+        WHERE
+        a.deleted = 0
+        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
+        <choose>
+            <when test="sortBy == 'relevance'">
+                ORDER BY
+                CASE
+                    WHEN a.title LIKE CONCAT(#{keyword}, '%') THEN 0
+                    WHEN a.title LIKE CONCAT('%', #{keyword}, '%') THEN 1
+                    WHEN a.summary LIKE CONCAT(#{keyword}, '%') THEN 2
+                    WHEN a.summary LIKE CONCAT('%', #{keyword}, '%') THEN 3
+                    ELSE 4
+                END,
+                a.read_count DESC,
+                a.publish_time DESC
+            </when>
+            <when test="sortBy == 'publishTime'">
+                ORDER BY
+                a.publish_time DESC
+            </when>
+            <when test="sortBy == 'readCount'">
+                ORDER BY
+                a.read_count DESC,
+                a.publish_time DESC
+            </when>
+            <otherwise>
+                ORDER BY
+                a.read_count DESC,
+                a.publish_time DESC
+            </otherwise>
+        </choose>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 搜索文章总数查询 -->
+    <select id="countSearchArticles" resultType="java.lang.Long">
+        SELECT
+        COUNT(DISTINCT a.id)
+        FROM
+        article a
+        WHERE
+        a.deleted = 0
+        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
     </select>
 </mapper>

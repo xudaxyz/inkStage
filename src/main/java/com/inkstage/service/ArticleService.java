@@ -136,4 +136,13 @@ public interface ArticleService {
      * @return 是否成功
      */
     boolean permanentDeleteArticle(Long id);
+
+    /**
+     * 搜索文章
+     * @param keyword 搜索关键词
+     * @param sortBy 排序方式：relevance, publishTime, readCount
+     * @param pageRequest 分页参数
+     * @return 分页结果
+     */
+    PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, com.inkstage.common.PageRequest pageRequest);
 }

@@ -711,4 +711,59 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
+
+    @Override
+    public PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, com.inkstage.common.PageRequest pageRequest) {
+        try {
+            log.info("搜索文章, 关键词: {}, 排序方式: {}, 页码: {}, 每页大小: {}", 
+                    keyword, sortBy, pageRequest.getPageNum(), pageRequest.getPageSize());
+
+            // 生成缓存键
+            String cacheKey = RedisKeyConstants.buildCacheKey(
+                    "article:search",
+                    keyword + ":" + sortBy + ":" + pageRequest.getPageNum() + ":" + pageRequest.getPageSize()
+            );
+
+            // 尝试从缓存获取
+            PageResult<ArticleListVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (pageResult != null) {
+                log.info("从缓存获取搜索结果成功, 缓存键: {}", cacheKey);
+                return pageResult;
+            }
+
+            // 计算偏移量
+            int offset = (pageRequest.getPageNum() - 1) * pageRequest.getPageSize();
+
+            // 查询搜索结果
+            List<ArticleListVO> articleList = articleMapper.searchArticles(keyword, sortBy, offset, pageRequest.getPageSize());
+            // 确保文章相关图片正常显示
+            fileService.ensureArticleImageAreFullUrl(articleList);
+            // 查询总记录数
+            long total = articleMapper.countSearchArticles(keyword);
+
+            // 构建分页结果
+            pageResult = PageResult.build(
+                    articleList,
+                    total,
+                    pageRequest.getPageNum(),
+                    pageRequest.getPageSize()
+            );
+
+            // 只缓存有结果的搜索
+            if (total > 0) {
+                // 更新缓存
+                redisUtil.set(cacheKey, pageResult, 30, TimeUnit.MINUTES);
+                log.info("更新搜索结果缓存, 缓存键: {}", cacheKey);
+            } else {
+                log.info("搜索结果为空, 不缓存, 缓存键: {}", cacheKey);
+            }
+
+            log.info("搜索文章成功, 总数: {}, 页码: {}, 每页大小: {}", total, pageRequest.getPageNum(), pageRequest.getPageSize());
+            return pageResult;
+        } catch (Exception e) {
+            log.error("搜索文章失败, 关键词: {}, 排序方式: {}", keyword, sortBy, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
 }
