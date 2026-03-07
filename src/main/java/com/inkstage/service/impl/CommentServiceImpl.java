@@ -5,15 +5,19 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.front.CommentDTO;
 import com.inkstage.dto.front.CommentQueryDTO;
+import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Comment;
 import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.exception.BusinessException;
+import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CommentMapper;
-import com.inkstage.service.CountService;
 import com.inkstage.service.CommentService;
+import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
@@ -42,6 +46,8 @@ public class CommentServiceImpl implements CommentService {
     private final FileService fileService;
     private final RedisUtil redisUtil;
     private final CountService countService;
+    private final NotificationService notificationService;
+    private final ArticleMapper articleMapper;
 
     @Override
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
@@ -136,6 +142,45 @@ public class CommentServiceImpl implements CommentService {
 
             // 增加文章评论数
             countService.updateArticleCommentCount(comment.getArticleId(), updated);
+
+            // 发送评论通知
+            String currentUserNickname = UserContext.getCurrentUser().getNickname();
+
+            if (comment.getParentId() != null && comment.getParentId() > 0) {
+                // 回复评论
+                Comment parentComment = commentMapper.selectByPrimaryKey(comment.getParentId());
+                if (parentComment != null && !parentComment.getUserId().equals(currentUserId)) {
+                    notificationService.sendNotificationWithTemplate(
+                            parentComment.getUserId(),
+                            NotificationType.COMMENT_REPLY,
+                            comment.getArticleId(),
+                            currentUserId,
+                            currentUserNickname,
+                            comment.getContent()
+                    );
+                }
+            } else {
+                // 文章评论
+                // 从文章服务获取文章信息
+                Article article = articleMapper.selectById(comment.getArticleId());
+                if (article != null) {
+                    Long articleAuthorId = article.getUserId();
+                    String articleTitle = article.getTitle();
+
+                    // 只有当评论者不是文章作者时才发送通知
+                    if (!currentUserId.equals(articleAuthorId)) {
+                        notificationService.sendNotificationWithTemplate(
+                                articleAuthorId,
+                                NotificationType.ARTICLE_COMMENT,
+                                comment.getArticleId(),
+                                currentUserId,
+                                currentUserNickname,
+                                articleTitle,
+                                comment.getContent()
+                        );
+                    }
+                }
+            }
         }
         return updated >= 1;
     }

@@ -124,6 +124,13 @@ public class RedisKeyConstants {
      */
     public static final String BLOOM_PREFIX = "bloom:";
 
+    // ==================== 通知相关 ====================
+    /**
+     * 未读通知数量前缀
+     * 格式: notification:unread:{user_id}
+     */
+    public static final String NOTIFICATION_UNREAD_COUNT = "notification:unread:";
+
     /**
      * 构建验证码键
      * @param account 账号

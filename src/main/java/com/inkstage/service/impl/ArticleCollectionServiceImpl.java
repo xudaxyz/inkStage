@@ -3,16 +3,16 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.front.CollectArticleDTO;
+import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleCollection;
 import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.NotificationType;
 import com.inkstage.mapper.ArticleCollectionMapper;
+import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CollectionFolderMapper;
-import com.inkstage.service.ArticleCollectionService;
-import com.inkstage.service.CollectionFolderService;
-import com.inkstage.service.CountService;
-import com.inkstage.service.FileService;
+import com.inkstage.service.*;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
@@ -39,11 +39,13 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     private final CountService countService;
     private final FileService fileService;
     private final CollectionFolderService collectionFolderService;
+    private final NotificationService notificationService;
+    private final ArticleMapper articleMapper;
 
     @Override
     @Transactional
     public boolean collectArticle(CollectArticleDTO collectArticleDTO) {
-        log.info("收藏文章, 文章ID: {}, 文件夹ID: {}, 文件夹名称: {}", 
+        log.info("收藏文章, 文章ID: {}, 文件夹ID: {}, 文件夹名称: {}",
                 collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId(), collectArticleDTO.getFolderName());
 
         Long userId = UserContext.getCurrentUser().getId();
@@ -52,7 +54,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
             log.warn("用户已收藏该文章, 文章ID: {}, 用户ID: {}", collectArticleDTO.getArticleId(), userId);
             return false;
         }
-        
+
         Long folderId = collectArticleDTO.getFolderId();
         // 处理文件夹
         if (collectArticleDTO.getFolderName() != null && !collectArticleDTO.getFolderName().isEmpty()) {
@@ -86,6 +88,28 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
             // 缓存收藏状态
             String collectKey = RedisKeyConstants.buildCacheKey("article:collect", collectArticleDTO.getArticleId() + ":" + userId);
             redisUtil.set(collectKey, true, 24, TimeUnit.HOURS);
+
+            // 发送收藏通知
+            String currentUserNickname = UserContext.getCurrentUser().getNickname();
+            // 从文章服务获取文章信息
+            Article article = articleMapper.selectById(collectArticleDTO.getArticleId());
+            if (article != null) {
+                Long articleAuthorId = article.getUserId();
+                String articleTitle = article.getTitle();
+
+                // 只有当收藏者不是文章作者时才发送通知
+                if (!userId.equals(articleAuthorId)) {
+                    notificationService.sendNotificationWithTemplate(
+                            articleAuthorId,
+                            NotificationType.ARTICLE_COLLECTION,
+                            collectArticleDTO.getArticleId(),
+                            userId,
+                            currentUserNickname,
+                            articleTitle
+                    );
+                }
+            }
+
             log.info("收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", collectArticleDTO.getArticleId(), userId, folderId);
             return true;
         }
@@ -208,53 +232,53 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     @Transactional
     public boolean moveCollectionArticle(Long articleId, Long targetFolderId) {
         log.info("移动收藏文章到其他文件夹, 文章ID: {}, 目标文件夹ID: {}", articleId, targetFolderId);
-        
+
         Long userId = UserContext.getCurrentUser().getId();
-        
+
         // 检查是否已收藏
         if (!isArticleCollected(articleId)) {
             log.warn("用户未收藏该文章, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;
         }
-        
+
         // 获取当前收藏记录
         ArticleCollection collection = articleCollectionMapper.selectByArticleIdAndUserId(articleId, userId);
         if (collection == null) {
             log.warn("收藏记录不存在, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;
         }
-        
+
         // 检查目标文件夹是否存在且属于当前用户
         CollectionFolder targetFolder = collectionFolderService.getCollectionFolderById(targetFolderId);
         if (targetFolder == null) {
             log.warn("目标文件夹不存在或无权限, 文件夹ID: {}, 用户ID: {}", targetFolderId, userId);
             return false;
         }
-        
+
         Long sourceFolderId = collection.getFolderId();
 
         // 更新收藏记录的文件夹ID
         collection.setFolderId(targetFolderId);
         collection.setUpdateTime(LocalDateTime.now());
         int updateResult = articleCollectionMapper.update(collection);
-        
+
         if (updateResult > 0) {
             // 更新源文件夹文章数量（减少）
             if (sourceFolderId != null && sourceFolderId > 0) {
                 collectionFolderMapper.updateArticleCount(sourceFolderId, -1);
                 log.info("更新源收藏文件夹文章数量, 文件夹ID: {}, 减少数量: 1", sourceFolderId);
             }
-            
+
             // 更新目标文件夹文章数量（增加）
             if (targetFolderId > 0) {
                 collectionFolderMapper.updateArticleCount(targetFolderId, 1);
                 log.info("更新目标收藏文件夹文章数量, 文件夹ID: {}, 增加数量: 1", targetFolderId);
             }
-            
+
             log.info("移动收藏文章成功, 文章ID: {}, 源文件夹ID: {}, 目标文件夹ID: {}", articleId, sourceFolderId, targetFolderId);
             return true;
         }
-        
+
         return false;
     }
 

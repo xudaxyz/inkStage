@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.NotificationSettingMapper">
+
+    <resultMap id="BaseResultMap" type="com.inkstage.entity.model.NotificationSetting">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="article_publish_notification" property="articlePublishNotification"/>
+        <result column="article_like_notification" property="articleLikeNotification"/>
+        <result column="article_collection_notification" property="articleCollectionNotification"/>
+        <result column="article_comment_notification" property="articleCommentNotification"/>
+        <result column="comment_reply_notification" property="commentReplyNotification"/>
+        <result column="comment_like_notification" property="commentLikeNotification"/>
+        <result column="follow_notification" property="followNotification"/>
+        <result column="message_notification" property="messageNotification"/>
+        <result column="report_notification" property="reportNotification"/>
+        <result column="feedback_notification" property="feedbackNotification"/>
+        <result column="system_notification" property="systemNotification"/>
+        <result column="email_notification" property="emailNotification"/>
+        <result column="site_notification" property="siteNotification"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="BaseResultMap">
+        SELECT * FROM notification_setting WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <insert id="insert" parameterType="com.inkstage.entity.model.NotificationSetting">
+        INSERT INTO notification_setting (
+            user_id,
+            article_publish_notification,
+            article_like_notification,
+            article_collection_notification,
+            article_comment_notification,
+            comment_reply_notification,
+            comment_like_notification,
+            follow_notification,
+            message_notification,
+            report_notification,
+            feedback_notification,
+            system_notification,
+            email_notification,
+            site_notification,
+            create_time,
+            update_time,
+            deleted
+        ) VALUES (
+            #{userId},
+            #{articlePublishNotification},
+            #{articleLikeNotification},
+            #{articleCollectionNotification},
+            #{articleCommentNotification},
+            #{commentReplyNotification},
+            #{commentLikeNotification},
+            #{followNotification},
+            #{messageNotification},
+            #{reportNotification},
+            #{feedbackNotification},
+            #{systemNotification},
+            #{emailNotification},
+            #{siteNotification},
+            NOW(),
+            NOW(),
+            0
+        )
+    </insert>
+
+    <update id="update" parameterType="com.inkstage.entity.model.NotificationSetting">
+        UPDATE notification_setting SET
+            article_publish_notification = #{articlePublishNotification},
+            article_like_notification = #{articleLikeNotification},
+            article_collection_notification = #{articleCollectionNotification},
+            article_comment_notification = #{articleCommentNotification},
+            comment_reply_notification = #{commentReplyNotification},
+            comment_like_notification = #{commentLikeNotification},
+            follow_notification = #{followNotification},
+            message_notification = #{messageNotification},
+            report_notification = #{reportNotification},
+            feedback_notification = #{feedbackNotification},
+            system_notification = #{systemNotification},
+            email_notification = #{emailNotification},
+            site_notification = #{siteNotification},
+            update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 0
+    </update>
+
+    <delete id="deleteByUserId">
+        UPDATE notification_setting SET deleted = 1, deleted_time = NOW(), update_time = NOW() WHERE user_id = #{userId}
+    </delete>
+
+</mapper>

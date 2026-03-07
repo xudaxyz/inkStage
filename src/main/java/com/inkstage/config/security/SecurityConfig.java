@@ -64,7 +64,9 @@ public class SecurityConfig {
                         .requestMatchers("/front/user/**").permitAll()
                         .requestMatchers("/front/article/**", "/front/comment/**").permitAll()
                         .requestMatchers("/front/tag/**", "/front/category/**").permitAll()
+                        .requestMatchers("/front/notification/**").permitAll()
                         .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()
                 )

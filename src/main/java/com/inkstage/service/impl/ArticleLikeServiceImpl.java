@@ -1,11 +1,15 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
 import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
+import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.CountService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +32,8 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     private final ArticleLikeMapper articleLikeMapper;
     private final RedisUtil redisUtil;
     private final CountService countService;
+    private final NotificationService notificationService;
+    private final ArticleMapper articleMapper;
 
     @Override
     @Transactional
@@ -55,6 +61,28 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 缓存点赞状态
             String likeKey = RedisKeyConstants.buildCacheKey("article:like", articleId + ":" + userId);
             redisUtil.set(likeKey, true, 24, TimeUnit.HOURS);
+
+            // 发送点赞通知
+            String currentUserNickname = UserContext.getCurrentUser().getNickname();
+            // 从文章服务获取文章信息
+            Article article = articleMapper.selectById(articleId);
+            if (article != null) {
+                Long articleAuthorId = article.getUserId();
+                String articleTitle = article.getTitle();
+
+                // 只有当点赞者不是文章作者时才发送通知
+                if (!userId.equals(articleAuthorId)) {
+                    notificationService.sendNotificationWithTemplate(
+                            articleAuthorId,
+                            NotificationType.ARTICLE_LIKE,
+                            articleId,
+                            userId,
+                            currentUserNickname,
+                            articleTitle
+                    );
+                }
+            }
+
             log.info("点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }

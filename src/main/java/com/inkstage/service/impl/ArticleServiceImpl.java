@@ -10,15 +10,11 @@ import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
-import com.inkstage.service.ArticleCollectionService;
-import com.inkstage.service.CountService;
-import com.inkstage.service.ArticleLikeService;
-import com.inkstage.service.ArticleService;
-import com.inkstage.service.FileService;
-import com.inkstage.service.TagService;
+import com.inkstage.service.*;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -50,6 +46,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleLikeService articleLikeService;
     private final ArticleCollectionService articleCollectionService;
     private final CountService countService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -67,6 +64,16 @@ public class ArticleServiceImpl implements ArticleService {
             handleArticleTags(article.getId(), articleCreateDTO.getTagIds());
 
             log.info("文章创建成功, 文章ID: {}", article.getId());
+
+            // 发送文章发布通知
+            notificationService.sendNotificationWithTemplate(
+                    currentUser.getId(),
+                    NotificationType.ARTICLE_PUBLISH,
+                    article.getId(),
+                    0L, // 系统发送
+                    article.getTitle()
+            );
+
             return article.getId();
         } catch (Exception e) {
             log.error("创建文章失败, 用户ID: {}, 标题: {}", currentUser.getId(), articleCreateDTO.getTitle(), e);

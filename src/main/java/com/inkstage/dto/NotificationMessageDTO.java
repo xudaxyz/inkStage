@@ -1,20 +1,17 @@
-package com.inkstage.entity.model;
+package com.inkstage.dto;
 
-import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.*;
-import com.inkstage.enums.PushedStatus;
+import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.ReportTargetType;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
-import java.time.LocalDateTime;
+import java.io.Serializable;
 
 /**
- * 通知实体类
+ * 通知消息DTO
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Notification extends BaseEntity {
+public class NotificationMessageDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -30,24 +27,9 @@ public class Notification extends BaseEntity {
     private NotificationType type;
 
     /**
-     * 通知标题
-     */
-    private String title;
-
-    /**
      * 通知内容
      */
     private String content;
-
-    /**
-     * 是否已读
-     */
-    private ReadStatus readStatus;
-
-    /**
-     * 已读时间
-     */
-    private LocalDateTime readTime;
 
     /**
      * 关联ID(如文章ID、评论ID、私信ID等)
@@ -65,21 +47,6 @@ public class Notification extends BaseEntity {
     private Long senderId;
 
     /**
-     * 是否已推送
-     */
-    private PushedStatus pushedStatus;
-
-    /**
-     * 推送时间
-     */
-    private LocalDateTime pushTime;
-
-    /**
-     * 通知优先级
-     */
-    private Priority priority;
-
-    /**
      * 操作链接(用于直接跳转到相关内容)
      */
     private String actionUrl;
@@ -88,4 +55,9 @@ public class Notification extends BaseEntity {
      * 额外数据(用于存储通知相关的扩展信息)
      */
     private String extraData;
+
+    /**
+     * 通知标题
+     */
+    private String title;
 }
