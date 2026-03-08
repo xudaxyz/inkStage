@@ -8,10 +8,11 @@ import lombok.Getter;
 
 @Getter
 public enum ReviewStatus implements EnumCode {
-    PENDING(0, "待审核"),
-    APPROVED(1, "已通过"),
-    REJECTED(2, "已拒绝"),
-    DISABLED(3, "禁用");
+    PENDING(1, "待审核"),
+    APPROVED(2, "审核通过"),
+    REJECTED(3, "审核拒绝"),
+    APPEALING(4, "申诉中"),
+    DISABLED(5, "禁用");
 
     private final Integer code;
     private final String desc;

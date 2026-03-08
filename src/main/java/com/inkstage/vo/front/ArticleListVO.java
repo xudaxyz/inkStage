@@ -60,7 +60,7 @@ public class ArticleListVO {
     /**
      * 文章状态
      */
-    private ArticleStatus status;
+    private ArticleStatus articleStatus;
 
     /**
      * 可见性状态

@@ -13,7 +13,8 @@
         <result column="user_id" property="userId"/>
         <result column="author_name" property="authorName"/>
         <result column="category_id" property="categoryId"/>
-        <result column="status" property="status" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
         <result column="publish_time" property="publishTime"/>
         <result column="read_count" property="readCount"/>
         <result column="like_count" property="likeCount"/>
@@ -38,7 +39,7 @@
     </resultMap>
 
     <sql id="baseColumns">
-        id, title, summary, content, content_html, cover_image, user_id, author_name, category_id, status, publish_time,
+        id, title, summary, content, content_html, cover_image, user_id, author_name, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time
     </sql>
@@ -51,12 +52,12 @@
 
     <insert id="insert" parameterType="com.inkstage.entity.model.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article
-        (title, summary, content, content_html, cover_image, user_id, author_name, category_id, status, publish_time,
+        (title, summary, content, content_html, cover_image, user_id, author_name, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time)
         VALUES
         (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{authorName}, #{categoryId},
-        #{status}, #{publishTime},
+        #{status}, #{reviewStatus}, #{publishTime},
         #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended},
         #{visible}, #{allowComment},
         #{allowForward}, #{original}, #{originalUrl}, #{lastEditTime}, #{createTime}, #{updateTime}, #{deleted},
@@ -73,7 +74,8 @@
             <if test="coverImage != null">cover_image = #{coverImage},</if>
             <if test="authorName != null">author_name = #{authorName},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
-            <if test="status != null">status = #{status},</if>
+            <if test="articleStatus != null">article_status = #{articleStatus},</if>
+            <if test="reviewStatus != null">review_status = #{reviewStatus},</if>
             <if test="publishTime != null">publish_time = #{publishTime},</if>
             <if test="readCount != null">read_count = #{readCount},</if>
             <if test="likeCount != null">like_count = #{likeCount},</if>
@@ -112,7 +114,7 @@
         <result column="title" property="title"/>
         <result column="summary" property="summary"/>
         <result column="cover_image" property="coverImage"/>
-        <result column="status" property="status"/>
+        <result column="article_status" property="articleStatus"/>
         <result column="visible" property="visible"/>
         <result column="publish_time" property="publishTime"/>
         <result column="last_edit_time" property="lastEditTime"/>
@@ -135,7 +137,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -197,7 +199,7 @@
         a.content_html,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.allow_comment,
         a.allow_forward,
@@ -231,7 +233,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -251,7 +253,7 @@
         user u ON a.user_id = u.id
         WHERE
         a.deleted = 0
-        AND a.status IN (1,2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         ORDER BY
         a.read_count DESC,
         a.like_count DESC,
@@ -266,7 +268,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -286,7 +288,7 @@
         user u ON a.user_id = u.id
         WHERE
         a.deleted = 0
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         ORDER BY
         a.publish_time DESC
         LIMIT #{limit}
@@ -299,7 +301,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -319,7 +321,7 @@
         user u ON a.user_id = u.id
         WHERE
         a.deleted = 0
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         AND a.cover_image IS NOT NULL AND a.cover_image != '' <!-- 有封面图片 -->
         ORDER BY
         a.top DESC,
@@ -336,7 +338,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -357,7 +359,7 @@
         WHERE
         a.deleted = 0
         AND a.user_id = #{userId}
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         ORDER BY
         a.top DESC,
         a.publish_time DESC
@@ -373,7 +375,7 @@
         WHERE
         a.deleted = 0
         AND a.user_id = #{userId}
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
     </select>
 
     <!-- 作者相关文章查询 -->
@@ -383,7 +385,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -405,7 +407,7 @@
         a.deleted = 0
         AND a.user_id = #{userId}
         AND a.id != #{excludeArticleId}
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         ORDER BY
         a.top DESC,
         a.publish_time DESC
@@ -417,7 +419,8 @@
         <id column="id" property="id"/>
         <result column="title" property="title"/>
         <result column="summary" property="summary"/>
-        <result column="status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
         <result column="visible" property="visible"/>
         <result column="original" property="original" javaType="com.inkstage.enums.article.OriginalStatus"/>
         <result column="publish_time" property="publishTime"/>
@@ -434,7 +437,8 @@
         title,
         summary,
         user_id,
-        status,
+        article_status,
+        review_status,
         visible,
         original,
         publish_time,
@@ -447,7 +451,7 @@
         deleted = 0
         AND user_id = #{userId}
         <if test="articleStatus != null and articleStatus.code != 0">
-            AND status = #{articleStatus.code}
+            AND article_status = #{articleStatus.code}
         </if>
         <if test="keyword != null and keyword != ''">
             AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
@@ -467,7 +471,7 @@
         a.deleted = 0
         AND a.user_id = #{userId}
         <if test="articleStatus != null and articleStatus.code != 0">
-            AND status = #{articleStatus.code}
+            AND article_status = #{articleStatus.code}
         </if>
         <if test="keyword != null and keyword != ''">
             AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
@@ -526,7 +530,7 @@
         a.title,
         a.summary,
         a.cover_image,
-        a.status,
+        a.article_status,
         a.visible,
         a.publish_time,
         a.last_edit_time,
@@ -546,7 +550,7 @@
         user u ON a.user_id = u.id
         WHERE
         a.deleted = 0
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
         <choose>
             <when test="sortBy == 'relevance'">
@@ -587,7 +591,7 @@
         article a
         WHERE
         a.deleted = 0
-        AND a.status IN (1, 2) <!-- 已发布 -->
+        AND a.article_status = 3 <!-- 已发布 -->
         AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
     </select>
 </mapper>

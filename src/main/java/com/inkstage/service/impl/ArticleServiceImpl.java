@@ -92,7 +92,8 @@ public class ArticleServiceImpl implements ArticleService {
                 log.info("创建新草稿, 用户ID: {}", currentUser.getId());
                 // 创建新草稿
                 Article article = buildArticle(dto, currentUser);
-                article.setStatus(ArticleStatus.DRAFT);
+                article.setArticleStatus(ArticleStatus.DRAFT);
+                article.setReviewStatus(null);
                 article.setPublishTime(null);
                 articleMapper.insert(article);
 
@@ -112,7 +113,8 @@ public class ArticleServiceImpl implements ArticleService {
 
                 Article article = buildArticle(dto, currentUser);
                 article.setId(id);
-                article.setStatus(ArticleStatus.DRAFT);
+                article.setArticleStatus(ArticleStatus.DRAFT);
+                article.setReviewStatus(null);
                 article.setPublishTime(null);
                 article.setCreateTime(existingArticle.getCreateTime());
                 article.setReadCount(existingArticle.getReadCount());
@@ -347,7 +349,8 @@ public class ArticleServiceImpl implements ArticleService {
         article.setUserId(user.getId());
         article.setAuthorName(user.getNickname());
         article.setCategoryId(dto.getCategoryId());
-        article.setStatus(dto.getStatus());
+        article.setArticleStatus(dto.getStatus());
+        article.setReviewStatus(dto.getReviewStatus());
         article.setVisible(dto.getVisible());
         article.setAllowComment(dto.getAllowComment());
         article.setAllowForward(dto.getAllowForward());
@@ -366,7 +369,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setShareCount(0);
 
         // 设置发布时间
-        if (ArticleStatus.PENDING == dto.getStatus() || ArticleStatus.PUBLISHED == dto.getStatus()) {
+        if (ArticleStatus.PUBLISHED == dto.getStatus() || ArticleStatus.PENDING_PUBLISH == dto.getStatus()) {
             article.setPublishTime(LocalDateTime.now());
         }
 

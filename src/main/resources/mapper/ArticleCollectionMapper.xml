@@ -88,7 +88,7 @@
             a.summary,
             a.cover_image,
             a.category_id,
-            a.status as article_status,
+            a.article_status,
             a.publish_time,
             a.original as original_status,
             a.read_count,

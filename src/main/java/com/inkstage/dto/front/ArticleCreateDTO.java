@@ -1,5 +1,6 @@
 package com.inkstage.dto.front;
 
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.AllowStatus;
 import com.inkstage.enums.article.OriginalStatus;
@@ -92,4 +93,9 @@ public class ArticleCreateDTO {
      * 置顶状态
      */
     private TopStatus top;
+
+    /**
+     * 审核状态
+     */
+    private ReviewStatus reviewStatus;
 }

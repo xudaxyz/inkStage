@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum ArticleStatus implements EnumCode {
     ALL(0, "全部"),
     DRAFT(1, "草稿"),
-    PENDING(2, "待审核"),
+    PENDING_PUBLISH(2, "待发布"),
     PUBLISHED(3, "已发布"),
     OFFLINE(4, "已下架"),
     RECYCLE(5, "回收站");

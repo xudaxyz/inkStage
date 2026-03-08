@@ -60,9 +60,14 @@ public class Article extends BaseEntity {
     private Long categoryId;
 
     /**
-     * 状态(0:草稿,1:已发布,2:待审核,3:已下架)
+     * 状态(1:草稿,2:待发布,3:已发布,4:已下架,5:回收站)
      */
-    private ArticleStatus status;
+    private ArticleStatus articleStatus;
+
+    /**
+     * 审核状态(1:待审核,2:审核通过,3:审核拒绝,4:申诉中)
+     */
+    private ReviewStatus reviewStatus;
 
     /**
      * 发布时间

@@ -1,5 +1,6 @@
 package com.inkstage.vo.front;
 
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.OriginalStatus;
@@ -41,6 +42,11 @@ public class MyArticleListVO implements Serializable {
      * 文章状态
      */
     private ArticleStatus articleStatus;
+
+    /**
+     * 审核状态
+     */
+    private ReviewStatus reviewStatus;
 
     /**
      * 可见性状态
