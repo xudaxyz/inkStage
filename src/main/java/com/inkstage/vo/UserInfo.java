@@ -90,4 +90,9 @@ public class UserInfo {
      * 注册时间
      */
     private LocalDateTime registerTime;
+
+    /**
+     * 用户角色
+     */
+    private String role;
 }

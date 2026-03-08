@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 用户角色关联Service实现类
@@ -34,5 +35,10 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRole.setDeleted(DeleteStatus.NOT_DELETED);
         
         userRoleMapper.insert(userRole);
+    }
+
+    @Override
+    public List<UserRole> getUserRoles(Long userId) {
+        return userRoleMapper.selectByUserId(userId);
     }
 }

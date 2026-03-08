@@ -25,4 +25,12 @@
         #{deleted}
         )
     </insert>
+
+    <!-- 根据用户ID查询角色列表 -->
+    <select id="selectByUserId" parameterType="java.lang.Long" resultMap="ResultMap">
+        SELECT * FROM user_role
+        WHERE user_id = #{userId}
+        AND deleted = 0
+        AND status = 1
+    </select>
 </mapper>

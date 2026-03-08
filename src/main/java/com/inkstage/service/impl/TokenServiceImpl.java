@@ -2,8 +2,11 @@ package com.inkstage.service.impl;
 
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
+import com.inkstage.entity.model.UserRole;
+import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TokenService;
+import com.inkstage.service.UserRoleService;
 import com.inkstage.vo.TokenResponse;
 import com.inkstage.vo.UserInfo;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +33,7 @@ public class TokenServiceImpl implements TokenService {
 
     private final FileService fileService;
     private final JwtEncoder jwtEncoder;
+    private final UserRoleService userRoleService;
 
     @Override
     public TokenResponse generateTokenForUser(User user, AuthDTO authDTO) {
@@ -38,8 +42,20 @@ public class TokenServiceImpl implements TokenService {
         // 解析权限范围
         Set<String> scopes = resolveScopes(authDTO.getScope());
 
+        // 获取用户角色
+        List<UserRole> userRoles = userRoleService.getUserRoles(user.getId());
         // 设置用户权限
-        List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
+        List<GrantedAuthority> authorities = userRoles.stream()
+                .map(role -> {
+                    UserRoleEnum roleEnum = UserRoleEnum.fromCode(role.getRoleId());
+                    return new SimpleGrantedAuthority("ROLE_" + roleEnum.name());
+                })
+                .collect(Collectors.toList());
+
+        // 如果用户没有角色，默认设置为普通用户
+        if (authorities.isEmpty()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        }
 
         // 生成访问令牌
         Instant now = Instant.now();
@@ -89,14 +105,14 @@ public class TokenServiceImpl implements TokenService {
         // 确保用户相关图片URL完整
         fileService.ensureUserImgIsFullUrl(user);
         // 设置用户信息
-        UserInfo userInfo = assembleUserInfo(user);
+        UserInfo userInfo = assembleUserInfo(user, userRoles);
         tokenResponse.setUserInfo(userInfo);
 
         log.info("用户: {} 令牌生成完成", user.getUsername());
         return tokenResponse;
     }
 
-    private UserInfo assembleUserInfo(User user) {
+    private UserInfo assembleUserInfo(User user, List<UserRole> userRoles) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
         userInfo.setName(user.getUsername());
@@ -108,6 +124,15 @@ public class TokenServiceImpl implements TokenService {
         userInfo.setGender(user.getGender());
         userInfo.setBirthDate(user.getBirthDate());
         userInfo.setLocation(user.getLocation());
+        
+        // 设置用户角色
+        if (!userRoles.isEmpty()) {
+            UserRoleEnum primaryRole = UserRoleEnum.fromCode(userRoles.getFirst().getRoleId());
+            userInfo.setRole(primaryRole.name());
+        } else {
+            userInfo.setRole(UserRoleEnum.USER.name());
+        }
+        
         return userInfo;
     }
 
