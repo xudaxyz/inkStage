@@ -2,6 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Category;
+import com.inkstage.enums.StatusEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.CategoryMapper;
 import com.inkstage.service.CategoryService;
@@ -55,6 +56,75 @@ public class CategoryServiceImpl implements CategoryService {
         } catch (Exception e) {
             log.error("获取激活状态分类失败", e);
             throw new BusinessException("获取激活分类列表失败", e);
+        }
+    }
+
+    @Override
+    public Category addCategory(Category category) {
+        log.info("添加分类: {}", category.getName());
+        try {
+            // 设置默认值
+            if (category.getParentId() == null) {
+                category.setParentId(0L);
+            }
+            if (category.getSortOrder() == null) {
+                category.setSortOrder(0);
+            }
+            if (category.getArticleCount() == null) {
+                category.setArticleCount(0);
+            }
+            if (category.getStatus() == null) {
+                category.setStatus(StatusEnum.ENABLED);
+            }
+            categoryMapper.insert(category);
+            return category;
+        } catch (Exception e) {
+            log.error("添加分类失败", e);
+            throw new BusinessException("添加分类失败", e);
+        }
+    }
+
+    @Override
+    public Category updateCategory(Category category) {
+        log.info("更新分类: {}", category.getId());
+        try {
+            if (category.getId() == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            categoryMapper.update(category);
+            return categoryMapper.selectById(category.getId());
+        } catch (Exception e) {
+            log.error("更新分类失败", e);
+            throw new BusinessException("更新分类失败", e);
+        }
+    }
+
+    @Override
+    public void deleteCategory(Long id) {
+        log.info("删除分类: {}", id);
+        try {
+            if (id == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            categoryMapper.deleteById(id);
+        } catch (Exception e) {
+            log.error("删除分类失败", e);
+            throw new BusinessException("删除分类失败", e);
+        }
+    }
+
+    @Override
+    public Category updateCategoryStatus(Long id, StatusEnum status) {
+        log.info("更新分类状态: {}, {}", id, status);
+        try {
+            if (id == null || status == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            categoryMapper.updateStatus(id, status);
+            return categoryMapper.selectById(id);
+        } catch (Exception e) {
+            log.error("更新分类状态失败", e);
+            throw new BusinessException("更新分类状态失败", e);
         }
     }
 

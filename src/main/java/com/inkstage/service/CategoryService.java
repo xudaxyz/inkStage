@@ -1,6 +1,7 @@
 package com.inkstage.service;
 
 import com.inkstage.entity.model.Category;
+import com.inkstage.enums.StatusEnum;
 
 import java.util.List;
 
@@ -27,5 +28,33 @@ public interface CategoryService {
      * @return 激活状态的分类列表
      */
     List<Category> getActiveCategories();
+
+    /**
+     * 添加分类
+     * @param category 分类对象
+     * @return 添加后的分类对象
+     */
+    Category addCategory(Category category);
+
+    /**
+     * 更新分类
+     * @param category 分类对象
+     * @return 更新后的分类对象
+     */
+    Category updateCategory(Category category);
+
+    /**
+     * 删除分类
+     * @param id 分类ID
+     */
+    void deleteCategory(Long id);
+
+    /**
+     * 更新分类状态
+     * @param id 分类ID
+     * @param status 状态
+     * @return 更新后的分类对象
+     */
+    Category updateCategoryStatus(Long id, StatusEnum status);
 
 }

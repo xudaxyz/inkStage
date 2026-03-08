@@ -41,4 +41,37 @@
         ORDER BY sort_order ASC, id ASC
     </select>
 
+    <!-- 添加分类 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.Category">
+        INSERT INTO category (
+            name, slug, parent_id, sort_order, description, article_count, status
+        ) VALUES (
+            #{name}, #{slug}, #{parentId}, #{sortOrder}, #{description}, #{articleCount}, #{status}
+        )
+    </insert>
+
+    <!-- 更新分类 -->
+    <update id="update" parameterType="com.inkstage.entity.model.Category">
+        UPDATE category SET
+            name = #{name},
+            slug = #{slug},
+            parent_id = #{parentId},
+            sort_order = #{sortOrder},
+            description = #{description},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除分类 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM category WHERE id = #{id}
+    </delete>
+
+    <!-- 更新分类状态 -->
+    <update id="updateStatus">
+        UPDATE category SET
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
 </mapper>
