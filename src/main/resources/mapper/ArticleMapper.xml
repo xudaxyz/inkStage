@@ -430,6 +430,24 @@
         <!-- 作者信息 -->
         <result column="user_id" property="userId"/>
     </resultMap>
+
+    <!-- 管理员文章列表结果映射 -->
+    <resultMap id="AdminArticleResultMap" type="com.inkstage.vo.admin.AdminArticleVO">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="author_name" property="authorName"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="read_count" property="readCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="top" property="top" javaType="com.inkstage.enums.article.TopStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <!-- 标签列表 -->
+        <collection property="tags" ofType="java.lang.String"/>
+    </resultMap>
     <!-- 当前用户文章列表查询 -->
     <select id="selectMyArticles" resultMap="MyArticleListResultMap">
         SELECT
@@ -594,4 +612,152 @@
         AND a.article_status = 3 <!-- 已发布 -->
         AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
     </select>
+
+    <!-- 管理员文章列表查询 -->
+    <select id="selectByPage" resultMap="ResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM
+        article a
+        WHERE
+        a.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.articleStatus != null">
+            AND a.article_status = #{query.articleStatus}
+        </if>
+        ORDER BY
+        a.create_time DESC
+        LIMIT #{query.offset}, #{query.pageSize}
+    </select>
+
+    <!-- 管理员文章总数查询 -->
+    <select id="countByPage" resultType="java.lang.Long">
+        SELECT
+        COUNT(DISTINCT a.id)
+        FROM
+        article a
+        WHERE
+        a.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.articleStatus != null">
+            AND a.article_status = #{query.articleStatus}
+        </if>
+    </select>
+
+    <!-- 管理员文章列表查询（返回ArticleListVO） -->
+    <select id="selectArticlesByPage" resultMap="ArticleListResultMap">
+        SELECT
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.article_status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.author_name,
+        a.category_id,
+        u.avatar,
+        c.name as category_name
+        FROM
+        article a
+        LEFT JOIN
+        category c ON a.category_id = c.id
+        LEFT JOIN
+        user u ON a.user_id = u.id
+        WHERE
+        a.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.articleStatus != null">
+            AND a.article_status = #{query.articleStatus}
+        </if>
+        ORDER BY
+        a.create_time DESC
+        LIMIT #{query.offset}, #{query.pageSize}
+    </select>
+
+    <!-- 管理员文章总数查询 -->
+    <select id="countArticlesByPage" resultType="java.lang.Long">
+        SELECT
+        COUNT(DISTINCT a.id)
+        FROM
+        article a
+        LEFT JOIN
+        category c ON a.category_id = c.id
+        WHERE
+        a.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.articleStatus != null">
+            AND a.article_status = #{query.articleStatus}
+        </if>
+    </select>
+
+    <!-- 更新文章状态 -->
+    <update id="updateArticleStatus">
+        UPDATE article 
+        SET article_status = #{status} 
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 管理员文章列表查询（返回AdminArticleVO） -->
+    <select id="selectAdminArticlesByPage" resultMap="AdminArticleResultMap">
+        SELECT
+        a.id,
+        a.title,
+        a.author_name,
+        a.article_status,
+        a.publish_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.top,
+        a.create_time,
+        a.update_time,
+        c.name as category_name
+        FROM
+        article a
+        LEFT JOIN
+        category c ON a.category_id = c.id
+        WHERE
+        a.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.categoryId != null and query.categoryId != 0">
+            AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.articleStatus != null">
+            AND a.article_status = #{query.articleStatus}
+        </if>
+        ORDER BY
+        a.top DESC,
+        a.create_time DESC
+        LIMIT #{query.offset}, #{query.pageSize}
+    </select>
+
+
 </mapper>

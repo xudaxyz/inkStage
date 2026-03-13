@@ -60,4 +60,19 @@ public interface CategoryMapper {
      */
     void updateStatus(@Param("id") Long id, @Param("status") StatusEnum status);
 
+    /**
+     * 根据关键字统计分类数量
+     * @param keyword 关键字
+     * @return 数量
+     */
+    Long countByKeyword(String keyword);
+
+    /**
+     * 根据关键字分页获取分类
+     * @param keyword 关键字
+     * @param offset 页码
+     * @param pageSize 每页大小
+     * @return 分类列表
+     */
+    List<Category> selectByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
 }

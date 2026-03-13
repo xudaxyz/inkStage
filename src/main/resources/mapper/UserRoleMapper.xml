@@ -33,4 +33,16 @@
         AND deleted = 0
         AND status = 1
     </select>
+
+    <!-- 根据用户ID删除角色关联 -->
+    <delete id="deleteByUserId" parameterType="java.lang.Long">
+        DELETE FROM user_role
+        WHERE user_id = #{userId}
+    </delete>
+
+    <update id="updateUserRole">
+        UPDATE user_role
+        SET role_id = #{userRole}, update_time = now()
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

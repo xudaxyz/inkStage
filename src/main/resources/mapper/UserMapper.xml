@@ -136,4 +136,117 @@
             like_count DESC
         LIMIT #{limit}
     </select>
+
+    <!-- 分页查询用户 -->
+    <select id="selectByPage" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user u
+        WHERE u.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="role != null">
+            AND u.id IN (
+                SELECT ur.user_id 
+                FROM user_role ur 
+                WHERE ur.role_id = #{role} AND ur.status = 1
+            )
+        </if>
+        <if test="status != null">
+            AND u.status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND u.create_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND u.create_time <![CDATA[ <= ]]> #{endDate}
+        </if>
+        ORDER BY
+        u.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计用户总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM user u
+        WHERE u.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="role != null">
+            AND u.id IN (
+                SELECT ur.user_id 
+                FROM user_role ur 
+                WHERE ur.role_id = #{role} AND ur.status = 1
+            )
+        </if>
+        <if test="status != null">
+            AND u.status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND u.create_time <![CDATA[ >= ]]> #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND u.create_time <![CDATA[ <= ]]> #{endDate}
+        </if>
+    </select>
+
+    <!-- 根据ID删除用户 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM user
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 查询用户最近发布的文章 -->
+    <select id="selectRecentArticles" resultType="com.inkstage.vo.admin.AdminUserArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.summary,
+            a.article_status as articleStatus,
+            a.review_status as reviewStatus,
+            a.publish_time as publishTime,
+            a.read_count as readCount,
+            a.comment_count as commentCount,
+            a.like_count as likeCount
+        FROM article a
+        WHERE a.user_id = #{userId}
+        AND a.deleted = 0
+        ORDER BY a.publish_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询用户最近发布的评论 -->
+    <select id="selectRecentComments" resultType="com.inkstage.vo.admin.AdminUserCommentVO">
+        SELECT
+            c.id,
+            c.article_id as articleId,
+            a.title as articleTitle,
+            c.content,
+            c.status,
+            c.top,
+            c.like_count as likeCount,
+            c.reply_count as replyCount,
+            c.create_time as createTime
+        FROM comment c
+        LEFT JOIN article a ON c.article_id = a.id
+        WHERE c.user_id = #{userId}
+        AND c.deleted = 0
+        ORDER BY c.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 根据用户ID更新用户状态 -->
+    <update id="updateUserStatus">
+        UPDATE user
+        <set>
+            <if test="userStatus != null">status = #{userStatus},</if>
+            update_time = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
 </mapper>

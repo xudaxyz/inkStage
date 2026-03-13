@@ -1,5 +1,7 @@
 package com.inkstage.service;
 
+import com.inkstage.common.PageRequest;
+import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Category;
 import com.inkstage.enums.StatusEnum;
 
@@ -57,4 +59,12 @@ public interface CategoryService {
      */
     Category updateCategoryStatus(Long id, StatusEnum status);
 
+    /**
+     * 获取所有分类（分页）
+     * @param keyword 关键字
+     * @param pageNum 页码
+     * @param pageSize 页大小
+     * @return 分页结果
+     */
+    PageResult<Category> getAdminCategories(String keyword, Integer pageNum, Integer pageSize);
 }

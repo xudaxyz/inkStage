@@ -28,6 +28,28 @@
         ORDER BY sort_order ASC, id ASC
     </select>
 
+    <!-- 分页获取分类 -->
+    <select id="selectByKeyword" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM category
+        <where>
+            <if test="keyword != null">
+                name LIKE CONCAT('%', #{keyword}, '%') OR slug LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY sort_order ASC, id ASC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计分类总数 -->
+    <select id="countByKeyword" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM category
+        <where>
+            <if test="keyword != null">
+                name LIKE CONCAT('%', #{keyword}, '%') OR slug LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+    </select>
+
     <!-- 根据ID获取分类 -->
     <select id="selectById" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category

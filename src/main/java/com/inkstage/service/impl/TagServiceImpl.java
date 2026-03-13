@@ -1,8 +1,11 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.common.PageRequest;
+import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.ArticleTag;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.enums.StatusEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.service.TagService;
@@ -26,32 +29,77 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> getAllTags() {
-        return tagMapper.selectAll();
+        log.info("获取所有标签");
+        try {
+            return tagMapper.selectAll();
+        } catch (Exception e) {
+            log.error("获取所有标签失败", e);
+            throw new BusinessException("获取标签列表失败", e);
+        }
+    }
+
+    @Override
+    public PageResult<Tag> getAdminTags(String keyword, Integer pageNum, Integer pageSize) {
+        log.info("分页获取标签，页码：{}，每页大小：{}", pageNum, pageSize);
+        try {
+            // 关键词转换为小写
+            if (keyword != null && !keyword.isEmpty()) {
+                keyword = keyword.toLowerCase();
+            }
+            
+            // 获取总记录数
+            Long total = tagMapper.countByKeyword(keyword);
+
+            Integer offset = (pageNum - 1) * pageSize;
+            
+            // 获取分页数据
+            List<Tag> tags = tagMapper.selectByKeyword(keyword, offset, pageSize);
+            
+            // 构建分页结果
+            return PageResult.build(tags, total, pageNum, pageSize);
+        } catch (Exception e) {
+            log.error("分页获取标签失败", e);
+            throw new BusinessException("分页获取标签失败", e);
+        }
     }
 
     @Override
     public Tag getTagById(Long id) {
-        if (id == null) {
-            log.error("标签ID为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR);
+        log.info("根据ID获取标签: {}", id);
+        try {
+            if (id == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            return tagMapper.selectById(id);
+        } catch (Exception e) {
+            log.error("根据ID获取标签失败", e);
+            throw new BusinessException("获取标签失败", e);
         }
-        return tagMapper.selectById(id);
-
     }
 
     @Override
     public List<Tag> getActiveTags() {
         log.info("获取激活状态标签列表");
-        return tagMapper.selectActiveTags();
+        try {
+            return tagMapper.selectActiveTags();
+        } catch (Exception e) {
+            log.error("获取激活状态标签失败", e);
+            throw new BusinessException("获取激活标签列表失败", e);
+        }
     }
 
     @Override
     public List<Tag> getTagsByArticleId(Long articleId) {
-        if (articleId == null) {
-            log.error("文章ID为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR);
+        log.info("根据文章ID获取标签: {}", articleId);
+        try {
+            if (articleId == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            return tagMapper.selectByArticleId(articleId);
+        } catch (Exception e) {
+            log.error("根据文章ID获取标签失败", e);
+            throw new BusinessException("获取文章标签失败", e);
         }
-        return tagMapper.selectByArticleId(articleId);
     }
 
     @Override
@@ -88,6 +136,80 @@ public class TagServiceImpl implements TagService {
         }
 
         tagMapper.deleteArticleTagsByArticleId(articleId);
+    }
+
+    @Override
+    public Tag addTag(Tag tag) {
+        log.info("添加标签: {}", tag.getName());
+        try {
+            // 设置默认值
+            if (tag.getArticleCount() == null) {
+                tag.setArticleCount(0);
+            }
+            if (tag.getUsageCount() == null) {
+                tag.setUsageCount(0);
+            }
+            if (tag.getStatus() == null) {
+                tag.setStatus(StatusEnum.ENABLED);
+            }
+            // 将slug转换为小写
+            if (tag.getSlug() != null && !tag.getSlug().isEmpty()) {
+                tag.setSlug(tag.getSlug().toLowerCase());
+            }
+            tagMapper.insert(tag);
+            return tag;
+        } catch (Exception e) {
+            log.error("添加标签失败", e);
+            throw new BusinessException("添加标签失败", e);
+        }
+    }
+
+    @Override
+    public Tag updateTag(Tag tag) {
+        log.info("更新标签: {}", tag.getId());
+        try {
+            if (tag.getId() == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            // 将slug转换为小写
+            if (tag.getSlug() != null && !tag.getSlug().isEmpty()) {
+                tag.setSlug(tag.getSlug().toLowerCase());
+            }
+            tagMapper.update(tag);
+            return tagMapper.selectById(tag.getId());
+        } catch (Exception e) {
+            log.error("更新标签失败", e);
+            throw new BusinessException("更新标签失败", e);
+        }
+    }
+
+    @Override
+    public void deleteTag(Long id) {
+        log.info("删除标签: {}", id);
+        try {
+            if (id == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            tagMapper.deleteById(id);
+        } catch (Exception e) {
+            log.error("删除标签失败", e);
+            throw new BusinessException("删除标签失败", e);
+        }
+    }
+
+    @Override
+    public Tag updateTagStatus(Long id, StatusEnum status) {
+        log.info("更新标签状态: {}, {}", id, status);
+        try {
+            if (id == null || status == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            tagMapper.updateStatus(id, status);
+            return tagMapper.selectById(id);
+        } catch (Exception e) {
+            log.error("更新标签状态失败", e);
+            throw new BusinessException("更新标签状态失败", e);
+        }
     }
 
 }

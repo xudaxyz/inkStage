@@ -384,5 +384,105 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    @Override
+    public PageResult<ArticleCommentVO> getCommentsByPage(com.inkstage.dto.admin.AdminCommentQueryDTO pageRequest) {
+        try {
+            log.info("管理员分页获取评论列表, 页码: {}, 每页大小: {}", pageRequest.getPageNum(), pageRequest.getPageSize());
+
+            // 计算偏移量
+            int offset = (pageRequest.getPageNum() - 1) * pageRequest.getPageSize();
+            pageRequest.setOffset(offset);
+
+            // 查询评论列表
+            List<ArticleCommentVO> articleCommentVOList = commentMapper.selectCommentsByPage(pageRequest);
+            // 确保评论图片的URL完整
+            fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
+            // 查询总记录数
+            Long total = commentMapper.countCommentsByPage(pageRequest);
+
+            // 构建分页结果
+            PageResult<ArticleCommentVO> pageResult = PageResult.build(
+                    articleCommentVOList,
+                    total,
+                    pageRequest.getPageNum(),
+                    pageRequest.getPageSize()
+            );
+
+            log.info("管理员分页获取评论列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, pageRequest.getPageNum(), pageRequest.getPageSize());
+            return pageResult;
+        } catch (Exception e) {
+            log.error("管理员分页获取评论列表失败, 页码: {}, 每页大小: {}", pageRequest.getPageNum(), pageRequest.getPageSize(), e);
+            throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateCommentStatus(Long id, com.inkstage.enums.ReviewStatus status, String reviewReason) {
+        try {
+            log.info("管理员更新评论状态, 评论ID: {}, 状态: {}, 审核原因: {}", id, status.getDesc(), reviewReason);
+
+            // 检查评论是否存在
+            Comment comment = commentMapper.selectByPrimaryKey(id);
+            if (comment == null) {
+                log.warn("评论不存在, 评论ID: {}", id);
+                throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
+            }
+
+            // 获取当前管理员ID
+            Long currentUserId = UserContext.getCurrentUserId();
+
+            // 更新评论状态
+            int result = commentMapper.updateCommentStatus(id, status.getCode(), currentUserId, reviewReason);
+            if (result <= 0) {
+                log.warn("更新评论状态失败, 评论ID: {}", id);
+                throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
+            }
+
+            // 清除评论列表缓存
+            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list", comment.getArticleId() + ":*");
+            redisUtil.deletePattern(commentListPattern);
+            log.info("清除评论列表缓存, 缓存模式: {}", commentListPattern);
+
+            log.info("管理员更新评论状态成功, 评论ID: {}, 新状态: {}", id, status.getDesc());
+            return true;
+        } catch (Exception e) {
+            log.error("管理员更新评论状态失败, 评论ID: {}", id, e);
+            throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean updateCommentTop(Long id, com.inkstage.enums.article.TopStatus top, Integer topOrder) {
+        try {
+            log.info("管理员更新评论置顶状态, 评论ID: {}, 置顶状态: {}, 置顶顺序: {}", id, top.getDesc(), topOrder);
+
+            // 检查评论是否存在
+            Comment comment = commentMapper.selectByPrimaryKey(id);
+            if (comment == null) {
+                log.warn("评论不存在, 评论ID: {}", id);
+                throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
+            }
+
+            // 更新评论置顶状态
+            int result = commentMapper.updateCommentTop(id, top.getCode(), topOrder);
+            if (result <= 0) {
+                log.warn("更新评论置顶状态失败, 评论ID: {}", id);
+                throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
+            }
+
+            // 清除评论列表缓存
+            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list", comment.getArticleId() + ":*");
+            redisUtil.deletePattern(commentListPattern);
+            log.info("清除评论列表缓存, 缓存模式: {}", commentListPattern);
+
+            log.info("管理员更新评论置顶状态成功, 评论ID: {}, 置顶状态: {}, 置顶顺序: {}", id, top.getDesc(), topOrder);
+            return true;
+        } catch (Exception e) {
+            log.error("管理员更新评论置顶状态失败, 评论ID: {}", id, e);
+            throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED, e.getMessage());
+        }
+    }
 
 }

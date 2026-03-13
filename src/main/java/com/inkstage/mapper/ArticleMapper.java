@@ -1,8 +1,10 @@
 package com.inkstage.mapper;
 
+import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -255,4 +257,54 @@ public interface ArticleMapper {
      * @return 文章数量
      */
     long countSearchArticles(@Param("keyword") String keyword);
+
+    /**
+     * 分页查询所有文章（管理员）
+     *
+     * @param offset 偏移量
+     * @param pageSize 每页大小
+     * @return 文章列表
+     */
+    List<Article> selectByPage(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+    /**
+     * 分页查询所有文章（管理员）
+     *
+     * @param queryDTO 查询条件
+     * @return 文章列表
+     */
+    List<Article> selectByPage(@Param("query") AdminArticleQueryDTO queryDTO);
+
+    /**
+     * 统计所有文章总数（管理员）
+     *
+     * @return 文章总数
+     */
+    Long countAll();
+
+    /**
+     * 统计所有文章总数（管理员）
+     *
+     * @param queryDTO 查询条件
+     * @return 文章总数
+     */
+    long countByPage(@Param("query") AdminArticleQueryDTO queryDTO);
+
+    /**
+     * 更新文章状态
+     *
+     * @param id 文章ID
+     * @param status 文章状态
+     * @return 影响行数
+     */
+    int updateStatus(@Param("id") Long id, @Param("status") ArticleStatus status);
+
+    /**
+     * 分页查询所有文章（管理员）
+     *
+     * @param queryDTO 查询条件
+     * @return 文章列表
+     */
+    List<AdminArticleVO> selectAdminArticlesByPage(@Param("query") AdminArticleQueryDTO queryDTO);
+
 }

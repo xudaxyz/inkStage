@@ -1,6 +1,9 @@
 package com.inkstage.service;
 
+import com.inkstage.common.PageRequest;
+import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.enums.StatusEnum;
 
 import java.util.List;
 
@@ -54,4 +57,44 @@ public interface TagService {
      */
     void deleteArticleTagsByArticleId(Long articleId);
 
+    /**
+     * 添加标签
+     *
+     * @param tag 标签信息
+     * @return 标签对象
+     */
+    Tag addTag(Tag tag);
+
+    /**
+     * 更新标签
+     *
+     * @param tag 标签信息
+     * @return 标签对象
+     */
+    Tag updateTag(Tag tag);
+
+    /**
+     * 删除标签
+     *
+     * @param id 标签ID
+     */
+    void deleteTag(Long id);
+
+    /**
+     * 更新标签状态
+     *
+     * @param id     标签ID
+     * @param status 状态
+     * @return 标签对象
+     */
+    Tag updateTagStatus(Long id, StatusEnum status);
+
+    /**
+     * 管理员获取标签列表
+     * @param keyword 关键字
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @return 响应结果
+     */
+    PageResult<Tag> getAdminTags(String keyword, Integer pageNum, Integer pageSize);
 }

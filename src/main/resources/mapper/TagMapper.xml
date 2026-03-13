@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.inkstage.mapper.TagMapper">
+    <!-- 基础结果映射 -->
     <resultMap id="ResultMap" type="com.inkstage.entity.model.Tag">
         <id column="id" property="id" />
         <result column="name" property="name" />
@@ -9,7 +10,7 @@
         <result column="description" property="description" />
         <result column="article_count" property="articleCount" />
         <result column="usage_count" property="usageCount" />
-        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
@@ -22,8 +23,30 @@
 
     <!-- 获取所有标签 -->
     <select id="selectAll" resultMap="ResultMap">
-        SELECT <include refid="baseColumns" />  FROM tag
-        ORDER BY usage_count DESC, id ASC
+        SELECT <include refid="baseColumns" /> FROM tag
+        ORDER BY id ASC
+    </select>
+
+    <!-- 分页获取标签 -->
+    <select id="selectByKeyword" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM tag
+        <where>
+            <if test="keyword != null and keyword != ''">
+                name LIKE CONCAT('%', #{keyword}, '%') OR slug LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
+        ORDER BY id ASC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计标签总数 -->
+    <select id="countByKeyword" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM tag
+        <where>
+            <if test="keyword != null and keyword != ''">
+                name LIKE CONCAT('%', #{keyword}, '%') OR slug LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')
+            </if>
+        </where>
     </select>
 
     <!-- 根据ID获取标签 -->
@@ -36,27 +59,58 @@
     <select id="selectActiveTags" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM tag
         WHERE status = 1
-        ORDER BY usage_count DESC, id ASC
+        ORDER BY id ASC
     </select>
 
-    <!-- 根据文章ID获取关联的标签 -->
+    <!-- 根据文章ID获取标签 -->
     <select id="selectByArticleId" resultMap="ResultMap">
-        SELECT t.* FROM tag t
+        SELECT t.<include refid="baseColumns" />
+        FROM tag t
         JOIN article_tag at ON t.id = at.tag_id
         WHERE at.article_id = #{articleId}
-        ORDER BY t.usage_count DESC, t.id ASC
+        ORDER BY t.id ASC
     </select>
 
-    <!-- 插入文章与标签的关联 -->
-    <insert id="insertArticleTag">
-        INSERT INTO article_tag (article_id, tag_id, create_time, update_time)
-        VALUES (#{articleId}, #{tagId}, NOW(), NOW())
+    <!-- 插入文章标签关联 -->
+    <insert id="insertArticleTag" parameterType="com.inkstage.entity.model.ArticleTag">
+        INSERT INTO article_tag (article_id, tag_id)
+        VALUES (#{articleId}, #{tagId})
     </insert>
 
-    <!-- 删除文章的所有标签关联 -->
-    <delete id="deleteArticleTagsByArticleId">
-        DELETE FROM article_tag
-        WHERE article_id = #{articleId}
+    <!-- 删除文章的标签关联 -->
+    <delete id="deleteArticleTagsByArticleId" parameterType="java.lang.Long">
+        DELETE FROM article_tag WHERE article_id = #{articleId}
     </delete>
+
+    <!-- 插入标签 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.Tag">
+        INSERT INTO tag (
+            name, slug, description, article_count, usage_count, status
+        ) VALUES (
+            #{name}, #{slug}, #{description}, #{articleCount}, #{usageCount}, #{status}
+        )
+    </insert>
+
+    <!-- 更新标签 -->
+    <update id="update" parameterType="com.inkstage.entity.model.Tag">
+        UPDATE tag SET
+            name = #{name},
+            slug = #{slug},
+            description = #{description},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除标签 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+    <!-- 更新标签状态 -->
+    <update id="updateStatus">
+        UPDATE tag SET
+            status = #{status}
+        WHERE id = #{id}
+    </update>
 
 </mapper>

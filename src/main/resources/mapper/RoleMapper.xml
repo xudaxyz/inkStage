@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.RoleMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="code" property="code"/>
+        <result column="description" property="description"/>
+        <result column="system_role" property="systemRole" javaType="com.inkstage.enums.DefaultStatus"/>
+        <result column="level" property="level"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
+    </resultMap>
+
+    <sql id="columns">
+        id, name, code, description, system_role, level, status, create_time, update_time, deleted
+    </sql>
+
+    <!-- 根据主键查询角色 -->
+    <select id="selectByPrimaryKey" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM role WHERE id = #{id} AND deleted = 0
+    </select>
+
+</mapper>

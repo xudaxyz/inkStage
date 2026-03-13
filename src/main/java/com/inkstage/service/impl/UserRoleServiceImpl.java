@@ -41,4 +41,10 @@ public class UserRoleServiceImpl implements UserRoleService {
     public List<UserRole> getUserRoles(Long userId) {
         return userRoleMapper.selectByUserId(userId);
     }
+
+    @Override
+    public Boolean updateUserRole(Long userId, UserRoleEnum userRole) {
+        int result = userRoleMapper.updateUserRole(userId, userRole);
+        return result > 0;
+    }
 }

@@ -1,6 +1,7 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
+import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.enums.article.ArticleStatus;
@@ -145,4 +146,34 @@ public interface ArticleService {
      * @return 分页结果
      */
     PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, com.inkstage.common.PageRequest pageRequest);
+
+    /**
+     * 分页获取所有文章（管理员）
+     * @param queryDTO 文章查询DTO
+     * @return 分页结果
+     */
+    PageResult<com.inkstage.vo.admin.AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO);
+
+    /**
+     * 分页获取所有文章（管理员，旧方法）
+     * @param queryDTO 文章查询DTO
+     * @return 分页结果
+     */
+    PageResult<com.inkstage.entity.model.Article> getArticlesByPage(AdminArticleQueryDTO queryDTO);
+
+    /**
+     * 根据ID获取文章（管理员）
+     * @param id 文章ID
+     * @return 文章信息
+     */
+    com.inkstage.entity.model.Article getArticleById(Long id);
+
+    /**
+     * 更新文章状态（管理员）
+     * @param id 文章ID
+     * @param status 文章状态
+     * @return 更新后的文章
+     */
+    com.inkstage.entity.model.Article updateArticleStatus(Long id, ArticleStatus status);
+
 }

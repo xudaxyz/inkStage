@@ -1,6 +1,12 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.dto.admin.AdminUserQueryDTO;
+import com.inkstage.entity.model.Role;
+import com.inkstage.entity.model.UserRole;
+import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
+import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.IPUtil;
@@ -14,8 +20,14 @@ import com.inkstage.enums.user.UserStatus;
 import com.inkstage.enums.VerificationStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.mapper.UserMapper;
+import com.inkstage.mapper.UserRoleMapper;
+import com.inkstage.mapper.RoleMapper;
 import com.inkstage.service.UserService;
 import com.inkstage.vo.front.HotUserVO;
+import com.inkstage.vo.admin.AdminUserDetailVO;
+import com.inkstage.vo.admin.AdminUserListVO;
+import com.inkstage.vo.admin.AdminUserArticleVO;
+import com.inkstage.vo.admin.AdminUserCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
+    private final UserRoleMapper userRoleMapper;
+    private final RoleMapper roleMapper;
     private final FileService fileService;
     private final RedisUtil redisUtil;
 
@@ -171,6 +185,66 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public AdminUserDetailVO getUserDetailById(Long id) {
+        log.info("根据ID获取用户详情: {}", id);
+        try {
+            // 获取用户信息
+            User user = getUserById(id);
+            if (user == null) {
+                throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
+            }
+
+            // 转换为AdminUserDetailVO
+            AdminUserDetailVO vo = new AdminUserDetailVO();
+            vo.setId(user.getId());
+            vo.setUsername(user.getUsername());
+            vo.setNickname(user.getNickname());
+            vo.setEmail(user.getEmail());
+            vo.setEmailVerified(user.getEmailVerified());
+            vo.setPhone(user.getPhone());
+            vo.setPhoneVerified(user.getPhoneVerified());
+            vo.setAvatar(fileService.convertToFullUrl(user.getAvatar()));
+            vo.setSignature(user.getSignature());
+            vo.setGender(user.getGender());
+            vo.setLocation(user.getLocation());
+            vo.setWebsite(user.getWebsite());
+            vo.setFollowCount(user.getFollowCount());
+            vo.setFollowerCount(user.getFollowerCount());
+            vo.setArticleCount(user.getArticleCount());
+            vo.setCommentCount(user.getCommentCount());
+            vo.setLikeCount(user.getLikeCount());
+            vo.setLastLoginTime(user.getLastLoginTime());
+            vo.setLastLoginIp(user.getLastLoginIp());
+            vo.setRegisterIp(user.getRegisterIp());
+            vo.setRegisterTime(user.getRegisterTime());
+            vo.setPrivacy(user.getPrivacy());
+            vo.setStatus(user.getStatus());
+
+            // 获取用户角色
+            List<UserRole> userRoles = userRoleMapper.selectByUserId(id);
+            if (!userRoles.isEmpty()) {
+                vo.setRole(UserRoleEnum.fromCode(userRoles.getFirst().getRoleId()));
+            }
+
+            // 获取最近发布的文章
+            List<AdminUserArticleVO> recentArticles = userMapper.selectRecentArticles(id, 5);
+            vo.setRecentArticles(recentArticles);
+
+            // 获取最近发布的评论
+            List<AdminUserCommentVO> recentComments = userMapper.selectRecentComments(id, 5);
+            vo.setRecentComments(recentComments);
+
+            log.info("获取用户 {} 详情成功: {}", id, vo);
+            return vo;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("获取用户详情失败: {}", id, e);
+            throw new BusinessException(ResponseMessage.ERROR, e.getMessage());
+        }
+    }
+
+    @Override
     public List<HotUserVO> getHotUsers(Integer limit) {
         try {
             log.info("获取热门用户, limit: {}", limit);
@@ -182,7 +256,8 @@ public class UserServiceImpl implements UserService {
             );
 
             // 尝试从缓存获取
-            List<HotUserVO> hotUsers = redisUtil.getWithType(cacheKey, new TypeReference<>() {});
+            List<HotUserVO> hotUsers = redisUtil.getWithType(cacheKey, new TypeReference<>() {
+            });
             if (hotUsers != null) {
                 log.info("从缓存获取热门用户成功, 缓存键: {}", cacheKey);
                 return hotUsers;
@@ -217,4 +292,148 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(ResponseMessage.ERROR, e.getMessage());
         }
     }
+
+    @Override
+    public PageResult<AdminUserListVO> getUsersByPage(AdminUserQueryDTO userQueryDTO) {
+        log.info("分页获取用户，页码：{}，每页大小：{}，关键词：{}，角色：{}，状态：{}",
+                userQueryDTO.getPageNum(), userQueryDTO.getPageSize(),
+                userQueryDTO.getKeyword(), userQueryDTO.getUserRole(), userQueryDTO.getStatus());
+        try {
+            // 获取总记录数
+            Long total = userMapper.countAll(
+                    userQueryDTO.getKeyword(),
+                    userQueryDTO.getUserRole(),
+                    userQueryDTO.getStatus(),
+                    userQueryDTO.getStartDate(),
+                    userQueryDTO.getEndDate()
+            );
+
+            // 获取分页数据
+            List<User> users = userMapper.selectByPage(
+                    userQueryDTO.getOffset(),
+                    userQueryDTO.getPageSize(),
+                    userQueryDTO.getKeyword(),
+                    userQueryDTO.getUserRole(),
+                    userQueryDTO.getStatus(),
+                    userQueryDTO.getStartDate(),
+                    userQueryDTO.getEndDate()
+            );
+
+            // 转换为AdminUserListVO
+            List<AdminUserListVO> userListVOs = users.stream().map(user -> {
+                AdminUserListVO vo = new AdminUserListVO();
+                vo.setId(user.getId());
+                vo.setUsername(user.getUsername());
+                vo.setNickname(user.getNickname());
+                vo.setEmail(user.getEmail());
+                vo.setPhone(user.getPhone());
+                vo.setStatus(user.getStatus());
+                vo.setRegisterTime(user.getRegisterTime());
+                vo.setLastLoginTime(user.getLastLoginTime());
+                vo.setArticleCount(user.getArticleCount());
+                vo.setCommentCount(user.getCommentCount());
+
+                // 获取用户角色
+                List<UserRole> userRoles = userRoleMapper.selectByUserId(user.getId());
+                if (!userRoles.isEmpty()) {
+                    Role role = roleMapper.selectByPrimaryKey(userRoles.getFirst().getRoleId());
+                    if (role != null) {
+                        vo.setRole(UserRoleEnum.valueOf(role.getCode()));
+                    }
+                }
+
+                return vo;
+            }).toList();
+            log.info("userListVOs: {}", userListVOs);
+
+            // 构建分页结果
+            return PageResult.build(userListVOs, total, userQueryDTO.getPageNum(), userQueryDTO.getPageSize());
+        } catch (Exception e) {
+            log.error("分页获取用户失败", e);
+            throw new BusinessException("分页获取用户失败", e);
+        }
+    }
+
+    @Override
+    public void deleteUser(Long id) {
+        log.info("删除用户: {}", id);
+        try {
+            if (id == null) {
+                throw new BusinessException(ResponseMessage.PARAM_ERROR);
+            }
+            userMapper.deleteById(id);
+
+            // 清除用户缓存
+            String cacheKey = RedisKeyConstants.buildUserKey(id);
+            redisUtil.delete(cacheKey);
+            log.info("清除用户缓存, 缓存键: {}", cacheKey);
+        } catch (Exception e) {
+            log.error("删除用户失败", e);
+            throw new BusinessException("删除用户失败", e);
+        }
+    }
+
+    @Override
+    public void updateUserDetail(Long id, AdminUserDetailVO userDetailVO) {
+        log.info("更新用户详情: {}, {}", id, userDetailVO);
+        try {
+            // 获取原用户信息
+            User user = getUserById(id);
+            if (user == null) {
+                throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
+            }
+
+            // 更新用户基本信息
+            user.setNickname(userDetailVO.getNickname());
+            user.setEmail(userDetailVO.getEmail());
+            user.setPhone(userDetailVO.getPhone());
+            user.setSignature(userDetailVO.getSignature());
+            user.setGender(userDetailVO.getGender());
+            user.setLocation(userDetailVO.getLocation());
+            user.setWebsite(userDetailVO.getWebsite());
+            user.setPrivacy(userDetailVO.getPrivacy());
+            user.setStatus(userDetailVO.getStatus());
+            user.setUpdateTime(LocalDateTime.now());
+
+            // 保存用户基本信息
+            userMapper.updateByPrimaryKeySelective(user);
+
+            // 处理角色更新
+            if (userDetailVO.getRole() != null) {
+                // 删除原有的用户角色关联
+                userRoleMapper.deleteByUserId(id);
+
+                // 创建新的用户角色关联
+                UserRole userRole = new UserRole();
+                userRole.setUserId(id);
+                userRole.setRoleId(userDetailVO.getRole().getCode());
+                userRole.setCreateTime(LocalDateTime.now());
+                userRole.setStatus(StatusEnum.ENABLED);
+                userRole.setDeleted(DeleteStatus.NOT_DELETED);
+                userRoleMapper.insert(userRole);
+
+                log.info("更新用户角色成功: {} -> {}", id, userDetailVO.getRole());
+            }
+
+            // 清除用户信息缓存
+            String cacheKey = RedisKeyConstants.buildUserKey(id);
+            redisUtil.delete(cacheKey);
+            log.info("清除用户信息缓存, 缓存键: {}", cacheKey);
+
+            log.info("用户详情更新成功: {}", id);
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("更新用户详情失败: {}", id, e);
+            throw new BusinessException(ResponseMessage.ERROR, e.getMessage());
+        }
+    }
+
+    @Override
+    public Boolean updateUserStatus(Long id, UserStatus userStatus) {
+        int result = userMapper.updateUserStatus(id, userStatus);
+        // 更新缓存
+        return result > 0;
+    }
+
 }

@@ -171,4 +171,92 @@
             AND deleted = 0
     </update>
 
+    <!-- 管理员评论列表查询 -->
+    <select id="selectCommentsByPage" resultType="com.inkstage.vo.front.ArticleCommentVO">
+        SELECT
+        c.id,
+        c.parent_id,
+        c.content,
+        c.floor,
+        c.like_count,
+        c.reply_count,
+        c.status,
+        c.top,
+        c.mention_user_ids,
+        c.top_order,
+        c.create_time,
+        c.update_time,
+        c.article_id,
+        c.user_id,
+        c.deleted,
+        u.nickname,
+        u.avatar,
+        u.gender,
+        u.status
+        FROM
+        comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE
+        c.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND c.content LIKE CONCAT('%', #{query.keyword}, '%')
+        </if>
+        <if test="query.articleId != null">
+            AND c.article_id = #{query.articleId}
+        </if>
+        <if test="query.userId != null">
+            AND c.user_id = #{query.userId}
+        </if>
+        <if test="query.status != null">
+            AND c.status = #{query.status}
+        </if>
+        ORDER BY
+        c.create_time DESC
+        LIMIT #{query.offset}, #{query.pageSize}
+    </select>
+
+    <!-- 管理员评论总数查询 -->
+    <select id="countCommentsByPage" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comment c
+        WHERE c.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND c.content LIKE CONCAT('%', #{query.keyword}, '%')
+        </if>
+        <if test="query.articleId != null">
+            AND c.article_id = #{query.articleId}
+        </if>
+        <if test="query.userId != null">
+            AND c.user_id = #{query.userId}
+        </if>
+        <if test="query.status != null">
+            AND c.status = #{query.status}
+        </if>
+    </select>
+
+    <!-- 更新评论状态 -->
+    <update id="updateCommentStatus">
+        UPDATE comment
+        SET
+            status = #{status},
+            review_user_id = #{reviewUserId},
+            review_time = NOW(),
+            review_reason = #{reviewReason},
+            update_time = NOW()
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </update>
+
+    <!-- 更新评论置顶状态 -->
+    <update id="updateCommentTop">
+        UPDATE comment
+        SET
+            top = #{top},
+            top_order = #{topOrder},
+            update_time = NOW()
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </update>
 </mapper>

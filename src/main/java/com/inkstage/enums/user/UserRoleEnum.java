@@ -7,7 +7,8 @@ import lombok.Getter;
 public enum UserRoleEnum implements EnumCode {
     SUPER_ADMIN(0, "超级管理员"),
     ADMIN(1, "管理员"),
-    USER(2, "普通用户");
+    USER(2, "普通用户"),
+    GUEST(3, "访客");
 
     private final Integer code;
     private final String desc;

@@ -42,4 +42,32 @@ public interface CommentService {
      */
     boolean deleteComment(Long commentId);
 
+    /**
+     * 管理员分页获取评论列表
+     *
+     * @param pageRequest 分页请求参数
+     * @return 评论列表
+     */
+    PageResult<ArticleCommentVO> getCommentsByPage(com.inkstage.dto.admin.AdminCommentQueryDTO pageRequest);
+
+    /**
+     * 管理员更新评论状态
+     *
+     * @param id 评论ID
+     * @param status 状态
+     * @param reviewReason 审核原因
+     * @return 是否更新成功
+     */
+    boolean updateCommentStatus(Long id, com.inkstage.enums.ReviewStatus status, String reviewReason);
+
+    /**
+     * 管理员更新评论置顶状态
+     *
+     * @param id 评论ID
+     * @param top 置顶状态
+     * @param topOrder 置顶顺序
+     * @return 是否更新成功
+     */
+    boolean updateCommentTop(Long id, com.inkstage.enums.article.TopStatus top, Integer topOrder);
+
 }

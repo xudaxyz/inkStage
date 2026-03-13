@@ -1,5 +1,6 @@
 package com.inkstage.controller.admin;
 
+import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
 import com.inkstage.entity.model.Category;
 import com.inkstage.enums.StatusEnum;
@@ -7,7 +8,6 @@ import com.inkstage.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 /**
  * 管理员分类Controller
@@ -20,14 +20,17 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     /**
-     * 获取所有分类
+     * 获取所有分类（分页）
      *
+     * @param keyword     关键字
+     * @param pageNum     页码
+     * @param pageSize    页大小
      * @return 响应结果
      */
-    @GetMapping
-    public Result<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
-        return Result.success(categories);
+    @GetMapping("/all")
+    public Result<PageResult<Category>> getAllCategories(@RequestParam String keyword, @RequestParam Integer pageNum, @RequestParam Integer pageSize) {
+        PageResult<Category> pageResult = categoryService.getAdminCategories(keyword, pageNum, pageSize);
+        return Result.success(pageResult);
     }
 
     /**

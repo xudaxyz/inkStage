@@ -1,9 +1,11 @@
 package com.inkstage.service.impl;
 
 
+import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
@@ -17,6 +19,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.*;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -716,7 +719,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, com.inkstage.common.PageRequest pageRequest) {
+    public PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, PageRequest pageRequest) {
         try {
             log.info("搜索文章, 关键词: {}, 排序方式: {}, 页码: {}, 每页大小: {}", 
                     keyword, sortBy, pageRequest.getPageNum(), pageRequest.getPageSize());
@@ -766,6 +769,121 @@ public class ArticleServiceImpl implements ArticleService {
             return pageResult;
         } catch (Exception e) {
             log.error("搜索文章失败, 关键词: {}, 排序方式: {}", keyword, sortBy, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    public PageResult<Article> getArticlesByPage(AdminArticleQueryDTO queryDTO) {
+        try {
+            log.info("管理员获取文章列表, 页码: {}, 每页大小: {}, 关键词: {}, 分类ID: {}, 文章状态: {}", 
+                    queryDTO.getPageNum(), queryDTO.getPageSize(), queryDTO.getKeyword(), 
+                    queryDTO.getCategoryId(), queryDTO.getArticleStatus());
+
+            // 计算偏移量
+            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
+            queryDTO.setOffset(offset);
+
+            // 查询文章列表
+            List<Article> articleList = articleMapper.selectByPage(queryDTO);
+            // 查询总记录数
+            long total = articleMapper.countByPage(queryDTO);
+
+            // 构建分页结果
+            PageResult<Article> pageResult = PageResult.build(
+                    articleList,
+                    total,
+                    queryDTO.getPageNum(),
+                    queryDTO.getPageSize()
+            );
+
+            log.info("管理员获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
+            return pageResult;
+        } catch (Exception e) {
+            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
+            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    public Article getArticleById(Long id) {
+        try {
+            log.info("管理员获取文章详情, 文章ID: {}", id);
+            Article article = articleMapper.selectById(id);
+            if (article == null) {
+                log.warn("文章不存在, 文章ID: {}", id);
+                throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
+            }
+            log.info("管理员获取文章详情成功, 文章ID: {}", id);
+            return article;
+        } catch (Exception e) {
+            log.error("管理员获取文章详情失败, 文章ID: {}", id, e);
+            throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND, e.getMessage());
+        }
+    }
+
+    @Override
+    @Transactional
+    public Article updateArticleStatus(Long id, ArticleStatus status) {
+        try {
+            log.info("管理员更新文章状态, 文章ID: {}, 状态: {}", id, status.getDesc());
+
+            // 检查文章是否存在
+            Article article = articleMapper.selectById(id);
+            if (article == null) {
+                log.warn("文章不存在, 文章ID: {}", id);
+                throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
+            }
+
+            // 更新文章状态
+            int result = articleMapper.updateStatus(id, status);
+            if (result <= 0) {
+                log.warn("更新文章状态失败, 文章ID: {}", id);
+                throw new BusinessException(ResponseMessage.ARTICLE_UPDATE_FAILED);
+            }
+
+            // 清除缓存
+            clearArticleDetailCache(id);
+            clearArticleListCache();
+
+            // 重新查询文章
+            Article updatedArticle = articleMapper.selectById(id);
+            log.info("管理员更新文章状态成功, 文章ID: {}, 新状态: {}", id, updatedArticle.getArticleStatus().getDesc());
+            return updatedArticle;
+        } catch (Exception e) {
+            log.error("管理员更新文章状态失败, 文章ID: {}, 状态: {}", id, status.getDesc(), e);
+            throw new BusinessException(ResponseMessage.ARTICLE_UPDATE_FAILED, e.getMessage());
+        }
+    }
+
+    @Override
+    public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
+        try {
+            log.info("管理员获取文章列表, 页码: {}, 每页大小: {}, 关键词: {}, 分类ID: {}, 文章状态: {}", 
+                    queryDTO.getPageNum(), queryDTO.getPageSize(), queryDTO.getKeyword(), 
+                    queryDTO.getCategoryId(), queryDTO.getArticleStatus());
+
+            // 计算偏移量
+            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
+            queryDTO.setOffset(offset);
+
+            // 查询文章列表
+            List<AdminArticleVO> articleList = articleMapper.selectAdminArticlesByPage(queryDTO);
+            // 查询总记录数
+            long total = articleMapper.countByPage(queryDTO);
+
+            // 构建分页结果
+            PageResult<AdminArticleVO> pageResult = PageResult.build(
+                    articleList,
+                    total,
+                    queryDTO.getPageNum(),
+                    queryDTO.getPageSize()
+            );
+
+            log.info("管理员获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
+            return pageResult;
+        } catch (Exception e) {
+            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
         }
     }
