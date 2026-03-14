@@ -131,6 +131,23 @@
             <version>${jspecify.version}</version>
             <scope>provided</scope>
         </dependency>
+        <!-- Jackson Dependencies -->
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>tools.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.20</version>
+            <scope>compile</scope>
+        </dependency>
         <!-- Apache Commons Pool2 -->
         <dependency>
             <groupId>org.apache.commons</groupId>

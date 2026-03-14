@@ -13,59 +13,26 @@ import java.util.List;
 @Mapper
 public interface CategoryMapper {
 
+    // ==================== 查询（Read） ====================
+    
     /**
      * 获取所有分类
      * @return 分类列表
      */
-    List<Category> selectAll();
+    List<Category> findAll();
 
     /**
      * 根据ID获取分类
      * @param id 分类ID
      * @return 分类对象
      */
-    Category selectById(Long id);
+    Category findById(Long id);
 
     /**
      * 获取所有激活状态的分类
      * @return 激活状态的分类列表
      */
-    List<Category> selectActiveCategories();
-
-    /**
-     * 添加分类
-     * @param category 分类对象
-     * @return 影响行数
-     */
-    int insert(Category category);
-
-    /**
-     * 更新分类
-     * @param category 分类对象
-     * @return 影响行数
-     */
-    int update(Category category);
-
-    /**
-     * 删除分类
-     * @param id 分类ID
-     * @return 影响行数
-     */
-    int deleteById(Long id);
-
-    /**
-     * 更新分类状态
-     * @param id 分类ID
-     * @param status 状态
-     */
-    void updateStatus(@Param("id") Long id, @Param("status") StatusEnum status);
-
-    /**
-     * 根据关键字统计分类数量
-     * @param keyword 关键字
-     * @return 数量
-     */
-    Long countByKeyword(String keyword);
+    List<Category> findActiveCategories();
 
     /**
      * 根据关键字分页获取分类
@@ -74,5 +41,57 @@ public interface CategoryMapper {
      * @param pageSize 每页大小
      * @return 分类列表
      */
-    List<Category> selectByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+    List<Category> findByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+    /**
+     * 批量查询分类
+     * @param ids 分类ID列表
+     * @return 分类列表
+     */
+    List<Category> findByIds(@Param("ids") List<Long> ids);
+
+    // ==================== 新增（Create） ====================
+    
+    /**
+     * 添加分类
+     * @param category 分类对象
+     * @return 影响行数
+     */
+    int insert(Category category);
+
+    // ==================== 更新（Update） ====================
+    
+    /**
+     * 更新分类
+     * @param category 分类对象
+     * @return 影响行数
+     */
+    int update(Category category);
+
+    /**
+     * 更新分类状态
+     * @param id 分类ID
+     * @param status 状态
+     * @return 影响行数
+     */
+    int updateStatus(@Param("id") Long id, @Param("status") StatusEnum status);
+
+    // ==================== 删除（Delete） ====================
+    
+    /**
+     * 删除分类
+     * @param id 分类ID
+     * @return 影响行数
+     */
+    int deleteById(Long id);
+
+    // ==================== 统计（Count） ====================
+    
+    /**
+     * 根据关键字统计分类数量
+     * @param keyword 关键字
+     * @return 数量
+     */
+    long countByKeyword(@Param("keyword") String keyword);
+
 }

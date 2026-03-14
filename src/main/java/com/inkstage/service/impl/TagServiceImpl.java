@@ -31,7 +31,7 @@ public class TagServiceImpl implements TagService {
     public List<Tag> getAllTags() {
         log.info("获取所有标签");
         try {
-            return tagMapper.selectAll();
+            return tagMapper.findAll();
         } catch (Exception e) {
             log.error("获取所有标签失败", e);
             throw new BusinessException("获取标签列表失败", e);
@@ -53,7 +53,7 @@ public class TagServiceImpl implements TagService {
             Integer offset = (pageNum - 1) * pageSize;
             
             // 获取分页数据
-            List<Tag> tags = tagMapper.selectByKeyword(keyword, offset, pageSize);
+            List<Tag> tags = tagMapper.findByKeyword(keyword, offset, pageSize);
             
             // 构建分页结果
             return PageResult.build(tags, total, pageNum, pageSize);
@@ -70,7 +70,7 @@ public class TagServiceImpl implements TagService {
             if (id == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
-            return tagMapper.selectById(id);
+            return tagMapper.findById(id);
         } catch (Exception e) {
             log.error("根据ID获取标签失败", e);
             throw new BusinessException("获取标签失败", e);
@@ -81,7 +81,7 @@ public class TagServiceImpl implements TagService {
     public List<Tag> getActiveTags() {
         log.info("获取激活状态标签列表");
         try {
-            return tagMapper.selectActiveTags();
+            return tagMapper.findActiveTags();
         } catch (Exception e) {
             log.error("获取激活状态标签失败", e);
             throw new BusinessException("获取激活标签列表失败", e);
@@ -95,7 +95,7 @@ public class TagServiceImpl implements TagService {
             if (articleId == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
-            return tagMapper.selectByArticleId(articleId);
+            return tagMapper.findByArticleId(articleId);
         } catch (Exception e) {
             log.error("根据文章ID获取标签失败", e);
             throw new BusinessException("获取文章标签失败", e);
@@ -103,7 +103,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void saveArticleTags(Long articleId, List<Long> tagIds) {
         try {
             log.info("保存文章标签关联, 文章ID：{}, 标签ID列表：{}", articleId, tagIds);
@@ -129,7 +129,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteArticleTagsByArticleId(Long articleId) {
         if (articleId == null) {
             throw new IllegalArgumentException("文章ID不能为空");
@@ -176,7 +176,7 @@ public class TagServiceImpl implements TagService {
                 tag.setSlug(tag.getSlug().toLowerCase());
             }
             tagMapper.update(tag);
-            return tagMapper.selectById(tag.getId());
+            return tagMapper.findById(tag.getId());
         } catch (Exception e) {
             log.error("更新标签失败", e);
             throw new BusinessException("更新标签失败", e);
@@ -205,7 +205,7 @@ public class TagServiceImpl implements TagService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             tagMapper.updateStatus(id, status);
-            return tagMapper.selectById(id);
+            return tagMapper.findById(id);
         } catch (Exception e) {
             log.error("更新标签状态失败", e);
             throw new BusinessException("更新标签状态失败", e);

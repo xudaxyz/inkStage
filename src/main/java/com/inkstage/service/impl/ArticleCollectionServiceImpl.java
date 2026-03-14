@@ -92,7 +92,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
             // 发送收藏通知
             String currentUserNickname = UserContext.getCurrentUser().getNickname();
             // 从文章服务获取文章信息
-            Article article = articleMapper.selectById(collectArticleDTO.getArticleId());
+            Article article = articleMapper.findById(collectArticleDTO.getArticleId());
             if (article != null) {
                 Long articleAuthorId = article.getUserId();
                 String articleTitle = article.getTitle();
@@ -130,7 +130,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         }
 
         // 查询收藏记录，获取文件夹ID
-        ArticleCollection collection = articleCollectionMapper.selectByArticleIdAndUserId(articleId, userId);
+        ArticleCollection collection = articleCollectionMapper.findByArticleIdAndUserId(articleId, userId);
         Long folderId = collection != null ? collection.getFolderId() : null;
 
         // 删除收藏记录
@@ -164,8 +164,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         }
 
         // 从数据库查询
-        int count = articleCollectionMapper.countByArticleIdAndUserId(articleId, userId);
-        boolean result = count > 0;
+        boolean result = articleCollectionMapper.findByArticleIdAndUserId(articleId, userId) != null;
 
         // 更新缓存
         redisUtil.set(collectKey, result, 24, TimeUnit.HOURS);
@@ -183,7 +182,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         int offset = (page - 1) * size;
 
         // 查询文章列表
-        List<CollectionArticleVO> collectionArticlesVO = articleCollectionMapper.selectCollectionArticles(
+        List<CollectionArticleVO> collectionArticlesVO = articleCollectionMapper.findCollectionArticles(
                 userId, folderId, keyword, sortBy, sortOrder, offset, size);
 
         // 确保图片URL完整
@@ -242,7 +241,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         }
 
         // 获取当前收藏记录
-        ArticleCollection collection = articleCollectionMapper.selectByArticleIdAndUserId(articleId, userId);
+        ArticleCollection collection = articleCollectionMapper.findByArticleIdAndUserId(articleId, userId);
         if (collection == null) {
             log.warn("收藏记录不存在, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;

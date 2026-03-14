@@ -1,5 +1,6 @@
 package com.inkstage.controller.front;
 
+import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
@@ -9,7 +10,6 @@ import com.inkstage.service.CommentService;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -47,7 +47,7 @@ public class CommentController {
      * @return 评论ID
      */
     @PostMapping("/create")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<?> createComment(@RequestBody CommentDTO commentDTO) {
         log.info("创建评论: {}", commentDTO);
         if (commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
@@ -68,7 +68,7 @@ public class CommentController {
      * @return 是否更新成功
      */
     @PutMapping("/update")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<?> updateComment(@RequestBody CommentDTO commentDTO) {
         log.info("更新评论: {}", commentDTO);
 

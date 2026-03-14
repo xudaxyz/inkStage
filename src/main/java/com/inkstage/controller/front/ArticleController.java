@@ -5,7 +5,6 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.enums.article.ArticleStatus;
-import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleService;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -14,7 +13,7 @@ import com.inkstage.vo.front.MyArticleListVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
+import com.inkstage.annotation.UserAccess;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -38,17 +37,15 @@ public class ArticleController {
      * @return 响应结果
      */
     @PostMapping("/create")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Long> createArticle(@Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("创建文章DTO: {}", articleCreateDTO);
-        // 检查文章DTO参数
-        checkArticleDTO(articleCreateDTO);
 
         Long articleId = articleService.createArticle(articleCreateDTO);
         if (articleId != null) {
-            return Result.success(articleId, "文章创建成功");
+            return Result.success(articleId, ResponseMessage.SUCCESS);
         } else {
-            return Result.error("文章创建失败");
+            return Result.error(ResponseMessage.ARTICLE_DELETE_FAILED);
         }
     }
 
@@ -60,16 +57,14 @@ public class ArticleController {
      * @return 响应结果
      */
     @PutMapping("/update/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Boolean> updateArticle(@PathVariable("id") Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("更新文章DTO: {}, 文章ID: {}", articleCreateDTO, id);
-        // 检查文章DTO参数
-        checkArticleDTO(articleCreateDTO);
         boolean success = articleService.updateArticle(id, articleCreateDTO);
         if (success) {
-            return Result.success("文章更新成功");
+            return Result.success(ResponseMessage.UPDATE_SUCCESS);
         } else {
-            return Result.error("文章更新失败");
+            return Result.error(ResponseMessage.ARTICLE_UPDATE_FAILED);
         }
     }
 
@@ -81,12 +76,10 @@ public class ArticleController {
      * @return 响应结果
      */
     @PutMapping("/draft/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Long> saveDraft(@PathVariable(required = false) Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
-        // 检查文章DTO参数
-        checkArticleDTO(articleCreateDTO);
         Long articleId = articleService.saveDraft(id, articleCreateDTO);
-        return articleId != null ? Result.success(articleId, "草稿保存成功") : Result.error("草稿保存失败");
+        return articleId != null ? Result.success(articleId, ResponseMessage.ARTICLE_DRAFT_SUCCESS) : Result.error(ResponseMessage.ARTICLE_DRAFT_FAILED);
     }
 
     /**
@@ -95,11 +88,11 @@ public class ArticleController {
      * @param id 文章ID
      * @return 响应结果
      */
-    @PostMapping("/delete/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/delete/{id}")
+    @UserAccess
     public Result<Boolean> deleteArticle(@PathVariable Long id) {
         boolean success = articleService.deleteArticle(id);
-        return success ? Result.success(true, "文章已移至回收站") : Result.error("文章删除失败");
+        return success ? Result.success(true, ResponseMessage.ARTICLE_DELETE_SUCCESS) : Result.error(ResponseMessage.ERROR);
     }
 
     /**
@@ -108,11 +101,11 @@ public class ArticleController {
      * @param id 文章ID
      * @return 响应结果
      */
-    @PostMapping("/permanent-delete/{id}")
-    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("/permanent-delete/{id}")
+    @UserAccess
     public Result<Boolean> permanentDeleteArticle(@PathVariable Long id) {
         boolean success = articleService.permanentDeleteArticle(id);
-        return success ? Result.success(true, "文章删除成功") : Result.error("文章删除失败");
+        return success ? Result.success(true, ResponseMessage.SUCCESS) : Result.error(ResponseMessage.ERROR);
     }
 
     /**
@@ -132,29 +125,7 @@ public class ArticleController {
         }
     }
 
-    /**
-     * 检查文章DTO参数
-     *
-     * @param articleCreateDTO 文章创建DTO
-     */
-    private void checkArticleDTO(ArticleCreateDTO articleCreateDTO) {
 
-        String title = articleCreateDTO.getTitle();
-        String content = articleCreateDTO.getContent();
-        List<Long> tagsId = articleCreateDTO.getTagIds();
-
-        if (title == null) {
-            throw new BusinessException(ResponseMessage.TITLE_IS_EMPTY);
-        }
-
-        if (content == null) {
-            throw new BusinessException(ResponseMessage.CONTENT_IS_EMPTY);
-        }
-
-        if (tagsId != null && !tagsId.isEmpty() && tagsId.size() > 10) {
-            throw new BusinessException(ResponseMessage.TAG_COUNT_EXCEEDED, "10");
-        }
-    }
 
     /**
      * 获取指定用户的文章列表
@@ -170,7 +141,7 @@ public class ArticleController {
                                                              @RequestParam(defaultValue = "10") Integer size) {
         log.info("获取用户文章列表, 用户ID: {}, 页码: {}, 每页大小: {}", userId, page, size);
         PageResult<ArticleListVO> pageResult = articleService.getUserArticles(userId, page, size);
-        return Result.success(pageResult, "获取用户文章列表成功");
+        return Result.success(pageResult, ResponseMessage.ARTICLE_LIST_SUCCESS);
     }
 
     /**
@@ -187,7 +158,7 @@ public class ArticleController {
                                                                 @RequestParam(defaultValue = "3") Integer limit) {
         log.info("获取作者相关文章, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit);
         List<ArticleListVO> relatedArticles = articleService.getAuthorRelatedArticles(userId, excludeArticleId, limit);
-        return Result.success(relatedArticles, "获取作者相关文章成功");
+        return Result.success(relatedArticles, ResponseMessage.ARTICLE_LIST_SUCCESS);
     }
 
     /**
@@ -197,11 +168,11 @@ public class ArticleController {
      * @return 响应结果
      */
     @PostMapping("/like/{articleId}")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Boolean> likeArticle(@PathVariable Long articleId) {
         log.info("点赞文章, 文章ID: {}", articleId);
         boolean success = articleLikeService.likeArticle(articleId);
-        return success ? Result.success(true, "点赞成功") : Result.error("点赞失败");
+        return success ? Result.success(true, ResponseMessage.ARTICLE_LIKE_SUCCESS) : Result.error(ResponseMessage.ARTICLE_LIKE_FAILED);
     }
 
     /**
@@ -211,11 +182,11 @@ public class ArticleController {
      * @return 响应结果
      */
     @DeleteMapping("/like/{articleId}")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Boolean> unlikeArticle(@PathVariable Long articleId) {
         log.info("取消点赞, 文章ID: {}", articleId);
         boolean success = articleLikeService.unlikeArticle(articleId);
-        return success ? Result.success(true, "取消点赞成功") : Result.error("取消点赞失败");
+        return success ? Result.success(true, ResponseMessage.ARTICLE_UNLIKE_SUCCESS) : Result.error(ResponseMessage.ARTICLE_UNLIKE_FAILED);
     }
 
     /**
@@ -225,11 +196,11 @@ public class ArticleController {
      * @return 响应结果
      */
     @GetMapping("/like/{articleId}/status")
-    @PreAuthorize("isAuthenticated()")
+    @UserAccess
     public Result<Boolean> checkArticleLikeStatus(@PathVariable Long articleId) {
         log.info("检查文章点赞状态, 文章ID: {}", articleId);
         boolean isLiked = articleLikeService.isArticleLiked(articleId);
-        return Result.success(isLiked, "获取点赞状态成功");
+        return Result.success(isLiked, ResponseMessage.SUCCESS);
     }
 
 
@@ -251,19 +222,24 @@ public class ArticleController {
      *
      * @param articleStatus 我的文章状态
      * @param keyword       搜索关键词
-     * @param page          页码
-     * @param size          每页大小
+     * @param pageNum       页码
+     * @param pageSize      每页大小
      * @return 文章列表分页结果
      */
-    @GetMapping("/my")
-    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/my-articles")
+    @UserAccess
     public Result<PageResult<MyArticleListVO>> getMyArticles(
             @RequestParam ArticleStatus articleStatus,
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size) {
-        log.info("获取当前用户文章列表, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus, keyword, page, size);
-        PageResult<MyArticleListVO> pageResult = articleService.getMyArticles(articleStatus, keyword, page, size);
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("获取当前用户文章列表, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus, keyword, pageNum, pageSize);
+        com.inkstage.dto.front.MyArticleQueryDTO queryDTO = new com.inkstage.dto.front.MyArticleQueryDTO();
+        queryDTO.setArticleStatus(articleStatus);
+        queryDTO.setKeyword(keyword);
+        queryDTO.setPageNum(pageNum);
+        queryDTO.setPageSize(pageSize);
+        PageResult<MyArticleListVO> pageResult = articleService.getMyArticles(queryDTO);
         return Result.success(pageResult);
     }
 

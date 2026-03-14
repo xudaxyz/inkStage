@@ -1,10 +1,14 @@
 package com.inkstage.service;
 
+import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
+import com.inkstage.dto.front.MyArticleQueryDTO;
+import com.inkstage.entity.model.Article;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -13,29 +17,29 @@ import java.util.List;
 
 /**
  * 文章服务接口
+ * 提供文章的创建、查询、更新、删除等核心功能
  */
 public interface ArticleService {
 
     /**
      * 创建文章
      *
-     * @param articleCreateDTO 文章创建DTO
+     * @param articleCreateDTO 文章创建DTO，包含文章标题、内容、分类等信息
      * @return 文章ID
      */
     Long createArticle(ArticleCreateDTO articleCreateDTO);
-
 
     /**
      * 保存草稿
      *
      * @param articleId        文章ID(如果为null则创建新草稿)
-     * @param articleCreateDTO 文章DTO
+     * @param articleCreateDTO 文章DTO，包含草稿内容
      * @return 文章ID
      */
     Long saveDraft(Long articleId, ArticleCreateDTO articleCreateDTO);
 
     /**
-     * 删除文章
+     * 删除文章（软删除）
      *
      * @param id 文章ID
      * @return 是否成功
@@ -45,7 +49,7 @@ public interface ArticleService {
     /**
      * 获取文章列表
      *
-     * @param queryDTO 查询参数
+     * @param queryDTO 查询参数，包含分类、标签、排序等条件
      * @return 分页结果
      */
     PageResult<ArticleListVO> getArticles(ArticleQueryDTO queryDTO);
@@ -54,7 +58,7 @@ public interface ArticleService {
      * 获取文章详情
      *
      * @param articleId 文章ID
-     * @return 文章详情
+     * @return 文章详情，包含完整的文章内容和相关信息
      */
     ArticleDetailVO getArticleDetail(Long articleId);
 
@@ -62,7 +66,7 @@ public interface ArticleService {
      * 更新文章
      *
      * @param articleId        文章ID
-     * @param articleCreateDTO 文章更新DTO
+     * @param articleCreateDTO 文章更新DTO，包含更新后的文章信息
      * @return 是否成功
      */
     boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO);
@@ -95,12 +99,12 @@ public interface ArticleService {
     /**
      * 获取指定用户的文章列表
      *
-     * @param userId 用户ID
-     * @param page   页码
-     * @param size   每页数量
+     * @param userId   用户ID
+     * @param pageNum  页码
+     * @param pageSize 每页数量
      * @return 分页结果
      */
-    PageResult<ArticleListVO> getUserArticles(Long userId, Integer page, Integer size);
+    PageResult<ArticleListVO> getUserArticles(Long userId, Integer pageNum, Integer pageSize);
 
     /**
      * 获取作者相关文章（排除当前文章）
@@ -115,13 +119,10 @@ public interface ArticleService {
     /**
      * 获取当前用户的文章列表，支持按状态过滤和搜索
      *
-     * @param articleStatus    文章状态
-     * @param keyword   搜索关键词
-     * @param page      页码
-     * @param size      每页数量
+     * @param queryDTO 我的文章查询DTO，包含状态、关键词、分页等参数
      * @return 分页结果
      */
-    PageResult<MyArticleListVO> getMyArticles(ArticleStatus articleStatus, String keyword, Integer page, Integer size);
+    PageResult<MyArticleListVO> getMyArticles(MyArticleQueryDTO queryDTO);
 
     /**
      * 增加文章阅读数
@@ -133,6 +134,7 @@ public interface ArticleService {
 
     /**
      * 彻底删除文章
+     *
      * @param id 文章ID
      * @return 是否成功
      */
@@ -140,40 +142,38 @@ public interface ArticleService {
 
     /**
      * 搜索文章
-     * @param keyword 搜索关键词
-     * @param sortBy 排序方式：relevance, publishTime, readCount
-     * @param pageRequest 分页参数
+     *
+     * @param keyword   搜索关键词
+     * @param sortBy    排序方式：relevance, publishTime, readCount
+     * @param pageNum   页码
+     * @param pageSize  每页数量
      * @return 分页结果
      */
-    PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, com.inkstage.common.PageRequest pageRequest);
+    PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, Integer pageNum, Integer pageSize);
 
     /**
      * 分页获取所有文章（管理员）
-     * @param queryDTO 文章查询DTO
+     *
+     * @param queryDTO 文章查询DTO，包含状态、关键词、分页等参数
      * @return 分页结果
      */
-    PageResult<com.inkstage.vo.admin.AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO);
-
-    /**
-     * 分页获取所有文章（管理员，旧方法）
-     * @param queryDTO 文章查询DTO
-     * @return 分页结果
-     */
-    PageResult<com.inkstage.entity.model.Article> getArticlesByPage(AdminArticleQueryDTO queryDTO);
+    PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO);
 
     /**
      * 根据ID获取文章（管理员）
+     *
      * @param id 文章ID
      * @return 文章信息
      */
-    com.inkstage.entity.model.Article getArticleById(Long id);
+    Article getArticleById(Long id);
 
     /**
      * 更新文章状态（管理员）
-     * @param id 文章ID
+     *
+     * @param id     文章ID
      * @param status 文章状态
      * @return 更新后的文章
      */
-    com.inkstage.entity.model.Article updateArticleStatus(Long id, ArticleStatus status);
+    Article updateArticleStatus(Long id, ArticleStatus status);
 
 }

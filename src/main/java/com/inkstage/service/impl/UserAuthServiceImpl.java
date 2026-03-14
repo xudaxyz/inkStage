@@ -78,6 +78,11 @@ public class UserAuthServiceImpl implements UserAuthService {
             String account = authDTO.getAccount();
             String password = authDTO.getPassword();
             AuthType authType = authDTO.getAuthType();
+            
+            // 检查认证类型
+            if (authType == null) {
+                throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
+            }
 
             // 验证码注册
             if (AuthType.CODE == authType) {

@@ -97,8 +97,68 @@ public enum ResponseMessage {
     UPDATED_FORBIDDEN("无更新权限"),
     DELETED_FORBIDDEN("无删除权限"),
     USER_NOT_LOGGED_IN("用户未登录"),
+    NOT_LOGIN("用户未登录"),
+    NO_PERMISSION("权限不足"),
+    RESOURCE_NOT_FOUND("资源不存在"),
+    RESOURCE_EXISTS("资源已存在"),
     COLLECTION_DEFAULT_FOLDER_EXIST("默认收藏夹已存在"),
-    COLLECTION_FOLDER_EXIST("收藏夹{}已存在");
+    COLLECTION_FOLDER_EXIST("收藏夹{}已存在"),
+    
+    // 文章相关成功消息
+    ARTICLE_LIST_SUCCESS("获取文章列表成功"),
+    ARTICLE_DETAIL_SUCCESS("获取文章详情成功"),
+    ARTICLE_CREATE_SUCCESS("创建文章成功"),
+    ARTICLE_UPDATE_SUCCESS("更新文章成功"),
+    ARTICLE_DELETE_SUCCESS("删除文章成功"),
+    ARTICLE_STATUS_UPDATE_SUCCESS("更新文章状态成功"),
+    ARTICLE_DRAFT_SUCCESS("草稿保存成功"),
+    ARTICLE_LIKE_SUCCESS("点赞成功"),
+    ARTICLE_UNLIKE_SUCCESS("取消点赞成功"),
+    ARTICLE_READ_COUNT_INCREMENT_SUCCESS("增加文章阅读数成功"),
+    
+    // 分类相关成功消息
+    CATEGORY_LIST_SUCCESS("获取分类列表成功"),
+    CATEGORY_DETAIL_SUCCESS("获取分类详情成功"),
+    CATEGORY_CREATE_SUCCESS("添加分类成功"),
+    CATEGORY_UPDATE_SUCCESS("更新分类成功"),
+    CATEGORY_DELETE_SUCCESS("删除分类成功"),
+    CATEGORY_STATUS_UPDATE_SUCCESS("更新分类状态成功"),
+    
+    // 标签相关成功消息
+    TAG_LIST_SUCCESS("获取标签列表成功"),
+    TAG_DETAIL_SUCCESS("获取标签详情成功"),
+    TAG_CREATE_SUCCESS("添加标签成功"),
+    TAG_UPDATE_SUCCESS("更新标签成功"),
+    TAG_DELETE_SUCCESS("删除标签成功"),
+    TAG_STATUS_UPDATE_SUCCESS("更新标签状态成功"),
+    
+    // 评论相关成功消息
+    COMMENT_LIST_SUCCESS("获取评论列表成功"),
+    COMMENT_CREATE_SUCCESS("创建评论成功"),
+    COMMENT_UPDATE_SUCCESS("更新评论成功"),
+    COMMENT_DELETE_SUCCESS("删除评论成功"),
+    COMMENT_STATUS_UPDATE_SUCCESS("更新评论状态成功"),
+    COMMENT_TOP_UPDATE_SUCCESS("更新评论置顶状态成功"),
+    
+    // 用户相关成功消息
+    USER_LIST_SUCCESS("获取用户列表成功"),
+    USER_DETAIL_SUCCESS("获取用户详情成功"),
+    USER_DELETE_SUCCESS("删除用户成功"),
+    USER_UPDATE_SUCCESS("更新用户成功"),
+    USER_STATUS_UPDATE_SUCCESS("更新用户状态成功"),
+    USER_ROLE_UPDATE_SUCCESS("更新用户角色成功"),
+    USER_PROFILE_UPDATE_SUCCESS("更新用户个人资料成功"),
+    
+    // 收藏相关成功消息
+    ARTICLE_COLLECT_SUCCESS("收藏成功"),
+    ARTICLE_UN_COLLECT_SUCCESS("取消收藏成功"),
+    COLLECTION_FOLDER_CREATE_SUCCESS("创建收藏文件夹成功"),
+    COLLECTION_FOLDER_UPDATE_SUCCESS("更新收藏文件夹成功"),
+    COLLECTION_FOLDER_DELETE_SUCCESS("删除收藏文件夹成功"),
+    COLLECTION_ARTICLE_MOVE_SUCCESS("移动收藏文章成功"),
+    
+    // 文件相关成功消息
+    FILE_DELETE_SUCCESS("文件删除成功");
 
     private final String message;
 

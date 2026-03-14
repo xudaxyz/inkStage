@@ -28,7 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> getAllCategories() {
         log.info("获取所有分类");
         try {
-            return categoryMapper.selectAll();
+            return categoryMapper.findAll();
         } catch (Exception e) {
             log.error("获取所有分类失败", e);
             throw new BusinessException("获取分类列表失败", e);
@@ -50,7 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
             int offset = (pageNum - 1) * pageSize;
             
             // 获取分页数据
-            List<Category> categories = categoryMapper.selectByKeyword(keyword, offset, pageSize);
+            List<Category> categories = categoryMapper.findByKeyword(keyword, offset, pageSize);
             
             // 构建分页结果
             return PageResult.build(categories, total, pageNum, pageSize);
@@ -67,7 +67,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (id == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
-            return categoryMapper.selectById(id);
+            return categoryMapper.findById(id);
         } catch (Exception e) {
             log.error("根据ID获取分类失败", e);
             throw new BusinessException("获取分类失败", e);
@@ -78,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> getActiveCategories() {
         log.info("获取激活状态分类");
         try {
-            return categoryMapper.selectActiveCategories();
+            return categoryMapper.findActiveCategories();
         } catch (Exception e) {
             log.error("获取激活状态分类失败", e);
             throw new BusinessException("获取激活分类列表失败", e);
@@ -126,7 +126,7 @@ public class CategoryServiceImpl implements CategoryService {
                 category.setSlug(category.getSlug().toLowerCase());
             }
             categoryMapper.update(category);
-            return categoryMapper.selectById(category.getId());
+            return categoryMapper.findById(category.getId());
         } catch (Exception e) {
             log.error("更新分类失败", e);
             throw new BusinessException("更新分类失败", e);
@@ -155,7 +155,7 @@ public class CategoryServiceImpl implements CategoryService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             categoryMapper.updateStatus(id, status);
-            return categoryMapper.selectById(id);
+            return categoryMapper.findById(id);
         } catch (Exception e) {
             log.error("更新分类状态失败", e);
             throw new BusinessException("更新分类状态失败", e);

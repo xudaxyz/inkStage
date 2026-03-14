@@ -6,30 +6,31 @@ import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.vo.front.ArticleCommentVO;
 
 /**
- * 评论Service接口
+ * 评论服务接口
+ * 提供评论的创建、查询、更新、删除等核心功能
  */
 public interface CommentService {
 
     /**
      * 获取评论列表
      *
-     * @param queryDTO 评论查询参数
-     * @return 评论列表
+     * @param queryDTO 评论查询参数，包含文章ID、分页等信息
+     * @return 评论列表，按树形结构组织
      */
     PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO);
 
     /**
      * 创建评论
      *
-     * @param commentDTO 评论DTO
-     * @return 评论ID
+     * @param commentDTO 评论DTO，包含文章ID、内容、父评论ID等信息
+     * @return 是否创建成功
      */
     boolean createComment(CommentDTO commentDTO);
 
     /**
      * 更新评论
      *
-     * @param commentDTO 评论DTO
+     * @param commentDTO 评论DTO，包含评论ID、更新后的内容等信息
      * @return 是否更新成功
      */
     boolean updateComment(CommentDTO commentDTO);
@@ -45,7 +46,7 @@ public interface CommentService {
     /**
      * 管理员分页获取评论列表
      *
-     * @param pageRequest 分页请求参数
+     * @param pageRequest 分页请求参数，包含关键词、状态等过滤条件
      * @return 评论列表
      */
     PageResult<ArticleCommentVO> getCommentsByPage(com.inkstage.dto.admin.AdminCommentQueryDTO pageRequest);
@@ -53,8 +54,8 @@ public interface CommentService {
     /**
      * 管理员更新评论状态
      *
-     * @param id 评论ID
-     * @param status 状态
+     * @param id          评论ID
+     * @param status      状态
      * @param reviewReason 审核原因
      * @return 是否更新成功
      */
@@ -63,8 +64,8 @@ public interface CommentService {
     /**
      * 管理员更新评论置顶状态
      *
-     * @param id 评论ID
-     * @param top 置顶状态
+     * @param id       评论ID
+     * @param top      置顶状态
      * @param topOrder 置顶顺序
      * @return 是否更新成功
      */

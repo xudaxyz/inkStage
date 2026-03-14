@@ -1,6 +1,8 @@
 package com.inkstage.controller.admin;
 
+import com.inkstage.annotation.AdminAccess;
 import com.inkstage.common.PageResult;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.enums.user.UserRoleEnum;
@@ -31,11 +33,12 @@ public class AdminUserController {
      * @param userQueryDTO 分页请求
      * @return 响应结果
      */
-    @PostMapping("/all")
+    @PostMapping("/list")
+    @AdminAccess
     public Result<PageResult<AdminUserListVO>> getUsersByPage(@RequestBody AdminUserQueryDTO userQueryDTO) {
         log.info("查询用户参数: {}", userQueryDTO);
         PageResult<AdminUserListVO> pageResult = userService.getUsersByPage(userQueryDTO);
-        return Result.success(pageResult);
+        return Result.success(pageResult, ResponseMessage.USER_LIST_SUCCESS);
     }
 
     /**
@@ -44,10 +47,12 @@ public class AdminUserController {
      * @param id 用户ID
      * @return 响应结果
      */
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
+    @AdminAccess
     public Result<AdminUserDetailVO> getUserById(@PathVariable Long id) {
+        log.info("获取用户详情, 用户ID: {}", id);
         AdminUserDetailVO userDetailVO = userService.getUserDetailById(id);
-        return Result.success(userDetailVO);
+        return Result.success(userDetailVO, ResponseMessage.USER_DETAIL_SUCCESS);
     }
 
     /**
@@ -56,10 +61,12 @@ public class AdminUserController {
      * @param id 用户ID
      * @return 响应结果
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
+    @AdminAccess
     public Result<Void> deleteUser(@PathVariable Long id) {
+        log.info("删除用户, 用户ID: {}", id);
         userService.deleteUser(id);
-        return Result.success();
+        return Result.success(ResponseMessage.USER_DELETE_SUCCESS);
     }
 
     /**
@@ -69,11 +76,13 @@ public class AdminUserController {
      * @param userDetailVO 用户详情
      * @return 响应结果
      */
-    @PutMapping("/{id}")
+    @PutMapping("/update/{id}")
+    @AdminAccess
     public Result<AdminUserDetailVO> updateUser(@PathVariable Long id, @RequestBody AdminUserDetailVO userDetailVO) {
+        log.info("更新用户, 用户ID: {}, 用户详情: {}", id, userDetailVO);
         userService.updateUserDetail(id, userDetailVO);
         AdminUserDetailVO updatedUser = userService.getUserDetailById(id);
-        return Result.success(updatedUser);
+        return Result.success(updatedUser, ResponseMessage.USER_UPDATE_SUCCESS);
     }
 
     /**
@@ -83,30 +92,34 @@ public class AdminUserController {
      * @param userStatus 用户状态
      * @return 响应结果
      */
-    @PutMapping("/update-status/{id}")
+    @PutMapping("/status/{id}")
+    @AdminAccess
     public Result<?> updateUserStatus(@PathVariable Long id, @RequestBody UserStatus userStatus) {
+        log.info("更新用户状态, 用户ID: {}, 状态: {}", id, userStatus);
         Boolean result = userService.updateUserStatus(id, userStatus);
         if (result) {
-            return Result.success("更新用户状态成功");
+            return Result.success(ResponseMessage.USER_STATUS_UPDATE_SUCCESS);
         } else {
-            return Result.error("更新用户状态失败");
+            return Result.error(ResponseMessage.UPDATE_FAILED);
         }
     }
 
     /**
-     * 更新用角色
+     * 更新用户角色
      *
      * @param id       用户ID
      * @param userRole 用户角色
      * @return 响应结果
      */
-    @PutMapping("/update-role/{id}")
+    @PutMapping("/role/{id}")
+    @AdminAccess
     public Result<?> updateUserRole(@PathVariable Long id, @RequestBody UserRoleEnum userRole) {
+        log.info("更新用户角色, 用户ID: {}, 角色: {}", id, userRole);
         Boolean result = userRoleService.updateUserRole(id, userRole);
         if (result) {
-            return Result.success("更新用户角色成功");
+            return Result.success(ResponseMessage.USER_ROLE_UPDATE_SUCCESS);
         } else {
-            return Result.error("更新用户角色失败");
+            return Result.error(ResponseMessage.UPDATE_FAILED);
         }
     }
 

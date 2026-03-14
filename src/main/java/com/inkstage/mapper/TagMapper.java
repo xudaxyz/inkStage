@@ -14,12 +14,14 @@ import java.util.List;
 @Mapper
 public interface TagMapper {
 
+    // ==================== 查询（Read） ====================
+    
     /**
      * 获取所有标签
      *
      * @return 标签列表
      */
-    List<Tag> selectAll();
+    List<Tag> findAll();
 
     /**
      * 根据ID获取标签
@@ -27,14 +29,14 @@ public interface TagMapper {
      * @param id 标签ID
      * @return 标签对象
      */
-    Tag selectById(Long id);
+    Tag findById(Long id);
 
     /**
      * 获取所有激活状态的标签
      *
      * @return 激活状态的标签列表
      */
-    List<Tag> selectActiveTags();
+    List<Tag> findActiveTags();
 
     /**
      * 根据文章ID获取关联的标签
@@ -42,7 +44,35 @@ public interface TagMapper {
      * @param articleId 文章ID
      * @return 标签列表
      */
-    List<Tag> selectByArticleId(Long articleId);
+    List<Tag> findByArticleId(Long articleId);
+
+    /**
+     * 根据关键字分页获取标签
+     *
+     * @param keyword 关键字
+     * @param offset 分页偏移量
+     * @param pageSize 每页大小
+     * @return 标签列表
+     */
+    List<Tag> findByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+    /**
+     * 批量查询标签
+     *
+     * @param ids 标签ID列表
+     * @return 标签列表
+     */
+    List<Tag> findByIds(@Param("ids") List<Long> ids);
+
+    // ==================== 新增（Create） ====================
+    
+    /**
+     * 插入标签
+     *
+     * @param tag 标签对象
+     * @return 影响行数
+     */
+    int insert(Tag tag);
 
     /**
      * 插入文章与标签的关联
@@ -53,21 +83,15 @@ public interface TagMapper {
     int insertArticleTag(ArticleTag articleTag);
 
     /**
-     * 删除文章的所有标签关联
+     * 批量插入文章标签关联
      *
-     * @param articleId 文章ID
+     * @param articleTags 文章标签关联列表
      * @return 影响行数
      */
-    int deleteArticleTagsByArticleId(Long articleId);
+    int batchInsertArticleTags(@Param("articleTags") List<ArticleTag> articleTags);
 
-    /**
-     * 插入标签
-     *
-     * @param tag 标签对象
-     * @return 影响行数
-     */
-    int insert(Tag tag);
-
+    // ==================== 更新（Update） ====================
+    
     /**
      * 更新标签
      *
@@ -77,6 +101,17 @@ public interface TagMapper {
     int update(Tag tag);
 
     /**
+     * 更新标签状态
+     *
+     * @param id     标签ID
+     * @param status 状态
+     * @return 影响行数
+     */
+    int updateStatus(@Param("id") Long id, @Param("status") StatusEnum status);
+
+    // ==================== 删除（Delete） ====================
+    
+    /**
      * 根据ID删除标签
      *
      * @param id 标签ID
@@ -85,29 +120,23 @@ public interface TagMapper {
     int deleteById(Long id);
 
     /**
-     * 更新标签状态
+     * 删除文章的所有标签关联
      *
-     * @param id     标签ID
-     * @param status 状态
+     * @param articleId 文章ID
      * @return 影响行数
      */
-    int updateStatus(Long id, StatusEnum status);
+    int deleteArticleTagsByArticleId(Long articleId);
 
+    // ==================== 统计（Count） ====================
+    
     /**
      * 根据关键字统计标签总数
      *
      * @param keyword 关键字
      * @return 总数
      */
-    Long countByKeyword(@Param("keyword") String keyword);
+    long countByKeyword(@Param("keyword") String keyword);
 
-    /**
-     * 根据关键字分页获取标签
-     *
-     * @param keyword 关键字
-      * @param offset 分页偏移量
-     * @param pageSize 每页大小
-     * @return 标签列表
-     */
-    List<Tag> selectByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
+
+
 }

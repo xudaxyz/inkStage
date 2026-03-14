@@ -1,6 +1,5 @@
 package com.inkstage.controller.front;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
 import com.inkstage.service.ArticleService;
@@ -29,13 +28,10 @@ public class SearchController {
     @GetMapping("/articles")
     public Result<PageResult<ArticleListVO>> searchArticles(
             @RequestParam String keyword,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer size,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "relevance") String sortBy) {
-        PageRequest pageRequest = new PageRequest();
-        pageRequest.setPageNum(page);
-        pageRequest.setPageSize(size);
-        PageResult<ArticleListVO> result = articleService.searchArticles(keyword, sortBy, pageRequest);
+        PageResult<ArticleListVO> result = articleService.searchArticles(keyword, sortBy, pageNum, pageSize);
         return Result.success(result);
     }
 

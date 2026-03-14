@@ -65,7 +65,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 发送点赞通知
             String currentUserNickname = UserContext.getCurrentUser().getNickname();
             // 从文章服务获取文章信息
-            Article article = articleMapper.selectById(articleId);
+            Article article = articleMapper.findById(articleId);
             if (article != null) {
                 Long articleAuthorId = article.getUserId();
                 String articleTitle = article.getTitle();
@@ -122,15 +122,13 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
         String likeKey = RedisKeyConstants.buildCacheKey("article:like", articleId + ":" + userId);
-        Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {
-        });
+        Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {});
         if (isLiked != null) {
             return isLiked;
         }
 
         // 从数据库查询
-        int count = articleLikeMapper.countByArticleIdAndUserId(articleId, userId);
-        boolean result = count > 0;
+        boolean result = articleLikeMapper.findByArticleIdAndUserId(articleId, userId) != null;
 
         // 更新缓存
         redisUtil.set(likeKey, result, 24, TimeUnit.HOURS);

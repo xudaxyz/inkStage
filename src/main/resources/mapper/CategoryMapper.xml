@@ -23,13 +23,13 @@
     </sql>
 
     <!-- 获取所有分类 -->
-    <select id="selectAll" resultMap="ResultMap">
+    <select id="findAll" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category
         ORDER BY sort_order ASC, id ASC
     </select>
 
     <!-- 分页获取分类 -->
-    <select id="selectByKeyword" resultMap="ResultMap">
+    <select id="findByKeyword" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category
         <where>
             <if test="keyword != null">
@@ -51,13 +51,13 @@
     </select>
 
     <!-- 根据ID获取分类 -->
-    <select id="selectById" resultMap="ResultMap">
+    <select id="findById" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category
         WHERE id = #{id}
     </select>
 
     <!-- 获取所有激活状态的分类 -->
-    <select id="selectActiveCategories" resultMap="ResultMap">
+    <select id="findActiveCategories" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category
         WHERE status = 1
         ORDER BY sort_order ASC, id ASC
@@ -95,5 +95,14 @@
             status = #{status}
         WHERE id = #{id}
     </update>
+
+    <!-- 批量查询分类 -->
+    <select id="findByIds" parameterType="java.util.List" resultMap="ResultMap">
+        SELECT <include refid="baseColumns" /> FROM category
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
 
 </mapper>

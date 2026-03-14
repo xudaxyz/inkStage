@@ -47,7 +47,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
             }
 
             // 检查文章是否存在
-            Article article = articleMapper.selectById(dto.getArticleId());
+            Article article = articleMapper.findById(dto.getArticleId());
             if (article == null) {
                 log.warn("文章不存在: {}", dto.getArticleId());
                 return false;

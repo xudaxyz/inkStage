@@ -25,4 +25,47 @@
         #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
+
+    <!-- 根据用户ID和认证类型查询认证信息 -->
+    <select id="findByUserIdAndType" resultMap="ResultMap">
+        SELECT * FROM user_auth
+        WHERE user_id = #{userId} AND auth_type = #{authType} AND deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询所有认证信息 -->
+    <select id="findByUserId" resultMap="ResultMap">
+        SELECT * FROM user_auth
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <!-- 根据认证标识和类型查询认证信息 -->
+    <select id="findByIdentifierAndType" resultMap="ResultMap">
+        SELECT * FROM user_auth
+        WHERE auth_identifier = #{identifier} AND auth_type = #{authType} AND deleted = 0
+    </select>
+
+    <!-- 更新用户认证信息 -->
+    <update id="update" parameterType="com.inkstage.entity.model.UserAuth">
+        UPDATE user_auth
+        SET
+            auth_identifier = #{authIdentifier},
+            auth_credential = #{authCredential},
+            primary_auth = #{primaryAuth},
+            update_time = #{updateTime}
+        WHERE
+            id = #{id}
+            AND deleted = 0
+    </update>
+
+    <!-- 删除用户认证信息 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM user_auth
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 根据用户ID删除所有认证信息 -->
+    <delete id="deleteByUserId" parameterType="java.lang.Long">
+        DELETE FROM user_auth
+        WHERE user_id = #{userId}
+    </delete>
 </mapper>

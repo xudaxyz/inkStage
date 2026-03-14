@@ -12,6 +12,8 @@ import java.util.List;
 @Mapper
 public interface CollectionFolderMapper {
 
+    // ==================== 查询（Read） ====================
+    
     /**
      * 根据ID查询收藏文件夹
      *
@@ -30,6 +32,24 @@ public interface CollectionFolderMapper {
     CollectionFolder selectByUserIdAndName(@Param("userId") Long userId, @Param("name") String name);
 
     /**
+     * 根据用户ID查询收藏文件夹列表
+     *
+     * @param userId 用户ID
+     * @return 收藏文件夹列表
+     */
+    List<CollectionFolder> selectByUserId(Long userId);
+
+    /**
+     * 根据用户ID和文件夹ID查询收藏文件夹
+     * @param userId 用户ID
+     * @param folderId 文件夹ID
+     * @return 收藏文件夹
+     */
+    CollectionFolder selectByUserIdAndFolderId(@Param("userId") Long userId, @Param("folderId") Long folderId);
+
+    // ==================== 新增（Create） ====================
+    
+    /**
      * 插入收藏文件夹
      *
      * @param folder 收藏文件夹
@@ -37,6 +57,8 @@ public interface CollectionFolderMapper {
      */
     int insert(CollectionFolder folder);
 
+    // ==================== 更新（Update） ====================
+    
     /**
      * 更新收藏文件夹
      *
@@ -54,6 +76,8 @@ public interface CollectionFolderMapper {
      */
     int updateArticleCount(@Param("folderId") Long folderId, @Param("count") Integer count);
 
+    // ==================== 删除（Delete） ====================
+    
     /**
      * 删除收藏文件夹
      *
@@ -61,21 +85,5 @@ public interface CollectionFolderMapper {
      * @return 影响行数
      */
     int deleteById(Long id);
-
-    /**
-     * 根据用户ID查询收藏文件夹列表
-     *
-     * @param userId 用户ID
-     * @return 收藏文件夹列表
-     */
-    List<CollectionFolder> selectByUserId(Long userId);
-
-    /**
-     * 根据用户ID和文件夹ID查询收藏文件夹
-     * @param userId 用户ID
-     * @param folderId 文件夹ID
-     * @return 收藏文件夹
-     */
-    CollectionFolder selectByUserIdAndFolderId(@Param("userId") Long userId, @Param("folderId") Long folderId);
 
 }

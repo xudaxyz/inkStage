@@ -9,6 +9,7 @@ import com.inkstage.service.VerifyCodeService;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,7 +34,7 @@ public class AuthController {
      * @return 注册结果, 包含令牌信息
      */
     @PostMapping("/register")
-    public Result<TokenResponse> register(@RequestBody AuthDTO authDTO) {
+    public Result<TokenResponse> register(@RequestBody @Valid AuthDTO authDTO) {
         TokenResponse tokenResponse = userAuthService.register(authDTO);
         if (tokenResponse != null) {
             return Result.success(tokenResponse, ResponseMessage.REGISTER_SUCCESS);
@@ -49,7 +50,7 @@ public class AuthController {
      * @return 登录结果, 包含令牌信息
      */
     @PostMapping("/login")
-    public Result<TokenResponse> login(@RequestBody AuthDTO authDTO) {
+    public Result<TokenResponse> login(@RequestBody @Valid AuthDTO authDTO) {
         TokenResponse tokenResponse = userAuthService.login(authDTO);
         if (tokenResponse != null) {
             return Result.success(tokenResponse, ResponseMessage.LOGIN_SUCCESS);
@@ -65,7 +66,7 @@ public class AuthController {
      * @return 是否发送成功
      */
     @PostMapping("/send-code")
-    public Result<?> sendCode(@RequestBody SendCodeDTO sendCodeDTO) {
+    public Result<?> sendCode(@RequestBody @Valid SendCodeDTO sendCodeDTO) {
         log.info("sendCode to: {}", sendCodeDTO.getAccount());
         boolean success = verifyCodeService.sendCode(sendCodeDTO);
         if (success) {

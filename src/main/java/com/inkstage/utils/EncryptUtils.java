@@ -1,13 +1,19 @@
 package com.inkstage.utils;
 
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
 
 /**
  * 加密工具类
  */
+@Component
 public class EncryptUtils {
 
-    private static final BCryptPasswordEncoder PASSWORD_ENCODER = new BCryptPasswordEncoder();
+    private final PasswordEncoder passwordEncoder;
+
+    public EncryptUtils(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
 
     /**
      * 加密密码
@@ -15,11 +21,11 @@ public class EncryptUtils {
      * @param password 原始密码
      * @return 加密后的密码
      */
-    public static String encodePassword(String password) {
+    public String encodePassword(String password) {
         if (password == null || password.isEmpty()) {
             throw new IllegalArgumentException("密码不能为空");
         }
-        return PASSWORD_ENCODER.encode(password);
+        return passwordEncoder.encode(password);
     }
 
     /**
@@ -29,13 +35,10 @@ public class EncryptUtils {
      * @param encodedPassword 加密后的密码
      * @return 是否匹配
      */
-    public static boolean matchesPassword(String rawPassword, String encodedPassword) {
+    public boolean matchesPassword(String rawPassword, String encodedPassword) {
         if (rawPassword == null || encodedPassword == null) {
             return false;
         }
-        return PASSWORD_ENCODER.matches(rawPassword, encodedPassword);
-    }
-
-    public static void main(String[] args) {
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
 }

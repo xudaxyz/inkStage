@@ -14,7 +14,6 @@ public class AuthDTO {
     /**
      * 操作类型：login(登录)/ register(注册)
      */
-    @NotBlank(message = "操作类型不能为空")
     private AuthOperationType operationType;
     
     /**
@@ -27,7 +26,6 @@ public class AuthDTO {
     /**
      * 认证类型：password(密码认证)/ code(验证码认证)
      */
-    @NotBlank(message = "认证类型不能为空")
     private AuthType authType;
     
     /**
@@ -39,7 +37,6 @@ public class AuthDTO {
     /**
      * 验证码(认证类型为code时必填)
      */
-    @Size(min = 4, max = 6, message = "验证码长度必须在4-6个字符之间")
     private String code;
     
     /**

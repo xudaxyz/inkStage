@@ -2,11 +2,11 @@ package com.inkstage.utils;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.*;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.stereotype.Component;
 import tools.jackson.databind.json.JsonMapper;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -152,14 +152,12 @@ public class RedisUtil {
      * @param key    键
      * @param expire 过期时间
      * @param unit   时间单位
-     * @return 是否成功
      */
-    public boolean expire(String key, long expire, TimeUnit unit) {
+    public void expire(String key, long expire, TimeUnit unit) {
         try {
-            return redisTemplate.expire(key, expire, unit);
+            redisTemplate.expire(key, expire, unit);
         } catch (Exception e) {
             log.error("Error setting expiration for Redis key: {}", key, e);
-            return false;
         }
     }
 
@@ -168,10 +166,9 @@ public class RedisUtil {
      *
      * @param key    键
      * @param expire 过期时间(秒)
-     * @return 是否成功
      */
-    public boolean expire(String key, long expire) {
-        return expire(key, expire, TimeUnit.SECONDS);
+    public void expire(String key, long expire) {
+        expire(key, expire, TimeUnit.SECONDS);
     }
 
     /**
@@ -283,14 +280,12 @@ public class RedisUtil {
      *
      * @param key   键
      * @param delta 减量
-     * @return 减少后的值
      */
-    public Long decrement(String key, long delta) {
+    public void decrement(String key, long delta) {
         try {
-            return redisTemplate.opsForValue().decrement(key, delta);
+            redisTemplate.opsForValue().decrement(key, delta);
         } catch (Exception e) {
             log.error("Error decrementing Redis key: {}", key, e);
-            return null;
         }
     }
 
@@ -298,10 +293,9 @@ public class RedisUtil {
      * 减少计数(默认减量为1)
      *
      * @param key 键
-     * @return 减少后的值
      */
-    public Long decrement(String key) {
-        return decrement(key, 1L);
+    public void decrement(String key) {
+        decrement(key, 1L);
     }
 
     /**

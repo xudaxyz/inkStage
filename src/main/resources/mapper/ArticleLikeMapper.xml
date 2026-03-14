@@ -2,6 +2,15 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.inkstage.mapper.ArticleLikeMapper">
+    <resultMap id="ArticleLikeMap" type="com.inkstage.entity.model.ArticleLike">
+        <id property="id" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted"/>
+        <result property="deletedTime" column="deleted_time"/>
+    </resultMap>
     
     <!-- 插入点赞记录 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.ArticleLike" useGeneratedKeys="true" keyProperty="id">
@@ -15,10 +24,62 @@
         WHERE article_id = #{articleId} AND user_id = #{userId}
     </delete>
     
-    <!-- 根据文章ID和用户ID查询点赞记录数 -->
-    <select id="countByArticleIdAndUserId" resultType="java.lang.Integer">
-        SELECT COUNT(*) FROM article_like
+    <!-- 根据文章ID和用户ID查询点赞记录 -->
+    <select id="findByArticleIdAndUserId" resultMap="ArticleLikeMap">
+        SELECT id, article_id, user_id, create_time, update_time, deleted, deleted_time
+        FROM article_like
         WHERE article_id = #{articleId} AND user_id = #{userId}
+    </select>
+
+    <!-- 查询用户点赞的文章ID列表 -->
+    <select id="findArticleIdsByUserId" resultType="java.lang.Long">
+        SELECT
+            article_id
+        FROM
+            article_like
+        WHERE
+            user_id = #{userId}
+            AND deleted = 0
+        ORDER BY
+            create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 批量检查用户对文章的点赞状态 -->
+    <select id="findByUserIdAndArticleIds" parameterType="java.util.Map" resultMap="ArticleLikeMap">
+        SELECT
+            id, article_id, user_id, create_time, update_time, deleted, deleted_time
+        FROM
+            article_like
+        WHERE
+            user_id = #{userId}
+            AND article_id IN
+            <foreach collection="articleIds" item="articleId" open="(" separator="," close=")">
+                #{articleId}
+            </foreach>
+            AND deleted = 0
+    </select>
+
+    <!-- 统计文章的点赞数 -->
+    <select id="countByArticleId" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            article_like
+        WHERE
+            article_id = #{articleId}
+            AND deleted = 0
+    </select>
+
+    <!-- 统计用户的点赞数 -->
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            article_like
+        WHERE
+            user_id = #{userId}
+            AND deleted = 0
     </select>
     
 </mapper>

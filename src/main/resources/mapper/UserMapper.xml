@@ -35,31 +35,258 @@
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
     </resultMap>
 
+    <!-- 管理员用户详情映射 -->
+    <resultMap id="AdminUserDetailResultMap" type="com.inkstage.vo.admin.AdminUserDetailVO">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="email" property="email"/>
+        <result column="email_verified" property="emailVerified"/>
+        <result column="phone" property="phone"/>
+        <result column="phone_verified" property="phoneVerified"/>
+        <result column="avatar" property="avatar"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="signature" property="signature"/>
+        <result column="gender" property="gender"/>
+        <result column="birth_date" property="birthDate"/>
+        <result column="location" property="location"/>
+        <result column="website" property="website"/>
+        <result column="follow_count" property="followCount"/>
+        <result column="follower_count" property="followerCount"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="comment_count" property="commentCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="last_login_ip" property="lastLoginIp"/>
+        <result column="register_ip" property="registerIp"/>
+        <result column="register_time" property="registerTime"/>
+        <result column="privacy" property="privacy"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 管理员用户列表映射 -->
+    <resultMap id="AdminUserListResultMap" type="com.inkstage.vo.admin.AdminUserListVO">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="nickname" property="nickname"/>
+        <result column="email" property="email"/>
+        <result column="phone" property="phone"/>
+        <result column="avatar" property="avatar"/>
+        <result column="status" property="status"/>
+        <result column="register_time" property="registerTime"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="comment_count" property="commentCount"/>
+    </resultMap>
+
+    <!-- 热门用户映射 -->
+    <resultMap id="HotUserResultMap" type="com.inkstage.vo.front.HotUserVO">
+        <id column="id" property="id"/>
+        <result column="nickname" property="nickname"/>
+        <result column="avatar" property="avatar"/>
+        <result column="follower_count" property="followerCount"/>
+        <result column="like_count" property="likeCount"/>
+        <result column="article_count" property="articleCount"/>
+    </resultMap>
+
     <sql id="columns">
         id, username, password, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
         last_login_time, last_login_ip, register_ip, register_time, privacy, status, create_time, update_time, deleted
     </sql>
 
+    <!-- 管理员用户详情列 -->
+    <sql id="adminUserDetailColumns">
+        id, username, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
+        gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, create_time, update_time
+    </sql>
+
+    <!-- 管理员用户列表列 -->
+    <sql id="adminUserListColumns">
+        id, username, nickname, email, phone, avatar, status, register_time, last_login_time, article_count, comment_count
+    </sql>
+
+    <!-- 热门用户列 -->
+    <sql id="hotUserColumns">
+        id, nickname, avatar, signature, follower_count, article_count
+    </sql>
+
+    <!-- 根据主键查询用户 -->
+    <select id="findById" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 根据用户名查询用户 -->
-    <select id="selectByUsername" resultMap="ResultMap">
+    <select id="findByUsername" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
         FROM user WHERE username = #{username} AND deleted = 0
     </select>
 
     <!-- 根据邮箱查询用户 -->
-    <select id="selectByEmail" resultMap="ResultMap">
+    <select id="findByEmail" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
         FROM user WHERE email = #{email} AND deleted = 0
     </select>
 
     <!-- 根据手机号查询用户 -->
-    <select id="selectByPhone" resultMap="ResultMap">
+    <select id="findByPhone" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
         FROM user WHERE phone = #{phone} AND deleted = 0
+    </select>
+
+    <!-- 分页查询用户 -->
+    <select id="findByPage" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user u
+        WHERE u.deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="role != null">
+            AND u.id IN (
+                SELECT ur.user_id 
+                FROM user_role ur 
+                WHERE ur.role_id = #{role} AND ur.status = 1
+            )
+        </if>
+        <if test="status != null">
+            AND u.status = #{status}
+        </if>
+        <if test="startDate != null">
+            AND u.create_time <![CDATA[ >= ]]>  #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND u.create_time <![CDATA[ <= ]]> #{endDate}
+        </if>
+        ORDER BY
+        u.id DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询热门用户 -->
+    <select id="findHotUsers" resultMap="HotUserResultMap">
+        SELECT
+        <include refid="hotUserColumns"/>
+        FROM user
+        WHERE deleted = 0
+        AND status = 1 <!-- 正常状态 -->
+        ORDER BY
+            follower_count DESC,
+            article_count DESC,
+            like_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询用户最近发布的文章 -->
+    <select id="findRecentArticles" resultType="com.inkstage.vo.admin.AdminUserArticleVO">
+        SELECT
+            a.id,
+            a.title,
+            a.summary,
+            a.article_status as articleStatus,
+            a.review_status as reviewStatus,
+            a.publish_time as publishTime,
+            a.read_count as readCount,
+            a.comment_count as commentCount,
+            a.like_count as likeCount
+        FROM article a
+        WHERE a.user_id = #{userId}
+        AND a.deleted = 0
+        ORDER BY a.publish_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 查询用户最近发布的评论 -->
+    <select id="findRecentComments" resultType="com.inkstage.vo.admin.AdminUserCommentVO">
+        SELECT
+            c.id,
+            c.article_id as articleId,
+            a.title as articleTitle,
+            c.content,
+            c.status,
+            c.top,
+            c.like_count as likeCount,
+            c.reply_count as replyCount,
+            c.create_time as createTime
+        FROM comment c
+        LEFT JOIN article a ON c.article_id = a.id
+        WHERE c.user_id = #{userId}
+        AND c.deleted = 0
+        ORDER BY c.create_time DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 批量查询用户 -->
+    <select id="findByIds" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </select>
+
+    <!-- 根据角色查询用户 -->
+    <select id="findByRole" resultMap="ResultMap">
+        SELECT
+        <include refid="columns"/>
+        FROM user u
+        WHERE u.deleted = 0
+        AND u.id IN (
+            SELECT ur.user_id 
+            FROM user_role ur 
+            WHERE ur.role_id = #{role} AND ur.status = 1
+        )
+        ORDER BY u.id DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 管理员根据ID获取用户详情 -->
+    <select id="findAdminUserDetailById" resultMap="AdminUserDetailResultMap">
+        SELECT
+        <include refid="adminUserDetailColumns"/>
+        FROM user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <!-- 管理员分页查询用户列表 -->
+    <select id="findAdminUserList" resultMap="AdminUserListResultMap">
+        SELECT
+        <include refid="adminUserListColumns"/>
+        FROM user u
+        WHERE u.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{query.keyword}, '%') OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%') OR u.email LIKE CONCAT('%', #{query.keyword}, '%') OR u.phone LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.role != null">
+            AND u.id IN (
+                SELECT ur.user_id 
+                FROM user_role ur 
+                WHERE ur.role_id = #{query.role} AND ur.status = 1
+            )
+        </if>
+        <if test="query.status != null">
+            AND u.status = #{query.status}
+        </if>
+        <if test="query.startDate != null">
+            AND u.create_time <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND u.create_time <![CDATA[ <= ]]> #{query.endDate}
+        </if>
+        ORDER BY u.id DESC
+        LIMIT #{query.offset}, #{query.pageSize}
     </select>
 
     <!-- 新增用户 -->
@@ -81,7 +308,7 @@
         )
     </insert>
 
-    <!-- 根据主键更新用户信息（选择性更新） -->
+    <!-- 根据主键更新用户信息(选择性更新) -->
     <update id="updateByPrimaryKeySelective" parameterType="com.inkstage.entity.model.User">
         UPDATE user
         <set>
@@ -116,59 +343,66 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 根据主键查询用户 -->
-    <select id="selectByPrimaryKey" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user WHERE id = #{id} AND deleted = 0
-    </select>
+    <!-- 更新用户状态 -->
+    <update id="updateStatus">
+        UPDATE user
+        <set>
+            status = #{status},
+            update_time = now()
+        </set>
+        WHERE id = #{id}
+    </update>
 
-    <!-- 查询热门用户 -->
-    <select id="selectHotUsers" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user
-        WHERE deleted = 0
-        AND status = 1 <!-- 正常状态 -->
-        ORDER BY
-            follower_count DESC,
-            article_count DESC,
-            like_count DESC
-        LIMIT #{limit}
-    </select>
+    <!-- 更新用户最后登录时间 -->
+    <update id="updateLastLoginTime">
+        UPDATE user
+        <set>
+            last_login_time = #{lastLoginTime},
+            update_time = now()
+        </set>
+        WHERE id = #{id}
+    </update>
 
-    <!-- 分页查询用户 -->
-    <select id="selectByPage" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user u
-        WHERE u.deleted = 0
-        <if test="keyword != null and keyword != ''">
-            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
-        <if test="role != null">
-            AND u.id IN (
-                SELECT ur.user_id 
-                FROM user_role ur 
-                WHERE ur.role_id = #{role} AND ur.status = 1
-            )
-        </if>
-        <if test="status != null">
-            AND u.status = #{status}
-        </if>
-        <if test="startDate != null">
-            AND u.create_time <![CDATA[ >= ]]>  #{startDate}
-        </if>
-        <if test="endDate != null">
-            AND u.create_time <![CDATA[ <= ]]> #{endDate}
-        </if>
-        ORDER BY
-        u.id DESC
-        LIMIT #{offset}, #{pageSize}
-    </select>
+    <!-- 管理员更新用户详情 -->
+    <update id="updateAdminUserDetail">
+        UPDATE user
+        <set>
+            <if test="userDetail.nickname != null">nickname = #{userDetail.nickname},</if>
+            <if test="userDetail.email != null">email = #{userDetail.email},</if>
+            <if test="userDetail.emailVerified != null">email_verified = #{userDetail.emailVerified},</if>
+            <if test="userDetail.phone != null">phone = #{userDetail.phone},</if>
+            <if test="userDetail.phoneVerified != null">phone_verified = #{userDetail.phoneVerified},</if>
+            <if test="userDetail.avatar != null">avatar = #{userDetail.avatar},</if>
+            <if test="userDetail.coverImage != null">cover_image = #{userDetail.coverImage},</if>
+            <if test="userDetail.signature != null">signature = #{userDetail.signature},</if>
+            <if test="userDetail.gender != null">gender = #{userDetail.gender},</if>
+            <if test="userDetail.birthDate != null">birth_date = #{userDetail.birthDate},</if>
+            <if test="userDetail.location != null">location = #{userDetail.location},</if>
+            <if test="userDetail.website != null">website = #{userDetail.website},</if>
+            <if test="userDetail.privacy != null">privacy = #{userDetail.privacy},</if>
+            update_time = now()
+        </set>
+        WHERE id = #{userDetail.id}
+    </update>
+
+    <!-- 管理员更新用户状态 -->
+    <update id="updateUserStatus">
+        UPDATE user
+        <set>
+            status = #{status},
+            update_time = now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除用户 -->
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM user
+        WHERE id = #{id}
+    </delete>
 
     <!-- 统计用户总数 -->
-    <select id="countAll" resultType="java.lang.Long">
+    <select id="countByCondition" resultType="java.lang.Long">
         SELECT
         COUNT(*)
         FROM user u
@@ -194,59 +428,31 @@
         </if>
     </select>
 
-    <!-- 根据ID删除用户 -->
-    <delete id="deleteById" parameterType="java.lang.Long">
-        DELETE FROM user
-        WHERE id = #{id}
-    </delete>
-
-    <!-- 查询用户最近发布的文章 -->
-    <select id="selectRecentArticles" resultType="com.inkstage.vo.admin.AdminUserArticleVO">
+    <!-- 管理员统计用户总数 -->
+    <select id="countAdminUserList" resultType="java.lang.Long">
         SELECT
-            a.id,
-            a.title,
-            a.summary,
-            a.article_status as articleStatus,
-            a.review_status as reviewStatus,
-            a.publish_time as publishTime,
-            a.read_count as readCount,
-            a.comment_count as commentCount,
-            a.like_count as likeCount
-        FROM article a
-        WHERE a.user_id = #{userId}
-        AND a.deleted = 0
-        ORDER BY a.publish_time DESC
-        LIMIT #{limit}
+        COUNT(*)
+        FROM user u
+        WHERE u.deleted = 0
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (u.username LIKE CONCAT('%', #{query.keyword}, '%') OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%') OR u.email LIKE CONCAT('%', #{query.keyword}, '%') OR u.phone LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.role != null">
+            AND u.id IN (
+                SELECT ur.user_id 
+                FROM user_role ur 
+                WHERE ur.role_id = #{query.role} AND ur.status = 1
+            )
+        </if>
+        <if test="query.status != null">
+            AND u.status = #{query.status}
+        </if>
+        <if test="query.startDate != null">
+            AND u.create_time <![CDATA[ >= ]]> #{query.startDate}
+        </if>
+        <if test="query.endDate != null">
+            AND u.create_time <![CDATA[ <= ]]> #{query.endDate}
+        </if>
     </select>
-
-    <!-- 查询用户最近发布的评论 -->
-    <select id="selectRecentComments" resultType="com.inkstage.vo.admin.AdminUserCommentVO">
-        SELECT
-            c.id,
-            c.article_id as articleId,
-            a.title as articleTitle,
-            c.content,
-            c.status,
-            c.top,
-            c.like_count as likeCount,
-            c.reply_count as replyCount,
-            c.create_time as createTime
-        FROM comment c
-        LEFT JOIN article a ON c.article_id = a.id
-        WHERE c.user_id = #{userId}
-        AND c.deleted = 0
-        ORDER BY c.create_time DESC
-        LIMIT #{limit}
-    </select>
-
-    <!-- 根据用户ID更新用户状态 -->
-    <update id="updateUserStatus">
-        UPDATE user
-        <set>
-            <if test="userStatus != null">status = #{userStatus},</if>
-            update_time = now()
-        </set>
-        WHERE id = #{id}
-    </update>
 
 </mapper>

@@ -36,8 +36,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthException.class)
     public Result<?> handleAuthException(AuthException e, HttpServletRequest request) {
         String requestId = generateRequestId();
-        log.error("[{}] AuthException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
-        return Result.error(e.getMessage());
+        String errorMessage = "认证失败: " + e.getMessage();
+        log.error("[{}] AuthException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
+        return Result.error(ResponseCode.UNAUTHORIZED, errorMessage);
     }
 
     /**
@@ -97,8 +98,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<?> handleHttpMessageNotReadableException(HttpMessageNotReadableException e, HttpServletRequest request) {
         String requestId = generateRequestId();
-        log.error("[{}] HttpMessageNotReadableException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
-        return Result.error(ResponseCode.BAD_REQUEST, "请求体格式错误, 无法解析");
+        String errorMessage = "请求体格式错误, 无法解析: " + e.getMessage();
+        log.error("[{}] HttpMessageNotReadableException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
+        return Result.error(ResponseCode.BAD_REQUEST, errorMessage);
     }
 
     /**
@@ -112,9 +114,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     public Result<?> handleHttpRequestMethodNotSupportedException(HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
         String requestId = generateRequestId();
-        log.error("[{}] HttpRequestMethodNotSupportedException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
-        return Result.error(ResponseCode.METHOD_NOT_ALLOWED, "请求方法不支持")
-                ;
+        String errorMessage = "请求方法不支持: " + e.getMethod();
+        log.error("[{}] HttpRequestMethodNotSupportedException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
+        return Result.error(ResponseCode.METHOD_NOT_ALLOWED, errorMessage);
     }
 
     /**
@@ -128,8 +130,9 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<?> handleNoSuchElementException(NoSuchElementException e, HttpServletRequest request) {
         String requestId = generateRequestId();
-        log.error("[{}] NoSuchElementException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
-        return Result.error(ResponseCode.NOT_FOUND, ResponseMessage.NOT_FOUND);
+        String errorMessage = "资源未找到: " + e.getMessage();
+        log.error("[{}] NoSuchElementException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
+        return Result.error(ResponseCode.NOT_FOUND, errorMessage);
     }
 
     /**
@@ -150,6 +153,38 @@ public class GlobalExceptionHandler {
                 .orElse("请求参数验证失败");
         log.error("[{}] MethodArgumentNotValidException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
         return Result.error(ResponseCode.BAD_REQUEST, errorMessage);
+    }
+
+    /**
+     * 处理运行时异常
+     *
+     * @param e       运行时异常
+     * @param request HTTP请求
+     * @return 统一响应结果
+     */
+    @ExceptionHandler(RuntimeException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<?> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
+        String requestId = generateRequestId();
+        String errorMessage = isProduction() ? "服务器内部错误" : "运行时异常: " + e.getMessage();
+        log.error("[{}] RuntimeException: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
+        return Result.error(ResponseCode.INTERNAL_SERVER_ERROR, errorMessage);
+    }
+
+    /**
+     * 处理所有其他异常
+     *
+     * @param e       异常
+     * @param request HTTP请求
+     * @return 统一响应结果
+     */
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public Result<?> handleException(Exception e, HttpServletRequest request) {
+        String requestId = generateRequestId();
+        String errorMessage = isProduction() ? "服务器内部错误" : "系统异常: " + e.getMessage();
+        log.error("[{}] Exception: {}, URI: {}", requestId, e.getMessage(), request.getRequestURI(), e);
+        return Result.error(ResponseCode.INTERNAL_SERVER_ERROR, errorMessage);
     }
 
     /**

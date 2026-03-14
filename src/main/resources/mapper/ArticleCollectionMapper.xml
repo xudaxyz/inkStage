@@ -34,7 +34,7 @@
     </select>
     
     <!-- 根据文章ID和用户ID查询收藏记录 -->
-    <select id="selectByArticleIdAndUserId" resultMap="ArticleCollectionMap">
+    <select id="findByArticleIdAndUserId" resultMap="ArticleCollectionMap">
         SELECT id, article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time
         FROM article_collection
         WHERE article_id = #{articleId} AND user_id = #{userId}
@@ -76,7 +76,7 @@
     </resultMap>
     
     <!-- 查询用户收藏的文章列表 -->
-    <select id="selectCollectionArticles" resultMap="CollectionArticleVOMap">
+    <select id="findCollectionArticles" resultMap="CollectionArticleVOMap">
         SELECT
             ac1.id,
             ac1.article_id,
@@ -152,6 +152,57 @@
                 AND a.title LIKE CONCAT('%', #{keyword}, '%')
             </if>
             AND a.deleted = 0
+    </select>
+
+    <!-- 查询用户收藏的文章ID列表 -->
+    <select id="findArticleIdsByUserId" resultType="java.lang.Long">
+        SELECT
+            article_id
+        FROM
+            article_collection
+        WHERE
+            user_id = #{userId}
+            AND deleted = 0
+        ORDER BY
+            collect_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 批量检查用户对文章的收藏状态 -->
+    <select id="findByUserIdAndArticleIds" parameterType="java.util.Map" resultMap="ArticleCollectionMap">
+        SELECT
+            id, article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time
+        FROM
+            article_collection
+        WHERE
+            user_id = #{userId}
+            AND article_id IN
+            <foreach collection="articleIds" item="articleId" open="(" separator="," close=")">
+                #{articleId}
+            </foreach>
+            AND deleted = 0
+    </select>
+
+    <!-- 统计文章的收藏数 -->
+    <select id="countByArticleId" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            article_collection
+        WHERE
+            article_id = #{articleId}
+            AND deleted = 0
+    </select>
+
+    <!-- 统计用户的收藏数 -->
+    <select id="countByUserId" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            article_collection
+        WHERE
+            user_id = #{userId}
+            AND deleted = 0
     </select>
     
 </mapper>

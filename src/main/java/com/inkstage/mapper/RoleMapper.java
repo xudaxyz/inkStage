@@ -10,6 +10,8 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface RoleMapper {
 
+    // ==================== 查询（Read） ====================
+    
     /**
      * 根据主键查询角色
      * @param id 角色ID
