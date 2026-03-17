@@ -42,6 +42,7 @@ CREATE TABLE `user`
     `register_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '用户注册的时间戳',
     `create_time`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`     DATETIME              DEFAULT NULL COMMENT '更新时间',
+    `username_last_modified_time`     DATETIME              DEFAULT NULL COMMENT '用户名最后修改时间',
     `deleted`         TINYINT               DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time`    DATETIME COMMENT '删除时间'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户表';

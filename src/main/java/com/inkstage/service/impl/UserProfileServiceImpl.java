@@ -44,9 +44,9 @@ public class UserProfileServiceImpl implements UserProfileService {
         try {
             log.debug("更新用户信息, 用户ID: {}", user.getId());
             // 检查用户是否存在
-            var existingUser = userMapper.findById(user.getId());
+            User existingUser = userMapper.findById(user.getId());
             if (existingUser == null) {
-                log.warn("用户不存在, 用户ID: {}", user.getId());
+                log.warn("用户ID: {}不存在!", user.getId());
                 throw new BusinessException("用户不存在");
             }
             // 执行更新
@@ -56,11 +56,10 @@ public class UserProfileServiceImpl implements UserProfileService {
                 throw new BusinessException("更新用户信息失败");
             }
             // 重新查询更新后的用户
-            var updatedUser = userMapper.findById(user.getId());
+            User updatedUser = userMapper.findById(user.getId());
+            fileService.ensureUserImgIsFullUrl(updatedUser);
             log.info("更新用户信息成功, 用户ID: {}", user.getId());
             return updatedUser;
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("更新用户信息失败, 用户ID: {}", user.getId(), e);
             throw new BusinessException("更新用户信息失败");
@@ -112,15 +111,12 @@ public class UserProfileServiceImpl implements UserProfileService {
             log.debug("获取用户资料, 用户ID: {}", id);
             var user = userMapper.findById(id);
             if (user == null) {
-                log.warn("用户不存在, 用户ID: {}", id);
                 throw new BusinessException("用户不存在");
             }
             // 确保用户头像和封面图的URL是完整的
             fileService.ensureUserImgIsFullUrl(user);
             log.info("获取用户资料成功, 用户ID: {}", id);
             return user;
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("获取用户资料失败, 用户ID: {}", id, e);
             throw new BusinessException("获取用户资料失败");

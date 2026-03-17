@@ -20,7 +20,7 @@ public class AuthDTO {
      * 账号：用户名/邮箱/手机号
      */
     @NotBlank(message = "账号不能为空")
-    @Size(min = 3, max = 50, message = "账号长度必须在3-50个字符之间")
+    @Size(min = 2, max = 32, message = "账号长度必须在2-32个字符之间")
     private String account;
     
     /**
@@ -31,7 +31,7 @@ public class AuthDTO {
     /**
      * 密码(认证类型为password时必填)
      */
-    @Size(min = 6, max = 50, message = "密码长度必须在6-50个字符之间")
+    @Size(min = 6, max = 32, message = "密码长度必须在6-32个字符之间")
     private String password;
     
     /**

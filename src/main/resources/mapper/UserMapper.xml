@@ -30,6 +30,7 @@
         <result column="register_time" property="registerTime"/>
         <result column="privacy" property="privacy" javaType="com.inkstage.enums.VisibleStatus"/>
         <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
+        <result column="username_last_modified_time" property="usernameLastModifiedTime"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
@@ -94,7 +95,7 @@
     <sql id="columns">
         id, username, password, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
-        last_login_time, last_login_ip, register_ip, register_time, privacy, status, create_time, update_time, deleted
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, create_time, update_time, deleted
     </sql>
 
     <!-- 管理员用户详情列 -->
@@ -297,14 +298,14 @@
         gender, birth_date, location, website, follow_count,
         follower_count, article_count, comment_count, like_count,
         last_login_time, last_login_ip, register_ip, register_time,
-        privacy, status, create_time, update_time, deleted
+        privacy, status, username_last_modified_time, create_time, update_time, deleted
         ) VALUES (
         #{username}, #{password}, #{nickname}, #{email}, #{emailVerified},
         #{phone}, #{phoneVerified}, #{avatar}, #{coverImage}, #{signature},
         #{gender}, #{birthDate}, #{location}, #{website}, #{followCount},
         #{followerCount}, #{articleCount}, #{commentCount}, #{likeCount},
         #{lastLoginTime}, #{lastLoginIp}, #{registerIp}, #{registerTime},
-        #{privacy}, #{status}, #{createTime}, #{updateTime}, #{deleted}
+        #{privacy}, #{status}, #{usernameLastModifiedTime}, #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
 
@@ -337,6 +338,7 @@
             <if test="registerTime != null">register_time = #{registerTime},</if>
             <if test="privacy != null">privacy = #{privacy},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="usernameLastModifiedTime != null">username_last_modified_time = #{usernameLastModifiedTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
         </set>

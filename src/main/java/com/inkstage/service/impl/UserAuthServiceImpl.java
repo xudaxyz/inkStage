@@ -61,7 +61,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private static final int MAX_LOGIN_FAIL_TIMES = 10;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public TokenResponse register(AuthDTO authDTO) {
         if (authDTO == null) {
             throw new BusinessException(ResponseMessage.REGISTER_FAILED);
@@ -135,6 +135,8 @@ public class UserAuthServiceImpl implements UserAuthService {
             user.setUsername(account);
             user.setNickname(account);
             user.setPassword(encodePassword);
+            user.setCreateTime(LocalDateTime.now());
+            user.setRegisterTime(LocalDateTime.now());
             User newUser = userService.createUser(user);
 
             // 创建用户认证信息
@@ -253,10 +255,10 @@ public class UserAuthServiceImpl implements UserAuthService {
             // 更新最后登录时间
             user.setLastLoginTime(LocalDateTime.now());
             user.setLastLoginIp(IPUtil.getClientIp());
-            userService.updateUser(user);
+            User updatedUser = userService.updateUser(user);
 
             // 生成OAuth2令牌
-            return tokenService.generateTokenForUser(user, authDTO);
+            return tokenService.generateTokenForUser(updatedUser, authDTO);
         } catch (BusinessException e) {
             log.error("用户登录失败: {}", e.getMessage());
             throw e;

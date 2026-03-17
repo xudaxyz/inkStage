@@ -146,4 +146,9 @@ public class User extends BaseEntity {
      * 状态(0:禁用,1:正常,2:待审核)
      */
     private UserStatus status;
+
+    /**
+     * 用户名最后修改时间
+     */
+    private LocalDateTime usernameLastModifiedTime;
 }

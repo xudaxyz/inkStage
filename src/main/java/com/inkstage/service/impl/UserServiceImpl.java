@@ -4,6 +4,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserStatus;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.service.UserService;
 import com.inkstage.service.UserAdminService;
 import com.inkstage.service.UserProfileService;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -168,5 +171,75 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return userProfileService.getUserProfile(id);
+    }
+
+    @Override
+    public User updateUsername(Long userId, String newUsername) {
+        if (userId == null || userId <= 0) {
+            log.warn("修改用户名参数无效, 用户ID: {}", userId);
+            throw new BusinessException("用户不存在");
+        }
+        if (newUsername == null || newUsername.isEmpty()) {
+            log.warn("修改用户名参数无效, 新用户名为空");
+            throw new BusinessException("用户名不能为空");
+        }
+
+        // 检查用户是否在一个月内已修改过用户名
+        long timeLeft = getUsernameModificationTimeLeft(userId);
+        if (timeLeft > 0) {
+            log.warn("用户在冷却期内, 用户ID: {}", userId);
+            throw new BusinessException("一个月内只能修改一次用户名");
+        }
+
+        newUsername = newUsername.trim();
+        // 检查新用户名是否已存在
+        if (isUsernameExists(newUsername)) {
+            log.warn("用户名已存在, 用户名: {}", newUsername);
+            throw new BusinessException("用户名已存在");
+        }
+
+        // 更新用户名和修改时间
+        User user = new User();
+        user.setId(userId);
+        user.setUsername(newUsername);
+        user.setUsernameLastModifiedTime(LocalDateTime.now());
+
+        return userProfileService.updateUser(user);
+    }
+
+    @Override
+    public long getUsernameModificationTimeLeft(Long userId) {
+        if (userId == null || userId <= 0) {
+            log.warn("获取修改时间剩余参数无效, 用户ID: {}", userId);
+            return -1;
+        }
+
+        User user = userProfileService.getUserById(userId);
+        if (user == null) {
+            log.warn("用户不存在, 用户ID: {}", userId);
+            return -1;
+        }
+
+        // 如果用户从未修改过用户名，允许修改
+        if (user.getUsernameLastModifiedTime() == null) {
+            return -1;
+        }
+
+        // 计算距离上次修改的时间差（毫秒）
+        LocalDateTime lastModified = user.getUsernameLastModifiedTime();
+        LocalDateTime now = LocalDateTime.now();
+        Duration duration = Duration.between(lastModified, now);
+        long milliseconds = duration.toMillis();
+
+        // 一个月的毫秒数（30天）
+        long oneMonth = 30L * 24L * 60L * 60L * 1000L;
+
+        // 如果距离上次修改不足一个月，返回剩余时间
+        if (milliseconds < oneMonth) {
+            return oneMonth - milliseconds;
+        }
+
+        // 否则允许修改
+        return -1;
     }
 }

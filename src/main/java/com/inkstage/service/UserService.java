@@ -141,4 +141,21 @@ public interface UserService {
      * @return 用户信息，包含完整的图片URL
      */
     User getUserProfile(Long id);
+
+    /**
+     * 修改用户名
+     *
+     * @param userId 用户ID
+     * @param newUsername 新用户名
+     * @return 更新后的用户信息
+     */
+    User updateUsername(Long userId, String newUsername);
+
+    /**
+     * 获取用户修改用户名的剩余时间（毫秒）
+     *
+     * @param userId 用户ID
+     * @return 剩余时间，-1表示可以修改
+     */
+    long getUsernameModificationTimeLeft(Long userId);
 }

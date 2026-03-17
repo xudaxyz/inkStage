@@ -4,7 +4,6 @@ import com.inkstage.entity.model.User;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.UserRegistrationService;
-import com.inkstage.utils.EncryptUtils;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Service;
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
     private final UserMapper userMapper;
-    private final EncryptUtils encryptUtils;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -79,8 +77,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
             if (user.getPhone() != null && isPhoneExists(user.getPhone())) {
                 throw new BusinessException("手机号已存在");
             }
-            // 加密密码
-            user.setPassword(encryptUtils.encodePassword(user.getPassword()));
             // 执行创建
             int result = userMapper.insert(user);
             if (result == 0) {
@@ -91,8 +87,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
             var createdUser = userMapper.findById(user.getId());
             log.info("创建用户成功, 用户名: {}", user.getUsername());
             return createdUser;
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("创建用户失败, 用户名: {}", user.getUsername(), e);
             throw new BusinessException("创建用户失败");

@@ -61,7 +61,7 @@ public class UserController {
 
         User updatedUser = userService.updateUser(user);
         // 重新获取包含完整URL的用户信息
-        return Result.success(userService.getUserProfile(user.getId()), ResponseMessage.UPDATE_SUCCESS);
+        return Result.success(updatedUser, ResponseMessage.UPDATE_SUCCESS);
     }
 
     /**
@@ -76,5 +76,32 @@ public class UserController {
         return Result.success(user, ResponseMessage.SUCCESS);
     }
 
+    /**
+     * 修改用户名
+     *
+     * @param newUsername 新用户名
+     * @return 更新结果
+     */
+    @PutMapping("/username")
+    @UserAccess
+    public Result<User> updateUsername(@RequestParam @Valid String newUsername) {
+        log.info("修改用户名, 新用户名: {}", newUsername);
+        Long userId = UserContext.getCurrentUserId();
+        User updatedUser = userService.updateUsername(userId, newUsername);
+        return Result.success(updatedUser, ResponseMessage.UPDATE_SUCCESS);
+    }
+
+    /**
+     * 获取修改用户名的剩余时间
+     *
+     * @return 剩余时间（毫秒），-1表示可以修改
+     */
+    @GetMapping("/username/modification-time-left")
+    @UserAccess
+    public Result<Long> getUsernameModificationTimeLeft() {
+        Long userId = UserContext.getCurrentUserId();
+        long timeLeft = userService.getUsernameModificationTimeLeft(userId);
+        return Result.success(timeLeft, ResponseMessage.SUCCESS);
+    }
 
 }
