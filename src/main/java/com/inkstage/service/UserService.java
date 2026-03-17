@@ -1,10 +1,13 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
+import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
+import com.inkstage.vo.admin.AdminUserDetailVO;
+import com.inkstage.vo.admin.AdminUserListVO;
 import com.inkstage.vo.front.HotUserVO;
+import com.inkstage.vo.front.UserPublicProfileVO;
 
 import java.util.List;
 
@@ -92,7 +95,7 @@ public interface UserService {
      * @param id 用户ID
      * @return 用户详情VO，包含完整的用户信息
      */
-    com.inkstage.vo.admin.AdminUserDetailVO getUserDetailById(Long id);
+    AdminUserDetailVO getUserDetailById(Long id);
 
     /**
      * 获取热门用户
@@ -108,7 +111,7 @@ public interface UserService {
      * @param pageRequest 分页请求，包含关键词、状态等过滤条件
      * @return 分页结果
      */
-    PageResult<com.inkstage.vo.admin.AdminUserListVO> getUsersByPage(com.inkstage.dto.admin.AdminUserQueryDTO pageRequest);
+    PageResult<AdminUserListVO> getUsersByPage(AdminUserQueryDTO pageRequest);
 
     /**
      * 删除用户（软删除）
@@ -123,7 +126,7 @@ public interface UserService {
      * @param id           用户ID
      * @param userDetailVO 用户详情VO，包含需要更新的详细信息
      */
-    void updateUserDetail(Long id, com.inkstage.vo.admin.AdminUserDetailVO userDetailVO);
+    void updateUserDetail(Long id, AdminUserDetailVO userDetailVO);
 
     /**
      * 更新用户状态
@@ -141,6 +144,14 @@ public interface UserService {
      * @return 用户信息，包含完整的图片URL
      */
     User getUserProfile(Long id);
+
+    /**
+     * 获取用户公开资料（包含完整的图片URL）
+     *
+     * @param id 用户ID
+     * @return 用户公开资料，包含完整的图片URL
+     */
+    UserPublicProfileVO getUserPublicProfile(Long id);
 
     /**
      * 修改用户名

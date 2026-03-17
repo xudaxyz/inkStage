@@ -9,7 +9,9 @@ import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.ArticleCreateService;
+import com.inkstage.service.CategoryService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.service.TagService;
 
@@ -31,8 +33,10 @@ import java.util.List;
 public class ArticleCreateServiceImpl implements ArticleCreateService {
 
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
     private final TagService tagService;
     private final NotificationService notificationService;
+    private final CategoryService categoryService;
 
     /**
      * 创建文章
@@ -51,14 +55,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             log.warn("创建文章参数为空");
             throw new BusinessException(ResponseMessage.PARAM_ERROR);
         }
-        if (articleCreateDTO.getTitle() == null || articleCreateDTO.getTitle().trim().isEmpty()) {
-            log.warn("文章标题为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章标题不能为空");
-        }
-        if (articleCreateDTO.getContent() == null || articleCreateDTO.getContent().trim().isEmpty()) {
-            log.warn("文章内容为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章内容不能为空");
-        }
 
         try {
             Article article = buildArticle(articleCreateDTO, currentUser);
@@ -66,6 +62,19 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
 
             // 处理标签关联
             handleArticleTags(article.getId(), articleCreateDTO.getTagIds());
+
+            // 更新分类文章数量
+            if (article.getCategoryId() != null) {
+                categoryService.updateArticleCount(article.getCategoryId(), 1);
+            }
+
+            // 更新用户文章数
+            User user = userMapper.findById(currentUser.getId());
+            if (user != null) {
+                int articleCount = user.getArticleCount() != null ? user.getArticleCount() : 0;
+                user.setArticleCount(articleCount + 1);
+                userMapper.updateByPrimaryKeySelective(user);
+            }
 
             // 发送文章发布通知
             notificationService.sendNotificationWithTemplate(
@@ -175,14 +184,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             log.warn("更新文章参数为空");
             throw new BusinessException(ResponseMessage.PARAM_ERROR);
         }
-        if (articleCreateDTO.getTitle() == null || articleCreateDTO.getTitle().trim().isEmpty()) {
-            log.warn("文章标题为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章标题不能为空");
-        }
-        if (articleCreateDTO.getContent() == null || articleCreateDTO.getContent().trim().isEmpty()) {
-            log.warn("文章内容为空");
-            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章内容不能为空");
-        }
 
         try {
             // 检查文章是否存在且属于当前用户
@@ -191,6 +192,9 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
                 log.warn("更新文章失败, 文章不存在或无权限, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
                 throw new BusinessException(ResponseMessage.NO_PERMISSION, "文章不存在或无权限");
             }
+
+            // 保存旧分类ID
+            Long oldCategoryId = existingArticle.getCategoryId();
 
             // 构建更新后的文章实体
             existingArticle.setTitle(articleCreateDTO.getTitle());
@@ -222,6 +226,17 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             if (updateResult <= 0) {
                 log.warn("文章更新失败, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
                 throw new BusinessException(ResponseMessage.ARTICLE_UPDATE_FAILED, "文章更新失败");
+            }
+
+            // 处理分类文章数量更新
+            Long newCategoryId = articleCreateDTO.getCategoryId();
+            if (!oldCategoryId.equals(newCategoryId)) {
+                // 减少旧分类的文章数
+                categoryService.updateArticleCount(oldCategoryId, -1);
+                // 增加新分类的文章数
+                if (newCategoryId != null) {
+                    categoryService.updateArticleCount(newCategoryId, 1);
+                }
             }
 
             // 处理标签关联

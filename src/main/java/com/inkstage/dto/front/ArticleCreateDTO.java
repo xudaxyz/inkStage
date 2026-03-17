@@ -35,7 +35,6 @@ public class ArticleCreateDTO {
     /**
      * 文章摘要
      */
-    @Size(max = 200, message = "摘要不能超过200个字符")
     private String summary;
 
     /**

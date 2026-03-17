@@ -94,4 +94,12 @@ public interface CategoryMapper {
      */
     long countByKeyword(@Param("keyword") String keyword);
 
+    /**
+     * 更新分类文章数量
+     * @param categoryId 分类ID
+     * @param increment 增量值
+     * @return 影响行数
+     */
+    int updateArticleCount(@Param("categoryId") Long categoryId, @Param("increment") int increment);
+
 }

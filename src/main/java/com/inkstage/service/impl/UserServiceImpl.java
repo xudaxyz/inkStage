@@ -13,6 +13,7 @@ import com.inkstage.service.UserStatsService;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import com.inkstage.vo.front.HotUserVO;
+import com.inkstage.vo.front.UserPublicProfileVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -171,6 +172,39 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         return userProfileService.getUserProfile(id);
+    }
+
+    @Override
+    public UserPublicProfileVO getUserPublicProfile(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("获取用户公开资料参数无效, 用户ID: {}", id);
+            return null;
+        }
+        User user = userProfileService.getUserProfile(id);
+        if (user == null) {
+            log.warn("用户不存在, ID: {}", id);
+            return null;
+        }
+        
+        // 构建用户公开资料VO
+        UserPublicProfileVO publicProfileVO = new UserPublicProfileVO();
+        publicProfileVO.setId(user.getId());
+        publicProfileVO.setNickname(user.getNickname());
+        publicProfileVO.setAvatar(user.getAvatar());
+        publicProfileVO.setCoverImage(user.getCoverImage());
+        publicProfileVO.setSignature(user.getSignature());
+        publicProfileVO.setGender(user.getGender());
+        publicProfileVO.setLocation(user.getLocation());
+        publicProfileVO.setWebsite(user.getWebsite());
+        publicProfileVO.setRegisterTime(user.getRegisterTime());
+        publicProfileVO.setArticleCount(user.getArticleCount());
+        publicProfileVO.setCommentCount(user.getCommentCount());
+        publicProfileVO.setLikeCount(user.getLikeCount());
+        publicProfileVO.setFollowCount(user.getFollowCount());
+        publicProfileVO.setFollowerCount(user.getFollowerCount());
+        publicProfileVO.setStatus(user.getStatus());
+        
+        return publicProfileVO;
     }
 
     @Override

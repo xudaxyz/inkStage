@@ -3,9 +3,11 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.ArticleManagementService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleVO;
@@ -13,6 +15,7 @@ import com.inkstage.vo.front.MyArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 文章管理服务实现类
@@ -23,8 +26,10 @@ import org.springframework.stereotype.Service;
 public class ArticleManagementServiceImpl implements ArticleManagementService {
 
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticle(Long id) {
         try {
             log.debug("删除文章, 文章ID: {}", id);
@@ -43,6 +48,17 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
             // 执行删除操作
             int result = articleMapper.deleteById(id, currentUser.getId());
             boolean success = result > 0;
+            if (success) {
+                // 更新用户文章数
+                User user = userMapper.findById(currentUser.getId());
+                if (user != null) {
+                    int articleCount = user.getArticleCount() != null ? user.getArticleCount() : 0;
+                    if (articleCount > 0) {
+                        user.setArticleCount(articleCount - 1);
+                        userMapper.updateByPrimaryKeySelective(user);
+                    }
+                }
+            }
             log.info("删除文章{}, 文章ID: {}", success ? "成功" : "失败", id);
             return success;
         } catch (BusinessException e) {
@@ -54,15 +70,39 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean permanentDeleteArticle(Long id) {
         try {
             log.debug("彻底删除文章, 文章ID: {}", id);
             Long currentUserId = UserContext.getCurrentUserId();
+            // 检查文章是否存在且属于当前用户
+            var article = articleMapper.findById(id);
+            if (article == null) {
+                log.warn("文章ID: {}不存在", id);
+                throw new BusinessException("文章不存在");
+            }
+            if (!article.getUserId().equals(currentUserId)) {
+                log.warn("无权彻底删除他人文章, 用户ID: {}, 文章ID: {}", currentUserId, id);
+                throw new BusinessException("无权删除他人文章");
+            }
             // 执行彻底删除操作
             int result = articleMapper.permanentDeleteById(id, currentUserId);
             boolean success = result > 0;
+            if (success) {
+                // 更新用户文章数
+                User user = userMapper.findById(currentUserId);
+                if (user != null) {
+                    int articleCount = user.getArticleCount() != null ? user.getArticleCount() : 0;
+                    if (articleCount > 0) {
+                        user.setArticleCount(articleCount - 1);
+                        userMapper.updateByPrimaryKeySelective(user);
+                    }
+                }
+            }
             log.info("彻底删除文章{}, 文章ID: {}", success ? "成功" : "失败", id);
             return success;
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("彻底删除文章失败, 文章ID: {}", id, e);
             throw new BusinessException("彻底删除文章失败");
@@ -125,7 +165,7 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
                     queryDTO.getPageSize()
             );
 
-            log.info("管理员获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
+            log.info("管理员获取文章列表成功, 总数: {}", total);
             return pageResult;
         } catch (Exception e) {
             log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
@@ -171,7 +211,7 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
             log.debug("管理员获取文章详情, 文章ID: {}", id);
             var article = articleMapper.findById(id);
             if (article == null) {
-                log.warn("文章不存在, 文章ID: {}", id);
+                log.warn("获取文章失败, 文章ID: {}不存在", id);
                 throw new BusinessException("文章不存在");
             }
             log.info("管理员获取文章详情成功, 文章ID: {}", id);
@@ -189,9 +229,8 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
         try {
             log.debug("更新文章状态, 文章ID: {}, 状态: {}", id, status.getDesc());
             // 检查文章是否存在
-            var article = articleMapper.findById(id);
+            Article article = articleMapper.findById(id);
             if (article == null) {
-                log.warn("文章不存在, 文章ID: {}", id);
                 throw new BusinessException("文章不存在");
             }
             // 更新状态

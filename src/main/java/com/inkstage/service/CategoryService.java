@@ -67,4 +67,11 @@ public interface CategoryService {
      * @return 分页结果
      */
     PageResult<Category> getAdminCategories(String keyword, Integer pageNum, Integer pageSize);
+
+    /**
+     * 更新分类文章数量
+     * @param categoryId 分类ID
+     * @param increment 增量值
+     */
+    void updateArticleCount(Long categoryId, int increment);
 }

@@ -5,8 +5,10 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.UserProfileDTO;
 import com.inkstage.entity.model.User;
+import com.inkstage.service.FollowService;
 import com.inkstage.service.UserService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.front.UserPublicProfileVO;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final FollowService followService;
 
     /**
      * 获取当前用户个人资料
@@ -71,9 +74,9 @@ public class UserController {
      * @return 用户详细信息
      */
     @GetMapping("/profile/{userId}")
-    public Result<User> getUserProfile(@PathVariable Long userId) {
-        User user = userService.getUserProfile(userId);
-        return Result.success(user, ResponseMessage.SUCCESS);
+    public Result<UserPublicProfileVO> getUserProfile(@PathVariable Long userId) {
+        UserPublicProfileVO userPublicProfile = userService.getUserPublicProfile(userId);
+        return Result.success(userPublicProfile, ResponseMessage.SUCCESS);
     }
 
     /**
@@ -102,6 +105,51 @@ public class UserController {
         Long userId = UserContext.getCurrentUserId();
         long timeLeft = userService.getUsernameModificationTimeLeft(userId);
         return Result.success(timeLeft, ResponseMessage.SUCCESS);
+    }
+
+    /**
+     * 关注用户
+     *
+     * @param userId 被关注用户ID
+     * @return 关注结果
+     */
+    @PostMapping("/follow/{userId}")
+    @UserAccess
+    public Result<Boolean> followUser(@PathVariable Long userId) {
+        Long currentUserId = UserContext.getCurrentUserId();
+        log.info("用户 {} 关注用户 {}", currentUserId, userId);
+        boolean result = followService.followUser(currentUserId, userId);
+        return Result.success(result, ResponseMessage.SUCCESS);
+    }
+
+    /**
+     * 取消关注用户
+     *
+     * @param userId 被取消关注用户ID
+     * @return 取消关注结果
+     */
+    @PostMapping("/unfollow/{userId}")
+    @UserAccess
+    public Result<Boolean> unfollowUser(@PathVariable Long userId) {
+        Long currentUserId = UserContext.getCurrentUserId();
+        log.info("用户 {} 取消关注用户 {}", currentUserId, userId);
+        boolean result = followService.unfollowUser(currentUserId, userId);
+        return Result.success(result, ResponseMessage.SUCCESS);
+    }
+
+    /**
+     * 检查关注状态
+     *
+     * @param userId 被检查用户ID
+     * @return 关注状态
+     */
+    @GetMapping("/follow/status/{userId}")
+    @UserAccess
+    public Result<Boolean> checkFollowStatus(@PathVariable Long userId) {
+        Long currentUserId = UserContext.getCurrentUserId();
+        log.info("检查用户 {} 对用户 {} 的关注状态", currentUserId, userId);
+        boolean status = followService.checkFollowStatus(currentUserId, userId);
+        return Result.success(status, ResponseMessage.SUCCESS);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.ArticleTag;
@@ -146,11 +145,11 @@ public class TagServiceImpl implements TagService {
             if (tag.getArticleCount() == null) {
                 tag.setArticleCount(0);
             }
-            if (tag.getUsageCount() == null) {
-                tag.setUsageCount(0);
-            }
             if (tag.getStatus() == null) {
                 tag.setStatus(StatusEnum.ENABLED);
+            }
+            if (tag.getUsageCount() == null) {
+                tag.setUsageCount(0);
             }
             // 将slug转换为小写
             if (tag.getSlug() != null && !tag.getSlug().isEmpty()) {
@@ -176,7 +175,7 @@ public class TagServiceImpl implements TagService {
                 tag.setSlug(tag.getSlug().toLowerCase());
             }
             tagMapper.update(tag);
-            return tagMapper.findById(tag.getId());
+            return tag;
         } catch (Exception e) {
             log.error("更新标签失败", e);
             throw new BusinessException("更新标签失败", e);
