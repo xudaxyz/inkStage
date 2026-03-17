@@ -7,9 +7,14 @@ import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
-import com.inkstage.enums.auth.AuthType;
+import com.inkstage.enums.DefaultStatus;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.VerificationStatus;
+import com.inkstage.enums.VisibleStatus;
+import com.inkstage.enums.auth.AccountType;
+import com.inkstage.enums.auth.AuthType;
+import com.inkstage.enums.user.Gender;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.service.TokenService;
@@ -17,6 +22,7 @@ import com.inkstage.service.UserAuthService;
 import com.inkstage.service.UserRoleService;
 import com.inkstage.service.UserService;
 import com.inkstage.service.VerifyCodeService;
+import com.inkstage.utils.AccountUtil;
 import com.inkstage.utils.IPUtil;
 import com.inkstage.utils.PasswordUtil;
 import com.inkstage.utils.RedisUtil;
@@ -30,6 +36,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
 
@@ -61,7 +69,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private static final int MAX_LOGIN_FAIL_TIMES = 10;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public TokenResponse register(AuthDTO authDTO) {
         if (authDTO == null) {
             throw new BusinessException(ResponseMessage.REGISTER_FAILED);
@@ -84,6 +92,11 @@ public class UserAuthServiceImpl implements UserAuthService {
                 throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
             }
 
+            // 验证账号格式
+            if (!AccountUtil.validateAccountFormat(account)) {
+                throw new BusinessException("账号格式错误");
+            }
+
             // 验证码注册
             if (AuthType.CODE == authType) {
                 String code = authDTO.getCode();
@@ -102,6 +115,10 @@ public class UserAuthServiceImpl implements UserAuthService {
                 if (password == null || password.isEmpty()) {
                     throw new BusinessException(ResponseMessage.PASSWORD_REQUIRED);
                 }
+                // 验证密码强度
+                if (!AccountUtil.validatePasswordStrength(password)) {
+                    throw new BusinessException("密码强度不足，至少需要包含大小写字母、数字和特殊字符中的三种");
+                }
             } else {
                 throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
             }
@@ -112,21 +129,25 @@ public class UserAuthServiceImpl implements UserAuthService {
             }
 
             // 检查账号唯一性
-            if (account.contains("@")) {
-                // 邮箱
-                if (userService.isEmailExists(account)) {
-                    throw new BusinessException(ResponseMessage.EMAIL_EXISTS);
-                }
-            } else if (account.matches("^1[3-9]\\d{9}$")) {
-                // 手机号
-                if (userService.isPhoneExists(account)) {
-                    throw new BusinessException(ResponseMessage.PHONE_EXISTS);
-                }
-            } else {
-                // 用户名
-                if (userService.isUsernameExists(account)) {
-                    throw new BusinessException(ResponseMessage.USERNAME_EXISTS);
-                }
+            AccountType accountType = AccountUtil.getAccountType(account);
+            switch (accountType) {
+                case EMAIL:
+                    if (userService.isEmailExists(account)) {
+                        throw new BusinessException(ResponseMessage.EMAIL_EXISTS);
+                    }
+                    break;
+                case PHONE:
+                    if (userService.isPhoneExists(account)) {
+                        throw new BusinessException(ResponseMessage.PHONE_EXISTS);
+                    }
+                    break;
+                case USERNAME:
+                    if (userService.isUsernameExists(account)) {
+                        throw new BusinessException(ResponseMessage.USERNAME_EXISTS);
+                    }
+                    break;
+                default:
+                    throw new BusinessException("账号格式错误");
             }
 
             String encodePassword = passwordEncoder.encode(password);
@@ -136,7 +157,33 @@ public class UserAuthServiceImpl implements UserAuthService {
             user.setNickname(account);
             user.setPassword(encodePassword);
             user.setCreateTime(LocalDateTime.now());
+            user.setUpdateTime(LocalDateTime.now());
             user.setRegisterTime(LocalDateTime.now());
+            user.setRegisterIp(clientIp);
+            user.setStatus(UserStatus.NORMAL);
+            user.setPrivacy(VisibleStatus.PUBLIC);
+            user.setDeleted(DeleteStatus.NOT_DELETED);
+            user.setFollowCount(0);
+            user.setFollowerCount(0);
+            user.setArticleCount(0);
+            user.setCommentCount(0);
+            user.setLikeCount(0);
+            user.setGender(Gender.UNKNOWN);
+            user.setPhoneVerified(VerificationStatus.UNVERIFIED);
+            user.setEmailVerified(VerificationStatus.UNVERIFIED);
+
+            // 根据账号类型设置相应字段和验证状态
+            switch (accountType) {
+                case EMAIL:
+                    user.setEmail(account);
+                    user.setEmailVerified(VerificationStatus.VERIFIED);
+                    break;
+                case PHONE:
+                    user.setPhone(account);
+                    user.setPhoneVerified(VerificationStatus.VERIFIED);
+                    break;
+            }
+            
             User newUser = userService.createUser(user);
 
             // 创建用户认证信息
@@ -146,7 +193,9 @@ public class UserAuthServiceImpl implements UserAuthService {
             userAuth.setAuthIdentifier(account); // 存储账号
             userAuth.setAuthCredential(encodePassword); // 存储加密后的密码
             userAuth.setEnabled(StatusEnum.ENABLED);
+            userAuth.setPrimaryAuth(DefaultStatus.YES);
             userAuth.setCreateTime(LocalDateTime.now());
+            userAuth.setUpdateTime(LocalDateTime.now());
             userAuth.setLastAuthTime(LocalDateTime.now());
             userAuth.setDeleted(DeleteStatus.NOT_DELETED);
             userAuthMapper.insert(userAuth);
@@ -203,13 +252,13 @@ public class UserAuthServiceImpl implements UserAuthService {
                     throw new BusinessException(ResponseMessage.CAPTCHA_ERROR);
                 }
                 // 根据账号获取用户
-                if (account.contains("@")) {
-                    user = userService.getUserByEmail(account);
-                } else if (account.matches("^1[3-9]\\d{9}$")) {
-                    user = userService.getUserByPhone(account);
-                } else {
-                    user = userService.getUserByUsername(account);
-                }
+                AccountType accountType = AccountUtil.getAccountType(account);
+                user = switch (accountType) {
+                    case EMAIL -> userService.getUserByEmail(account);
+                    case PHONE -> userService.getUserByPhone(account);
+                    case USERNAME -> userService.getUserByUsername(account);
+                    default -> throw new BusinessException("账号格式错误");
+                };
             } else if (AuthType.PASSWORD == authType) {
                 if (password == null || password.isEmpty()) {
                     throw new BusinessException(ResponseMessage.PASSWORD_REQUIRED);

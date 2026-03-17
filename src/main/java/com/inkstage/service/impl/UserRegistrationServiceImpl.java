@@ -23,9 +23,9 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
     public boolean isUsernameExists(String username) {
         try {
             log.debug("检查用户名是否已存在, 用户名: {}", username);
-            var user = userMapper.findByUsername(username);
+            User user = userMapper.findByUsername(username);
             boolean exists = user != null;
-            log.info("用户名{}已存在", exists ? "" : "不");
+            log.info("用户名 {} 已存在", exists ? "" : "不");
             return exists;
         } catch (Exception e) {
             log.error("检查用户名是否已存在失败, 用户名: {}", username, e);
@@ -37,7 +37,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
     public boolean isEmailExists(String email) {
         try {
             log.debug("检查邮箱是否已存在, 邮箱: {}", email);
-            var user = userMapper.findByEmail(email);
+            User user = userMapper.findByEmail(email);
             boolean exists = user != null;
             log.info("邮箱{}已存在", exists ? "" : "不");
             return exists;
@@ -51,7 +51,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
     public boolean isPhoneExists(String phone) {
         try {
             log.debug("检查手机号是否已存在, 手机号: {}", phone);
-            var user = userMapper.findByPhone(phone);
+            User user = userMapper.findByPhone(phone);
             boolean exists = user != null;
             log.info("手机号{}已存在", exists ? "" : "不");
             return exists;
@@ -83,10 +83,7 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
                 log.warn("创建用户失败, 用户名: {}", user.getUsername());
                 throw new BusinessException("创建用户失败");
             }
-            // 重新查询创建后的用户
-            var createdUser = userMapper.findById(user.getId());
-            log.info("创建用户成功, 用户名: {}", user.getUsername());
-            return createdUser;
+            return user;
         } catch (Exception e) {
             log.error("创建用户失败, 用户名: {}", user.getUsername(), e);
             throw new BusinessException("创建用户失败");
