@@ -1,5 +1,6 @@
 package com.inkstage.dto.front;
 
+import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.AllowStatus;
@@ -10,6 +11,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class ArticleCreateDTO {
     /**
      * 标签列表
      */
-    private List<Long> tagIds;
+    private List<Tag> tags;
 
     /**
      * 封面图URL
@@ -92,6 +94,26 @@ public class ArticleCreateDTO {
      * 置顶状态
      */
     private TopStatus top;
+
+    /**
+     * SEO标题
+     */
+    private String metaTitle;
+
+    /**
+     * SEO描述
+     */
+    private String metaDescription;
+
+    /**
+     * SEO关键词
+     */
+    private String metaKeywords;
+
+    /**
+     * 定时发布时间
+     */
+    private LocalDateTime scheduledPublishTime;
 
     /**
      * 审核状态

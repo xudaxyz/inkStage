@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.NotificationType;
@@ -11,17 +12,20 @@ import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.ArticleCreateService;
+import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.CategoryService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.service.TagService;
 
 import com.inkstage.utils.UserContext;
+import com.inkstage.utils.MarkdownUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -35,8 +39,10 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
     private final TagService tagService;
+    private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CategoryService categoryService;
+    private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
 
     /**
      * 创建文章
@@ -61,7 +67,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             articleMapper.insert(article);
 
             // 处理标签关联
-            handleArticleTags(article.getId(), articleCreateDTO.getTagIds());
+            handleArticleTags(article.getId(), articleCreateDTO.getTags());
 
             // 更新分类文章数量
             if (article.getCategoryId() != null) {
@@ -74,6 +80,12 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
                 int articleCount = user.getArticleCount() != null ? user.getArticleCount() : 0;
                 user.setArticleCount(articleCount + 1);
                 userMapper.updateByPrimaryKeySelective(user);
+            }
+
+            // 对于大文章，异步处理Markdown转换
+            String content = articleCreateDTO.getContent();
+            if (content.length() > 10000) {
+                asyncArticleProcessService.processArticleMarkdown(article.getId(), content);
             }
 
             // 发送文章发布通知
@@ -120,9 +132,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
                 article.setPublishTime(null);
                 articleMapper.insert(article);
 
-                // 处理标签关联
-                handleArticleTags(article.getId(), dto.getTagIds());
-
                 log.info("新草稿创建成功, 草稿ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
                 return article.getId();
             } else {
@@ -150,9 +159,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
                     log.warn("草稿更新失败, 草稿ID: {}, 用户ID: {}", id, currentUser.getId());
                     throw new BusinessException(ResponseMessage.ARTICLE_DRAFT_FAILED, "草稿更新失败");
                 }
-
-                // 处理标签关联
-                handleArticleTags(id, dto.getTagIds());
 
                 log.info("草稿更新成功, 草稿ID: {}, 用户ID: {}", id, currentUser.getId());
                 return id;
@@ -199,7 +205,17 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             // 构建更新后的文章实体
             existingArticle.setTitle(articleCreateDTO.getTitle());
             existingArticle.setContent(articleCreateDTO.getContent());
-            existingArticle.setContentHtml(articleCreateDTO.getContent()); // 暂时直接使用内容, 后续需要添加 Markdown 转换
+
+            // 对于大文章使用异步处理Markdown转换
+            String content = articleCreateDTO.getContent();
+            if (content.length() > 10000) { // 内容超过10000字的文章视为大文章
+                // 先设置一个临时的HTML内容
+                existingArticle.setContentHtml("<p>正在处理文章内容...</p>");
+            } else {
+                // 小文章直接同步处理
+                existingArticle.setContentHtml(MarkdownUtils.markdownToHtml(content));
+            }
+
             existingArticle.setSummary(articleCreateDTO.getSummary());
             existingArticle.setCoverImage(articleCreateDTO.getCoverImage());
             existingArticle.setCategoryId(articleCreateDTO.getCategoryId());
@@ -208,6 +224,10 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             existingArticle.setAllowComment(articleCreateDTO.getAllowComment());
             existingArticle.setOriginal(articleCreateDTO.getOriginal());
             existingArticle.setOriginalUrl(articleCreateDTO.getOriginalUrl());
+            existingArticle.setMetaTitle(articleCreateDTO.getMetaTitle());
+            existingArticle.setMetaDescription(articleCreateDTO.getMetaDescription());
+            existingArticle.setMetaKeywords(articleCreateDTO.getMetaKeywords());
+            existingArticle.setScheduledPublishTime(articleCreateDTO.getScheduledPublishTime());
             existingArticle.setLastEditTime(LocalDateTime.now());
             existingArticle.setVisible(articleCreateDTO.getVisible());
             existingArticle.setAllowForward(articleCreateDTO.getAllowForward());
@@ -240,7 +260,13 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             }
 
             // 处理标签关联
-            handleArticleTags(articleId, articleCreateDTO.getTagIds());
+            handleArticleTags(articleId, articleCreateDTO.getTags());
+
+            // 对于大文章，异步处理Markdown转换
+            String largeContent = articleCreateDTO.getContent();
+            if (largeContent.length() > 10000) {
+                asyncArticleProcessService.processArticleMarkdown(articleId, largeContent);
+            }
 
             log.info("文章更新成功, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
             return true;
@@ -257,13 +283,30 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
         Article article = new Article();
         article.setTitle(dto.getTitle());
         article.setContent(dto.getContent());
-        article.setContentHtml(dto.getContent()); // 暂时直接使用内容, 后续需要添加 Markdown 转换
+
+        // 对于大文章使用异步处理Markdown转换
+        String content = dto.getContent();
+        if (content.length() > 10000) { // 内容超过10000字的文章视为大文章
+            // 先设置一个临时的HTML内容
+            article.setContentHtml("<p>正在处理文章内容...</p>");
+        } else {
+            // 小文章直接同步处理
+            article.setContentHtml(MarkdownUtils.markdownToHtml(content));
+        }
 
         // 处理摘要
         String summary = dto.getSummary();
         if (summary == null || summary.trim().isEmpty()) {
-            // 如果没有提供摘要, 自动从内容中提取前200字
+            // 如果没有提供摘要, 自动从内容中提取
             summary = generateSummary(dto.getContent());
+
+            // 如果内容为空，从标题生成摘要
+            if (summary.isEmpty() && dto.getTitle() != null && !dto.getTitle().trim().isEmpty()) {
+                summary = dto.getTitle().trim();
+                if (summary.length() > 100) {
+                    summary = summary.substring(0, 100) + "...";
+                }
+            }
         }
         article.setSummary(summary);
         article.setCoverImage(dto.getCoverImage());
@@ -276,6 +319,10 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
         article.setAllowForward(dto.getAllowForward());
         article.setOriginal(dto.getOriginal());
         article.setOriginalUrl(dto.getOriginalUrl());
+        article.setMetaTitle(dto.getMetaTitle());
+        article.setMetaDescription(dto.getMetaDescription());
+        article.setMetaKeywords(dto.getMetaKeywords());
+        article.setScheduledPublishTime(dto.getScheduledPublishTime());
         article.setTop(dto.getTop());
         article.setLastEditTime(LocalDateTime.now());
         article.setCreateTime(LocalDateTime.now());
@@ -310,7 +357,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
 
         // 移除Markdown标记
         plainText = plainText
-                .replaceAll("#+", "") // 标题
+                .replaceAll("#+ ", "") // 标题
                 .replaceAll("\\*\\*", "") // 加粗
                 .replaceAll("_+", "") // 斜体
                 .replaceAll("`+", "") // 代码
@@ -321,27 +368,81 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
 
         // 截取前200字
         if (plainText.length() > 200) {
-            plainText = plainText.substring(0, 200) + "...";
+            // 尝试在句子结束处截断，使摘要更自然
+            int endIndex = getEndIndex(plainText);
+            plainText = plainText.substring(0, endIndex) + "...";
         }
 
         return plainText;
     }
 
+    private int getEndIndex(String plainText) {
+        int endIndex = plainText.lastIndexOf(".", 200);
+        if (endIndex == -1) {
+            endIndex = plainText.lastIndexOf("。", 200);
+        }
+        if (endIndex == -1) {
+            endIndex = plainText.lastIndexOf("!", 200);
+        }
+        if (endIndex == -1) {
+            endIndex = plainText.lastIndexOf("?", 200);
+        }
+        if (endIndex == -1) {
+            endIndex = plainText.lastIndexOf(" ", 200);
+        }
+        if (endIndex == -1) {
+            endIndex = 200;
+        } else {
+            endIndex += 1; // 包含标点符号
+        }
+        return endIndex;
+    }
+
     /**
      * 处理文章标签关联
      */
-    private void handleArticleTags(Long articleId, List<Long> tagIds) {
+    public void handleArticleTags(Long articleId, List<Tag> tags) {
         if (articleId == null) {
             log.warn("处理文章标签关联失败, 文章ID为空");
             return;
         }
-        if (tagIds == null || tagIds.isEmpty()) {
+
+        // 收集所有标签ID
+        List<Long> allTagIds = new ArrayList<>();
+
+        // 处理标签列表
+        if (tags == null || tags.isEmpty()) {
+            return;
+        }
+        for (Tag tag : tags) {
+            if (tag == null || tag.getName() == null || tag.getName().trim().isEmpty()) {
+                continue;
+            }
+
+            if (tag.getId() != null && tag.getId() > 0) {
+                // 已存在的标签，直接使用其ID
+                allTagIds.add(tag.getId());
+            } else {
+                // 新标签，需要创建
+                try {
+                    Long tagId = tagService.createTagIfNotExists(tag);
+                    if (tagId != null) {
+                        allTagIds.add(tagId);
+                    }
+                } catch (Exception e) {
+                    // 标签创建失败，记录日志但不影响文章发布
+                    log.error("创建标签失败, 标签名称: {}", tag.getName(), e);
+                }
+            }
+        }
+
+        if (allTagIds.isEmpty()) {
             // 没有标签, 清除现有关联
-            tagService.deleteArticleTagsByArticleId(articleId);
+            articleTagService.deleteArticleTagsByArticleId(articleId);
             return;
         }
 
         // 保存文章标签关联
-        tagService.saveArticleTags(articleId, tagIds);
+        articleTagService.saveArticleTags(articleId, allTagIds);
     }
 }

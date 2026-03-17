@@ -158,7 +158,8 @@ public enum ResponseMessage {
     COLLECTION_ARTICLE_MOVE_SUCCESS("移动收藏文章成功"),
     
     // 文件相关成功消息
-    FILE_DELETE_SUCCESS("文件删除成功");
+    FILE_DELETE_SUCCESS("文件删除成功"),
+    ARTICLE_TAGS_MAX_TEN("文章标签不能超过10个");
 
     private final String message;
 

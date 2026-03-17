@@ -2,15 +2,17 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
-import com.inkstage.entity.model.ArticleTag;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.StatusEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.service.TagService;
+import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -87,55 +89,7 @@ public class TagServiceImpl implements TagService {
         }
     }
 
-    @Override
-    public List<Tag> getTagsByArticleId(Long articleId) {
-        log.info("根据文章ID获取标签: {}", articleId);
-        try {
-            if (articleId == null) {
-                throw new BusinessException(ResponseMessage.PARAM_ERROR);
-            }
-            return tagMapper.findByArticleId(articleId);
-        } catch (Exception e) {
-            log.error("根据文章ID获取标签失败", e);
-            throw new BusinessException("获取文章标签失败", e);
-        }
-    }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void saveArticleTags(Long articleId, List<Long> tagIds) {
-        try {
-            log.info("保存文章标签关联, 文章ID：{}, 标签ID列表：{}", articleId, tagIds);
-            if (articleId == null) {
-                throw new IllegalArgumentException("文章ID不能为空");
-            }
-            // 删除文章现有的标签关联
-            tagMapper.deleteArticleTagsByArticleId(articleId);
-
-            // 添加新的标签关联
-            if (tagIds != null && !tagIds.isEmpty()) {
-                for (Long tagId : tagIds) {
-                    ArticleTag articleTag = new ArticleTag();
-                    articleTag.setArticleId(articleId);
-                    articleTag.setTagId(tagId);
-                    tagMapper.insertArticleTag(articleTag);
-                }
-            }
-        } catch (Exception e) {
-            log.error("保存文章标签关联失败", e);
-            throw new BusinessException("保存文章标签失败", e);
-        }
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void deleteArticleTagsByArticleId(Long articleId) {
-        if (articleId == null) {
-            throw new IllegalArgumentException("文章ID不能为空");
-        }
-
-        tagMapper.deleteArticleTagsByArticleId(articleId);
-    }
 
     @Override
     public Tag addTag(Tag tag) {
@@ -208,6 +162,41 @@ public class TagServiceImpl implements TagService {
         } catch (Exception e) {
             log.error("更新标签状态失败", e);
             throw new BusinessException("更新标签状态失败", e);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    public Long createTagIfNotExists(Tag tag) {
+        log.info("创建标签（如果不存在）: {}", tag.getName());
+        try {
+            // 首先尝试根据名称查找标签
+            Tag existingTag = tagMapper.findByName(tag.getName());
+            if (existingTag != null) {
+                log.info("标签已存在: {}", tag.getName());
+                // 标签已存在，更新文章数
+                existingTag.setArticleCount(existingTag.getArticleCount() + 1);
+                tagMapper.update(existingTag);
+                return existingTag.getId();
+            }
+
+            // 标签不存在，创建新标签
+            tag.setStatus(StatusEnum.ENABLED);
+            tag.setArticleCount(1); // 新标签，文章数设为1
+            tag.setUsageCount(1); // 使用次数设置为1
+            
+            // 设置当前用户ID
+            User currentUser = UserContext.getCurrentUser();
+            if (currentUser != null) {
+                tag.setUserId(currentUser.getId());
+            }
+            
+            tagMapper.insert(tag);
+            log.info("创建新标签成功: {}", tag.getName());
+            return tag.getId();
+        } catch (Exception e) {
+            log.error("创建标签失败", e);
+            throw new BusinessException("创建标签失败", e);
         }
     }
 

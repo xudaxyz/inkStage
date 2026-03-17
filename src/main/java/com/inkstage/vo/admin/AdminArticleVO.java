@@ -1,11 +1,11 @@
 package com.inkstage.vo.admin;
 
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 后台文章管理VO
@@ -64,9 +64,9 @@ public class AdminArticleVO {
     private TopStatus top;
 
     /**
-     * 标签列表
+     * 文章审核状态
      */
-    private List<String> tags;
+    private ReviewStatus reviewStatus;
 
     /**
      * 创建时间

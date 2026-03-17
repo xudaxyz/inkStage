@@ -30,6 +30,11 @@
                 javaType="com.inkstage.enums.AllowStatus"/>
         <result column="original" property="original" javaType="com.inkstage.enums.article.OriginalStatus"/>
         <result column="original_url" property="originalUrl"/>
+        <result column="meta_title" property="metaTitle"/>
+        <result column="meta_description" property="metaDescription"/>
+        <result column="meta_keywords" property="metaKeywords"/>
+        <result column="scheduled_publish_time" property="scheduledPublishTime"/>
+        <result column="share_token" property="shareToken"/>
         <result column="last_edit_time" property="lastEditTime"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -40,7 +45,8 @@
     <sql id="baseColumns">
         id, title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
-        allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time
+        allow_forward, original, original_url, last_edit_time, create_time, update_time, deleted, deleted_time,
+        scheduled_publish_time, share_token, meta_title, meta_description, meta_keywords
     </sql>
 
     <!-- 根据ID查询文章 -->
@@ -72,7 +78,7 @@
         a.comment_count,
         a.collection_count,
         a.share_count,
-        a.user_id as user_id,
+        a.user_id,
         u.avatar,
         u.nickname,
         u.article_count,
@@ -385,10 +391,9 @@
         <result column="like_count" property="likeCount"/>
         <result column="comment_count" property="commentCount"/>
         <result column="top" property="top" javaType="com.inkstage.enums.article.TopStatus"/>
+        <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <!-- 标签列表 -->
-        <collection property="tags" ofType="java.lang.String"/>
     </resultMap>
     <!-- 当前用户文章列表查询 -->
     <select id="findMyArticles" resultMap="MyArticleListResultMap">
@@ -577,6 +582,7 @@
         a.like_count,
         a.comment_count,
         a.top,
+        a.review_status,
         a.create_time,
         a.update_time,
         u.nickname,
@@ -695,14 +701,15 @@
         INSERT INTO article
         (title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
-        allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time)
+        allow_forward, original, original_url, last_edit_time, create_time, update_time, deleted, deleted_time,
+        scheduled_publish_time, share_token, meta_title, meta_description, meta_keywords)
         VALUES
         (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{categoryId},
         #{articleStatus}, #{reviewStatus}, #{publishTime},
         #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended},
         #{visible}, #{allowComment},
         #{allowForward}, #{original}, #{originalUrl}, #{lastEditTime}, #{createTime}, #{updateTime}, #{deleted},
-        #{deletedTime})
+        #{deletedTime}, #{scheduledPublishTime}, #{shareToken}, #{metaTitle}, #{metaDescription}, #{metaKeywords})
     </insert>
 
     <!-- 更新文章 -->
@@ -734,7 +741,12 @@
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
-            <if test="deletedTime != null">deleted_time = #{deletedTime}</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
+            <if test="scheduledPublishTime != null">scheduled_publish_time = #{scheduledPublishTime},</if>
+            <if test="shareToken != null">share_token = #{shareToken},</if>
+            <if test="metaTitle != null">meta_title = #{metaTitle},</if>
+            <if test="metaDescription != null">meta_description = #{metaDescription},</if>
+            <if test="metaKeywords != null">meta_keywords = #{metaKeywords}</if>
         </set>
         where id = #{id}
     </update>
@@ -804,6 +816,26 @@
     <!-- 根据文章ID获取分享数 -->
     <select id="getShareCount" resultType="java.lang.Long">
         SELECT share_count FROM article WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <!-- 查询到达定时发布时间且状态为待发布的文章 -->
+    <select id="findScheduledArticles" resultMap="ResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM article
+        WHERE article_status = 2 <!-- 待发布/定时发布 -->
+        AND scheduled_publish_time IS NOT NULL
+        AND scheduled_publish_time <![CDATA[ <= ]]> #{currentTime}
+        AND deleted = 0
+    </select>
+
+    <!-- 根据分享令牌查询文章 -->
+    <select id="findByShareToken" resultMap="ResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM article
+        WHERE share_token = #{shareToken}
+        AND deleted = 0
     </select>
 
 </mapper>

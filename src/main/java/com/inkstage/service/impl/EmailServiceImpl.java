@@ -32,7 +32,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("通知邮件发送成功，收件人: {}", to);
             return true;
         } catch (Exception e) {
-            log.error("通知邮件发送失败，收件人: {}", to, e);
+            log.error("通知邮件发送失败，收件人: {}, 错误消息: {}", to, e.getMessage());
             return false;
         }
     }
@@ -49,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("重要通知邮件发送成功，收件人: {}", to);
             return true;
         } catch (Exception e) {
-            log.error("重要通知邮件发送失败，收件人: {}", to, e);
+            log.error("重要通知邮件发送失败，收件人: {}, 错误消息: {}", to, e.getMessage());
             return false;
         }
     }
@@ -78,7 +78,7 @@ public class EmailServiceImpl implements EmailService {
             log.info("批量邮件发送完成，成功: {}, 总数量: {}", successCount, emails.size());
             return successCount > 0;
         } catch (Exception e) {
-            log.error("批量邮件发送失败", e);
+            log.error("批量邮件发送失败，错误消息: {}", e.getMessage());
             return false;
         }
     }

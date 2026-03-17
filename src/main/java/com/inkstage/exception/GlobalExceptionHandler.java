@@ -1,7 +1,6 @@
 package com.inkstage.exception;
 
 import com.inkstage.common.ResponseCode;
-import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import jakarta.security.auth.message.AuthException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -146,13 +145,50 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletRequest request) {
         String requestId = generateRequestId();
-        // 获取第一个验证失败的字段和错误信息
-        String errorMessage = e.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
-                .findFirst()
-                .orElse("请求参数验证失败");
+        // 获取所有验证失败的字段和错误信息
+        StringBuilder errorMessage = new StringBuilder();
+        e.getBindingResult().getFieldErrors().forEach(fieldError -> {
+            String fieldName = fieldError.getField();
+            // 将字段名转换为更友好的名称
+            String friendlyFieldName = getFriendlyFieldName(fieldName);
+            errorMessage.append(friendlyFieldName).append(": ").append(fieldError.getDefaultMessage()).append("；");
+        });
+        if (!errorMessage.isEmpty()) {
+            errorMessage.setLength(errorMessage.length() - 1); // 移除最后的分号
+        } else {
+            errorMessage.append("请求参数验证失败");
+        }
         log.error("[{}] MethodArgumentNotValidException: {}, URI: {}", requestId, errorMessage, request.getRequestURI(), e);
-        return Result.error(ResponseCode.BAD_REQUEST, errorMessage);
+        return Result.error(ResponseCode.BAD_REQUEST, errorMessage.toString());
+    }
+
+    /**
+     * 将字段名转换为更友好的名称
+     *
+     * @param fieldName 字段名
+     * @return 友好的字段名称
+     */
+    private String getFriendlyFieldName(String fieldName) {
+        // 字段名映射，将驼峰命名转换为中文名称
+        return switch (fieldName) {
+            case "title" -> "文章标题";
+            case "content" -> "文章内容";
+            case "summary" -> "文章摘要";
+            case "categoryId" -> "文章分类";
+            case "tagIds" -> "文章标签";
+            case "coverImage" -> "封面图片";
+            case "status" -> "文章状态";
+            case "visible" -> "可见性";
+            case "allowComment" -> "评论设置";
+            case "allowForward" -> "转发设置";
+            case "original" -> "文章类型";
+            case "originalUrl" -> "转载链接";
+            case "metaTitle" -> "SEO标题";
+            case "metaDescription" -> "SEO描述";
+            case "metaKeywords" -> "SEO关键词";
+            case "scheduledPublishTime" -> "定时发布时间";
+            default -> fieldName;
+        };
     }
 
     /**

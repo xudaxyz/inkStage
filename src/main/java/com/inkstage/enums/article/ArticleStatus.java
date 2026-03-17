@@ -36,7 +36,7 @@ public enum ArticleStatus implements EnumCode {
      */
     @JsonCreator
     public static ArticleStatus fromString(String value) {
-        if (value == null) {
+        if (value == null || value.isEmpty()) {
             return null;
         }
         for (ArticleStatus status : ArticleStatus.values()) {

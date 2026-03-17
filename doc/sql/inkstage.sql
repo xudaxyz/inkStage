@@ -133,6 +133,11 @@ CREATE TABLE `article`
     `allow_forward`    TINYINT               DEFAULT 1 COMMENT '允许转发状态：0-不允许, 1-允许',
     `original`         TINYINT               DEFAULT 1 COMMENT '是否原创（0:转载,1:原创）',
     `original_url`     VARCHAR(255) COMMENT '转载来源URL',
+    `meta_title`       VARCHAR(200) COMMENT 'SEO标题',
+    `meta_description` TEXT COMMENT 'SEO描述',
+    `meta_keywords`    VARCHAR(255) COMMENT 'SEO关键词',
+    `scheduled_publish_time` DATETIME COMMENT '定时发布时间',
+    `share_token`      VARCHAR(64) COMMENT '分享令牌',
     `views_ip`         JSON COMMENT '阅读IP记录（用于去重）',
     `last_edit_time`   DATETIME COMMENT '最后一次编辑的时间',
     `create_time`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -173,15 +178,17 @@ CREATE TABLE `tag`
 (
     `id`            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
     `name`          VARCHAR(50) NOT NULL UNIQUE COMMENT '标签名称',
-    `slug`          VARCHAR(50) NOT NULL UNIQUE COMMENT '标签别名（URL友好）',
+    `slug`          VARCHAR(50) DEFAULT NULL COMMENT '标签别名（URL友好）',
     `description`   TEXT COMMENT '标签描述',
+    `user_id`       BIGINT COMMENT '创建者ID',
     `article_count` INT                  DEFAULT 0 COMMENT '标签下文章数量',
     `usage_count`   INT                  DEFAULT 0 COMMENT '标签使用次数',
     `status`        TINYINT              DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
     `create_time`   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`   DATETIME    NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted`       TINYINT              DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
-    `deleted_time`  DATETIME COMMENT '删除时间'
+    `update_time`   DATETIME    DEFAULT NULL COMMENT '更新时间',
+    `deleted`       TINYINT     NOT NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
+    `deleted_time`  DATETIME COMMENT '删除时间',
+    KEY             `idx_user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='标签表';
 
 -- 文章标签关联表（article_tag）
@@ -194,7 +201,6 @@ CREATE TABLE `article_tag`
     `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
-    UNIQUE KEY `uk_article_tag` (`article_id`, `tag_id`),
     KEY            `idx_article_id` (`article_id`),
     KEY            `idx_tag_id` (`tag_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='文章标签关联表';

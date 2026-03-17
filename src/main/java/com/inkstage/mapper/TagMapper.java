@@ -1,6 +1,5 @@
 package com.inkstage.mapper;
 
-import com.inkstage.entity.model.ArticleTag;
 import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.StatusEnum;
 import org.apache.ibatis.annotations.Mapper;
@@ -64,6 +63,30 @@ public interface TagMapper {
      */
     List<Tag> findByIds(@Param("ids") List<Long> ids);
 
+    /**
+     * 根据用户ID查询标签
+     *
+     * @param userId 用户ID
+     * @return 标签列表
+     */
+    List<Tag> findByUserId(@Param("userId") Long userId);
+
+    /**
+     * 根据名称查询标签
+     *
+     * @param name 标签名称
+     * @return 标签对象
+     */
+    Tag findByName(@Param("name") String name);
+
+    /**
+     * 根据slug查询标签
+     *
+     * @param slug 标签slug
+     * @return 标签对象
+     */
+    Tag findBySlug(@Param("slug") String slug);
+
     // ==================== 新增（Create） ====================
     
     /**
@@ -74,21 +97,7 @@ public interface TagMapper {
      */
     int insert(Tag tag);
 
-    /**
-     * 插入文章与标签的关联
-     *
-     * @param articleTag 文章标签关联对象
-     * @return 影响行数
-     */
-    int insertArticleTag(ArticleTag articleTag);
 
-    /**
-     * 批量插入文章标签关联
-     *
-     * @param articleTags 文章标签关联列表
-     * @return 影响行数
-     */
-    int batchInsertArticleTags(@Param("articleTags") List<ArticleTag> articleTags);
 
     // ==================== 更新（Update） ====================
     
@@ -119,13 +128,7 @@ public interface TagMapper {
      */
     int deleteById(Long id);
 
-    /**
-     * 删除文章的所有标签关联
-     *
-     * @param articleId 文章ID
-     * @return 影响行数
-     */
-    int deleteArticleTagsByArticleId(Long articleId);
+
 
     // ==================== 统计（Count） ====================
     
@@ -136,7 +139,5 @@ public interface TagMapper {
      * @return 总数
      */
     long countByKeyword(@Param("keyword") String keyword);
-
-
 
 }

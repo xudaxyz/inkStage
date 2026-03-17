@@ -5,6 +5,7 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleService;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -40,6 +41,11 @@ public class ArticleController {
     @UserAccess
     public Result<Long> createArticle(@Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("创建文章DTO: {}", articleCreateDTO);
+
+        if (articleCreateDTO.getTags() != null && !(articleCreateDTO.getTags().size() > 10)) {
+            log.warn("文章标签数量超过10个");
+            throw new BusinessException(ResponseMessage.ARTICLE_TAGS_MAX_TEN);
+        }
 
         Long articleId = articleService.createArticle(articleCreateDTO);
         if (articleId != null) {
@@ -126,7 +132,6 @@ public class ArticleController {
     }
 
 
-
     /**
      * 获取指定用户的文章列表
      *
@@ -154,8 +159,8 @@ public class ArticleController {
      */
     @GetMapping("/user-related")
     public Result<List<ArticleListVO>> getUserRelatedArticles(@RequestParam Long userId,
-                                                                @RequestParam Long excludeArticleId,
-                                                                @RequestParam(defaultValue = "3") Integer limit) {
+                                                              @RequestParam Long excludeArticleId,
+                                                              @RequestParam(defaultValue = "3") Integer limit) {
         log.info("获取作者相关文章, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit);
         List<ArticleListVO> relatedArticles = articleService.getUserRelatedArticles(userId, excludeArticleId, limit);
         return Result.success(relatedArticles, ResponseMessage.ARTICLE_LIST_SUCCESS);

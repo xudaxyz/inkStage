@@ -1,6 +1,5 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;

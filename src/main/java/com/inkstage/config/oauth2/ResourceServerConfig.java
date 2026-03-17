@@ -1,5 +1,7 @@
 package com.inkstage.config.oauth2;
 
+import com.inkstage.mapper.RoleMapper;
+import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.service.UserCacheService;
 import com.inkstage.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,9 @@ public class ResourceServerConfig {
 
     private final UserService userService;
     private final UserCacheService userCacheService;
+    private final RoleMapper roleMapper;
+    private final UserRoleMapper userRoleMapper;
+
 
     /**
      * JWT解码器
@@ -46,6 +51,6 @@ public class ResourceServerConfig {
      */
     @Bean
     public Converter<@NotNull Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter() {
-        return new CustomJwtAuthenticationConverter(userService, userCacheService);
+        return new CustomJwtAuthenticationConverter(userService, userCacheService, roleMapper, userRoleMapper);
     }
 }

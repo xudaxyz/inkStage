@@ -130,6 +130,31 @@ public class Article extends BaseEntity {
     private String originalUrl;
 
     /**
+     * SEO标题
+     */
+    private String metaTitle;
+
+    /**
+     * SEO描述
+     */
+    private String metaDescription;
+
+    /**
+     * SEO关键词
+     */
+    private String metaKeywords;
+
+    /**
+     * 定时发布时间
+     */
+    private LocalDateTime scheduledPublishTime;
+
+    /**
+     * 分享令牌
+     */
+    private String shareToken;
+
+    /**
      * 最后一次编辑的时间
      */
     private LocalDateTime lastEditTime;

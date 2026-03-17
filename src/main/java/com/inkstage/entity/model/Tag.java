@@ -21,6 +21,11 @@ public class Tag extends BaseEntity {
      * 标签名称
      */
     private String name;
+
+    /**
+     * 创建者ID
+     */
+    private Long userId;
     
     /**
      * 标签别名(URL友好)

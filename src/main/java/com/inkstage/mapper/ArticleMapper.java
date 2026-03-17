@@ -11,6 +11,7 @@ import com.inkstage.vo.front.MyArticleListVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -348,6 +349,20 @@ public interface ArticleMapper {
      */
     long countByPage(@Param("query") AdminArticleQueryDTO queryDTO);
 
+    /**
+     * 查询到达定时发布时间且状态为待发布的文章
+     *
+     * @param currentTime 当前时间
+     * @return 文章列表
+     */
+    List<Article> findScheduledArticles(@Param("currentTime") LocalDateTime currentTime);
 
+    /**
+     * 根据分享令牌查询文章
+     *
+     * @param shareToken 分享令牌
+     * @return 文章
+     */
+    Article findByShareToken(@Param("shareToken") String shareToken);
 
 }

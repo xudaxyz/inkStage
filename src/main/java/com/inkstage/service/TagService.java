@@ -1,6 +1,5 @@
 package com.inkstage.service;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.StatusEnum;
@@ -34,28 +33,7 @@ public interface TagService {
      */
     List<Tag> getActiveTags();
 
-    /**
-     * 根据文章ID获取关联的标签
-     *
-     * @param articleId 文章ID
-     * @return 标签列表
-     */
-    List<Tag> getTagsByArticleId(Long articleId);
 
-    /**
-     * 保存文章与标签的关联(通过标签ID)
-     *
-     * @param articleId 文章ID
-     * @param tagIds    标签ID列表
-     */
-    void saveArticleTags(Long articleId, List<Long> tagIds);
-
-    /**
-     * 删除文章的所有标签关联
-     *
-     * @param articleId 文章ID
-     */
-    void deleteArticleTagsByArticleId(Long articleId);
 
     /**
      * 添加标签
@@ -97,4 +75,11 @@ public interface TagService {
      * @return 响应结果
      */
     PageResult<Tag> getAdminTags(String keyword, Integer pageNum, Integer pageSize);
+
+    /**
+     * 创建标签（如果不存在）
+     * @param tag 标签信息
+     * @return 标签ID
+     */
+    Long createTagIfNotExists(Tag tag);
 }

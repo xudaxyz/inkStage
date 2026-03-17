@@ -14,8 +14,8 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleCollectionService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleQueryService;
+import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
-import com.inkstage.service.TagService;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleVO;
@@ -40,7 +40,7 @@ import tools.jackson.core.type.TypeReference;
 public class ArticleQueryServiceImpl implements ArticleQueryService {
 
     private final ArticleMapper articleMapper;
-    private final TagService tagService;
+    private final ArticleTagService articleTagService;
     private final FileService fileService;
     private final RedisUtil redisUtil;
     private final ArticleLikeService articleLikeService;
@@ -109,12 +109,12 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             // 查询文章详情
             articleDetailVO = articleMapper.findDetailById(id);
             if (articleDetailVO == null) {
-                log.warn("文章不存在, 文章ID: {}", id);
+                log.warn("文章: {} 不存在", id);
                 throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
             }
 
             // 查询文章标签
-            List<Tag> tagList = tagService.getTagsByArticleId(id);
+            List<Tag> tagList = articleTagService.getTagsByArticleId(id);
             articleDetailVO.setTags(tagList);
             fileService.ensureArticleDetailIsFullUrl(articleDetailVO);
 

@@ -1,6 +1,8 @@
 package com.inkstage.config.oauth2;
 
 import com.inkstage.entity.model.User;
+import com.inkstage.mapper.RoleMapper;
+import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.security.UserDetailsImpl;
 import com.inkstage.service.UserCacheService;
 import com.inkstage.service.UserService;
@@ -27,15 +29,19 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
     private final JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter;
     private final UserService userService;
     private final UserCacheService userCacheService;
+    private final UserRoleMapper userRoleMapper;
+    private final RoleMapper roleMapper;
 
-    public CustomJwtAuthenticationConverter(UserService userService, UserCacheService userCacheService) {
+    public CustomJwtAuthenticationConverter(UserService userService, UserCacheService userCacheService, RoleMapper roleMapper, UserRoleMapper userRoleMapper) {
         this.userService = userService;
         this.userCacheService = userCacheService;
-        this.grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        this.roleMapper = roleMapper;
+        this.userRoleMapper = userRoleMapper;
+        grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         // 配置权限前缀
-        this.grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
         // 配置权限声明名称
-        this.grantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("scope");
     }
 
     @Override
@@ -62,10 +68,10 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
         User user = loadUser(userId, username);
 
         // 构建UserDetailsImpl
-        UserDetailsImpl userDetails = new UserDetailsImpl(user);
+        UserDetailsImpl userDetails = new UserDetailsImpl(user, userRoleMapper, roleMapper);
 
-        // 获取权限信息
-        Collection<? extends GrantedAuthority> authorities = this.grantedAuthoritiesConverter.convert(jwt);
+        // 使用UserDetailsImpl中的权限信息
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
 
         // 创建UsernamePasswordAuthenticationToken，使用UserDetailsImpl作为principal
         return new UsernamePasswordAuthenticationToken(

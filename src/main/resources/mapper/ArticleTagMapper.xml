@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ArticleTagMapper">
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.ArticleTag">
+        <id property="id" column="id"/>
+        <result property="articleId" column="article_id"/>
+        <result property="tagId" column="tag_id"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="deleted" column="deleted" javaType="com.inkstage.enums.DeleteStatus" />
+        <result property="deletedTime" column="deleted_time"/>
+
+    </resultMap>
+    <!-- 插入文章标签关联 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleTag">
+        INSERT INTO article_tag (article_id, tag_id, create_time, deleted)
+        VALUES (#{articleId}, #{tagId}, #{createTime}, #{deleted})
+    </insert>
+
+    <!-- 批量插入文章标签关联 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO article_tag (article_id, tag_id, create_time, deleted)
+        VALUES
+        <foreach collection="articleTags" item="articleTag" separator=",">
+            (#{articleTag.articleId}, #{articleTag.tagId}, #{articleTag.createTime}, #{articleTag.deleted})
+        </foreach>
+    </insert>
+
+    <!-- 删除文章的标签关联 -->
+    <delete id="deleteByArticleId" parameterType="java.lang.Long">
+        DELETE FROM article_tag WHERE article_id = #{articleId}
+    </delete>
+
+</mapper>
