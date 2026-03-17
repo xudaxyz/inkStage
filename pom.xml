@@ -185,7 +185,6 @@
             <groupId>com.vladsch.flexmark</groupId>
             <artifactId>flexmark-all</artifactId>
             <version>${flexmark.version}</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 
