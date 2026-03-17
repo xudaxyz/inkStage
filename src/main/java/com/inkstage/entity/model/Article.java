@@ -50,11 +50,6 @@ public class Article extends BaseEntity {
     private Long userId;
 
     /**
-     * 文章作者的名称
-     */
-    private String authorName;
-
-    /**
      * 分类ID
      */
     private Long categoryId;

@@ -38,7 +38,7 @@ public class ReadingHistoryVO {
     /**
      * 作者名称
      */
-    private String authorName;
+    private String nickname;
 
     /**
      * 作者头像

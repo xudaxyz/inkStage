@@ -253,7 +253,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
         article.setSummary(summary);
         article.setCoverImage(dto.getCoverImage());
         article.setUserId(user.getId());
-        article.setAuthorName(user.getNickname());
         article.setCategoryId(dto.getCategoryId());
         article.setArticleStatus(dto.getStatus());
         article.setReviewStatus(dto.getReviewStatus());

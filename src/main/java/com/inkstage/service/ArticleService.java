@@ -1,6 +1,5 @@
 package com.inkstage.service;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleCreateDTO;
@@ -114,7 +113,7 @@ public interface ArticleService {
      * @param limit            限制数量
      * @return 相关文章列表
      */
-    List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
+    List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
 
     /**
      * 获取当前用户的文章列表，支持按状态过滤和搜索

@@ -130,7 +130,7 @@ public class ArticleDetailVO {
     /**
      * 作者昵称
      */
-    private String authorName;
+    private String nickname;
 
     /**
      * 作者头像

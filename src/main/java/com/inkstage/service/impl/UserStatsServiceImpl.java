@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.service.FileService;
 import com.inkstage.service.UserStatsService;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.vo.front.HotUserVO;
@@ -22,6 +23,7 @@ public class UserStatsServiceImpl implements UserStatsService {
 
     private final UserMapper userMapper;
     private final RedisUtil redisUtil;
+    private final FileService fileService;
 
     @Override
     public List<HotUserVO> getHotUsers(Integer limit) {
@@ -40,7 +42,8 @@ public class UserStatsServiceImpl implements UserStatsService {
 
             // 查询热门用户
             hotUsers = userMapper.findHotUsers(limit);
-
+            // 确保用户头像 URL 完整
+            fileService.ensureHotUserImgAreFullUrl(hotUsers);
             // 更新缓存
             redisUtil.set(cacheKey, hotUsers, 30, TimeUnit.MINUTES);
             log.debug("更新热门用户缓存, 缓存键: {}", cacheKey);

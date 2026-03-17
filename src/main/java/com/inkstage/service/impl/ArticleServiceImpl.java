@@ -140,7 +140,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
+    public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
         if (userId == null || userId <= 0) {
             log.warn("获取作者相关文章参数无效, 用户ID: {}", userId);
             throw new BusinessException(ResponseMessage.PARAM_ERROR, "用户ID无效");
@@ -148,7 +148,7 @@ public class ArticleServiceImpl implements ArticleService {
         if (limit == null || limit <= 0) {
             limit = 5;
         }
-        return articleQueryService.getAuthorRelatedArticles(userId, excludeArticleId, limit);
+        return articleQueryService.getUserRelatedArticles(userId, excludeArticleId, limit);
     }
 
     @Override

@@ -109,7 +109,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public User getUserProfile(Long id) {
         try {
             log.debug("获取用户资料, 用户ID: {}", id);
-            var user = userMapper.findById(id);
+            User user = userMapper.findById(id);
             if (user == null) {
                 throw new BusinessException("用户不存在");
             }

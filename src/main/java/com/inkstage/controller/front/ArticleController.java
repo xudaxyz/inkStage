@@ -152,12 +152,12 @@ public class ArticleController {
      * @param limit            限制数量
      * @return 相关文章列表
      */
-    @GetMapping("/author/related")
-    public Result<List<ArticleListVO>> getAuthorRelatedArticles(@RequestParam Long userId,
+    @GetMapping("/user-related")
+    public Result<List<ArticleListVO>> getUserRelatedArticles(@RequestParam Long userId,
                                                                 @RequestParam Long excludeArticleId,
                                                                 @RequestParam(defaultValue = "3") Integer limit) {
         log.info("获取作者相关文章, 用户ID: {}, 排除文章ID: {}, 限制数量: {}", userId, excludeArticleId, limit);
-        List<ArticleListVO> relatedArticles = articleService.getAuthorRelatedArticles(userId, excludeArticleId, limit);
+        List<ArticleListVO> relatedArticles = articleService.getUserRelatedArticles(userId, excludeArticleId, limit);
         return Result.success(relatedArticles, ResponseMessage.ARTICLE_LIST_SUCCESS);
     }
 

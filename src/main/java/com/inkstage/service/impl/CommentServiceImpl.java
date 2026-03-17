@@ -218,13 +218,13 @@ public class CommentServiceImpl implements CommentService {
             // 文章评论
             Article article = articleMapper.findById(comment.getArticleId());
             if (article != null) {
-                Long articleAuthorId = article.getUserId();
+                Long articleUserId = article.getUserId();
                 String articleTitle = article.getTitle();
 
                 // 只有当评论者不是文章作者时才发送通知
-                if (!currentUserId.equals(articleAuthorId)) {
+                if (!currentUserId.equals(articleUserId)) {
                     notificationService.sendNotificationWithTemplate(
-                            articleAuthorId,
+                            articleUserId,
                             NotificationType.ARTICLE_COMMENT,
                             comment.getArticleId(),
                             currentUserId,

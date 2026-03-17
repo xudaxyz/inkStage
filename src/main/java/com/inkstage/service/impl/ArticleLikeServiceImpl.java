@@ -67,13 +67,13 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 从文章服务获取文章信息
             Article article = articleMapper.findById(articleId);
             if (article != null) {
-                Long articleAuthorId = article.getUserId();
+                Long articleUserId = article.getUserId();
                 String articleTitle = article.getTitle();
 
                 // 只有当点赞者不是文章作者时才发送通知
-                if (!userId.equals(articleAuthorId)) {
+                if (!userId.equals(articleUserId)) {
                     notificationService.sendNotificationWithTemplate(
-                            articleAuthorId,
+                            articleUserId,
                             NotificationType.ARTICLE_LIKE,
                             articleId,
                             userId,

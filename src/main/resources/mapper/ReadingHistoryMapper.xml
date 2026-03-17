@@ -25,7 +25,7 @@
         <result column="summary" property="summary"/>
         <result column="cover_image" property="coverImage"/>
         <result column="user_id" property="userId"/>
-        <result column="author_name" property="authorName"/>
+        <result column="nickname" property="nickname"/>
         <result column="avatar" property="avatar"/>
         <result column="progress" property="progress"/>
         <result column="duration" property="duration"/>
@@ -101,8 +101,8 @@
             a.summary,
             a.cover_image,
             a.user_id,
-            a.author_name,
             u.avatar,
+            u.nickname,
             rh.progress,
             rh.duration,
             rh.last_read_time,
@@ -125,8 +125,8 @@
             a.summary,
             a.cover_image,
             a.user_id,
-            a.author_name,
             u.avatar,
+            u.nickname,
             rh.progress,
             rh.duration,
             rh.last_read_time,
@@ -147,8 +147,8 @@
             a.summary,
             a.cover_image,
             a.user_id,
-            a.author_name,
             u.avatar,
+            u.nickname,
             rh.progress,
             rh.duration,
             rh.last_read_time,

@@ -117,7 +117,6 @@ CREATE TABLE `article`
     `content`          LONGTEXT     NOT NULL COMMENT '文章内容',
     `content_html`     LONGTEXT COMMENT '文章HTML内容（Markdown转换结果）',
     `cover_image`      VARCHAR(255) COMMENT '文章封面图URL',
-    `author_name`      VARCHAR(50) COMMENT '文章作者的名称',
     `category_id`      BIGINT COMMENT '分类ID',
     `article_status`   TINYINT               DEFAULT 1 COMMENT '文章状态(1:草稿,2:待发布,3:已发布,4:已下架,5:回收站)',
     `review_status`   TINYINT               DEFAULT 1 COMMENT '审核状态(1:待审核,2:审核通过,3:审核拒绝,4:申诉中,5:禁用)',

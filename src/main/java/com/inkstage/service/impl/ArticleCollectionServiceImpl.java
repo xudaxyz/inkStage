@@ -94,13 +94,13 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
             // 从文章服务获取文章信息
             Article article = articleMapper.findById(collectArticleDTO.getArticleId());
             if (article != null) {
-                Long articleAuthorId = article.getUserId();
+                Long articleUserId = article.getUserId();
                 String articleTitle = article.getTitle();
 
                 // 只有当收藏者不是文章作者时才发送通知
-                if (!userId.equals(articleAuthorId)) {
+                if (!userId.equals(articleUserId)) {
                     notificationService.sendNotificationWithTemplate(
-                            articleAuthorId,
+                            articleUserId,
                             NotificationType.ARTICLE_COLLECTION,
                             collectArticleDTO.getArticleId(),
                             userId,

@@ -71,5 +71,5 @@ public interface ArticleQueryService {
      * @param limit            限制数量
      * @return 相关文章列表
      */
-    List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
+    List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit);
 }

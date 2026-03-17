@@ -87,7 +87,7 @@ public interface ArticleMapper {
      * @param limit            限制数量
      * @return 相关文章列表
      */
-    List<ArticleListVO> findAuthorRelatedArticles(@Param("userId") Long userId, @Param("excludeArticleId") Long excludeArticleId, @Param("limit") Integer limit);
+    List<ArticleListVO> findUserRelatedArticles(@Param("userId") Long userId, @Param("excludeArticleId") Long excludeArticleId, @Param("limit") Integer limit);
 
     /**
      * 查询当前用户文章列表

@@ -11,7 +11,6 @@
         <result column="content_html" property="contentHtml"/>
         <result column="cover_image" property="coverImage"/>
         <result column="user_id" property="userId"/>
-        <result column="author_name" property="authorName"/>
         <result column="category_id" property="categoryId"/>
         <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
         <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
@@ -39,7 +38,7 @@
     </resultMap>
 
     <sql id="baseColumns">
-        id, title, summary, content, content_html, cover_image, user_id, author_name, category_id, article_status, review_status, publish_time,
+        id, title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time
     </sql>
@@ -74,8 +73,8 @@
         a.collection_count,
         a.share_count,
         a.user_id as user_id,
-        a.author_name,
         u.avatar,
+        u.nickname,
         u.article_count,
         u.follow_count,
         u.follower_count,
@@ -102,7 +101,7 @@
         <result column="comment_count" property="commentCount"/>
         <!-- 作者信息 -->
         <result column="user_id" property="userId"/>
-        <result column="author_name" property="authorName"/>
+        <result column="nickname" property="nickname"/>
         <result column="avatar" property="avatar"/>
         <!-- 分类信息 -->
         <result column="category_id" property="categoryId"/>
@@ -124,9 +123,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -184,9 +183,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -219,9 +218,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -252,8 +251,8 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
+        u.nickname,
         u.avatar,
         c.name as category_name
         FROM
@@ -289,9 +288,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -322,7 +321,7 @@
     </select>
 
     <!-- 作者相关文章查询 -->
-    <select id="findAuthorRelatedArticles" resultMap="ArticleListResultMap">
+    <select id="findUserRelatedArticles" resultMap="ArticleListResultMap">
         SELECT
         a.id,
         a.title,
@@ -336,9 +335,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -378,7 +377,7 @@
     <resultMap id="AdminArticleResultMap" type="com.inkstage.vo.admin.AdminArticleVO">
         <id column="id" property="id"/>
         <result column="title" property="title"/>
-        <result column="author_name" property="authorName"/>
+        <result column="nickname" property="nickname"/>
         <result column="category_name" property="categoryName"/>
         <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
         <result column="publish_time" property="publishTime"/>
@@ -454,9 +453,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -572,7 +571,6 @@
         SELECT
         a.id,
         a.title,
-        a.author_name,
         a.article_status,
         a.publish_time,
         a.read_count,
@@ -581,9 +579,12 @@
         a.top,
         a.create_time,
         a.update_time,
+        u.nickname,
         c.name as category_name
         FROM
         article a
+        LEFT JOIN
+        user u ON a.user_id = u.id
         LEFT JOIN
         category c ON a.category_id = c.id
         WHERE
@@ -630,9 +631,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -665,9 +666,9 @@
         a.like_count,
         a.comment_count,
         a.user_id,
-        a.author_name,
         a.category_id,
         u.avatar,
+        u.nickname,
         c.name as category_name
         FROM
         article a
@@ -692,11 +693,11 @@
     <!-- 插入文章 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Article" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO article
-        (title, summary, content, content_html, cover_image, user_id, author_name, category_id, article_status, review_status, publish_time,
+        (title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time,create_time, update_time, deleted, deleted_time)
         VALUES
-        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{authorName}, #{categoryId},
+        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{categoryId},
         #{articleStatus}, #{reviewStatus}, #{publishTime},
         #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended},
         #{visible}, #{allowComment},
@@ -713,7 +714,6 @@
             <if test="content != null">content = #{content},</if>
             <if test="contentHtml != null">content_html = #{contentHtml},</if>
             <if test="coverImage != null">cover_image = #{coverImage},</if>
-            <if test="authorName != null">author_name = #{authorName},</if>
             <if test="categoryId != null">category_id = #{categoryId},</if>
             <if test="articleStatus != null">article_status = #{articleStatus},</if>
             <if test="reviewStatus != null">review_status = #{reviewStatus},</if>

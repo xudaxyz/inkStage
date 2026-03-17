@@ -1,6 +1,5 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.RedisKeyConstants;
@@ -289,11 +288,11 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
     /**
      * 获取作者相关文章
      */
-    public List<ArticleListVO> getAuthorRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
+    public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:author:related",
+                    "article:user:related",
                     userId + ":" + excludeArticleId + ":" + limit
             );
 
@@ -305,7 +304,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             }
 
             // 查询作者相关文章
-            relatedArticles = articleMapper.findAuthorRelatedArticles(userId, excludeArticleId, limit);
+            relatedArticles = articleMapper.findUserRelatedArticles(userId, excludeArticleId, limit);
             // 确保文章相关图片正常显示
             fileService.ensureArticleImageAreFullUrl(relatedArticles);
 
@@ -430,14 +429,12 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             long total = articleMapper.countByPage(queryDTO);
 
             // 构建分页结果
-            PageResult<Article> pageResult = PageResult.build(
+            return PageResult.build(
                     articleList,
                     total,
                     queryDTO.getPageNum(),
                     queryDTO.getPageSize()
             );
-
-            return pageResult;
         } catch (Exception e) {
             log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
@@ -476,14 +473,12 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             long total = articleMapper.countByPage(queryDTO);
 
             // 构建分页结果
-            PageResult<AdminArticleVO> pageResult = PageResult.build(
+            return PageResult.build(
                     articleList,
                     total,
                     queryDTO.getPageNum(),
                     queryDTO.getPageSize()
             );
-
-            return pageResult;
         } catch (Exception e) {
             log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
             throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());

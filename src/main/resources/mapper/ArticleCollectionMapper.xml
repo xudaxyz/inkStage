@@ -59,7 +59,7 @@
         <result property="coverImage" column="cover_image"/>
         <result property="articleStatus" column="article_status"/>
         <result property="userId" column="user_id"/>
-        <result property="authorName" column="author_name"/>
+        <result property="nickname" column="nickname"/>
         <result property="avatar" column="avatar"/>
         <result property="categoryId" column="category_id"/>
         <result property="categoryName" column="category_name"/>
@@ -95,7 +95,7 @@
             a.like_count,
             a.comment_count,
             u.avatar,
-            u.nickname as author_name,
+            u.nickname,
             c.name as category_name,
             cf1.name as folder_name
         FROM 
