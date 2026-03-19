@@ -45,6 +45,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         // 禁用CSRF保护, 适用于前后端分离架构
         http
+                // 只处理非OAuth2授权服务器的请求
+                .securityMatcher("/front/**", "/index/**", "/ws/**", "/admin/**")
                 // 启用CORS支持
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
@@ -66,7 +68,7 @@ public class SecurityConfig {
                         .requestMatchers("/front/tag/**", "/front/category/**").permitAll()
                         .requestMatchers("/front/search/**").permitAll()
                         .requestMatchers("/front/notification/**").permitAll()
-                        .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code").permitAll()
+                        .requestMatchers("/front/auth/register", "/front/auth/login", "/front/auth/send-code", "/front/auth/refresh-token").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         // 其他请求需要认证
                         .anyRequest().authenticated()

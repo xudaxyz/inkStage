@@ -4,16 +4,14 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.dto.SendCodeDTO;
+import com.inkstage.service.TokenService;
 import com.inkstage.service.UserAuthService;
 import com.inkstage.service.VerifyCodeService;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.validation.Valid;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * 前台用户认证Controller
@@ -26,6 +24,7 @@ public class AuthController {
 
     private final UserAuthService userAuthService;
     private final VerifyCodeService verifyCodeService;
+    private final TokenService tokenService;
 
     /**
      * 用户注册
@@ -73,6 +72,27 @@ public class AuthController {
             return Result.success(ResponseMessage.SEND_CODE_SUCCESS);
         } else {
             return Result.error(ResponseMessage.SEND_CODE_FAILED);
+        }
+    }
+
+    /**
+     * 刷新令牌
+     *
+     * @param refreshToken 刷新令牌请求
+     * @return 新的令牌信息
+     */
+    @PostMapping("/refresh-token")
+    public Result<TokenResponse> refreshToken(@RequestParam String refreshToken) {
+        try {
+            TokenResponse tokenResponse = tokenService.refreshToken(refreshToken);
+            if (tokenResponse != null) {
+                return Result.success(tokenResponse, ResponseMessage.REFRESH_TOKEN_SUCCESS);
+            } else {
+                return Result.error(ResponseMessage.REFRESH_TOKEN_FAILED);
+            }
+        } catch (Exception e) {
+            log.error("刷新令牌失败: {}", e.getMessage());
+            return Result.error(ResponseMessage.REFRESH_TOKEN_FAILED);
         }
     }
 

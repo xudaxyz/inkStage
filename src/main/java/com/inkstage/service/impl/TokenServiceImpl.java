@@ -4,16 +4,20 @@ import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.user.UserRoleEnum;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TokenService;
 import com.inkstage.service.UserRoleService;
+import com.inkstage.service.UserService;
 import com.inkstage.vo.TokenResponse;
 import com.inkstage.vo.UserInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
@@ -33,7 +37,9 @@ public class TokenServiceImpl implements TokenService {
 
     private final FileService fileService;
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final UserRoleService userRoleService;
+    private final UserService userService;
 
     @Override
     public TokenResponse generateTokenForUser(User user, AuthDTO authDTO) {
@@ -61,6 +67,16 @@ public class TokenServiceImpl implements TokenService {
         Instant now = Instant.now();
         Instant expiresAt = now.plus(3600, ChronoUnit.SECONDS);
 
+        // 生成刷新令牌
+        Instant refreshExpiresAt;
+        if (authDTO.getRememberMe() != null && authDTO.getRememberMe()) {
+            // 记住我：刷新令牌7天过期
+            refreshExpiresAt = now.plus(7, ChronoUnit.DAYS);
+        } else {
+            // 不记住我：刷新令牌1天过期
+            refreshExpiresAt = now.plus(1, ChronoUnit.DAYS);
+        }
+
         JwtClaimsSet accessTokenClaims = JwtClaimsSet.builder()
                 .issuer("inkstage-2026-access") // 令牌颁发者
                 .subject(user.getId().toString()) // 用户ID
@@ -78,9 +94,6 @@ public class TokenServiceImpl implements TokenService {
 
         // 使用JwtEncoder生成访问令牌
         String accessToken = jwtEncoder.encode(JwtEncoderParameters.from(accessTokenClaims)).getTokenValue();
-
-        // 生成刷新令牌
-        Instant refreshExpiresAt = now.plus(7, ChronoUnit.DAYS);
         JwtClaimsSet refreshTokenClaims = JwtClaimsSet.builder()
                 .issuer("inkstage-2026-refresh")
                 .subject(user.getId().toString())
@@ -149,5 +162,40 @@ public class TokenServiceImpl implements TokenService {
         return Arrays.stream(scope.split(" "))
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public TokenResponse refreshToken(String refreshToken) {
+        log.info("刷新令牌");
+        try {
+            // 解析刷新令牌
+            Jwt jwt = jwtDecoder.decode(refreshToken);
+            
+            // 从令牌中获取用户ID
+            String userIdStr = jwt.getSubject();
+            if (userIdStr == null) {
+                throw new BusinessException("刷新令牌无效");
+            }
+            
+            Long userId = Long.parseLong(userIdStr);
+            
+            // 获取用户信息
+            User user = userService.getUserById(userId);
+            if (user == null) {
+                throw new BusinessException("用户不存在");
+            }
+            
+            // TODO 构建临时AuthDTO
+            AuthDTO authDTO = new AuthDTO();
+            authDTO.setClientId("inkstage-client");
+            authDTO.setScope("read write admin");
+            authDTO.setRememberMe(true);
+            
+            // 生成新的令牌
+            return generateTokenForUser(user, authDTO);
+        } catch (Exception e) {
+            log.error("刷新令牌失败: {}", e.getMessage());
+            throw new BusinessException("刷新令牌失败");
+        }
     }
 }

@@ -60,4 +60,9 @@ public class AuthDTO {
      * 权限范围
      */
     private String scope;
+    
+    /**
+     * 是否记住我
+     */
+    private Boolean rememberMe = false;
 }

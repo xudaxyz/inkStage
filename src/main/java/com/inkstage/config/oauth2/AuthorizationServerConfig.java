@@ -84,39 +84,32 @@ public class AuthorizationServerConfig {
      */
     @Bean
     @Order(0)
-    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) {
-        try {
-            // 只处理授权服务器相关请求
-            http.securityMatcher("/oauth2/**", "/.well-known/oauth-authorization-server")
-                    // 启用CORS支持
-                    .cors(cors -> cors.configurationSource(request -> {
-                        CorsConfiguration config = new CorsConfiguration();
-                        // 动态允许请求来源
-                        String origin = request.getHeader("Origin");
-                        config.addAllowedOriginPattern(Objects.requireNonNullElse(origin, "*"));
-                        config.addAllowedMethod("*");
-                        config.addAllowedHeader("*");
-                        config.setAllowCredentials(true);
-                        config.setMaxAge(3600L);
-                        return config;
-                    }))
-                    // 允许所有授权服务器端点公开访问
-                    .authorizeHttpRequests(authorize -> authorize
-                            // 允许所有授权服务器端点
-                            .anyRequest().permitAll()
-                    )
-                    // 禁用CSRF保护(适用于密码授权类型)
-                    .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/**"))
-                    // 无状态会话
-                    .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+    public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http) throws Exception {
+        // 只处理授权服务器相关请求
+        http.securityMatcher("/oauth2/**", "/.well-known/oauth-authorization-server")
+                // 启用CORS支持
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    // 动态允许请求来源
+                    String origin = request.getHeader("Origin");
+                    config.addAllowedOriginPattern(Objects.requireNonNullElse(origin, "*"));
+                    config.addAllowedMethod("*");
+                    config.addAllowedHeader("*");
+                    config.setAllowCredentials(true);
+                    config.setMaxAge(3600L);
+                    return config;
+                }))
+                // 允许所有授权服务器端点公开访问
+                .authorizeHttpRequests(authorize -> authorize
+                        // 允许所有授权服务器端点
+                        .anyRequest().permitAll()
+                )
+                // 禁用CSRF保护(适用于密码授权类型)
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/oauth2/**"))
+                // 无状态会话
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-            return http.build();
-
-        } catch (Exception e) {
-            log.error("授权服务器安全过滤器链配置失败", e);
-            throw e;
-        }
-
+        return http.build();
     }
 
     /**

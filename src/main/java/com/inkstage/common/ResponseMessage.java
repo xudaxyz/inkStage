@@ -159,7 +159,11 @@ public enum ResponseMessage {
     
     // 文件相关成功消息
     FILE_DELETE_SUCCESS("文件删除成功"),
-    ARTICLE_TAGS_MAX_TEN("文章标签不能超过10个");
+    ARTICLE_TAGS_MAX_TEN("文章标签不能超过10个"),
+    
+    // 令牌相关消息
+    REFRESH_TOKEN_SUCCESS("令牌刷新成功"),
+    REFRESH_TOKEN_FAILED("令牌刷新失败");
 
     private final String message;
 
