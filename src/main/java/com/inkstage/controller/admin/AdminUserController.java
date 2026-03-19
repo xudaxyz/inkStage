@@ -5,10 +5,12 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.service.UserRoleService;
 import com.inkstage.service.UserService;
+import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
@@ -121,6 +123,20 @@ public class AdminUserController {
         } else {
             return Result.error(ResponseMessage.UPDATE_FAILED);
         }
+    }
+
+    /**
+     * 获取当前管理员个人资料
+     *
+     * @return 管理员个人资料
+     */
+    @GetMapping("/profile")
+    @AdminAccess
+    public Result<?> getAdminProfile() {
+        log.info("管理员获取个人资料");
+        Long userId = UserContext.getCurrentUserId();
+        User user = userService.getUserProfile(userId);
+        return Result.success(user, ResponseMessage.SUCCESS);
     }
 
 }

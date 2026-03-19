@@ -33,4 +33,12 @@ public interface ArticleTagMapper {
      * @param articleId 文章ID
      */
     void deleteByArticleId(Long articleId);
+
+    /**
+     * 根据文章ID查询标签关联列表
+     *
+     * @param articleId 文章ID
+     * @return 文章标签关联列表
+     */
+    List<ArticleTag> findByArticleId(Long articleId);
 }

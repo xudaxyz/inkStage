@@ -40,12 +40,12 @@ public class AdminUserListVO {
     /**
      * 用户角色
      */
-    private UserRoleEnum role;
+    private UserRoleEnum userRole;
 
     /**
      * 用户状态
      */
-    private UserStatus status;
+    private UserStatus userStatus;
 
     /**
      * 注册时间

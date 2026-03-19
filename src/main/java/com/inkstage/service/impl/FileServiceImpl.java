@@ -6,6 +6,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.service.FileService;
 import com.inkstage.service.strategy.StorageStrategy;
 import com.inkstage.service.strategy.StorageStrategyFactory;
+import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -138,6 +139,15 @@ public class FileServiceImpl implements FileService {
             String fullAvatarUrl = convertToFullUrl(collectionArticleVO.getAvatar());
             collectionArticleVO.setAvatar(fullAvatarUrl);
         }
+    }
+
+    @Override
+    public void ensureAdminArticleDetailIsFullUrl(AdminArticleDetailVO adminArticleDetailVO) {
+        if(adminArticleDetailVO == null){
+            return;
+        }
+        String fullCoverImageUrl = convertToFullUrl(adminArticleDetailVO.getCoverImage());
+        adminArticleDetailVO.setCoverImage(fullCoverImageUrl);
     }
 
     @Override

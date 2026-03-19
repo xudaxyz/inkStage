@@ -1,4 +1,4 @@
-package com.inkstage.controller.front;
+package com.inkstage.controller;
 
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/front/auth")
+@RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
 

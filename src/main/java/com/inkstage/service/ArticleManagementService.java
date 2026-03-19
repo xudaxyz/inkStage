@@ -3,6 +3,7 @@ package com.inkstage.service;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.front.MyArticleListVO;
 
 /**
@@ -64,4 +65,33 @@ public interface ArticleManagementService {
      * @return 更新后的文章
      */
     com.inkstage.entity.model.Article updateArticleStatus(Long id, ArticleStatus status);
+
+    /**
+     * 审核通过文章（管理员）
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean approveArticle(Long id);
+
+    /**
+     * 审核拒绝文章（管理员）
+     * @param id 文章ID
+     * @param reason 拒绝原因
+     * @return 是否成功
+     */
+    boolean rejectArticle(Long id, String reason);
+
+    /**
+     * 重新审核文章（管理员）
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean reprocessArticle(Long id);
+
+    /**
+     * 获取管理员文章详情（包含完整信息）
+     * @param id 文章ID
+     * @return 管理员文章详情VO
+     */
+    AdminArticleDetailVO getAdminArticleDetail(Long id);
 }

@@ -107,7 +107,7 @@
 
     <!-- 管理员用户列表列 -->
     <sql id="adminUserListColumns">
-        id, username, nickname, email, phone, avatar, status, register_time, last_login_time, article_count, comment_count
+        id, username, nickname, email, phone, user_status, register_time, last_login_time, article_count, comment_count
     </sql>
 
     <!-- 热门用户列 -->
@@ -270,11 +270,11 @@
         <if test="query.keyword != null and query.keyword != ''">
             AND (u.username LIKE CONCAT('%', #{query.keyword}, '%') OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%') OR u.email LIKE CONCAT('%', #{query.keyword}, '%') OR u.phone LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
-        <if test="query.role != null">
+        <if test="query.userRole != null">
             AND u.id IN (
                 SELECT ur.user_id 
                 FROM user_role ur 
-                WHERE ur.role_id = #{query.role} AND ur.status = 1
+                WHERE ur.role_id = #{query.userRole} AND ur.status = 1
             )
         </if>
         <if test="query.status != null">
@@ -439,11 +439,11 @@
         <if test="query.keyword != null and query.keyword != ''">
             AND (u.username LIKE CONCAT('%', #{query.keyword}, '%') OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%') OR u.email LIKE CONCAT('%', #{query.keyword}, '%') OR u.phone LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
-        <if test="query.role != null">
+        <if test="query.userRole != null">
             AND u.id IN (
                 SELECT ur.user_id 
                 FROM user_role ur 
-                WHERE ur.role_id = #{query.role} AND ur.status = 1
+                WHERE ur.role_id = #{query.userRole} AND ur.status = 1
             )
         </if>
         <if test="query.status != null">

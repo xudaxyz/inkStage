@@ -8,6 +8,7 @@ import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.service.ArticleService;
+import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,8 +47,8 @@ public class AdminArticleController {
     @AdminAccess
     public Result<?> getArticleDetail(@PathVariable Long id) {
         log.info("管理员获取文章详情, 文章ID: {}", id);
-        Article article = articleService.getArticleById(id);
-        return Result.success(article, ResponseMessage.ARTICLE_DETAIL_SUCCESS);
+        AdminArticleDetailVO articleDetail = articleService.getAdminArticleDetail(id);
+        return Result.success(articleDetail, ResponseMessage.ARTICLE_DETAIL_SUCCESS);
     }
 
     /**
@@ -79,6 +80,58 @@ public class AdminArticleController {
         boolean deleted = articleService.deleteArticle(id);
         if (deleted) {
             return Result.success(true, ResponseMessage.ARTICLE_DELETE_SUCCESS);
+        } else {
+            return Result.error(ResponseMessage.ERROR);
+        }
+    }
+
+    /**
+     * 审核通过文章
+     * @param id 文章ID
+     * @return 审核结果
+     */
+    @PutMapping("/approve/{id}")
+    @AdminAccess
+    public Result<?> approveArticle(@PathVariable Long id) {
+        log.info("管理员审核通过文章, 文章ID: {}", id);
+        boolean approved = articleService.approveArticle(id);
+        if (approved) {
+            return Result.success(true, "审核通过成功");
+        } else {
+            return Result.error(ResponseMessage.ERROR);
+        }
+    }
+
+    /**
+     * 审核拒绝文章
+     * @param id 文章ID
+     * @param reason 拒绝原因
+     * @return 审核结果
+     */
+    @PutMapping("/reject/{id}")
+    @AdminAccess
+    public Result<?> rejectArticle(@PathVariable Long id, @RequestBody String reason) {
+        log.info("管理员审核拒绝文章, 文章ID: {}, 原因: {}", id, reason);
+        boolean rejected = articleService.rejectArticle(id, reason);
+        if (rejected) {
+            return Result.success(true, "审核拒绝成功");
+        } else {
+            return Result.error(ResponseMessage.ERROR);
+        }
+    }
+
+    /**
+     * 重新审核文章
+     * @param id 文章ID
+     * @return 审核结果
+     */
+    @PutMapping("/reprocess/{id}")
+    @AdminAccess
+    public Result<?> reprocessArticle(@PathVariable Long id) {
+        log.info("管理员重新审核文章, 文章ID: {}", id);
+        boolean reprocessed = articleService.reprocessArticle(id);
+        if (reprocessed) {
+            return Result.success(true, "重新审核成功");
         } else {
             return Result.error(ResponseMessage.ERROR);
         }

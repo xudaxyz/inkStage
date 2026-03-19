@@ -12,6 +12,7 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.*;
 import com.inkstage.utils.RedisCacheManager;
+import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
@@ -199,5 +200,48 @@ public class ArticleServiceImpl implements ArticleService {
             throw new BusinessException(ResponseMessage.PARAM_ERROR, "查询参数不能为空");
         }
         return articleManagementService.getAdminArticlesByPage(queryDTO);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean approveArticle(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("审核通过文章参数无效, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章ID无效");
+        }
+        return articleManagementService.approveArticle(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean rejectArticle(Long id, String reason) {
+        if (id == null || id <= 0) {
+            log.warn("审核拒绝文章参数无效, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章ID无效");
+        }
+        if (reason == null || reason.trim().isEmpty()) {
+            log.warn("审核拒绝文章缺少拒绝原因, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.PARAM_ERROR, "拒绝原因不能为空");
+        }
+        return articleManagementService.rejectArticle(id, reason);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean reprocessArticle(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("重新审核文章参数无效, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章ID无效");
+        }
+        return articleManagementService.reprocessArticle(id);
+    }
+
+    @Override
+    public AdminArticleDetailVO getAdminArticleDetail(Long id) {
+        if (id == null || id <= 0) {
+            log.warn("获取管理员文章详情参数无效, 文章ID: {}", id);
+            throw new BusinessException(ResponseMessage.PARAM_ERROR, "文章ID无效");
+        }
+        return articleManagementService.getAdminArticleDetail(id);
     }
 }

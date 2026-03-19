@@ -32,4 +32,9 @@
         DELETE FROM article_tag WHERE article_id = #{articleId}
     </delete>
 
+    <!-- 根据文章ID查询标签关联列表 -->
+    <select id="findByArticleId" parameterType="java.lang.Long" resultMap="ResultMap">
+        SELECT * FROM article_tag WHERE article_id = #{articleId} AND deleted = 0
+    </select>
+
 </mapper>

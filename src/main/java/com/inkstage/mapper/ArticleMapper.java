@@ -3,7 +3,9 @@ package com.inkstage.mapper;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
@@ -234,6 +236,15 @@ public interface ArticleMapper {
     int updateStatus(@Param("id") Long id, @Param("status") ArticleStatus status);
 
     /**
+     * 更新文章审核状态
+     *
+     * @param id 文章ID
+     * @param reviewStatus 审核状态
+     * @return 影响行数
+     */
+    int updateReviewStatus(@Param("id") Long id, @Param("reviewStatus") ReviewStatus reviewStatus);
+
+    /**
      * 更新文章阅读数
      *
      * @param id 文章ID
@@ -365,4 +376,11 @@ public interface ArticleMapper {
      */
     Article findByShareToken(@Param("shareToken") String shareToken);
 
+    /**
+     * (管理员)根据ID查询文章详情VO对象
+     *
+     * @param id 文章ID
+     * @return 文章详情VO对象
+     */
+    AdminArticleDetailVO findAdminDetailById(@Param("id") Long id);
 }
