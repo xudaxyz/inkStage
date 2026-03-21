@@ -6,7 +6,7 @@
     <resultMap id="ResultMap" type="com.inkstage.entity.model.UserAuth">
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
-        <result column="auth_type" property="authType"/>
+        <result column="auth_type" property="authType" javaType="com.inkstage.enums.auth.AuthType"/>
         <result column="auth_identifier" property="authIdentifier"/>
         <result column="auth_credential" property="authCredential"/>
         <result column="primary_auth" property="primaryAuth" javaType="com.inkstage.enums.DefaultStatus"/>

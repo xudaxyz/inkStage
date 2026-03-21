@@ -3,6 +3,7 @@ package com.inkstage.entity.model;
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.DefaultStatus;
 import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.auth.AuthType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -25,9 +26,9 @@ public class UserAuth extends BaseEntity {
     private Long userId;
 
     /**
-     * 认证类型(username,password,email,phone,GitHub,qq,WeChat等)
+     * 认证类型(username,email,phone,GitHub,qq,WeChat等)
      */
-    private String authType;
+    private AuthType authType;
 
     /**
      * 认证标识(用户名,邮箱,手机号,第三方用户ID)

@@ -5,12 +5,12 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
-import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.service.UserRoleService;
 import com.inkstage.service.UserService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
@@ -94,7 +94,7 @@ public class AdminUserController {
      * @param userStatus 用户状态
      * @return 响应结果
      */
-    @PutMapping("/status/{id}")
+    @PutMapping("/update-status/{id}")
     @AdminAccess
     public Result<?> updateUserStatus(@PathVariable Long id, @RequestBody UserStatus userStatus) {
         log.info("更新用户状态, 用户ID: {}, 状态: {}", id, userStatus);
@@ -132,11 +132,11 @@ public class AdminUserController {
      */
     @GetMapping("/profile")
     @AdminAccess
-    public Result<?> getAdminProfile() {
+    public Result<UserInfo> getAdminProfile() {
         log.info("管理员获取个人资料");
         Long userId = UserContext.getCurrentUserId();
-        User user = userService.getUserProfile(userId);
-        return Result.success(user, ResponseMessage.SUCCESS);
+        UserInfo userInfo = userService.getUserProfile(userId);
+        return Result.success(userInfo, ResponseMessage.SUCCESS);
     }
 
 }

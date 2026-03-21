@@ -24,4 +24,12 @@ public interface UserAuthService {
      */
     TokenResponse login(AuthDTO authDTO);
 
+    /**
+     * 用户登出
+     *
+     * @param userId 用户ID
+     * @param refreshToken 刷新令牌
+     */
+    void logout(Long userId, String refreshToken);
+
 }

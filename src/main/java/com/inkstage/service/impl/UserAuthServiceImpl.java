@@ -1,331 +1,259 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.exception.BusinessException;
-import com.inkstage.common.ResponseMessage;
-import com.inkstage.constant.AuthTypeConstant;
-import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
-import com.inkstage.enums.DefaultStatus;
-import com.inkstage.enums.DeleteStatus;
-import com.inkstage.enums.StatusEnum;
-import com.inkstage.enums.VerificationStatus;
-import com.inkstage.enums.VisibleStatus;
-import com.inkstage.enums.auth.AccountType;
+import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.auth.AuthType;
-import com.inkstage.enums.user.Gender;
 import com.inkstage.enums.user.UserStatus;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserAuthMapper;
+import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.TokenService;
+import com.inkstage.service.TokenStoreService;
 import com.inkstage.service.UserAuthService;
 import com.inkstage.service.UserRoleService;
-import com.inkstage.service.UserService;
 import com.inkstage.service.VerifyCodeService;
-import com.inkstage.utils.AccountUtil;
-import com.inkstage.utils.IPUtil;
-import com.inkstage.utils.PasswordUtil;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.inkstage.constant.RedisKeyConstants.LOGIN_ATTEMPT_PREFIX;
+import static com.inkstage.constant.RedisKeyConstants.LOGIN_LOCK_PREFIX;
+
 /**
- * 用户认证Service实现类
+ * 用户认证服务实现类
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserAuthServiceImpl implements UserAuthService {
 
+    private final UserMapper userMapper;
     private final UserAuthMapper userAuthMapper;
-    private final UserService userService;
-    private final UserRoleService userRoleService;
-    private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
+    private final TokenStoreService tokenStoreService;
     private final VerifyCodeService verifyCodeService;
+    private final UserRoleService userRoleService;
     private final RedisUtil redisUtil;
-    private final AuthenticationManager authenticationManager;
 
-    // 注册频率限制(秒)
-    private static final int REGISTER_RATE_LIMIT_SECONDS = 300;
-    // 登录失败限制(秒)
-    private static final int LOGIN_FAIL_LIMIT_SECONDS = 300;
-    // 最大登录失败次数
-    private static final int MAX_LOGIN_FAIL_TIMES = 10;
+    private static final int MAX_LOGIN_ATTEMPTS = 5;
+    private static final int LOCKOUT_TIME_MINUTES = 15;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
-    public TokenResponse register(AuthDTO authDTO) {
-        if (authDTO == null) {
-            throw new BusinessException(ResponseMessage.REGISTER_FAILED);
-        }
-
-        try {
-            // 检查注册频率限制
-            String clientIp = IPUtil.getClientIp();
-            String limitKey = RedisKeyConstants.buildRegisterLimitKey(clientIp);
-            if (redisUtil.hasKey(limitKey)) {
-                throw new BusinessException(ResponseMessage.REGISTER_TOO_FREQUENTLY);
-            }
-
-            String account = authDTO.getAccount();
-            String password = authDTO.getPassword();
-            AuthType authType = authDTO.getAuthType();
-            
-            // 检查认证类型
-            if (authType == null) {
-                throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
-            }
-
-            // 验证账号格式
-            if (!AccountUtil.validateAccountFormat(account)) {
-                throw new BusinessException("账号格式错误");
-            }
-
-            // 验证码注册
-            if (AuthType.CODE == authType) {
-                String code = authDTO.getCode();
-                if (code == null || code.isEmpty()) {
-                    throw new BusinessException(ResponseMessage.CAPTCHA_REQUIRED);
-                }
-                // 验证验证码
-                boolean verifyResult = verifyCodeService.verifyCode(account, code, "register");
-                if (!verifyResult) {
-                    throw new BusinessException(ResponseMessage.CAPTCHA_ERROR);
-                }
-                // 生成随机密码
-                password = PasswordUtil.generateRandomPassword(12);
-            } else if (AuthType.PASSWORD == authType) {
-                // 密码注册
-                if (password == null || password.isEmpty()) {
-                    throw new BusinessException(ResponseMessage.PASSWORD_REQUIRED);
-                }
-                // 验证密码强度
-                if (!AccountUtil.validatePasswordStrength(password)) {
-                    throw new BusinessException("密码强度不足，至少需要包含大小写字母、数字和特殊字符中的三种");
-                }
-            } else {
-                throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
-            }
-
-            // 检查是否同意条款
-            if (!authDTO.isAgreeTerms()) {
-                throw new BusinessException(ResponseMessage.AGREE_TERMS_REQUIRED);
-            }
-
-            // 检查账号唯一性
-            AccountType accountType = AccountUtil.getAccountType(account);
-            switch (accountType) {
-                case EMAIL:
-                    if (userService.isEmailExists(account)) {
-                        throw new BusinessException(ResponseMessage.EMAIL_EXISTS);
-                    }
-                    break;
-                case PHONE:
-                    if (userService.isPhoneExists(account)) {
-                        throw new BusinessException(ResponseMessage.PHONE_EXISTS);
-                    }
-                    break;
-                case USERNAME:
-                    if (userService.isUsernameExists(account)) {
-                        throw new BusinessException(ResponseMessage.USERNAME_EXISTS);
-                    }
-                    break;
-                default:
-                    throw new BusinessException("账号格式错误");
-            }
-
-            String encodePassword = passwordEncoder.encode(password);
-            // 创建用户
-            User user = new User();
-            user.setUsername(account);
-            user.setNickname(account);
-            user.setPassword(encodePassword);
-            user.setCreateTime(LocalDateTime.now());
-            user.setUpdateTime(LocalDateTime.now());
-            user.setRegisterTime(LocalDateTime.now());
-            user.setRegisterIp(clientIp);
-            user.setStatus(UserStatus.NORMAL);
-            user.setPrivacy(VisibleStatus.PUBLIC);
-            user.setDeleted(DeleteStatus.NOT_DELETED);
-            user.setFollowCount(0);
-            user.setFollowerCount(0);
-            user.setArticleCount(0);
-            user.setCommentCount(0);
-            user.setLikeCount(0);
-            user.setGender(Gender.UNKNOWN);
-            user.setPhoneVerified(VerificationStatus.UNVERIFIED);
-            user.setEmailVerified(VerificationStatus.UNVERIFIED);
-
-            // 根据账号类型设置相应字段和验证状态
-            switch (accountType) {
-                case EMAIL:
-                    user.setEmail(account);
-                    user.setEmailVerified(VerificationStatus.VERIFIED);
-                    break;
-                case PHONE:
-                    user.setPhone(account);
-                    user.setPhoneVerified(VerificationStatus.VERIFIED);
-                    break;
-            }
-            
-            User newUser = userService.createUser(user);
-
-            // 创建用户认证信息
-            UserAuth userAuth = new UserAuth();
-            userAuth.setUserId(newUser.getId());
-            userAuth.setAuthType(AuthTypeConstant.USERNAME);
-            userAuth.setAuthIdentifier(account); // 存储账号
-            userAuth.setAuthCredential(encodePassword); // 存储加密后的密码
-            userAuth.setEnabled(StatusEnum.ENABLED);
-            userAuth.setPrimaryAuth(DefaultStatus.YES);
-            userAuth.setCreateTime(LocalDateTime.now());
-            userAuth.setUpdateTime(LocalDateTime.now());
-            userAuth.setLastAuthTime(LocalDateTime.now());
-            userAuth.setDeleted(DeleteStatus.NOT_DELETED);
-            userAuthMapper.insert(userAuth);
-
-            // 为用户分配角色
-            userRoleService.createUserRole(newUser);
-
-            // 设置注册频率限制
-            redisUtil.set(limitKey, "1", REGISTER_RATE_LIMIT_SECONDS, TimeUnit.SECONDS);
-
-            // 生成OAuth2令牌
-            return tokenService.generateTokenForUser(newUser, authDTO);
-        } catch (BusinessException e) {
-            log.error("用户注册失败: {}", e.getMessage());
-            throw e;
-        } catch (Exception e) {
-            log.error("用户注册异常: {}", e.getMessage(), e);
-            throw new BusinessException(ResponseMessage.REGISTER_FAILED);
-        }
-    }
-
-    @Override
+    @Transactional
     public TokenResponse login(AuthDTO authDTO) {
-        if (authDTO == null) {
-            throw new BusinessException(ResponseMessage.LOGIN_FAILED);
-        }
+        log.info("用户登录，账号: {}", authDTO.getAccount());
+
+        // 检查登录尝试次数
+        checkLoginAttempts(authDTO.getAccount());
 
         try {
-            // 检查登录频率限制
-            String clientIp = IPUtil.getClientIp();
-            String failKey = RedisKeyConstants.buildLoginFailKey(clientIp);
-            Integer failCount = redisUtil.getWithType(failKey, new TypeReference<>() {});
-            if (failCount != null && failCount >= MAX_LOGIN_FAIL_TIMES) {
-                throw new BusinessException(ResponseMessage.LOGIN_TOO_FREQUENTLY);
-            }
-
-            String account = authDTO.getAccount();
-            String password = authDTO.getPassword();
-            String code = authDTO.getCode();
-            AuthType authType = authDTO.getAuthType();
-
-            User user = null;
-
-            // 验证码登录
-            if (AuthType.CODE == authType) {
-                if (code == null || code.isEmpty()) {
-                    throw new BusinessException(ResponseMessage.CAPTCHA_REQUIRED);
-                }
-                // 验证验证码
-                boolean verifyResult = verifyCodeService.verifyCode(account, code, "login");
-                if (!verifyResult) {
-                    // 记录登录失败次数
-                    recordLoginFail(clientIp, failKey, failCount);
-                    throw new BusinessException(ResponseMessage.CAPTCHA_ERROR);
-                }
-                // 根据账号获取用户
-                AccountType accountType = AccountUtil.getAccountType(account);
-                user = switch (accountType) {
-                    case EMAIL -> userService.getUserByEmail(account);
-                    case PHONE -> userService.getUserByPhone(account);
-                    case USERNAME -> userService.getUserByUsername(account);
-                    default -> throw new BusinessException("账号格式错误");
-                };
-            } else if (AuthType.PASSWORD == authType) {
-                if (password == null || password.isEmpty()) {
-                    throw new BusinessException(ResponseMessage.PASSWORD_REQUIRED);
-                }
-                // 密码登录 - 使用 AuthenticationManager 进行认证
-                try {
-                    // 通过用户名和密码进行认证
-                    Authentication authentication = authenticationManager.authenticate(
-                            new UsernamePasswordAuthenticationToken(account, password)
-                    );
-                    // 从认证结果中获取用户详情
-                    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-                    // 根据用户名获取完整的用户信息
-                    if (userDetails != null) {
-                        user = userService.getUserByUsername(userDetails.getUsername());
-                    }
-                } catch (Exception e) {
-                    // 记录登录失败次数
-                    recordLoginFail(clientIp, failKey, failCount);
-                    if (e instanceof UsernameNotFoundException) {
-                        throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
-                    } else {
-                        throw new BusinessException(ResponseMessage.PASSWORD_ERROR);
-                    }
-                }
-            } else {
-                throw new BusinessException(ResponseMessage.AUTH_TYPE_ERROR);
-            }
-
-            // 检查用户是否存在
+            // 根据账号类型获取用户
+            User user = getUserByAccount(authDTO.getAccount());
             if (user == null) {
-                throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
+                incrementLoginAttempts(authDTO.getAccount());
+                throw new BusinessException("账号或密码错误");
             }
 
             // 检查用户状态
-            if (UserStatus.NORMAL != user.getStatus()) {
-                throw new BusinessException(ResponseMessage.USER_DISABLED);
+            if (user.getStatus() == UserStatus.DISABLED) {
+                throw new BusinessException("账号已被禁用");
+            }
+            if (user.getStatus() != UserStatus.NORMAL) {
+                throw new BusinessException("账号状态异常");
             }
 
-            // 清除登录失败记录
-            redisUtil.delete(failKey);
+            // 验证凭证
+            if (!validateCredentials(user, authDTO)) {
+                incrementLoginAttempts(authDTO.getAccount());
+                throw new BusinessException("账号或密码错误");
+            }
 
-            // 更新最后登录时间
-            user.setLastLoginTime(LocalDateTime.now());
-            user.setLastLoginIp(IPUtil.getClientIp());
-            User updatedUser = userService.updateUser(user);
+            // 检查用户是否有角色，如果没有，分配默认角色
+            List<UserRole> userRoles = userRoleService.getUserRoles(user.getId());
+            if (userRoles.isEmpty()) {
+                userRoleService.createUserRole(user);
+                log.info("为用户 {} 分配默认角色", user.getId());
+            }
 
-            // 生成OAuth2令牌
-            return tokenService.generateTokenForUser(updatedUser, authDTO);
+            // 重置登录尝试次数
+            resetLoginAttempts(authDTO.getAccount());
+
+            // 生成令牌
+            TokenResponse tokenResponse = tokenService.generateTokenForUser(user, authDTO);
+            log.info("用户登录成功，用户ID: {}", user.getId());
+            return tokenResponse;
         } catch (BusinessException e) {
-            log.error("用户登录失败: {}", e.getMessage());
+            log.warn("用户登录失败，账号: {}, 原因: {}", authDTO.getAccount(), e.getMessage());
             throw e;
         } catch (Exception e) {
-            log.error("用户登录异常: {}", e.getMessage(), e);
-            throw new BusinessException(ResponseMessage.LOGIN_FAILED);
+            log.error("用户登录异常，账号: {}", authDTO.getAccount(), e);
+            throw new BusinessException("登录失败，请稍后重试");
         }
     }
 
-    /**
-     * 记录登录失败次数
-     */
-    private void recordLoginFail(String clientIp, String failKey, Integer failCount) {
-        log.info("记录登录失败次数: clientIp={}, failKey={}, failCount={}", clientIp, failKey, failCount);
-        if (failCount == null) {
-            failCount = 0;
+    @Override
+    @Transactional
+    public TokenResponse register(AuthDTO authDTO) {
+        log.info("用户注册，账号: {}", authDTO.getAccount());
+
+        try {
+            // 检查账号是否已存在
+            if (getUserByAccount(authDTO.getAccount()) != null) {
+                throw new BusinessException("账号已存在");
+            }
+
+            // 验证验证码
+            if (!verifyCodeService.verifyCode(authDTO.getAccount(), authDTO.getCode(), "register")) {
+                throw new BusinessException("验证码错误或已过期");
+            }
+
+            // 对密码进行统一加密
+            authDTO.setPassword(passwordEncoder.encode(authDTO.getPassword()));
+            // 创建用户
+            User user = createUser(authDTO);
+
+            // 为新用户分配默认角色
+            userRoleService.createUserRole(user);
+
+            // 创建用户认证信息
+            createUserAuth(user, authDTO);
+
+            // 生成令牌
+            TokenResponse tokenResponse = tokenService.generateTokenForUser(user, authDTO);
+            log.info("用户注册成功，用户ID: {}", user.getId());
+            return tokenResponse;
+        } catch (BusinessException e) {
+            log.warn("用户注册失败，账号: {}, 原因: {}", authDTO.getAccount(), e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("用户注册异常，账号: {}", authDTO.getAccount(), e);
+            throw new BusinessException("注册失败，请稍后重试");
         }
-        failCount++;
-        redisUtil.set(failKey, failCount, LOGIN_FAIL_LIMIT_SECONDS, TimeUnit.SECONDS);
+    }
+
+    @Override
+    @Transactional
+    public void logout(Long userId, String refreshToken) {
+        log.info("用户登出，用户ID: {}", userId);
+
+        try {
+            // 撤销刷新令牌
+            if (refreshToken != null) {
+                tokenStoreService.revokeRefreshToken(userId, refreshToken);
+            } else {
+                // 撤销用户所有刷新令牌
+                tokenStoreService.revokeAllRefreshTokens(userId);
+            }
+            log.info("用户登出成功，用户ID: {}", userId);
+        } catch (Exception e) {
+            log.error("用户登出异常，用户ID: {}", userId, e);
+            // 登出失败不影响用户体验，记录日志即可
+        }
+    }
+
+    private User getUserByAccount(String account) {
+        // 尝试通过邮箱查找
+        User user = userMapper.findByEmail(account);
+        if (user != null) {
+            return user;
+        }
+        // 尝试通过用户名查找
+        return userMapper.findByUsername(account);
+    }
+
+    private boolean validateCredentials(User user, AuthDTO authDTO) {
+        if (authDTO.getAuthType() == AuthType.USERNAME) {
+            // 密码登录
+            UserAuth userAuth = userAuthMapper.findByUserIdAndType(user.getId(), AuthType.USERNAME);
+            return userAuth != null && passwordEncoder.matches(authDTO.getPassword(), userAuth.getAuthCredential());
+        } else if (authDTO.getAuthType() == AuthType.EMAIL || authDTO.getAuthType() == AuthType.PHONE) {
+            // 验证码登录
+            return verifyCodeService.verifyCode(authDTO.getAccount(), authDTO.getCode(), "login");
+        }
+        return false;
+    }
+
+    private User createUser(AuthDTO authDTO) {
+        User user = new User();
+        user.setUsername(generateUsername(authDTO.getAccount()));
+        user.setEmail(authDTO.getAccount());
+        user.setStatus(UserStatus.NORMAL);
+        user.setCreateTime(LocalDateTime.now());
+        user.setUpdateTime(LocalDateTime.now());
+
+        userMapper.insert(user);
+        return user;
+    }
+
+    private void createUserAuth(User user, AuthDTO authDTO) {
+        UserAuth userAuth = new UserAuth();
+        userAuth.setUserId(user.getId());
+        userAuth.setAuthType(authDTO.getAuthType());
+        userAuth.setAuthIdentifier(authDTO.getAccount());
+
+        if (authDTO.getAuthType() == AuthType.USERNAME) {
+            userAuth.setAuthCredential(authDTO.getPassword());
+        }
+
+        userAuth.setCreateTime(LocalDateTime.now());
+        userAuth.setUpdateTime(LocalDateTime.now());
+
+        userAuthMapper.insert(userAuth);
+    }
+
+    private String generateUsername(String account) {
+        // 从邮箱提取用户名
+        if (account.contains("@")) {
+            String username = account.split("@")[0];
+            // 检查用户名是否已存在
+            int suffix = 1;
+            String originalUsername = username;
+            while (userMapper.findByUsername(username) != null) {
+                username = originalUsername + suffix++;
+            }
+            return username;
+        }
+        return account;
+    }
+
+    private void checkLoginAttempts(String account) {
+        String lockKey = LOGIN_LOCK_PREFIX + account;
+        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+
+        // 检查是否被锁定
+        if (redisUtil.hasKey(lockKey)) {
+            throw new BusinessException("账号已被锁定，请15分钟后再试");
+        }
+
+        // 检查登录尝试次数
+        Integer attempts = redisUtil.get(attemptKey, Integer.class);
+        if (attempts != null && attempts >= MAX_LOGIN_ATTEMPTS) {
+            // 锁定账号
+            redisUtil.set(lockKey, 1, LOCKOUT_TIME_MINUTES, TimeUnit.MINUTES);
+            redisUtil.delete(attemptKey);
+            throw new BusinessException("账号已被锁定，请15分钟后再试");
+        }
+    }
+
+    private void incrementLoginAttempts(String account) {
+        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+        redisUtil.increment(attemptKey);
+        redisUtil.expire(attemptKey, LOCKOUT_TIME_MINUTES, TimeUnit.MINUTES);
+    }
+
+    private void resetLoginAttempts(String account) {
+        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+        redisUtil.delete(attemptKey);
     }
 }

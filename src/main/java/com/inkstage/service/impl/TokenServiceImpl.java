@@ -7,6 +7,7 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.FileService;
 import com.inkstage.service.TokenService;
+import com.inkstage.service.TokenStoreService;
 import com.inkstage.service.UserRoleService;
 import com.inkstage.service.UserService;
 import com.inkstage.vo.TokenResponse;
@@ -22,6 +23,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -40,6 +42,7 @@ public class TokenServiceImpl implements TokenService {
     private final JwtDecoder jwtDecoder;
     private final UserRoleService userRoleService;
     private final UserService userService;
+    private final TokenStoreService tokenStoreService;
 
     @Override
     public TokenResponse generateTokenForUser(User user, AuthDTO authDTO) {
@@ -107,6 +110,10 @@ public class TokenServiceImpl implements TokenService {
 
         String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshTokenClaims)).getTokenValue();
 
+        // 存储刷新令牌到Redis
+        tokenStoreService.storeRefreshToken(user.getId(), refreshToken, 
+            Duration.ofSeconds(refreshExpiresAt.getEpochSecond() - now.getEpochSecond()));
+
         // 构建响应
         TokenResponse tokenResponse = new TokenResponse();
         tokenResponse.setAccess_token(accessToken);
@@ -128,7 +135,7 @@ public class TokenServiceImpl implements TokenService {
     private UserInfo assembleUserInfo(User user, List<UserRole> userRoles) {
         UserInfo userInfo = new UserInfo();
         userInfo.setId(user.getId());
-        userInfo.setName(user.getUsername());
+        userInfo.setUsername(user.getUsername());
         userInfo.setEmail(user.getEmail());
         userInfo.setAvatar(user.getAvatar());
         userInfo.setNickname(user.getNickname());
@@ -137,15 +144,15 @@ public class TokenServiceImpl implements TokenService {
         userInfo.setGender(user.getGender());
         userInfo.setBirthDate(user.getBirthDate());
         userInfo.setLocation(user.getLocation());
-        
+
         // 设置用户角色
         if (!userRoles.isEmpty()) {
             UserRoleEnum primaryRole = UserRoleEnum.fromCode(userRoles.getFirst().getRoleId());
-            userInfo.setRole(primaryRole.name());
+            userInfo.setRole(primaryRole);
         } else {
-            userInfo.setRole(UserRoleEnum.USER.name());
+            userInfo.setRole(UserRoleEnum.USER);
         }
-        
+
         return userInfo;
     }
 
@@ -170,27 +177,52 @@ public class TokenServiceImpl implements TokenService {
         try {
             // 解析刷新令牌
             Jwt jwt = jwtDecoder.decode(refreshToken);
-            
+
             // 从令牌中获取用户ID
             String userIdStr = jwt.getSubject();
             if (userIdStr == null) {
                 throw new BusinessException("刷新令牌无效");
             }
-            
+
             Long userId = Long.parseLong(userIdStr);
-            
+
+            // 验证刷新令牌是否在Redis中有效
+            if (!tokenStoreService.validateRefreshToken(userId, refreshToken)) {
+                throw new BusinessException("刷新令牌已过期或被撤销");
+            }
+
             // 获取用户信息
             User user = userService.getUserById(userId);
             if (user == null) {
+                // 撤销所有刷新令牌
+                tokenStoreService.revokeAllRefreshTokens(userId);
                 throw new BusinessException("用户不存在");
             }
-            
-            // TODO 构建临时AuthDTO
+
+            // 获取客户端id
+            List<String> audience = jwt.getAudience();
+            if (audience == null || audience.isEmpty()) {
+                throw new BusinessException("Audience 不存在");
+            }
+            String clientId = jwt.getAudience().getFirst();
+
+            String scope = jwt.getClaimAsString("scope");
+            if (scope == null || scope.isEmpty()) {
+                scope = "read write";
+            }
+
+            Instant expiresAt = jwt.getExpiresAt();
+            long daysUnitExpiry = ChronoUnit.DAYS.between(Instant.now(), expiresAt);
+
             AuthDTO authDTO = new AuthDTO();
-            authDTO.setClientId("inkstage-client");
-            authDTO.setScope("read write admin");
-            authDTO.setRememberMe(true);
-            
+            authDTO.setClientId(clientId);
+            authDTO.setScope(scope);
+            // 如果刷新令牌过期时间超过3天，认为用户选择了记住我
+            authDTO.setRememberMe(daysUnitExpiry >= 3);
+
+            // 撤销旧的刷新令牌
+            tokenStoreService.revokeRefreshToken(userId, refreshToken);
+
             // 生成新的令牌
             return generateTokenForUser(user, authDTO);
         } catch (Exception e) {

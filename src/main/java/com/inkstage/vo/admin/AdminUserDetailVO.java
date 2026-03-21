@@ -9,6 +9,7 @@ import lombok.Data;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -70,6 +71,11 @@ public class AdminUserDetailVO implements Serializable {
      * 性别
      */
     private Gender gender;
+
+    /**
+     * 生日
+     */
+    private LocalDate birthDate;
 
     /**
      * 所在地区
@@ -134,12 +140,12 @@ public class AdminUserDetailVO implements Serializable {
     /**
      * 用户状态
      */
-    private UserStatus status;
+    private UserStatus userStatus;
 
     /**
      * 用户角色
      */
-    private UserRoleEnum role;
+    private UserRoleEnum userRole;
 
     /**
      * 最近发布的文章

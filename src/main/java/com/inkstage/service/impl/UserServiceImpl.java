@@ -3,13 +3,12 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
+import com.inkstage.entity.model.UserRole;
+import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
-import com.inkstage.service.UserService;
-import com.inkstage.service.UserAdminService;
-import com.inkstage.service.UserProfileService;
-import com.inkstage.service.UserRegistrationService;
-import com.inkstage.service.UserStatsService;
+import com.inkstage.service.*;
+import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import com.inkstage.vo.front.HotUserVO;
@@ -34,6 +33,7 @@ public class UserServiceImpl implements UserService {
     private final UserProfileService userProfileService;
     private final UserAdminService userAdminService;
     private final UserStatsService userStatsService;
+    private final UserRoleService userRoleService;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -166,12 +166,33 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserProfile(Long id) {
+    public UserInfo getUserProfile(Long id) {
         if (id == null || id <= 0) {
             log.warn("获取用户资料参数无效, 用户ID: {}", id);
             return null;
         }
-        return userProfileService.getUserProfile(id);
+        User userProfile = userProfileService.getUserProfile(id);
+        UserInfo userInfo = new UserInfo();
+        userInfo.setId(userProfile.getId());
+        userInfo.setUsername(userProfile.getUsername());
+        userInfo.setNickname(userProfile.getNickname());
+        userInfo.setEmail(userProfile.getEmail());
+        userInfo.setAvatar(userProfile.getAvatar());
+        userInfo.setCoverImage(userProfile.getCoverImage());
+        userInfo.setSignature(userProfile.getSignature());
+        userInfo.setGender(userProfile.getGender());
+        userInfo.setBirthDate(userProfile.getBirthDate());
+        userInfo.setLocation(userProfile.getLocation());
+        userInfo.setRegisterTime(userProfile.getRegisterTime());
+        userInfo.setArticleCount(userProfile.getArticleCount());
+        userInfo.setCommentCount(userProfile.getCommentCount());
+        userInfo.setLikeCount(userProfile.getLikeCount());
+        userInfo.setFollowCount(userProfile.getFollowCount());
+        userInfo.setFollowerCount(userProfile.getFollowerCount());
+        // 获取用户角色
+        List<UserRole> userRoles = userRoleService.getUserRoles(id);
+        userInfo.setRole(UserRoleEnum.fromCode(userRoles.getFirst().getRoleId()));
+        return userInfo;
     }
 
     @Override

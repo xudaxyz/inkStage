@@ -4,6 +4,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserStatus;
+import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import com.inkstage.vo.front.HotUserVO;
@@ -143,7 +144,7 @@ public interface UserService {
      * @param id 用户ID
      * @return 用户信息，包含完整的图片URL
      */
-    User getUserProfile(Long id);
+    UserInfo getUserProfile(Long id);
 
     /**
      * 获取用户公开资料（包含完整的图片URL）

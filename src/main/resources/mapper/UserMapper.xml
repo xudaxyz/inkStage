@@ -46,7 +46,6 @@
         <result column="phone" property="phone"/>
         <result column="phone_verified" property="phoneVerified"/>
         <result column="avatar" property="avatar"/>
-        <result column="cover_image" property="coverImage"/>
         <result column="signature" property="signature"/>
         <result column="gender" property="gender"/>
         <result column="birth_date" property="birthDate"/>
@@ -62,9 +61,7 @@
         <result column="register_ip" property="registerIp"/>
         <result column="register_time" property="registerTime"/>
         <result column="privacy" property="privacy"/>
-        <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_time" property="updateTime"/>
+        <result column="user_status" property="userStatus" javaType="com.inkstage.enums.user.UserStatus"/>
     </resultMap>
 
     <!-- 管理员用户列表映射 -->
@@ -74,12 +71,12 @@
         <result column="nickname" property="nickname"/>
         <result column="email" property="email"/>
         <result column="phone" property="phone"/>
-        <result column="avatar" property="avatar"/>
-        <result column="status" property="status"/>
+        <result column="status" property="userStatus" javaType="com.inkstage.enums.user.UserStatus"/>
         <result column="register_time" property="registerTime"/>
         <result column="last_login_time" property="lastLoginTime"/>
         <result column="article_count" property="articleCount"/>
         <result column="comment_count" property="commentCount"/>
+        <result column="user_role" property="userRole" javaType="com.inkstage.enums.user.UserRoleEnum"/>
     </resultMap>
 
     <!-- 热门用户映射 -->
@@ -103,11 +100,6 @@
         id, username, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
         last_login_time, last_login_ip, register_ip, register_time, privacy, status, create_time, update_time
-    </sql>
-
-    <!-- 管理员用户列表列 -->
-    <sql id="adminUserListColumns">
-        id, username, nickname, email, phone, user_status, register_time, last_login_time, article_count, comment_count
     </sql>
 
     <!-- 热门用户列 -->
@@ -256,26 +248,28 @@
     <!-- 管理员根据ID获取用户详情 -->
     <select id="findAdminUserDetailById" resultMap="AdminUserDetailResultMap">
         SELECT
-        <include refid="adminUserDetailColumns"/>
-        FROM user
-        WHERE id = #{id} AND deleted = 0
+        u.id, u.username, u.nickname, u.email, u.email_verified, u.phone, u.phone_verified,
+        u.avatar, u.signature, u.gender, u.birth_date, u.location, u.website, u.follow_count, u.follower_count, u.article_count, u.comment_count, u.like_count,
+        u.last_login_time, u.last_login_ip, u.register_ip, u.register_time, u.privacy, u.status as user_status,
+        COALESCE(MAX(ur.role_id), 2) as user_role
+        FROM user u
+        LEFT JOIN user_role ur ON u.id = ur.user_id AND ur.status = 1
+        WHERE u.id = #{id} AND u.deleted = 0
     </select>
 
     <!-- 管理员分页查询用户列表 -->
     <select id="findAdminUserList" resultMap="AdminUserListResultMap">
         SELECT
-        <include refid="adminUserListColumns"/>
+        u.id, u.username, u.nickname, u.email, u.phone, u.status, u.register_time, u.last_login_time, u.article_count, u.comment_count,
+        COALESCE(MAX(ur.role_id), 2) as user_role
         FROM user u
+        LEFT JOIN user_role ur ON u.id = ur.user_id AND ur.status = 1
         WHERE u.deleted = 0
         <if test="query.keyword != null and query.keyword != ''">
             AND (u.username LIKE CONCAT('%', #{query.keyword}, '%') OR u.nickname LIKE CONCAT('%', #{query.keyword}, '%') OR u.email LIKE CONCAT('%', #{query.keyword}, '%') OR u.phone LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
         <if test="query.userRole != null">
-            AND u.id IN (
-                SELECT ur.user_id 
-                FROM user_role ur 
-                WHERE ur.role_id = #{query.userRole} AND ur.status = 1
-            )
+            AND ur.role_id = #{query.userRole}
         </if>
         <if test="query.status != null">
             AND u.status = #{query.status}
@@ -286,6 +280,7 @@
         <if test="query.endDate != null">
             AND u.create_time <![CDATA[ <= ]]> #{query.endDate}
         </if>
+        GROUP BY u.id
         ORDER BY u.id DESC
         LIMIT #{query.offset}, #{query.pageSize}
     </select>

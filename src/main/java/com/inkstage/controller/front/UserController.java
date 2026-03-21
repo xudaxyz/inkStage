@@ -8,6 +8,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.service.FollowService;
 import com.inkstage.service.UserService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.front.UserPublicProfileVO;
 
 import jakarta.validation.Valid;
@@ -34,11 +35,11 @@ public class UserController {
      */
     @GetMapping("/profile")
     @UserAccess
-    public Result<User> getProfile() {
+    public Result<UserInfo> getProfile() {
         // 从UserContext中获取当前用户ID
         Long userId = UserContext.getCurrentUserId();
-        User user = userService.getUserProfile(userId);
-        return Result.success(user, ResponseMessage.SUCCESS);
+        UserInfo userInfo = userService.getUserProfile(userId);
+        return Result.success(userInfo, ResponseMessage.SUCCESS);
     }
 
     /**

@@ -163,7 +163,11 @@ public enum ResponseMessage {
     
     // 令牌相关消息
     REFRESH_TOKEN_SUCCESS("令牌刷新成功"),
-    REFRESH_TOKEN_FAILED("令牌刷新失败");
+    REFRESH_TOKEN_FAILED("令牌刷新失败"),
+    
+    // 登出相关消息
+    LOGOUT_SUCCESS("登出成功"),
+    LOGOUT_FAILED("登出失败");
 
     private final String message;
 

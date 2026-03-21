@@ -143,11 +143,20 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void ensureAdminArticleDetailIsFullUrl(AdminArticleDetailVO adminArticleDetailVO) {
-        if(adminArticleDetailVO == null){
+        if (adminArticleDetailVO == null) {
             return;
         }
         String fullCoverImageUrl = convertToFullUrl(adminArticleDetailVO.getCoverImage());
         adminArticleDetailVO.setCoverImage(fullCoverImageUrl);
+    }
+
+    @Override
+    public String getFullUrl(String image) {
+        if (image == null) {
+            log.info("图片信息不存在，无法生成完整URL");
+            return null;
+        }
+        return convertToFullUrl(image);
     }
 
     @Override

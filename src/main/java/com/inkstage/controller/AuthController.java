@@ -50,6 +50,7 @@ public class AuthController {
      */
     @PostMapping("/login")
     public Result<TokenResponse> login(@RequestBody @Valid AuthDTO authDTO) {
+        log.info("用户登录: {}", authDTO);
         TokenResponse tokenResponse = userAuthService.login(authDTO);
         if (tokenResponse != null) {
             return Result.success(tokenResponse, ResponseMessage.LOGIN_SUCCESS);
@@ -83,6 +84,7 @@ public class AuthController {
      */
     @PostMapping("/refresh-token")
     public Result<TokenResponse> refreshToken(@RequestParam String refreshToken) {
+        log.info("刷新token: {}", refreshToken);
         try {
             TokenResponse tokenResponse = tokenService.refreshToken(refreshToken);
             if (tokenResponse != null) {
@@ -93,6 +95,25 @@ public class AuthController {
         } catch (Exception e) {
             log.error("刷新令牌失败: {}", e.getMessage());
             return Result.error(ResponseMessage.REFRESH_TOKEN_FAILED);
+        }
+    }
+
+    /**
+     * 用户登出
+     *
+     * @param userId 用户ID
+     * @param refreshToken 刷新令牌
+     * @return 登出结果
+     */
+    @PostMapping("/logout")
+    public Result<?> logout(@RequestParam Long userId, @RequestParam(required = false) String refreshToken) {
+        log.info("用户登出: {}", userId);
+        try {
+            userAuthService.logout(userId, refreshToken);
+            return Result.success(ResponseMessage.LOGOUT_SUCCESS);
+        } catch (Exception e) {
+            log.error("用户登出失败: {}", e.getMessage());
+            return Result.error(ResponseMessage.LOGOUT_FAILED);
         }
     }
 

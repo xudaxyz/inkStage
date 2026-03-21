@@ -1,6 +1,7 @@
 package com.inkstage.mapper;
 
 import com.inkstage.entity.model.UserAuth;
+import com.inkstage.enums.auth.AuthType;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -20,7 +21,7 @@ public interface UserAuthMapper {
      * @param authType 认证类型
      * @return 认证信息
      */
-    UserAuth findByUserIdAndType(@Param("userId") Long userId, @Param("authType") String authType);
+    UserAuth findByUserIdAndType(@Param("userId") Long userId, @Param("authType") AuthType authType);
 
     /**
      * 根据用户ID查询所有认证信息

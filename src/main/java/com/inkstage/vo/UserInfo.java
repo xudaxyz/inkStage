@@ -1,6 +1,7 @@
 package com.inkstage.vo;
 
 import com.inkstage.enums.user.Gender;
+import com.inkstage.enums.user.UserRoleEnum;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ public class UserInfo {
     /**
      * 用户名
      */
-    private String name;
+    private String username;
 
     /**
      * 邮箱
@@ -94,5 +95,5 @@ public class UserInfo {
     /**
      * 用户角色
      */
-    private String role;
+    private UserRoleEnum role;
 }

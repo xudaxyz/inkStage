@@ -128,4 +128,10 @@ public interface FileService {
      */
     void ensureAdminArticleDetailIsFullUrl(AdminArticleDetailVO adminArticleDetailVO);
 
+    /**
+     * 获取完整的预签名URL
+     * @param image 图片URL
+     * @return 完整的预签名URL
+     */
+    String getFullUrl(String image);
 }

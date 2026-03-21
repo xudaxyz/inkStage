@@ -5,12 +5,15 @@ import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
+import com.inkstage.service.FileService;
 import com.inkstage.service.UserAdminService;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * 用户管理服务实现类（管理员）
@@ -21,20 +24,21 @@ import org.springframework.stereotype.Service;
 public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserMapper userMapper;
+    private final FileService fileService;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {
         try {
             log.debug("管理员根据ID获取用户详情, 用户ID: {}", id);
-            var userDetail = userMapper.findAdminUserDetailById(id);
+            AdminUserDetailVO userDetail = userMapper.findAdminUserDetailById(id);
             if (userDetail == null) {
-                log.warn("用户不存在, 用户ID: {}", id);
+                log.warn("用户不存在: {}", id);
                 throw new BusinessException("用户不存在");
             }
             log.info("管理员根据ID获取用户详情成功, 用户ID: {}", id);
+            String fullAvatarUrl = fileService.getFullUrl(userDetail.getAvatar());
+            userDetail.setAvatar(fullAvatarUrl);
             return userDetail;
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("管理员根据ID获取用户详情失败, 用户ID: {}", id, e);
             throw new BusinessException("获取用户详情失败");
@@ -52,7 +56,7 @@ public class UserAdminServiceImpl implements UserAdminService {
             pageRequest.setOffset(offset);
 
             // 查询用户列表
-            var userList = userMapper.findAdminUserList(pageRequest);
+            List<AdminUserListVO> userList = userMapper.findAdminUserList(pageRequest);
             // 查询总记录数
             long total = userMapper.countAdminUserList(pageRequest);
 
@@ -79,7 +83,6 @@ public class UserAdminServiceImpl implements UserAdminService {
             // 检查用户是否存在
             var user = userMapper.findById(id);
             if (user == null) {
-                log.warn("用户不存在, 用户ID: {}", id);
                 throw new BusinessException("用户不存在");
             }
             // 执行删除
@@ -104,7 +107,6 @@ public class UserAdminServiceImpl implements UserAdminService {
             // 检查用户是否存在
             var user = userMapper.findById(id);
             if (user == null) {
-                log.warn("用户不存在, 用户ID: {}", id);
                 throw new BusinessException("用户不存在");
             }
             // 执行更新
