@@ -4,7 +4,6 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
- import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.service.UserAdminService;
@@ -28,7 +27,6 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
-    private final ArticleMapper articleMapper;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {

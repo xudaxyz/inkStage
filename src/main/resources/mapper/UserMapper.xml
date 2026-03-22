@@ -61,6 +61,7 @@
         <result column="last_login_ip" property="lastLoginIp"/>
         <result column="register_ip" property="registerIp"/>
         <result column="register_time" property="registerTime"/>
+        <result column="username_last_modified_time" property="usernameLastModifiedTime"/>
         <result column="privacy" property="privacy"/>
         <result column="user_status" property="userStatus" javaType="com.inkstage.enums.user.UserStatus"/>
     </resultMap>
@@ -251,7 +252,7 @@
         SELECT
         u.id, u.username, u.nickname, u.email, u.email_verified, u.phone, u.phone_verified, u.cover_image,
         u.avatar, u.signature, u.gender, u.birth_date, u.location, u.website, u.follow_count, u.follower_count, u.article_count, u.comment_count, u.like_count,
-        u.last_login_time, u.last_login_ip, u.register_ip, u.register_time, u.privacy, u.status as user_status,
+        u.last_login_time, u.last_login_ip, u.register_ip, u.register_time, u.username_last_modified_time, u.privacy, u.status as user_status,
         COALESCE(MAX(ur.role_id), 2) as user_role
         FROM user u
         LEFT JOIN user_role ur ON u.id = ur.user_id AND ur.status = 1

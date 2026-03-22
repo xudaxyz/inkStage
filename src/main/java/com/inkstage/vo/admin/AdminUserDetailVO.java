@@ -138,6 +138,11 @@ public class AdminUserDetailVO implements Serializable {
     private LocalDateTime registerTime;
 
     /**
+     * 用户名最后修改时间
+     */
+    private LocalDateTime usernameLastModifiedTime;
+
+    /**
      * 隐私设置
      */
     private VisibleStatus privacy;

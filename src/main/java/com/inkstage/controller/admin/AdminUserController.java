@@ -113,7 +113,7 @@ public class AdminUserController {
      * @param userRole 用户角色
      * @return 响应结果
      */
-    @PutMapping("/role/{id}")
+    @PutMapping("/update-role/{id}")
     @AdminAccess
     public Result<?> updateUserRole(@PathVariable Long id, @RequestBody UserRoleEnum userRole) {
         log.info("更新用户角色, 用户ID: {}, 角色: {}", id, userRole);
