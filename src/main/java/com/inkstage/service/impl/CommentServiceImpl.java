@@ -259,7 +259,7 @@ public class CommentServiceImpl implements CommentService {
             // 查询评论
             Comment comment = commentMapper.findById(commentDTO.getId());
             if (comment == null) {
-                log.warn("评论不存在, 评论ID: {}", commentDTO.getId());
+                log.warn("评论ID {} 不存在", commentDTO.getId());
                 throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
             }
 
@@ -292,14 +292,12 @@ public class CommentServiceImpl implements CommentService {
     public boolean deleteComment(Long commentId) {
         if (commentId == null) {
             log.warn("删除评论参数为空");
-            log.warn(ResponseMessage.COMMENT_DELETE_FAILED.getMessage());
             throw new BusinessException(ResponseMessage.COMMENT_DELETE_FAILED);
         }
 
         Long userId = UserContext.getCurrentUserId();
         if (userId == null) {
             log.warn("用户未登录, 无法删除评论");
-            log.warn(ResponseMessage.NOT_LOGIN.getMessage());
             throw new BusinessException(ResponseMessage.NOT_LOGIN);
         }
 
@@ -309,12 +307,12 @@ public class CommentServiceImpl implements CommentService {
             // 查询评论
             Comment comment = commentMapper.findById(commentId);
             if (comment == null) {
-                log.warn("评论不存在, 评论ID: {}", commentId);
+                log.warn("评论ID: {} 不存在", commentId);
                 throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
             }
 
-            // 验证权限
-            if (!comment.getUserId().equals(userId)) {
+            // 验证权限, 仅管理员和作者本身可以删除评论
+            if (!comment.getUserId().equals(userId) && !UserContext.isAdmin()) {
                 log.warn("用户无权限删除评论, 评论ID: {}, 用户ID: {}", commentId, userId);
                 throw new BusinessException(ResponseMessage.DELETED_FORBIDDEN);
             }
@@ -427,7 +425,6 @@ public class CommentServiceImpl implements CommentService {
      */
     private Long incrementCommentCount(Long commentId, CommentCountType countType) {
         if (commentId == null || countType == null) {
-            log.warn("评论ID或计数类型为空, 评论ID: {}, 计数类型: {}", commentId, countType);
             return null;
         }
 
@@ -537,7 +534,7 @@ public class CommentServiceImpl implements CommentService {
             // 检查评论是否存在
             Comment comment = commentMapper.findById(id);
             if (comment == null) {
-                log.warn("评论不存在, 评论ID: {}", id);
+                log.warn("评论id {} 不存在", id);
                 throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
             }
 
@@ -593,6 +590,15 @@ public class CommentServiceImpl implements CommentService {
             log.error("更新评论置顶状态失败, 评论ID: {}", id, e);
             throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED, e.getMessage());
         }
+    }
+
+    @Override
+    public boolean adminUpdateComment(Comment comment) {
+        if (comment == null || comment.getId() == null) {
+            log.warn("评论ID为空");
+            throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
+        }
+        return commentMapper.updateById(comment) > 0;
     }
 
 }

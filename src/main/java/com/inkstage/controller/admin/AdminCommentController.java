@@ -5,13 +5,17 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
+import com.inkstage.entity.model.Comment;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.service.CommentService;
+import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 后台评论Controller
@@ -26,6 +30,7 @@ public class AdminCommentController {
 
     /**
      * 分页获取评论列表
+     *
      * @param commentQueryDTO 评论查询参数
      * @return 分页结果
      */
@@ -38,37 +43,83 @@ public class AdminCommentController {
     }
 
     /**
-     * 更新评论状态
-     * @param id 评论ID
-     * @param status 状态
+     * 更新评论
+     *
+     * @param id           评论ID
+     * @param content      评论内容
+     * @param reviewStatus 审核状态
+     * @param top          置顶状态
      * @param reviewReason 审核原因
      * @return 操作结果
      */
-    @PutMapping("/status/{id}")
+    @PutMapping("/update/{id}")
     @AdminAccess
-    public Result<?> updateCommentStatus(@PathVariable Long id, 
-                                       @RequestParam ReviewStatus status, 
-                                       @RequestParam(required = false) String reviewReason) {
-        log.info("管理员更新评论状态, 评论ID: {}, 状态: {}, 审核原因: {}", id, status.getDesc(), reviewReason);
-        boolean result = commentService.updateCommentStatus(id, status, reviewReason);
+    public Result<?> updateComment(@PathVariable Long id,
+                                   @RequestParam String content,
+                                   @RequestParam(required = false) ReviewStatus reviewStatus,
+                                   @RequestParam(required = false) TopStatus top,
+                                   @RequestParam(required = false) String reviewReason) {
+        log.info("管理员更新评论相关信息, 评论ID: {}, 评论内容: {}, 审核状态: {}, 置顶状态: {}, 审核原因: {}", id, content, reviewStatus, top, reviewReason);
+        Comment comment = new Comment();
+        comment.setId(id);
+        comment.setContent(content);
+        comment.setTop(top);
+        comment.setReviewReason(reviewReason);
+        comment.setReviewUserId(UserContext.getCurrentUserId());
+        if (reviewStatus != null) {
+            comment.setStatus(reviewStatus);
+            comment.setReviewTime(LocalDateTime.now());
+        }
+        boolean result = commentService.adminUpdateComment(comment);
+        return Result.success(result, ResponseMessage.COMMENT_UPDATE_SUCCESS);
+    }
+
+    /**
+     * 更新评论状态
+     *
+     * @param id           评论ID
+     * @param reviewStatus 审核状态
+     * @param reviewReason 审核原因
+     * @return 操作结果
+     */
+    @PutMapping("/update-status/{id}")
+    @AdminAccess
+    public Result<?> updateCommentStatus(@PathVariable Long id,
+                                         @RequestParam ReviewStatus reviewStatus,
+                                         @RequestParam(required = false) String reviewReason) {
+        log.info("管理员更新评论状态, 评论ID: {}, 审核状态: {}, 审核原因: {}", id, reviewStatus.getDesc(), reviewReason);
+        boolean result = commentService.updateCommentStatus(id, reviewStatus, reviewReason);
         return Result.success(result, ResponseMessage.COMMENT_STATUS_UPDATE_SUCCESS);
     }
 
     /**
      * 更新评论置顶状态
-     * @param id 评论ID
+     *
+     * @param id  评论ID
      * @param top 置顶状态
-     * @param topOrder 置顶顺序
      * @return 操作结果
      */
-    @PutMapping("/top/{id}")
+    @PutMapping("/update-top/{id}")
     @AdminAccess
-    public Result<?> updateCommentTop(@PathVariable Long id, 
-                                    @RequestParam TopStatus top, 
-                                    @RequestParam Integer topOrder) {
-        log.info("管理员更新评论置顶状态, 评论ID: {}, 置顶状态: {}, 置顶顺序: {}", id, top.getDesc(), topOrder);
-        boolean result = commentService.updateCommentTop(id, top, topOrder);
+    public Result<?> updateCommentTop(@PathVariable Long id,
+                                      @RequestParam TopStatus top) {
+        log.info("管理员更新评论置顶状态, 评论ID: {}, 置顶状态: {}", id, top.getDesc());
+        boolean result = commentService.updateCommentTop(id, top, null);
         return Result.success(result, ResponseMessage.COMMENT_TOP_UPDATE_SUCCESS);
+    }
+
+    /**
+     * 删除评论
+     *
+     * @param id 评论ID
+     * @return 操作结果
+     */
+    @DeleteMapping("/delete/{id}")
+    @AdminAccess
+    public Result<?> deleteComment(@PathVariable Long id) {
+        log.info("管理员删除评论, 评论ID: {}", id);
+        boolean result = commentService.deleteComment(id);
+        return Result.success(result, ResponseMessage.COMMENT_DELETE_SUCCESS);
     }
 
 }

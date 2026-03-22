@@ -103,4 +103,29 @@ public class UserContext {
         return authentication != null && authentication.isAuthenticated() &&
                 !(authentication instanceof AnonymousAuthenticationToken);
     }
+
+    /**
+     * 检查用户是否是管理员
+     *
+     * @return 如果用户是管理员/超级管理员, 返回true; 否则返回false
+     */
+    public static boolean isAdmin() {
+        return getCurrentUserDetailsOptional()
+                .map(userDetails -> userDetails.getAuthorities().stream()
+                        .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority())
+                                || "ROLE_SUPER_ADMIN".equals(authority.getAuthority())))
+                .orElse(false);
+    }
+
+    /**
+     * 检查用户是否是超级管理员
+     *
+     * @return 如果用户是超级管理员, 返回true; 否则返回false
+     */
+    public static boolean isSuperAdmin() {
+        return getCurrentUserDetailsOptional()
+                .map(userDetails -> userDetails.getAuthorities().stream()
+                        .anyMatch(authority -> "ROLE_SUPER_ADMIN".equals(authority.getAuthority())))
+                .orElse(false);
+    }
 }

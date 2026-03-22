@@ -1,8 +1,12 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
+import com.inkstage.dto.admin.AdminCommentQueryDTO;
 import com.inkstage.dto.front.CommentDTO;
 import com.inkstage.dto.front.CommentQueryDTO;
+import com.inkstage.entity.model.Comment;
+import com.inkstage.enums.ReviewStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.vo.front.ArticleCommentVO;
 
 /**
@@ -49,17 +53,17 @@ public interface CommentService {
      * @param pageRequest 分页请求参数，包含关键词、状态等过滤条件
      * @return 评论列表
      */
-    PageResult<ArticleCommentVO> getCommentsByPage(com.inkstage.dto.admin.AdminCommentQueryDTO pageRequest);
+    PageResult<ArticleCommentVO> getCommentsByPage(AdminCommentQueryDTO pageRequest);
 
     /**
      * 管理员更新评论状态
      *
-     * @param id          评论ID
-     * @param status      状态
+     * @param id           评论ID
+     * @param status       状态
      * @param reviewReason 审核原因
      * @return 是否更新成功
      */
-    boolean updateCommentStatus(Long id, com.inkstage.enums.ReviewStatus status, String reviewReason);
+    boolean updateCommentStatus(Long id, ReviewStatus status, String reviewReason);
 
     /**
      * 管理员更新评论置顶状态
@@ -69,6 +73,14 @@ public interface CommentService {
      * @param topOrder 置顶顺序
      * @return 是否更新成功
      */
-    boolean updateCommentTop(Long id, com.inkstage.enums.article.TopStatus top, Integer topOrder);
+    boolean updateCommentTop(Long id, TopStatus top, Integer topOrder);
+
+    /**
+     * 管理员更新评论信息
+     *
+     * @param comment 评论信息
+     * @return 是否更新成功
+     */
+    boolean adminUpdateComment(Comment comment);
 
 }

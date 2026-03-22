@@ -1,5 +1,6 @@
 package com.inkstage.vo.front;
 
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 
@@ -44,7 +45,7 @@ public class ArticleCommentVO {
     /**
      * 评论状态
      */
-    private Integer status;
+    private ReviewStatus reviewStatus;
 
     /**
      * 是否置顶(0:否,1:是)
@@ -77,6 +78,11 @@ public class ArticleCommentVO {
     private Long articleId;
 
     /**
+     * 文章ID
+     */
+    private String articleTitle;
+
+    /**
      * 用户ID
      */
     private Long userId;
@@ -100,21 +106,6 @@ public class ArticleCommentVO {
      * 用户状态
      */
     private Integer userStatus;
-
-    /**
-     * 点踩数
-     */
-    private Integer dislikeCount;
-
-    /**
-     * 是否已点赞
-     */
-    private Boolean isLiked;
-
-    /**
-     * 是否已点踩
-     */
-    private Boolean isDisliked;
 
     /**
      * 回复评论列表

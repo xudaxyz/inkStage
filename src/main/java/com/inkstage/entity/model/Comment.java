@@ -55,7 +55,7 @@ public class Comment extends BaseEntity {
     private Integer replyCount;
 
     /**
-     * 状态(0:待审核,1:已通过,2:已拒绝)
+     * 状态
      */
     private ReviewStatus status;
 

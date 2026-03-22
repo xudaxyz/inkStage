@@ -43,7 +43,7 @@
         c.floor,
         c.like_count,
         c.reply_count,
-        c.status,
+        c.status as comment_status,
         c.top,
         c.mention_user_ids,
         c.top_order,
@@ -52,13 +52,15 @@
         c.article_id,
         c.user_id,
         c.deleted,
+        a.title as article_title,
         u.nickname,
         u.avatar,
         u.gender,
-        u.status
+        u.status as user_status
         FROM
         comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN article a ON c.article_id = a.id
         WHERE
         c.deleted = 0
         AND c.article_id = #{query.articleId}
@@ -121,9 +123,15 @@
     <!-- 根据ID更新评论 -->
     <update id="updateById" parameterType="com.inkstage.entity.model.Comment">
         UPDATE comment
-        SET
-            content = #{content},
+        <set>
+        <if test="content != null">content = #{content},</if>
+        <if test="status != null">status = #{status},</if>
+        <if test="top != null">top = #{top},</if>
+        <if test="reviewReason != null">review_reason = #{reviewReason},</if>
+        <if test="reviewUserId != null">review_user_id = #{reviewUserId},</if>
+        <if test="reviewTime != null">review_time = #{reviewTime},</if>
             update_time = NOW()
+        </set>
         WHERE
             id = #{id}
             AND deleted = 0
@@ -180,22 +188,24 @@
         c.floor,
         c.like_count,
         c.reply_count,
-        c.status,
+        c.status as review_status,
         c.top,
-        c.mention_user_ids,
         c.top_order,
+        c.mention_user_ids,
         c.create_time,
         c.update_time,
         c.article_id,
         c.user_id,
         c.deleted,
+        a.title as article_title,
         u.nickname,
         u.avatar,
         u.gender,
-        u.status
+        u.status as user_status
         FROM
         comment c
         LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN article a ON c.article_id = a.id
         WHERE
         c.deleted = 0
         <if test="query.keyword != null and query.keyword != ''">
