@@ -4,9 +4,12 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
+ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.service.UserAdminService;
+import com.inkstage.vo.admin.AdminUserArticleVO;
+import com.inkstage.vo.admin.AdminUserCommentVO;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +28,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
+    private final ArticleMapper articleMapper;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {
@@ -36,8 +40,14 @@ public class UserAdminServiceImpl implements UserAdminService {
                 throw new BusinessException("用户不存在");
             }
             log.info("管理员根据ID获取用户详情成功, 用户ID: {}", id);
-            String fullAvatarUrl = fileService.getFullUrl(userDetail.getAvatar());
-            userDetail.setAvatar(fullAvatarUrl);
+            fileService.ensureAdminUserDetailIsFullUrl(userDetail);
+            // 获取用户最近发表的文章
+            List<AdminUserArticleVO> recentArticles = userMapper.findRecentArticles(id, 5);
+            userDetail.setRecentArticles(recentArticles);
+            // 获取用户最近发表的评论
+            List<AdminUserCommentVO> recentComments = userMapper.findRecentComments(id, 5);
+            userDetail.setRecentComments(recentComments);
+
             return userDetail;
         } catch (Exception e) {
             log.error("管理员根据ID获取用户详情失败, 用户ID: {}", id, e);

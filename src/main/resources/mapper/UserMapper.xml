@@ -46,6 +46,7 @@
         <result column="phone" property="phone"/>
         <result column="phone_verified" property="phoneVerified"/>
         <result column="avatar" property="avatar"/>
+        <result column="cover_image" property="coverImage"/>
         <result column="signature" property="signature"/>
         <result column="gender" property="gender"/>
         <result column="birth_date" property="birthDate"/>
@@ -248,7 +249,7 @@
     <!-- 管理员根据ID获取用户详情 -->
     <select id="findAdminUserDetailById" resultMap="AdminUserDetailResultMap">
         SELECT
-        u.id, u.username, u.nickname, u.email, u.email_verified, u.phone, u.phone_verified,
+        u.id, u.username, u.nickname, u.email, u.email_verified, u.phone, u.phone_verified, u.cover_image,
         u.avatar, u.signature, u.gender, u.birth_date, u.location, u.website, u.follow_count, u.follower_count, u.article_count, u.comment_count, u.like_count,
         u.last_login_time, u.last_login_ip, u.register_ip, u.register_time, u.privacy, u.status as user_status,
         COALESCE(MAX(ur.role_id), 2) as user_role

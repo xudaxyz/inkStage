@@ -2,6 +2,7 @@ package com.inkstage.service;
 
 import com.inkstage.entity.model.User;
 import com.inkstage.vo.admin.AdminArticleDetailVO;
+import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.front.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -134,4 +135,10 @@ public interface FileService {
      * @return 完整的预签名URL
      */
     String getFullUrl(String image);
+
+    /**
+     * 确保AdminUserDetailVO对象中的图片字段是完整的预签名URL
+     * @param userDetail 管理员用户详情VO
+     */
+    void ensureAdminUserDetailIsFullUrl(AdminUserDetailVO userDetail);
 }

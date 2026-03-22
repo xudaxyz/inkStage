@@ -63,6 +63,11 @@ public class AdminUserDetailVO implements Serializable {
     private String avatar;
 
     /**
+     * 个人封面图
+     */
+    private String coverImage;
+
+    /**
      * 个性签名
      */
     private String signature;
