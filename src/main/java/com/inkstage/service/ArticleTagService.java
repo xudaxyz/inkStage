@@ -31,4 +31,11 @@ public interface ArticleTagService {
      * @param articleId 文章ID
      */
     void deleteArticleTagsByArticleId(Long articleId);
+
+    /**
+     * 处理文章标签关联（包括标签创建）
+     * @param articleId 文章ID
+     * @param tags 标签列表
+     */
+    void handleArticleTags(Long articleId, List<Tag> tags);
 }

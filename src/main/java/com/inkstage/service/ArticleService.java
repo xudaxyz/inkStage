@@ -1,14 +1,9 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.dto.front.MyArticleQueryDTO;
-import com.inkstage.entity.model.Article;
-import com.inkstage.enums.article.ArticleStatus;
-import com.inkstage.vo.admin.AdminArticleDetailVO;
-import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -17,7 +12,7 @@ import java.util.List;
 
 /**
  * 文章服务接口
- * 提供文章的创建、查询、更新、删除等核心功能
+ * 提供文章的创建、查询、更新、删除等前端用户功能
  */
 public interface ArticleService {
 
@@ -143,69 +138,11 @@ public interface ArticleService {
     /**
      * 搜索文章
      *
-     * @param keyword   搜索关键词
-     * @param sortBy    排序方式：relevance, publishTime, readCount
-     * @param pageNum   页码
-     * @param pageSize  每页数量
+     * @param keyword  搜索关键词
+     * @param sortBy   排序方式：relevance, publishTime, readCount
+     * @param pageNum  页码
+     * @param pageSize 每页数量
      * @return 分页结果
      */
     PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, Integer pageNum, Integer pageSize);
-
-    /**
-     * 分页获取所有文章（管理员）
-     *
-     * @param queryDTO 文章查询DTO，包含状态、关键词、分页等参数
-     * @return 分页结果
-     */
-    PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO);
-
-    /**
-     * 根据ID获取文章（管理员）
-     *
-     * @param id 文章ID
-     * @return 文章信息
-     */
-    Article getArticleById(Long id);
-
-    /**
-     * 更新文章状态（管理员）
-     *
-     * @param id     文章ID
-     * @param status 文章状态
-     * @return 更新后的文章
-     */
-    Article updateArticleStatus(Long id, ArticleStatus status);
-
-    /**
-     * 审核通过文章（管理员）
-     *
-     * @param id 文章ID
-     * @return 是否成功
-     */
-    boolean approveArticle(Long id);
-
-    /**
-     * 审核拒绝文章（管理员）
-     *
-     * @param id     文章ID
-     * @param reason 拒绝原因
-     * @return 是否成功
-     */
-    boolean rejectArticle(Long id, String reason);
-
-    /**
-     * 重新审核文章（管理员）
-     *
-     * @param id 文章ID
-     * @return 是否成功
-     */
-    boolean reprocessArticle(Long id);
-
-    /**
-     * 获取管理员文章详情（包含完整信息）
-     *
-     * @param id 文章ID
-     * @return 管理员文章详情VO
-     */
-    AdminArticleDetailVO getAdminArticleDetail(Long id);
 }

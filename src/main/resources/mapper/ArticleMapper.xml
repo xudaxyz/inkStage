@@ -391,6 +391,7 @@
         <result column="like_count" property="likeCount"/>
         <result column="comment_count" property="commentCount"/>
         <result column="top" property="top" javaType="com.inkstage.enums.article.TopStatus"/>
+        <result column="recommended" property="recommended" javaType="com.inkstage.enums.article.RecommendStatus"/>
         <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
@@ -582,6 +583,7 @@
         a.like_count,
         a.comment_count,
         a.top,
+        a.recommended,
         a.review_status,
         a.create_time,
         a.update_time,
@@ -790,10 +792,26 @@
         UPDATE article SET share_count = share_count + #{offset} WHERE id = #{id} AND deleted = 0
     </update>
 
+    <!-- 更新文章置顶状态 -->
+    <update id="updateTopStatus">
+        UPDATE article SET top = #{topStatus} WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新文章推荐状态 -->
+    <update id="updateRecommendStatus">
+        UPDATE article SET recommended = #{recommendStatus} WHERE id = #{id} AND deleted = 0
+    </update>
+
     <!-- 根据ID删除文章 -->
     <update id="deleteById">
         update article set article_status = 5 where id = #{id} and user_id = #{userId}
     </update>
+
+    <!-- 管理员根据文章ID删除文章 -->
+    <update id="deleteByAdmin">
+        update article set article_status = 5 where id = #{id}
+    </update>
+
 
     <!-- 根据文章ID永久删除文章 -->
     <update id="permanentDeleteById">
@@ -864,6 +882,7 @@
         <result column="collection_count" property="collectionCount"/>
         <result column="share_count" property="shareCount"/>
         <result column="top" property="top"/>
+        <result column="recommended" property="recommended"/>
         <result column="visible" property="visible"/>
         <result column="allow_comment" property="allowComment"/>
         <result column="allow_forward" property="allowForward"/>
@@ -886,7 +905,7 @@
         a.id, a.title, a.summary, a.content, a.content_html, a.cover_image,
         a.article_status, a.review_status, a.create_time, a.publish_time,
         a.last_edit_time, a.read_count, a.like_count, a.comment_count,
-        a.collection_count, a.share_count, a.top, a.visible, a.allow_comment,
+        a.collection_count, a.share_count, a.top, a.recommended, a.visible, a.allow_comment,
         a.allow_forward, a.original, a.original_url, a.meta_title,
         a.meta_description, a.meta_keywords,
         a.user_id, u.nickname, a.category_id, c.name as category_name

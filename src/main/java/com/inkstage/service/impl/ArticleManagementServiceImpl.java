@@ -1,33 +1,21 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.dto.admin.AdminArticleQueryDTO;
-import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
-import com.inkstage.entity.model.ArticleTag;
-import com.inkstage.entity.model.Tag;
 import com.inkstage.mapper.ArticleMapper;
-import com.inkstage.mapper.ArticleTagMapper;
-import com.inkstage.mapper.TagMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.ArticleManagementService;
-import com.inkstage.service.FileService;
 import com.inkstage.utils.UserContext;
-import com.inkstage.vo.admin.AdminArticleDetailVO;
-import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.MyArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * 文章管理服务实现类
+ * 用户文章管理服务实现类
  */
 @Slf4j
 @Service
@@ -36,9 +24,6 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
 
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
-    private final ArticleTagMapper articleTagMapper;
-    private final TagMapper tagMapper;
-    private final FileService fileService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -150,232 +135,6 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
         } catch (Exception e) {
             log.error("获取当前用户文章列表失败, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus.getDesc(), keyword, page, size, e);
             throw new BusinessException("获取文章列表失败");
-        }
-    }
-
-    @Override
-    public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
-        try {
-            log.debug("管理员获取文章列表, 页码: {}, 每页大小: {}, 关键词: {}, 分类ID: {}, 文章状态: {}",
-                    queryDTO.getPageNum(), queryDTO.getPageSize(), queryDTO.getKeyword(),
-                    queryDTO.getCategoryId(), queryDTO.getArticleStatus());
-
-            // 计算偏移量
-            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
-            queryDTO.setOffset(offset);
-
-            // 查询文章列表
-            var articleList = articleMapper.findAdminArticlesByPage(queryDTO);
-            // 查询总记录数
-            long total = articleMapper.countByPage(queryDTO);
-
-            // 构建分页结果
-            var pageResult = PageResult.build(
-                    articleList,
-                    total,
-                    queryDTO.getPageNum(),
-                    queryDTO.getPageSize()
-            );
-
-            log.info("管理员获取文章列表成功, 总数: {}", total);
-            return pageResult;
-        } catch (Exception e) {
-            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
-            throw new BusinessException("获取文章列表失败");
-        }
-    }
-
-    @Override
-    public PageResult<Article> getArticlesByPage(AdminArticleQueryDTO queryDTO) {
-        try {
-            log.debug("管理员获取文章列表, 页码: {}, 每页大小: {}, 关键词: {}, 分类ID: {}, 文章状态: {}",
-                    queryDTO.getPageNum(), queryDTO.getPageSize(), queryDTO.getKeyword(),
-                    queryDTO.getCategoryId(), queryDTO.getArticleStatus());
-
-            // 计算偏移量
-            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
-            queryDTO.setOffset(offset);
-
-            // 查询文章列表
-            var articleList = articleMapper.findByPage(queryDTO);
-            // 查询总记录数
-            long total = articleMapper.countByPage(queryDTO);
-
-            // 构建分页结果
-            var pageResult = PageResult.build(
-                    articleList,
-                    total,
-                    queryDTO.getPageNum(),
-                    queryDTO.getPageSize()
-            );
-
-            log.info("管理员获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
-            return pageResult;
-        } catch (Exception e) {
-            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
-            throw new BusinessException("获取文章列表失败");
-        }
-    }
-
-    @Override
-    public Article getArticleById(Long id) {
-        try {
-            log.debug("管理员获取文章详情, 文章ID: {}", id);
-            var article = articleMapper.findById(id);
-            if (article == null) {
-                log.warn("获取文章失败, 文章ID: {}不存在", id);
-                throw new BusinessException("文章不存在");
-            }
-            log.info("管理员获取文章详情成功, 文章ID: {}", id);
-            return article;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("管理员获取文章详情失败, 文章ID: {}", id, e);
-            throw new BusinessException("获取文章详情失败");
-        }
-    }
-
-    @Override
-    public Article updateArticleStatus(Long id, ArticleStatus status) {
-        try {
-            log.debug("更新文章状态, 文章ID: {}, 状态: {}", id, status.getDesc());
-            // 检查文章是否存在
-            Article article = articleMapper.findById(id);
-            if (article == null) {
-                throw new BusinessException("文章不存在");
-            }
-            // 更新状态
-            int result = articleMapper.updateStatus(id, status);
-            if (result == 0) {
-                log.warn("更新文章状态失败, 文章ID: {}", id);
-                throw new BusinessException("更新文章状态失败");
-            }
-            // 重新查询更新后的文章
-            var updatedArticle = articleMapper.findById(id);
-            log.info("更新文章状态成功, 文章ID: {}, 新状态: {}", id, status.getDesc());
-            return updatedArticle;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("更新文章状态失败, 文章ID: {}, 状态: {}", id, status.getDesc(), e);
-            throw new BusinessException("更新文章状态失败");
-        }
-    }
-
-    @Override
-    public boolean approveArticle(Long id) {
-        try {
-            log.debug("审核通过文章, 文章ID: {}", id);
-            // 检查文章是否存在
-            Article article = articleMapper.findById(id);
-            if (article == null) {
-                throw new BusinessException("文章不存在");
-            }
-            // 更新审核状态为通过
-            int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.APPROVED);
-            if (result == 0) {
-                log.warn("审核通过文章失败, 文章ID: {}", id);
-                throw new BusinessException("审核通过文章失败");
-            }
-            // 更新文章状态为已发布
-            articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
-            log.info("审核通过文章成功, 文章ID: {}", id);
-            return true;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("审核通过文章失败, 文章ID: {}", id, e);
-            throw new BusinessException("审核通过文章失败");
-        }
-    }
-
-    @Override
-    public boolean rejectArticle(Long id, String reason) {
-        try {
-            log.debug("审核拒绝文章, 文章ID: {}, 原因: {}", id, reason);
-            // 检查文章是否存在
-            Article article = articleMapper.findById(id);
-            if (article == null) {
-                throw new BusinessException("文章不存在");
-            }
-            // 更新审核状态为拒绝
-            int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.REJECTED);
-            if (result == 0) {
-                log.warn("审核拒绝文章失败, 文章ID: {}", id);
-                throw new BusinessException("审核拒绝文章失败");
-            }
-            // 这里可以添加拒绝原因的存储逻辑
-            // 例如：articleMapper.updateRejectReason(id, reason);
-            log.info("审核拒绝文章成功, 文章ID: {}", id);
-            return true;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("审核拒绝文章失败, 文章ID: {}", id, e);
-            throw new BusinessException("审核拒绝文章失败");
-        }
-    }
-
-    @Override
-    public boolean reprocessArticle(Long id) {
-        try {
-            log.debug("重新审核文章, 文章ID: {}", id);
-            // 检查文章是否存在
-            Article article = articleMapper.findById(id);
-            if (article == null) {
-                throw new BusinessException("文章不存在");
-            }
-            // 更新审核状态为待审核
-            int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.PENDING);
-            if (result == 0) {
-                log.warn("重新审核文章失败, 文章ID: {}", id);
-                throw new BusinessException("重新审核文章失败");
-            }
-            log.info("重新审核文章成功, 文章ID: {}", id);
-            return true;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("重新审核文章失败, 文章ID: {}", id, e);
-            throw new BusinessException("重新审核文章失败");
-        }
-    }
-
-    @Override
-    public AdminArticleDetailVO getAdminArticleDetail(Long id) {
-        try {
-            log.debug("获取管理员文章详情, 文章ID: {}", id);
-            // 检查文章是否存在
-            AdminArticleDetailVO adminArticleDetailVO = articleMapper.findAdminDetailById(id);
-            if (adminArticleDetailVO == null) {
-                throw new BusinessException("文章不存在");
-            }
-            fileService.ensureAdminArticleDetailIsFullUrl(adminArticleDetailVO);
-
-            // 获取标签列表
-            List<ArticleTag> articleTags = articleTagMapper.findByArticleId(id);
-            if (articleTags != null && !articleTags.isEmpty()) {
-                List<Tag> tags = new ArrayList<>();
-                for (ArticleTag articleTag : articleTags) {
-                    Tag tag = tagMapper.findById(articleTag.getTagId());
-                    if (tag != null) {
-                        Tag newTag = new Tag();
-                        newTag.setId(tag.getId());
-                        newTag.setName(tag.getName());
-                        tags.add(newTag);
-                    }
-                }
-                adminArticleDetailVO.setTags(tags);
-            }
-
-            log.info("获取管理员文章详情成功, 文章ID: {}", id);
-            return adminArticleDetailVO;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("获取管理员文章详情失败, 文章ID: {}", id, e);
-            throw new BusinessException("获取文章详情失败");
         }
     }
 }

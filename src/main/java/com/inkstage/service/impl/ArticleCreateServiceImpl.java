@@ -3,7 +3,6 @@ package com.inkstage.service.impl;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
-import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.NotificationType;
@@ -11,22 +10,15 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
-import com.inkstage.service.ArticleCreateService;
-import com.inkstage.service.ArticleTagService;
-import com.inkstage.service.CategoryService;
-import com.inkstage.service.NotificationService;
-import com.inkstage.service.TagService;
-
-import com.inkstage.utils.UserContext;
+import com.inkstage.service.*;
 import com.inkstage.utils.MarkdownUtils;
+import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 文章创建和更新服务实现类
@@ -38,7 +30,6 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
 
     private final ArticleMapper articleMapper;
     private final UserMapper userMapper;
-    private final TagService tagService;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CategoryService categoryService;
@@ -67,7 +58,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             articleMapper.insert(article);
 
             // 处理标签关联
-            handleArticleTags(article.getId(), articleCreateDTO.getTags());
+            articleTagService.handleArticleTags(article.getId(), articleCreateDTO.getTags());
 
             // 更新分类文章数量
             if (article.getCategoryId() != null) {
@@ -260,7 +251,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             }
 
             // 处理标签关联
-            handleArticleTags(articleId, articleCreateDTO.getTags());
+            articleTagService.handleArticleTags(articleId, articleCreateDTO.getTags());
 
             // 对于大文章，异步处理Markdown转换
             String largeContent = articleCreateDTO.getContent();
@@ -398,51 +389,5 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
         return endIndex;
     }
 
-    /**
-     * 处理文章标签关联
-     */
-    public void handleArticleTags(Long articleId, List<Tag> tags) {
-        if (articleId == null) {
-            log.warn("处理文章标签关联失败, 文章ID为空");
-            return;
-        }
 
-        // 收集所有标签ID
-        List<Long> allTagIds = new ArrayList<>();
-
-        // 处理标签列表
-        if (tags == null || tags.isEmpty()) {
-            return;
-        }
-        for (Tag tag : tags) {
-            if (tag == null || tag.getName() == null || tag.getName().trim().isEmpty()) {
-                continue;
-            }
-
-            if (tag.getId() != null && tag.getId() > 0) {
-                // 已存在的标签，直接使用其ID
-                allTagIds.add(tag.getId());
-            } else {
-                // 新标签，需要创建
-                try {
-                    Long tagId = tagService.createTagIfNotExists(tag);
-                    if (tagId != null) {
-                        allTagIds.add(tagId);
-                    }
-                } catch (Exception e) {
-                    // 标签创建失败，记录日志但不影响文章发布
-                    log.error("创建标签失败, 标签名称: {}", tag.getName(), e);
-                }
-            }
-        }
-
-        if (allTagIds.isEmpty()) {
-            // 没有标签, 清除现有关联
-            articleTagService.deleteArticleTagsByArticleId(articleId);
-            return;
-        }
-
-        // 保存文章标签关联
-        articleTagService.saveArticleTags(articleId, allTagIds);
-    }
 }

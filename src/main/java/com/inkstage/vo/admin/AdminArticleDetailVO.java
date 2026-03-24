@@ -6,6 +6,7 @@ import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.OriginalStatus;
+import com.inkstage.enums.article.RecommendStatus;
 import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 
@@ -112,6 +113,11 @@ public class AdminArticleDetailVO {
      * 是否置顶
      */
     private TopStatus top;
+
+    /**
+     * 是否推荐
+     */
+    private RecommendStatus recommended;
 
     /**
      * 可见性状态

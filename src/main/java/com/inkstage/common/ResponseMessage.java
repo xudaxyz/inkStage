@@ -167,7 +167,8 @@ public enum ResponseMessage {
     
     // 登出相关消息
     LOGOUT_SUCCESS("登出成功"),
-    LOGOUT_FAILED("登出失败");
+    LOGOUT_FAILED("登出失败"),
+    ARTICLE_DELETE_ERROR("删除文章失败");
 
     private final String message;
 

@@ -1,18 +1,17 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.enums.article.ArticleStatus;
-import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.front.MyArticleListVO;
 
 /**
- * 文章管理服务接口
+ * 用户文章管理服务接口
+ * 提供用户个人文章管理功能，如删除、获取个人文章列表等
  */
 public interface ArticleManagementService {
 
     /**
-     * 删除文章
+     * 删除文章（软删除）
      *
      * @param id 文章ID
      * @return 是否成功
@@ -36,62 +35,4 @@ public interface ArticleManagementService {
      * @return 分页结果
      */
     PageResult<MyArticleListVO> getMyArticles(ArticleStatus articleStatus, String keyword, Integer page, Integer size);
-
-    /**
-     * 分页获取所有文章（管理员）
-     * @param queryDTO 文章查询DTO
-     * @return 分页结果
-     */
-    PageResult<com.inkstage.vo.admin.AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO);
-
-    /**
-     * 分页获取所有文章（管理员，旧方法）
-     * @param queryDTO 文章查询DTO
-     * @return 分页结果
-     */
-    PageResult<com.inkstage.entity.model.Article> getArticlesByPage(AdminArticleQueryDTO queryDTO);
-
-    /**
-     * 根据ID获取文章（管理员）
-     * @param id 文章ID
-     * @return 文章信息
-     */
-    com.inkstage.entity.model.Article getArticleById(Long id);
-
-    /**
-     * 更新文章状态（管理员）
-     * @param id 文章ID
-     * @param status 文章状态
-     * @return 更新后的文章
-     */
-    com.inkstage.entity.model.Article updateArticleStatus(Long id, ArticleStatus status);
-
-    /**
-     * 审核通过文章（管理员）
-     * @param id 文章ID
-     * @return 是否成功
-     */
-    boolean approveArticle(Long id);
-
-    /**
-     * 审核拒绝文章（管理员）
-     * @param id 文章ID
-     * @param reason 拒绝原因
-     * @return 是否成功
-     */
-    boolean rejectArticle(Long id, String reason);
-
-    /**
-     * 重新审核文章（管理员）
-     * @param id 文章ID
-     * @return 是否成功
-     */
-    boolean reprocessArticle(Long id);
-
-    /**
-     * 获取管理员文章详情（包含完整信息）
-     * @param id 文章ID
-     * @return 管理员文章详情VO
-     */
-    AdminArticleDetailVO getAdminArticleDetail(Long id);
 }

@@ -5,6 +5,8 @@ import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.enums.article.TopStatus;
+import com.inkstage.enums.article.RecommendStatus;
 import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -289,6 +291,24 @@ public interface ArticleMapper {
      */
     int updateShareCount(@Param("id") Long id, @Param("offset") int offset);
 
+    /**
+     * 更新文章置顶状态
+     *
+     * @param id 文章ID
+     * @param topStatus 置顶状态
+     * @return 影响行数
+     */
+    int updateTopStatus(@Param("id") Long id, @Param("topStatus") TopStatus topStatus);
+
+    /**
+     * 更新文章推荐状态
+     *
+     * @param id 文章ID
+     * @param recommendStatus 推荐状态
+     * @return 影响行数
+     */
+    int updateRecommendStatus(@Param("id") Long id, @Param("recommendStatus") RecommendStatus recommendStatus);
+
     // ==================== 删除（Delete） ====================
     
     /**
@@ -299,6 +319,13 @@ public interface ArticleMapper {
      * @return 影响行数
      */
     int deleteById(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * 管理员删除文章
+     * @param articleId 文章ID
+     * @return 影响行数
+     */
+    int deleteByAdmin(@Param("id") Long articleId);
 
     /**
      * 根据文章ID永久删除文章
