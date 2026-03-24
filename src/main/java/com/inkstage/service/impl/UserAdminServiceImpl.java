@@ -6,7 +6,9 @@ import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.service.UserAdminService;
+import com.inkstage.enums.NotificationType;
 import com.inkstage.vo.admin.AdminUserArticleVO;
 import com.inkstage.vo.admin.AdminUserCommentVO;
 import com.inkstage.vo.admin.AdminUserDetailVO;
@@ -27,6 +29,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {
@@ -151,6 +154,42 @@ public class UserAdminServiceImpl implements UserAdminService {
             throw e;
         } catch (Exception e) {
             log.error("管理员更新用户状态失败, 用户ID: {}, 状态: {}", id, userStatus.getDesc(), e);
+            throw new BusinessException("更新用户状态失败");
+        }
+    }
+
+    @Override
+    public Boolean updateUserStatusWithNotification(Long id, UserStatus userStatus, String reason) {
+        try {
+            log.debug("管理员更新用户状态并发送通知, 用户ID: {}, 状态: {}, 原因: {}", id, userStatus.getDesc(), reason);
+            // 检查用户是否存在
+            var user = userMapper.findById(id);
+            if (user == null) {
+                log.warn("用户不存在, 用户ID: {}", id);
+                throw new BusinessException("用户不存在");
+            }
+            // 执行更新
+            int result = userMapper.updateUserStatus(id, userStatus);
+            boolean success = result > 0;
+            if (success) {
+                // 发送通知
+                notificationService.sendNotificationWithTemplate(
+                        id,
+                        NotificationType.USER_STATUS_CHANGE,
+                        null,
+                        0L, // 系统发送
+                        userStatus.getDesc(),
+                        reason
+                );
+                log.info("管理员更新用户状态并发送通知成功, 用户ID: {}, 新状态: {}", id, userStatus.getDesc());
+            } else {
+                log.warn("更新用户状态失败, 未发送通知, 用户ID: {}", id);
+            }
+            return success;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("管理员更新用户状态并发送通知失败, 用户ID: {}, 状态: {}", id, userStatus.getDesc(), e);
             throw new BusinessException("更新用户状态失败");
         }
     }

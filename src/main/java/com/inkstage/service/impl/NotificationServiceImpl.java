@@ -82,8 +82,8 @@ public class NotificationServiceImpl implements NotificationService {
         // 构建通知消息DTO
         NotificationMessageDTO message = new NotificationMessageDTO();
         message.setUserId(notification.getUserId());
-        message.setType(notification.getType());
         message.setContent(notification.getContent());
+        message.setType(notification.getType());
         message.setRelatedId(notification.getRelatedId());
         message.setRelatedType(notification.getRelatedType());
         message.setSenderId(notification.getSenderId());
@@ -110,11 +110,13 @@ public class NotificationServiceImpl implements NotificationService {
             case MESSAGE -> "message";
             case REPORT -> "report";
             case FEEDBACK -> "feedback";
-            case SYSTEM -> "system";
+            case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REPROCESS, ARTICLE_TOP, ARTICLE_RECOMMEND, ARTICLE_DELETE,
+                 ARTICLE_ONLINE, ARTICLE_OFFLINE, TAG_DELETE, ARTICLE_REVIEW_REJECT, COMMENT_REVIEW_REJECT,
+                 COMMENT_TOP -> "system";
         };
 
         if (!notificationSettingService.isNotificationEnabled(userId, settingKey)) {
-            log.info("用户 {} 已关闭 {} 类型的通知", userId, type.getDesc());
+            log.info("用户 ID {} 已关闭 {} 类型的通知", userId, type.getDesc());
             return false;
         }
 
@@ -156,7 +158,10 @@ public class NotificationServiceImpl implements NotificationService {
                     case MESSAGE -> "message";
                     case REPORT -> "report";
                     case FEEDBACK -> "feedback";
-                    case SYSTEM -> "system";
+                    case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REJECT, ARTICLE_REVIEW_REPROCESS, ARTICLE_OFFLINE,
+                         ARTICLE_ONLINE, ARTICLE_TOP, ARTICLE_RECOMMEND,
+                         ARTICLE_DELETE, TAG_DELETE, COMMENT_REVIEW_REJECT, COMMENT_TOP -> "system";
+
                 };
 
                 if (!notificationSettingService.isNotificationEnabled(notification.getUserId(), settingKey)) {
@@ -170,8 +175,8 @@ public class NotificationServiceImpl implements NotificationService {
                 message.setType(notification.getType());
                 message.setContent(notification.getContent());
                 message.setRelatedId(notification.getRelatedId());
-                message.setRelatedType(notification.getRelatedType());
                 message.setSenderId(notification.getSenderId());
+                message.setRelatedType(notification.getRelatedType());
                 message.setActionUrl(notification.getActionUrl());
                 message.setExtraData(notification.getExtraData());
                 message.setTitle(notification.getTitle());
@@ -215,7 +220,10 @@ public class NotificationServiceImpl implements NotificationService {
                     case MESSAGE -> "message";
                     case REPORT -> "report";
                     case FEEDBACK -> "feedback";
-                    case SYSTEM -> "system";
+                    case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REJECT, ARTICLE_REVIEW_REPROCESS, ARTICLE_OFFLINE,
+                         ARTICLE_ONLINE, ARTICLE_TOP, ARTICLE_RECOMMEND,
+                         ARTICLE_DELETE, TAG_DELETE, COMMENT_REVIEW_REJECT, COMMENT_TOP -> "system";
+
                 };
 
                 if (!notificationSettingService.isNotificationEnabled(userId, settingKey)) {

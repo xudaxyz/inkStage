@@ -153,6 +153,14 @@ public interface CommentMapper {
      */
     long countByUserId(@Param("userId") Long userId);
 
+    /**
+     * 查询文章的置顶评论
+     *
+     * @param articleId 文章ID
+     * @return 置顶评论
+     */
+    Comment findTopCommentByArticleId(@Param("articleId") Long articleId);
+
 
 
 }

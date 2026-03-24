@@ -322,4 +322,16 @@
         FROM comment
         WHERE deleted = 0 AND user_id = #{userId}
     </select>
+
+    <!-- 查询文章的置顶评论 -->
+    <select id="findTopCommentByArticleId" parameterType="java.lang.Long" resultMap="ResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM comment
+        WHERE
+            article_id = #{articleId}
+            AND deleted = 0
+            AND top = 1
+        LIMIT 1
+    </select>
 </mapper>

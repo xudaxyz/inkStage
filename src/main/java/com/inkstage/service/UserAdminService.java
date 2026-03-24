@@ -45,4 +45,13 @@ public interface UserAdminService {
      * @return 是否更新成功，true表示更新成功，false表示更新失败
      */
     Boolean updateUserStatus(Long id, UserStatus userStatus);
+    
+    /**
+     * 更新用户状态并发送通知
+     * @param id 用户ID
+     * @param userStatus 用户状态
+     * @param reason 状态变更原因
+     * @return 是否更新成功，true表示更新成功，false表示更新失败
+     */
+    Boolean updateUserStatusWithNotification(Long id, UserStatus userStatus, String reason);
 }

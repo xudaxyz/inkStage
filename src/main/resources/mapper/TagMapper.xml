@@ -137,4 +137,12 @@
           AND status = 1
     </select>
 
+    <!-- 根据标签ID获取使用该标签的所有用户ID -->
+    <select id="findUserIdsByTagId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        SELECT DISTINCT a.user_id FROM article a
+        JOIN article_tag at ON a.id = at.article_id
+        WHERE at.tag_id = #{tagId}
+          AND a.deleted = 0
+    </select>
+
 </mapper>

@@ -139,5 +139,13 @@ public interface TagMapper {
      * @return 总数
      */
     long countByKeyword(@Param("keyword") String keyword);
+    
+    /**
+     * 根据标签ID获取使用该标签的所有用户ID
+     *
+     * @param tagId 标签ID
+     * @return 用户ID列表
+     */
+    List<Long> findUserIdsByTagId(@Param("tagId") Long tagId);
 
 }

@@ -8,7 +8,9 @@ import com.inkstage.enums.StatusEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.service.TagService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.enums.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,7 @@ public class TagServiceImpl implements TagService {
 
 
     private final TagMapper tagMapper;
+    private final NotificationService notificationService;
 
     @Override
     public List<Tag> getAllTags() {
@@ -143,7 +146,42 @@ public class TagServiceImpl implements TagService {
             if (id == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
+            
+            // 获取标签信息
+            Tag tag = tagMapper.findById(id);
+            if (tag == null) {
+                throw new BusinessException("标签不存在");
+            }
+            
+            // 获取使用该标签的所有用户ID
+            List<Long> userIds = tagMapper.findUserIdsByTagId(id);
+            
+            // 发送通知
+            for (Long userId : userIds) {
+                String message;
+                if (tag.getUserId() != null && tag.getUserId().equals(userId)) {
+                    // 对创建者的通知
+                    message = "您创建的标签" + tag.getName() + "已被删除";
+                } else {
+                    // 对使用者的通知
+                    message = "您使用的标签" + tag.getName() + "已被删除";
+                }
+                
+                notificationService.sendNotificationWithTemplate(
+                        userId,
+                        NotificationType.TAG_DELETE,
+                        id,
+                        0L, // 系统发送
+                        message,
+                        "标签不符合平台规范"
+                );
+            }
+            
+            // 执行删除操作
             tagMapper.deleteById(id);
+            log.info("删除标签并发送通知成功, 标签ID: {}", id);
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             log.error("删除标签失败", e);
             throw new BusinessException("删除标签失败", e);
