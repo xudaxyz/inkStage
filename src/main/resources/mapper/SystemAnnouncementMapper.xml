@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.SystemAnnouncementMapper">
+
+    <resultMap id="BaseResultMap" type="com.inkstage.entity.model.SystemAnnouncement">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="content" property="content"/>
+        <result column="type" property="type" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="status" property="status" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="publish_time" property="publishTime"/>
+        <result column="expire_time" property="expireTime"/>
+        <result column="read_count" property="readCount"/>
+        <result column="create_user_id" property="createUserId"/>
+        <result column="update_user_id" property="updateUserId"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, content, type, status, publish_time, expire_time, read_count,
+        create_user_id, update_user_id, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM system_announcement
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM system_announcement
+        WHERE deleted = 0
+        <if test="type != null">
+            AND type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        </if>
+        <if test="status != null">
+            AND status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        ORDER BY create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT COUNT(*)
+        FROM system_announcement
+        WHERE deleted = 0
+        <if test="type != null">
+            AND type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        </if>
+        <if test="status != null">
+            AND status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        </if>
+        <if test="keyword != null and keyword != ''">
+            AND (title LIKE CONCAT('%', #{keyword}, '%') OR content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM system_announcement
+        WHERE deleted = 0
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM system_announcement
+        WHERE status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        AND deleted = 0
+        ORDER BY publish_time DESC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO system_announcement (
+            title, content, type, status, publish_time, expire_time, read_count,
+            create_user_id, update_user_id, create_time, update_time, deleted
+        ) VALUES (
+            #{title}, #{content},
+            #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},
+            #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},
+            #{publishTime}, #{expireTime}, #{readCount},
+            #{createUserId}, #{updateUserId}, #{createTime}, #{updateTime}, 0
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE system_announcement
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="type != null">type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},</if>
+            <if test="status != null">status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},</if>
+            <if test="publishTime != null">publish_time = #{publishTime},</if>
+            <if test="expireTime != null">expire_time = #{expireTime},</if>
+            <if test="readCount != null">read_count = #{readCount},</if>
+            <if test="updateUserId != null">update_user_id = #{updateUserId},</if>
+            update_time = NOW()
+        </set>
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="deleteById">
+        UPDATE system_announcement
+        SET deleted = 1, deleted_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <update id="incrementReadCount">
+        UPDATE system_announcement
+        SET read_count = read_count + 1
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+</mapper>

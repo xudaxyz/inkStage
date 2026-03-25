@@ -170,4 +170,19 @@ public interface UserService {
      * @return 剩余时间，-1表示可以修改
      */
     long getUsernameModificationTimeLeft(Long userId);
+
+    /**
+     * 根据角色代码获取用户ID列表
+     *
+     * @param roleCode 角色代码
+     * @return 用户ID列表
+     */
+    List<Long> getUserIdsByRoleCode(String roleCode);
+
+    /**
+     * 获取所有用户ID列表
+     *
+     * @return 所有用户ID列表
+     */
+    List<Long> getAllUserIds();
 }

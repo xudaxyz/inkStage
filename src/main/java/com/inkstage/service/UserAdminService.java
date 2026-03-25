@@ -6,6 +6,8 @@ import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 
+import java.util.List;
+
 /**
  * 用户管理服务接口（管理员）
  */
@@ -54,4 +56,18 @@ public interface UserAdminService {
      * @return 是否更新成功，true表示更新成功，false表示更新失败
      */
     Boolean updateUserStatusWithNotification(Long id, UserStatus userStatus, String reason);
+
+    /**
+     * 根据角色代码获取用户ID列表
+     * @param roleCode 角色代码
+     * @return 用户ID列表
+     */
+    List<Long> getUserIdsByRoleCode(String roleCode);
+
+    /**
+     * 获取所有用户ID
+     * @return 所有用户ID列表
+     */
+    List<Long> getAllUserIds();
+
 }

@@ -454,4 +454,23 @@
         </if>
     </select>
 
+    <!-- 根据角色代码获取用户ID列表 -->
+    <select id="findUserIdsByRoleCode" resultType="java.lang.Long">
+        SELECT
+        u.id
+        FROM user u
+        JOIN user_role ur ON u.id = ur.user_id
+        WHERE u.deleted = 0
+        AND ur.role_id = #{roleCode}
+        AND ur.status = 1
+    </select>
+
+    <!-- 获取所有用户ID列表 -->
+    <select id="findAllUserIds" resultType="java.lang.Long">
+        SELECT
+        id
+        FROM user
+        WHERE deleted = 0
+    </select>
+
 </mapper>

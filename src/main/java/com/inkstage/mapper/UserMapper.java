@@ -208,6 +208,17 @@ public interface UserMapper {
      */
     long countAdminUserList(@Param("query") AdminUserQueryDTO query);
 
+    /**
+     * 根据角色代码获取用户ID列表
+     * @param roleCode 角色代码
+     * @return 用户ID列表
+     */
+    List<Long> findUserIdsByRoleCode(@Param("roleCode") String roleCode);
 
+    /**
+     * 获取所有用户ID列表
+     * @return 所有用户ID列表
+     */
+    List<Long> findAllUserIds();
 
 }

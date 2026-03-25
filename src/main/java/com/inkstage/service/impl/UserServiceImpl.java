@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -296,5 +297,35 @@ public class UserServiceImpl implements UserService {
 
         // 否则允许修改
         return -1;
+    }
+
+    @Override
+    public List<Long> getUserIdsByRoleCode(String roleCode) {
+        if (roleCode == null || roleCode.isEmpty()) {
+            log.warn("根据角色代码获取用户ID列表参数为空");
+            return new ArrayList<>();
+        }
+        try {
+            log.debug("根据角色代码获取用户ID列表, 角色代码: {}", roleCode);
+            List<Long> userIds = userAdminService.getUserIdsByRoleCode(roleCode);
+            log.info("根据角色代码获取用户ID列表成功, 角色代码: {}, 用户数量: {}", roleCode, userIds.size());
+            return userIds;
+        } catch (Exception e) {
+            log.error("根据角色代码获取用户ID列表失败, 角色代码: {}", roleCode, e);
+            return new ArrayList<>();
+        }
+    }
+
+    @Override
+    public List<Long> getAllUserIds() {
+        try {
+            log.debug("获取所有用户ID列表");
+            List<Long> userIds = userAdminService.getAllUserIds();
+            log.info("获取所有用户ID列表成功, 用户数量: {}", userIds.size());
+            return userIds;
+        } catch (Exception e) {
+            log.error("获取所有用户ID列表失败", e);
+            return new ArrayList<>();
+        }
     }
 }

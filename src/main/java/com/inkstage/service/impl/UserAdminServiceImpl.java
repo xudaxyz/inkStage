@@ -2,6 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
@@ -163,7 +164,7 @@ public class UserAdminServiceImpl implements UserAdminService {
         try {
             log.debug("管理员更新用户状态并发送通知, 用户ID: {}, 状态: {}, 原因: {}", id, userStatus.getDesc(), reason);
             // 检查用户是否存在
-            var user = userMapper.findById(id);
+            User user = userMapper.findById(id);
             if (user == null) {
                 log.warn("用户不存在, 用户ID: {}", id);
                 throw new BusinessException("用户不存在");
@@ -192,5 +193,15 @@ public class UserAdminServiceImpl implements UserAdminService {
             log.error("管理员更新用户状态并发送通知失败, 用户ID: {}, 状态: {}", id, userStatus.getDesc(), e);
             throw new BusinessException("更新用户状态失败");
         }
+    }
+
+    @Override
+    public List<Long> getUserIdsByRoleCode(String roleCode) {
+        return userMapper.findUserIdsByRoleCode(roleCode);
+    }
+
+    @Override
+    public List<Long> getAllUserIds() {
+        return userMapper.findAllUserIds();
     }
 }
