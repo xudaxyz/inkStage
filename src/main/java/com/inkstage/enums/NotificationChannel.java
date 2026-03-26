@@ -8,10 +8,9 @@ import lombok.Getter;
 @Getter
 public enum NotificationChannel implements EnumCode {
 
-    SITE(1, "站内信", "通过站内消息系统发送"),
+    SITE(1, "系统", "通过站内消息系统发送"),
     EMAIL(2, "邮件", "通过电子邮件发送"),
-    SMS(3, "短信", "通过短信发送"),
-    PUSH(4, "推送", "通过移动推送发送");
+    SMS(3, "短信", "通过短信发送");
 
     private final Integer code;
     private final String desc;
