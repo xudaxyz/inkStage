@@ -113,9 +113,22 @@ public class RedisCacheManager {
      */
     public void clearArticleCommentCache(Long articleId) {
         if (articleId != null) {
-            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list", articleId + ":*");
+            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list:", articleId + ":*");
             redisUtil.deletePattern(commentListPattern);
             log.info("清除文章评论列表缓存, 文章ID: {}", articleId);
+        }
+    }
+
+    /**
+     * 清除文章回复评论列表缓存
+     *
+      * @param parentId 父评论ID
+     */
+    public void clearArticleCommentRepliesCache(Long parentId) {
+        if (parentId != null) {
+            String commentReplyPattern = RedisKeyConstants.buildCacheKey("comment:replies:", parentId + ":*");
+            redisUtil.deletePattern(commentReplyPattern);
+            log.info("清除文章回复评论列表缓存, 父评论ID: {}", parentId);
         }
     }
 

@@ -86,7 +86,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 增加数量: {}", folderId, result);
             }
             // 缓存收藏状态
-            String collectKey = RedisKeyConstants.buildCacheKey("article:collect", collectArticleDTO.getArticleId() + ":" + userId);
+            String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", collectArticleDTO.getArticleId() + ":" + userId);
             redisUtil.set(collectKey, true, 24, TimeUnit.HOURS);
 
             // 发送收藏通知
@@ -145,7 +145,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 减少数量: {}", folderId, result);
             }
             // 删除缓存
-            String collectKey = RedisKeyConstants.buildCacheKey("article:collect", articleId + ":" + userId);
+            String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", articleId + ":" + userId);
             redisUtil.delete(collectKey);
             log.info("取消收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", articleId, userId, folderId);
             return true;
@@ -157,7 +157,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     public boolean isArticleCollected(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
-        String collectKey = RedisKeyConstants.buildCacheKey("article:collect", articleId + ":" + userId);
+        String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", articleId + ":" + userId);
         Boolean isCollected = redisUtil.get(collectKey, Boolean.class);
         if (isCollected != null) {
             return isCollected;

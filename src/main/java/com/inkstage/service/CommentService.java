@@ -83,4 +83,15 @@ public interface CommentService {
      */
     boolean adminUpdateComment(Comment comment);
 
+    /**
+     * 获取子评论列表
+     *
+     * @param parentId 父评论ID
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param sortBy 排序方式：hot（最热）、new（最新）
+     * @return 子评论列表
+     */
+    PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy);
+
 }

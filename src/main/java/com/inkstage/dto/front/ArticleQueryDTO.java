@@ -12,7 +12,7 @@ public class ArticleQueryDTO {
     /**
      * 页码
      */
-    private Integer page = 1;
+    private Integer pageNum = 1;
 
     /**
      * 页大小

@@ -42,8 +42,26 @@ public class CacheKeyGenerator {
      */
     public static String generateCommentListKey(Long articleId, Integer pageNum, Integer pageSize) {
         return RedisKeyConstants.buildCacheKey(
-                "comment:list",
+                "comment:list:",
                 articleId + ":" + pageNum + ":" + pageSize
+        );
+    }
+
+    /**
+     * 生成评论列表缓存键（包含排序和子评论参数）
+     * @param articleId 文章ID
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param sortBy 排序方式
+     * @param maxReplies 子评论最大数量
+     * @param replySortBy 子评论排序方式
+     * @return 缓存键
+     */
+    public static String generateCommentListKey(Long articleId, Integer pageNum, Integer pageSize, 
+                                               String sortBy, Integer maxReplies, String replySortBy) {
+        return RedisKeyConstants.buildCacheKey(
+                "comment:list:",
+                articleId + ":" + pageNum + ":" + pageSize + ":" + sortBy + ":" + maxReplies + ":" + replySortBy
         );
     }
 
@@ -62,7 +80,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateHotUserKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("user:hot", limit.toString());
+        return RedisKeyConstants.buildCacheKey("user:hot:", limit.toString());
     }
 
     /**
@@ -72,7 +90,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateCommentCountKey(Long commentId, String countType) {
-        return RedisKeyConstants.buildHotDataKey("comment", commentId + ":" + countType);
+        return RedisKeyConstants.buildHotDataKey("comment:", commentId + ":" + countType);
     }
 
     /**
@@ -81,7 +99,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleReadCountKey(Long articleId) {
-        return RedisKeyConstants.buildHotDataKey("article", articleId + ":read");
+        return RedisKeyConstants.buildHotDataKey("article:", articleId + ":read");
     }
 
     /**
@@ -90,7 +108,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleLikeCountKey(Long articleId) {
-        return RedisKeyConstants.buildHotDataKey("article", articleId + ":like");
+        return RedisKeyConstants.buildHotDataKey("article:", articleId + ":like");
     }
 
     /**

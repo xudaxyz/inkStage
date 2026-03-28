@@ -102,4 +102,27 @@ public class CommentController {
         }
     }
 
+    /**
+     * 获取子评论列表
+     *
+     * @param parentId 父评论ID
+     * @param pageNum 页码
+     * @param pageSize 每页大小
+     * @param sortBy 排序方式：hot（最热）、new（最新）
+     * @return 子评论列表
+     */
+    @GetMapping("/replies")
+    public Result<?> getReplies(@RequestParam Long parentId, 
+                               @RequestParam(defaultValue = "1") Integer pageNum, 
+                               @RequestParam(defaultValue = "10") Integer pageSize, 
+                               @RequestParam(defaultValue = "hot") String sortBy) {
+        // 调用服务方法获取子评论列表
+        PageResult<ArticleCommentVO> result = commentService.getReplies(parentId, pageNum, pageSize, sortBy);
+        if (result != null) {
+            return Result.success(result);
+        } else {
+            return Result.success(ResponseMessage.NO_COMMENTS);
+        }
+    }
+
 }

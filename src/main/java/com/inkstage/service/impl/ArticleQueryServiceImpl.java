@@ -54,7 +54,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
                     "article:list:",
-                    queryDTO.getPage() + ":" + queryDTO.getPageSize() + ":" +
+                    queryDTO.getPageNum() + ":" + queryDTO.getPageSize() + ":" +
                             (queryDTO.getCategoryId() != null ? queryDTO.getCategoryId() : "null") + ":" +
                             (queryDTO.getTagId() != null ? queryDTO.getTagId() : "null")
             );
@@ -67,7 +67,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             }
 
             // 计算偏移量
-            int offset = (queryDTO.getPage() - 1) * queryDTO.getPageSize();
+            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
             queryDTO.setOffset(offset);
 
             // 查询文章列表
@@ -81,14 +81,14 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             pageResult = PageResult.build(
                     articleList,
                     total,
-                    queryDTO.getPage(),
+                    queryDTO.getPageNum(),
                     queryDTO.getPageSize()
             );
 
             // 更新缓存
             redisUtil.set(cacheKey, pageResult, 30, TimeUnit.MINUTES);
 
-            log.info("获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPage(), queryDTO.getPageSize());
+            log.info("获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
             return pageResult;
         } catch (Exception e) {
             log.error("获取文章列表失败, 查询参数: {}", queryDTO, e);

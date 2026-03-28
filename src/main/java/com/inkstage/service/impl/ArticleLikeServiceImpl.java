@@ -59,7 +59,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 增加点赞数
             countService.updateArticleLikeCount(articleId, 1);
             // 缓存点赞状态
-            String likeKey = RedisKeyConstants.buildCacheKey("article:like", articleId + ":" + userId);
+            String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
             redisUtil.set(likeKey, true, 24, TimeUnit.HOURS);
 
             // 发送点赞通知
@@ -109,7 +109,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 减少点赞数
             countService.updateArticleLikeCount(articleId, -1);
             // 删除缓存
-            String likeKey = RedisKeyConstants.buildCacheKey("article:like", articleId + ":" + userId);
+            String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
             redisUtil.delete(likeKey);
             log.info("取消点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
@@ -121,7 +121,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     public boolean isArticleLiked(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
-        String likeKey = RedisKeyConstants.buildCacheKey("article:like", articleId + ":" + userId);
+        String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
         Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {});
         if (isLiked != null) {
             return isLiked;

@@ -161,6 +161,26 @@ public interface CommentMapper {
      */
     Comment findTopCommentByArticleId(@Param("articleId") Long articleId);
 
+    /**
+     * 根据父评论ID查询子评论列表
+     *
+     * @param parentId 父评论ID
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @param sortBy 排序方式
+     * @return 子评论列表
+     */
+    List<ArticleCommentVO> findRepliesByParentId(@Param("parentId") Long parentId, 
+                                               @Param("offset") int offset, 
+                                               @Param("limit") int limit, 
+                                               @Param("sortBy") String sortBy);
 
+    /**
+     * 根据父评论ID统计子评论总数
+     *
+     * @param parentId 父评论ID
+     * @return 子评论总数
+     */
+    long countRepliesByParentId(@Param("parentId") Long parentId);
 
 }

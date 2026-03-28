@@ -32,4 +32,14 @@ public class CommentQueryDTO {
      * 排序方式：hot（最热）、new（最新）
      */
     private String sortBy = "hot";
+
+    /**
+     * 子评论最大返回数量，默认3条
+     */
+    private Integer maxReplies = 3;
+
+    /**
+     * 子评论排序方式：hot（最热）、new（最新）
+     */
+    private String replySortBy = "hot";
 }

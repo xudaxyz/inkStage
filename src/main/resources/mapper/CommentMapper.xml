@@ -334,4 +334,56 @@
             AND top = 1
         LIMIT 1
     </select>
+
+    <!-- 根据父评论ID查询子评论列表 -->
+    <select id="findRepliesByParentId" resultType="com.inkstage.vo.front.ArticleCommentVO">
+        SELECT
+        c.id,
+        c.parent_id,
+        c.content,
+        c.floor,
+        c.like_count,
+        c.reply_count,
+        c.status as comment_status,
+        c.top,
+        c.mention_user_ids,
+        c.top_order,
+        c.create_time,
+        c.update_time,
+        c.article_id,
+        c.user_id,
+        c.deleted,
+        a.title as article_title,
+        u.nickname,
+        u.avatar,
+        u.gender,
+        u.status as user_status
+        FROM
+        comment c
+        LEFT JOIN user u ON c.user_id = u.id
+        LEFT JOIN article a ON c.article_id = a.id
+        WHERE
+        c.deleted = 0
+        AND c.parent_id = #{parentId}
+        ORDER BY
+        <choose>
+            <when test="sortBy != null and sortBy == 'hot'">
+                like_count DESC, create_time DESC
+            </when>
+            <when test="sortBy != null and sortBy == 'new'">
+                create_time DESC
+            </when>
+            <otherwise>
+                like_count DESC, create_time DESC
+            </otherwise>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 根据父评论ID统计子评论总数 -->
+    <select id="countRepliesByParentId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM comment
+        WHERE deleted = 0 AND parent_id = #{parentId}
+    </select>
 </mapper>

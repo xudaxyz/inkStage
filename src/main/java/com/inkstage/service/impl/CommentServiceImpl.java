@@ -19,6 +19,7 @@ import com.inkstage.service.CommentService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.constant.RedisKeyConstants;
 import com.inkstage.utils.CacheKeyGenerator;
 import com.inkstage.utils.RedisCacheManager;
 import com.inkstage.utils.RedisUtil;
@@ -66,7 +67,10 @@ public class CommentServiceImpl implements CommentService {
         String cacheKey = CacheKeyGenerator.generateCommentListKey(
                 queryDTO.getArticleId(),
                 queryDTO.getPageNum(),
-                queryDTO.getPageSize()
+                queryDTO.getPageSize(),
+                queryDTO.getSortBy(),
+                queryDTO.getMaxReplies(),
+                queryDTO.getReplySortBy()
         );
 
         try {
@@ -86,7 +90,7 @@ public class CommentServiceImpl implements CommentService {
             }
 
             // 将扁平评论列表转换为树形结构
-            articleCommentVOList = buildCommentTree(articleCommentVOList);
+            articleCommentVOList = buildCommentTree(articleCommentVOList, queryDTO.getMaxReplies(), queryDTO.getReplySortBy());
 
             // 查询总记录数
             Long total = commentMapper.countCommentsByArticleId(queryDTO);
@@ -147,6 +151,11 @@ public class CommentServiceImpl implements CommentService {
             if (updated >= 1) {
                 // 清除评论列表缓存
                 cacheManager.clearArticleCommentCache(comment.getArticleId());
+
+                // 除回复评论ID列表缓存
+                if (comment.getParentId() != null && comment.getParentId() > 0) {
+                    cacheManager.clearArticleCommentRepliesCache(comment.getParentId());
+                }
 
                 // 增加文章评论数
                 countService.updateArticleCommentCount(comment.getArticleId(), updated);
@@ -359,10 +368,12 @@ public class CommentServiceImpl implements CommentService {
     /**
      * 将扁平的评论列表转换为树形结构
      *
-     * @param comments 扁平评论列表
+     * @param comments    扁平评论列表
+     * @param maxReplies  子评论最大返回数量
+     * @param replySortBy 子评论排序方式
      * @return 树形评论列表
      */
-    private List<ArticleCommentVO> buildCommentTree(List<ArticleCommentVO> comments) {
+    private List<ArticleCommentVO> buildCommentTree(List<ArticleCommentVO> comments, Integer maxReplies, String replySortBy) {
         if (comments == null || comments.isEmpty()) {
             return null;
         }
@@ -389,6 +400,28 @@ public class CommentServiceImpl implements CommentService {
                 ArticleCommentVO parentComment = commentMap.get(parentId);
                 if (parentComment != null) {
                     parentComment.getReplies().add(comment);
+                }
+            }
+        }
+
+        // 第三步: 对每个顶级评论的子评论进行排序和数量限制
+        for (ArticleCommentVO topComment : topLevelComments) {
+            List<ArticleCommentVO> replies = topComment.getReplies();
+            if (replies != null && !replies.isEmpty()) {
+                // 子评论排序
+                if ("hot".equals(replySortBy)) {
+                    replies.sort((a, b) -> {
+                        int likeCountA = a.getLikeCount() != null ? a.getLikeCount() : 0;
+                        int likeCountB = b.getLikeCount() != null ? b.getLikeCount() : 0;
+                        return likeCountB - likeCountA;
+                    });
+                } else if ("new".equals(replySortBy)) {
+                    replies.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
+                }
+
+                // 限制子评论数量
+                if (maxReplies != null && maxReplies > 0 && replies.size() > maxReplies) {
+                    topComment.setReplies(replies.subList(0, maxReplies));
                 }
             }
         }
@@ -640,6 +673,57 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
         }
         return commentMapper.updateById(comment) > 0;
+    }
+
+    @Override
+    public PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy) {
+        if (parentId == null || pageNum == null || pageSize == null) {
+            log.warn("获取子评论参数不完整, parentId: {}, pageNum: {}, pageSize: {}", parentId, pageNum, pageSize);
+            return null;
+        }
+
+        log.info("获取子评论列表, 父评论ID: {}, 页码: {}, 每页大小: {}, 排序方式: {}", parentId, pageNum, pageSize, sortBy);
+
+        // 生成缓存键
+        String cacheKey = RedisKeyConstants.buildCacheKey(
+                "comment:replies:",
+                parentId + ":" + pageNum + ":" + pageSize + ":" + sortBy
+        );
+
+        try {
+            // 尝试从缓存获取
+            PageResult<ArticleCommentVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (pageResult != null) {
+                return pageResult;
+            }
+
+            // 计算偏移量
+            int offset = (pageNum - 1) * pageSize;
+
+            // 查询子评论列表
+            List<ArticleCommentVO> replies = commentMapper.findRepliesByParentId(parentId, offset, pageSize, sortBy);
+            if (replies == null || replies.isEmpty()) {
+                return null;
+            }
+
+            // 确保评论图片的URL完整
+            fileService.ensureCommentImageAreFullUrl(replies);
+
+            // 查询子评论总数
+            Long total = commentMapper.countRepliesByParentId(parentId);
+
+            // 构建分页结果
+            pageResult = PageResult.build(replies, total, pageNum, pageSize);
+
+            // 更新缓存
+            redisUtil.set(cacheKey, pageResult, 5, TimeUnit.MINUTES);
+
+            return pageResult;
+        } catch (Exception e) {
+            log.error("获取子评论列表失败, 父评论ID: {}", parentId, e);
+            return null;
+        }
     }
 
 }
