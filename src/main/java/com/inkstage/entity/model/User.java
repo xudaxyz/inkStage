@@ -151,4 +151,9 @@ public class User extends BaseEntity {
      * 用户名最后修改时间
      */
     private LocalDateTime usernameLastModifiedTime;
+
+    /**
+     * 用户角色ID
+     */
+    private Integer roleId;
 }

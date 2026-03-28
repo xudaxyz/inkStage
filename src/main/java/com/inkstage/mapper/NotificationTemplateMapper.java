@@ -1,5 +1,6 @@
 package com.inkstage.mapper;
 
+import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.enums.NotificationChannel;
 import com.inkstage.enums.NotificationType;
@@ -63,15 +64,12 @@ public interface NotificationTemplateMapper {
     /**
      * 分页查询模板列表
      */
-    List<NotificationTemplate> selectPage(@Param("offset") int offset, @Param("pageSize") int pageSize,
-                                          @Param("type") NotificationType type, @Param("status") StatusEnum status,
-                                          @Param("keyword") String keyword);
+    List<NotificationTemplate> selectPageByQuery(@Param("query") NotificationTemplateQueryDTO queryDTO, @Param("offset") Integer offset, @Param("limit") Integer limit);
 
     /**
      * 查询模板总数
      */
-    long count(@Param("type") NotificationType type, @Param("status") StatusEnum status,
-               @Param("keyword") String keyword);
+    long countByQuery(@Param("query") NotificationTemplateQueryDTO queryDTO);
 
     /**
      * 检查编码是否存在

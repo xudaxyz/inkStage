@@ -14,7 +14,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleDetailKey(Long articleId) {
-        return RedisKeyConstants.buildCacheKey("article:detail", articleId.toString());
+        return RedisKeyConstants.buildCacheKey("article:detail:", articleId.toString());
     }
 
     /**
@@ -30,7 +30,7 @@ public class CacheKeyGenerator {
         if (categoryId != null) {
             keyBuilder.append(":").append(categoryId);
         }
-        return RedisKeyConstants.buildCacheKey("article:list", keyBuilder.toString());
+        return RedisKeyConstants.buildCacheKey("article:list:", keyBuilder.toString());
     }
 
     /**
@@ -102,7 +102,7 @@ public class CacheKeyGenerator {
      */
     public static String generateUserArticleListKey(Long userId, Integer pageNum, Integer pageSize) {
         return RedisKeyConstants.buildCacheKey(
-                "user:article:list",
+                "user:article:list:",
                 userId + ":" + pageNum + ":" + pageSize
         );
     }
@@ -114,7 +114,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateHotArticleKey(Integer limit, String timeRange) {
-        return RedisKeyConstants.buildCacheKey("article:hot", limit + ":" + timeRange);
+        return RedisKeyConstants.buildCacheKey("article:hot:", limit + ":" + timeRange);
     }
 
     /**
@@ -123,7 +123,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateLatestArticleKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("article:latest", limit.toString());
+        return RedisKeyConstants.buildCacheKey("article:latest:", limit.toString());
     }
 
     /**
@@ -132,6 +132,6 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateBannerArticleKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("article:banner", limit.toString());
+        return RedisKeyConstants.buildCacheKey("article:banner:", limit.toString());
     }
 }

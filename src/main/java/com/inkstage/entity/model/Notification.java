@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 /**
  * 通知实体类
@@ -28,6 +29,11 @@ public class Notification extends BaseEntity {
      * 通知类型
      */
     private NotificationType type;
+
+    /**
+     * 通知分类
+     */
+    private NotificationCategory category;
 
     /**
      * 通知标题
@@ -65,6 +71,26 @@ public class Notification extends BaseEntity {
     private Long senderId;
 
     /**
+     * 发送者昵称
+     */
+    private String senderName;
+
+    /**
+     * 发送者头像
+     */
+    private String senderAvatar;
+
+    /**
+     * 聚合键（用于通知聚合）
+     */
+    private String aggregationKey;
+
+    /**
+     * 聚合数量（用于显示"3人赞了你的文章"）
+     */
+    private Integer aggregationCount;
+
+    /**
      * 是否已推送
      */
     private PushedStatus pushedStatus;
@@ -86,6 +112,11 @@ public class Notification extends BaseEntity {
 
     /**
      * 额外数据(用于存储通知相关的扩展信息)
+     */
+    private Map<String, Object> extra;
+
+    /**
+     * 额外数据字符串(用于序列化传输)
      */
     private String extraData;
 }

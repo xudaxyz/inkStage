@@ -3,27 +3,19 @@ package com.inkstage.controller.admin;
 import com.inkstage.annotation.AdminAccess;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
-import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.enums.StatusEnum;
 import com.inkstage.service.AdminNotificationTemplateService;
-import com.inkstage.service.UserService;
 import com.inkstage.vo.TemplatePreviewVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
-import static com.inkstage.config.rabbitmq.RabbitMQConfig.NOTIFICATION_EXCHANGE;
-import static com.inkstage.config.rabbitmq.RabbitMQConfig.NOTIFICATION_ROUTING_KEY;
 
 /**
  * 后台通知模板管理Controller
@@ -35,8 +27,6 @@ import static com.inkstage.config.rabbitmq.RabbitMQConfig.NOTIFICATION_ROUTING_K
 public class AdminNotificationTemplateController {
 
     private final AdminNotificationTemplateService templateService;
-    private final UserService userService;
-    private final RabbitTemplate rabbitTemplate;
 
     /**
      * 创建通知模板
@@ -97,14 +87,8 @@ public class AdminNotificationTemplateController {
      */
     @GetMapping("/list")
     @AdminAccess
-    public Result<PageResult<NotificationTemplate>> listTemplates(NotificationTemplateQueryDTO queryDTO) {
-        PageResult<NotificationTemplate> result = templateService.getTemplatePage(
-                queryDTO.getPageNum(),
-                queryDTO.getPageSize(),
-                queryDTO.getType(),
-                queryDTO.getStatus(),
-                queryDTO.getKeyword()
-        );
+    public Result<PageResult<NotificationTemplate>> listTemplates(NotificationTemplateQueryDTO notificationTemplateQuery) {
+        PageResult<NotificationTemplate> result = templateService.getTemplatePage(notificationTemplateQuery);
         return Result.success(result);
     }
 
@@ -154,13 +138,13 @@ public class AdminNotificationTemplateController {
     @PostMapping("/preview/{code}")
     @AdminAccess
     public Result<TemplatePreviewVO> previewTemplate(@PathVariable String code,
-                                                     @RequestBody Map<String, Object> variables) {
-        try {
-            TemplatePreviewVO result = templateService.renderTemplate(code, variables);
-            return Result.success(result);
-        } catch (Exception e) {
-            return Result.error("模板渲染失败: " + e.getMessage());
+                                                     @RequestBody String variables) {
+        TemplatePreviewVO result = templateService.renderTemplate(code, variables);
+        if (result == null) {
+            return Result.error("模板渲染失败");
         }
+        return Result.success(result);
+
     }
 
     /**
@@ -168,44 +152,13 @@ public class AdminNotificationTemplateController {
      */
     @PostMapping("/send")
     @AdminAccess
-    public Result<Integer> sendNotification(@Valid @RequestBody ManualNotificationDTO dto) {
-        try {
-            List<Long> userIds = getUserIdsByType(dto);
-            if (userIds.isEmpty()) {
-                return Result.error("未找到符合条件的用户");
-            }
+    public Result<Integer> sendNotification(@Valid @RequestBody ManualNotificationDTO manualNotification) {
+        int successCount = templateService.sendNotification(manualNotification);
 
-            // todo 应该放在service层
-            int successCount = 0;
-            for (Long userId : userIds) {
-                try {
-                    TemplatePreviewVO rendered = templateService.renderTemplate(dto.getTemplateCode(), dto.getVariables());
-                    if (rendered == null) {
-                        continue;
-                    }
-                    // TODO 使用批量发送
-                    NotificationMessageDTO message = new NotificationMessageDTO();
-                    message.setUserId(userId);
-                    message.setTitle(rendered.getTitle());
-                    message.setContent(rendered.getContent());
-
-                    message.setType(rendered.getType());
-                    message.setRelatedId(dto.getRelatedId());
-                    message.setSenderId(dto.getSenderId() != null ? dto.getSenderId() : 0L);
-                    message.setActionUrl(rendered.getActionUrl());
-
-                    rabbitTemplate.convertAndSend(NOTIFICATION_EXCHANGE, NOTIFICATION_ROUTING_KEY, message);
-                    successCount++;
-                } catch (Exception e) {
-                    log.error("发送通知失败，用户ID: {}", userId, e);
-                }
-            }
-
-            return Result.success(successCount);
-        } catch (Exception e) {
-            log.error("手动发送通知失败", e);
-            return Result.error("发送失败: " + e.getMessage());
+        if (successCount == 0) {
+            return Result.error("未找到符合条件的用户或发送失败");
         }
+        return Result.success(successCount);
     }
 
     /**
@@ -226,15 +179,5 @@ public class AdminNotificationTemplateController {
         return template;
     }
 
-    /**
-     * 根据用户类型获取用户ID列表
-     */
-    private List<Long> getUserIdsByType(ManualNotificationDTO dto) {
-        return switch (dto.getUserType()) {
-            case "all" -> userService.getAllUserIds();
-            case "specific" -> dto.getUserIds() != null ? dto.getUserIds() : new ArrayList<>();
-            case "role" -> userService.getUserIdsByRoleCode(dto.getRoleCode());
-            default -> new ArrayList<>();
-        };
-    }
 }
+

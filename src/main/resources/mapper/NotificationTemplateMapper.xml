@@ -80,36 +80,36 @@
         ORDER BY create_time DESC
     </select>
 
-    <select id="selectPage" resultMap="BaseResultMap">
+    <select id="selectPageByQuery" resultMap="BaseResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM notification_template
         WHERE deleted = 0
-        <if test="type != null">
-            AND type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        <if test="query.type != null">
+            AND type = #{query.type}
         </if>
-        <if test="status != null">
-            AND status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        <if test="query.status != null">
+            AND status = #{query.status}
         </if>
-        <if test="keyword != null and keyword != ''">
-            AND (name LIKE CONCAT('%', #{keyword}, '%') OR code LIKE CONCAT('%', #{keyword}, '%'))
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (name LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
         ORDER BY create_time DESC
-        LIMIT #{offset}, #{pageSize}
+        LIMIT #{offset}, #{limit}
     </select>
 
-    <select id="count" resultType="long">
+    <select id="countByQuery" resultType="long">
         SELECT COUNT(*)
         FROM notification_template
         WHERE deleted = 0
-        <if test="type != null">
-            AND type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        <if test="query.type != null">
+            AND type = #{query.type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
         </if>
-        <if test="status != null">
-            AND status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        <if test="query.status != null">
+            AND status = #{query.status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
         </if>
-        <if test="keyword != null and keyword != ''">
-            AND (name LIKE CONCAT('%', #{keyword}, '%') OR code LIKE CONCAT('%', #{keyword}, '%'))
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (name LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
     </select>
 

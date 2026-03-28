@@ -3,12 +3,16 @@ package com.inkstage.controller.front;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.NotificationCategory;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -95,5 +99,58 @@ public class NotificationController {
         Long userId = UserContext.getCurrentUserId();
         notificationService.syncUnreadCount(userId);
         return Result.success();
+    }
+
+    /**
+     * 按分类获取通知列表
+     */
+    @GetMapping("/category/{category}")
+    public Result<PageResult<Notification>> getNotificationsByCategory(
+            @PathVariable NotificationCategory category,
+            @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
+        Long userId = UserContext.getCurrentUserId();
+        PageResult<Notification> pageResult = notificationService.getNotificationsByCategory(userId, category, pageNum, pageSize);
+        return Result.success(pageResult);
+    }
+
+    /**
+     * 按分类获取未读通知数量
+     */
+    @GetMapping("/unread/count/category")
+    public Result<Map<NotificationCategory, Integer>> getUnreadCountByCategory() {
+        Long userId = UserContext.getCurrentUserId();
+        Map<NotificationCategory, Integer> countMap = notificationService.getUnreadCountByCategory(userId);
+        return Result.success(countMap);
+    }
+
+    /**
+     * 按分类标记通知为已读
+     */
+    @PutMapping("/read/category/{category}")
+    public Result<Boolean> markAsReadByCategory(@PathVariable NotificationCategory category) {
+        Long userId = UserContext.getCurrentUserId();
+        boolean result = notificationService.markAsReadByCategory(userId, category);
+        return Result.success(result);
+    }
+
+    /**
+     * 清空通知
+     */
+    @DeleteMapping("/clear")
+    public Result<Boolean> clearNotifications() {
+        Long userId = UserContext.getCurrentUserId();
+        boolean result = notificationService.clearNotifications(userId);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取聚合后的通知
+     */
+    @GetMapping("/aggregated")
+    public Result<List<Notification>> getAggregatedNotifications() {
+        Long userId = UserContext.getCurrentUserId();
+        List<Notification> notifications = notificationService.getAggregatedNotifications(userId);
+        return Result.success(notifications);
     }
 }

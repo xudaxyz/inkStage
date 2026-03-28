@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.NotificationCategory;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.ReadStatus;
 import com.inkstage.mapper.NotificationMapper;
@@ -289,5 +290,76 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         return PageResult.build(notifications, (long) total, pageNum, pageSize);
+    }
+
+    @Override
+    public PageResult<Notification> getNotificationsByCategory(Long userId, NotificationCategory category, Integer pageNum, Integer pageSize) {
+        int offset = (pageNum - 1) * pageSize;
+        List<Notification> notifications = notificationMapper.selectByUserIdAndCategoryWithPage(userId, category, offset, pageSize);
+        int total = notificationMapper.countByUserIdAndCategory(userId, category);
+        return PageResult.build(notifications, (long) total, pageNum, pageSize);
+    }
+
+    @Override
+    public Map<NotificationCategory, Integer> getUnreadCountByCategory(Long userId) {
+        // 尝试从缓存获取
+        Map<NotificationCategory, Integer> cachedCountMap = notificationCacheService.getCachedUnreadCountByCategory(userId);
+        if (cachedCountMap != null) {
+            return cachedCountMap;
+        }
+
+        // 从数据库查询
+        List<Map<String, Object>> countList = notificationMapper.countUnreadByUserIdGroupByCategory(userId);
+        Map<NotificationCategory, Integer> countMap = new java.util.HashMap<>();
+
+        // 初始化所有分类的未读数量为0
+        for (NotificationCategory cat : NotificationCategory.values()) {
+            countMap.put(cat, 0);
+        }
+
+        // 填充查询结果
+        for (Map<String, Object> map : countList) {
+            String categoryName = (String) map.get("category");
+            Integer count = (Integer) map.get("count");
+            try {
+                NotificationCategory category = NotificationCategory.valueOf(categoryName);
+                countMap.put(category, count);
+            } catch (IllegalArgumentException e) {
+                log.warn("Unknown notification category: {}", categoryName);
+            }
+        }
+
+        // 缓存结果
+        notificationCacheService.cacheUnreadCountByCategory(userId, countMap);
+        return countMap;
+    }
+
+    @Override
+    public boolean markAsReadByCategory(Long userId, NotificationCategory category) {
+        int result = notificationMapper.updateByUserIdAndCategoryReadStatus(userId, category, ReadStatus.READ);
+        if (result > 0) {
+            // 清除缓存
+            notificationCacheService.clearUnreadCountCache(userId);
+        }
+        return result > 0;
+    }
+
+    @Override
+    public boolean clearNotifications(Long userId) {
+        int result = notificationMapper.deleteByUserId(userId);
+        if (result > 0) {
+            // 清除缓存
+            notificationCacheService.clearUnreadCountCache(userId);
+            notificationCacheService.clearNotificationsCache(userId);
+        }
+        return result > 0;
+    }
+
+    @Override
+    public List<Notification> getAggregatedNotifications(Long userId) {
+        // 实现通知聚合逻辑
+        // 这里简化实现，实际项目中需要根据聚合键进行分组
+        // 聚合逻辑...
+        return notificationMapper.selectByUserId(userId);
     }
 }

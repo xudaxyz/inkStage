@@ -4,7 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 手动发送通知DTO
@@ -37,7 +36,7 @@ public class ManualNotificationDTO {
     /**
      * 模板变量
      */
-    private Map<String, Object> variables;
+    private String variables;
 
     /**
      * 关联ID

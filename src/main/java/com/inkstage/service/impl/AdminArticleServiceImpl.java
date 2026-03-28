@@ -14,6 +14,7 @@ import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.service.util.ArticleServiceUtils;
 import com.inkstage.enums.NotificationType;
+import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
@@ -36,6 +37,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final FileService fileService;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
+    private final RedisUtil redisUtil;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -66,6 +68,29 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         } catch (Exception e) {
             log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
             throw new BusinessException("获取文章列表失败");
+        }
+    }
+
+    /**
+     * 清理文章相关缓存
+     */
+    private void clearArticleCache() {
+        try {
+            // 清理热门文章缓存
+            redisUtil.deletePattern("article:hot:*");
+            // 清理最新文章缓存
+            redisUtil.deletePattern("article:latest:*");
+            // 清理轮播图文章缓存
+            redisUtil.deletePattern("article:banner:*");
+            // 清理文章列表缓存
+            redisUtil.deletePattern("article:list:*");
+            // 清理用户文章缓存
+            redisUtil.deletePattern("article:user:*");
+            // 清理搜索缓存
+            redisUtil.deletePattern("article:search:*");
+            log.info("文章缓存清理成功");
+        } catch (Exception e) {
+            log.error("清理文章缓存失败", e);
         }
     }
 
@@ -101,6 +126,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                 );
             }
             
+            // 清理相关缓存
+            clearArticleCache();
+            
             log.info("更新文章状态并发送通知成功, 文章ID: {}, 状态: {}", id, status.getDesc());
             return result > 0;
         } catch (Exception e) {
@@ -120,6 +148,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             ArticleServiceUtils.checkOperationResult(result, id, "审核通过文章");
             // 更新文章状态为已发布
             articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
+            // 清理相关缓存
+            clearArticleCache();
+            
             log.info("审核通过文章成功, 文章ID: {}", id);
             return true;
         } catch (BusinessException e) {
@@ -382,6 +413,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                     article.getTitle(),
                     "文章不符合平台规范"
             );
+            // 清理相关缓存
+            clearArticleCache();
+            
             log.info("管理员删除文章并发送通知成功, 文章ID: {}", id);
             return i > 0;
         } catch (BusinessException e) {

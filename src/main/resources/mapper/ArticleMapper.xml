@@ -140,7 +140,7 @@
         LEFT JOIN
         user u ON a.user_id = u.id
         WHERE
-        a.deleted = 0
+        a.deleted = 0 and a.article_status = 3
         <if test="query.categoryId != null and query.categoryId != 0">
             AND a.category_id = #{query.categoryId}
         </if>
@@ -165,7 +165,7 @@
         LEFT JOIN
         category c ON a.category_id = c.id
         WHERE
-        a.deleted = 0
+        a.deleted = 0 and a.article_status = 3
         <if test="query.categoryId != null and query.categoryId != 0">
             AND a.category_id = #{query.categoryId}
         </if>

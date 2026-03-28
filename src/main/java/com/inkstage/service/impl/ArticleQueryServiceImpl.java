@@ -53,7 +53,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:list",
+                    "article:list:",
                     queryDTO.getPage() + ":" + queryDTO.getPageSize() + ":" +
                             (queryDTO.getCategoryId() != null ? queryDTO.getCategoryId() : "null") + ":" +
                             (queryDTO.getTagId() != null ? queryDTO.getTagId() : "null")
@@ -101,7 +101,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
      */
     public ArticleDetailVO getArticleDetail(Long id) {
         // 生成缓存键（不包含用户信息，因为缓存的是通用信息）
-        String cacheKey = RedisKeyConstants.buildCacheKey("article:detail", id.toString());
+        String cacheKey = RedisKeyConstants.buildCacheKey("article:detail:", id.toString());
 
         // 尝试从缓存获取通用信息
         ArticleDetailVO articleDetailVO = redisUtil.get(cacheKey, ArticleDetailVO.class);
@@ -148,7 +148,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:hot",
+                    "article:hot:",
                     limit + ":" + timeRange
             );
 
@@ -182,7 +182,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:latest",
+                    "article:latest:",
                     limit.toString()
             );
 
@@ -214,7 +214,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:banner",
+                    "article:banner:",
                     limit.toString()
             );
 
@@ -246,7 +246,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:user",
+                    "article:user:",
                     userId + ":" + pageNum + ":" + pageSize
             );
 
@@ -292,7 +292,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         try {
             // 生成缓存键
             String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:user:related",
+                    "article:user:related:",
                     userId + ":" + excludeArticleId + ":" + limit
             );
 

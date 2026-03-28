@@ -158,6 +158,11 @@ public class AdminUserDetailVO implements Serializable {
     private UserRoleEnum userRole;
 
     /**
+     * 用户角色ID
+     */
+    private Integer roleId;
+
+    /**
      * 最近发布的文章
      */
     private List<AdminUserArticleVO> recentArticles;

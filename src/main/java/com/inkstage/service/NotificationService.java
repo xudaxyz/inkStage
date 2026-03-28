@@ -3,6 +3,7 @@ package com.inkstage.service;
 import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.NotificationCategory;
 import com.inkstage.enums.NotificationType;
 
 import java.util.List;
@@ -67,4 +68,29 @@ public interface NotificationService {
      * 分页获取用户的通知列表
      */
     PageResult<Notification> getNotificationListWithPage( NotificationType type, Integer pageNum, Integer pageSize);
+
+    /**
+     * 按分类获取用户的通知列表
+     */
+    PageResult<Notification> getNotificationsByCategory(Long userId, NotificationCategory category, Integer pageNum, Integer pageSize);
+
+    /**
+     * 按分类获取用户未读通知数量
+     */
+    Map<NotificationCategory, Integer> getUnreadCountByCategory(Long userId);
+
+    /**
+     * 按分类标记通知为已读
+     */
+    boolean markAsReadByCategory(Long userId, NotificationCategory category);
+
+    /**
+     * 清空用户通知
+     */
+    boolean clearNotifications(Long userId);
+
+    /**
+     * 获取聚合后的通知
+     */
+    List<Notification> getAggregatedNotifications(Long userId);
 }

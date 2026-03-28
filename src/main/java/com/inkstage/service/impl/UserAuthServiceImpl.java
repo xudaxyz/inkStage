@@ -4,16 +4,17 @@ import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
 import com.inkstage.entity.model.UserRole;
+import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.VerificationStatus;
+import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.auth.AuthType;
+import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.mapper.UserMapper;
-import com.inkstage.service.TokenService;
-import com.inkstage.service.TokenStoreService;
-import com.inkstage.service.UserAuthService;
-import com.inkstage.service.UserRoleService;
-import com.inkstage.service.VerifyCodeService;
+import com.inkstage.service.*;
+import com.inkstage.utils.IPUtil;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
@@ -113,10 +114,13 @@ public class UserAuthServiceImpl implements UserAuthService {
                 throw new BusinessException("账号已存在");
             }
 
-            // 验证验证码
-            if (!verifyCodeService.verifyCode(authDTO.getAccount(), authDTO.getCode(), "register")) {
-                throw new BusinessException("验证码错误或已过期");
+            // 注册类型为邮箱或手机时验证验证码
+            if (authDTO.getAuthType() == AuthType.EMAIL || authDTO.getAuthType() == AuthType.PHONE) {
+                if (!verifyCodeService.verifyCode(authDTO.getAccount(), authDTO.getCode(), "register")) {
+                    throw new BusinessException("验证码错误或已过期");
+                }
             }
+
 
             // 对密码进行统一加密
             authDTO.setPassword(passwordEncoder.encode(authDTO.getPassword()));
@@ -186,9 +190,29 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     private User createUser(AuthDTO authDTO) {
         User user = new User();
-        user.setUsername(generateUsername(authDTO.getAccount()));
-        user.setEmail(authDTO.getAccount());
+        String name = generateUsername(authDTO.getAccount());
+        user.setUsername(name);
+        user.setPassword(authDTO.getPassword());
+        user.setNickname(name);
+        if (authDTO.getAuthType() == AuthType.EMAIL) {
+            user.setEmail(authDTO.getAccount());
+            user.setEmailVerified(VerificationStatus.VERIFIED);
+        }
+        if (authDTO.getAuthType() == AuthType.PHONE) {
+            user.setPhone(authDTO.getAccount());
+            user.setPhoneVerified(VerificationStatus.VERIFIED);
+        }
         user.setStatus(UserStatus.NORMAL);
+        user.setRoleId(UserRoleEnum.USER.getCode());
+        user.setFollowCount(0);
+        user.setFollowerCount(0);
+        user.setArticleCount(0);
+        user.setCommentCount(0);
+        user.setLikeCount(0);
+        user.setRegisterTime(LocalDateTime.now());
+        user.setRegisterIp(IPUtil.getClientIp());
+        user.setPrivacy(VisibleStatus.PUBLIC);
+        user.setDeleted(DeleteStatus.NOT_DELETED);
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
 
@@ -206,6 +230,7 @@ public class UserAuthServiceImpl implements UserAuthService {
             userAuth.setAuthCredential(authDTO.getPassword());
         }
 
+        userAuth.setDeleted(DeleteStatus.NOT_DELETED);
         userAuth.setCreateTime(LocalDateTime.now());
         userAuth.setUpdateTime(LocalDateTime.now());
 

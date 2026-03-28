@@ -50,6 +50,12 @@ public class RedisKeyConstants {
     // 通知未读计数
     public static final String NOTIFICATION_UNREAD_COUNT = "notification:unread:count:";
     
+    // 通知按分类未读计数
+    public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "notification:unread:count:category:";
+    
+    // 通知最近列表
+    public static final String NOTIFICATION_RECENT_LIST = "notification:recent:list:";
+    
     // 用户前缀
     public static final String USER_PREFIX = "user:";
     

@@ -96,4 +96,9 @@ public class UserInfo {
      * 用户角色
      */
     private UserRoleEnum role;
+
+    /**
+     * 用户角色ID
+     */
+    private Integer roleId;
 }

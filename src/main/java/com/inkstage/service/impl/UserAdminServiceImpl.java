@@ -4,10 +4,10 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserStatus;
+import com.inkstage.event.NotificationEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
-import com.inkstage.service.NotificationService;
 import com.inkstage.service.UserAdminService;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.vo.admin.AdminUserArticleVO;
@@ -16,6 +16,7 @@ import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class UserAdminServiceImpl implements UserAdminService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {
@@ -173,15 +174,16 @@ public class UserAdminServiceImpl implements UserAdminService {
             int result = userMapper.updateUserStatus(id, userStatus);
             boolean success = result > 0;
             if (success) {
-                // 发送通知
-                notificationService.sendNotificationWithTemplate(
-                        id,
-                        NotificationType.USER_STATUS_CHANGE,
-                        null,
-                        0L, // 系统发送
-                        userStatus.getDesc(),
-                        reason
-                );
+                // 发布通知事件（异步处理，不阻塞主业务流程）
+                NotificationEvent event = NotificationEvent.builder()
+                        .source(this)
+                        .userId(id)
+                        .type(NotificationType.USER_STATUS_CHANGE)
+                        .title("账号状态变更通知")
+                        .content("您的账号状态已变更为：" + userStatus.getDesc() + "，原因：" + reason)
+                        .senderId(0L)
+                        .build();
+                eventPublisher.publishEvent(event);
                 log.info("管理员更新用户状态并发送通知成功, 用户ID: {}, 新状态: {}", id, userStatus.getDesc());
             } else {
                 log.warn("更新用户状态失败, 未发送通知, 用户ID: {}", id);

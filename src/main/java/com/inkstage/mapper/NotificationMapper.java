@@ -1,12 +1,14 @@
 package com.inkstage.mapper;
 
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.NotificationCategory;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.ReadStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 通知Mapper接口
@@ -123,4 +125,56 @@ public interface NotificationMapper {
      * @return 通知总数
      */
     int countByUserIdAndType(@Param("userId") Long userId, @Param("type") NotificationType type);
-}
+
+    // ==================== 分类相关方法 ====================
+    
+    /**
+     * 根据用户ID和通知分类查询通知列表
+     * @param userId 用户ID
+     * @param category 通知分类
+     * @return 通知列表
+     */
+    List<Notification> selectByUserIdAndCategory(@Param("userId") Long userId, @Param("category") NotificationCategory category);
+    
+    /**
+     * 根据用户ID和通知分类分页查询通知列表
+     * @param userId 用户ID
+     * @param category 通知分类
+     * @param offset 偏移量
+     * @param limit 限制数量
+     * @return 通知列表
+     */
+    List<Notification> selectByUserIdAndCategoryWithPage(@Param("userId") Long userId, @Param("category") NotificationCategory category, @Param("offset") Integer offset, @Param("limit") Integer limit);
+    
+    /**
+     * 根据用户ID和通知分类更新所有通知为已读
+     * @param userId 用户ID
+     * @param category 通知分类
+     * @param readStatus 阅读状态
+     * @return 影响行数
+     */
+    int updateByUserIdAndCategoryReadStatus(@Param("userId") Long userId, @Param("category") NotificationCategory category, @Param("readStatus") ReadStatus readStatus);
+    
+    /**
+     * 统计用户指定分类未读通知数量
+     * @param userId 用户ID
+     * @param category 通知分类
+     * @return 未读通知数量
+     */
+    int countUnreadByUserIdAndCategory(@Param("userId") Long userId, @Param("category") NotificationCategory category);
+    
+    /**
+     * 统计用户各分类未读通知数量
+     * @param userId 用户ID
+     * @return 各分类未读通知数量
+     */
+    List<Map<String, Object>> countUnreadByUserIdGroupByCategory(@Param("userId") Long userId);
+    
+    /**
+     * 统计用户指定分类通知总数
+     * @param userId 用户ID
+     * @param category 通知分类
+     * @return 通知总数
+     */
+    int countByUserIdAndCategory(@Param("userId") Long userId, @Param("category") NotificationCategory category);
+} 

@@ -25,7 +25,7 @@ public class RedisCacheManager {
      */
     public void clearArticleDetailCache(Long articleId) {
         try {
-            String articleDetailKey = RedisKeyConstants.buildCacheKey("article:detail", articleId.toString());
+            String articleDetailKey = RedisKeyConstants.buildCacheKey("article:detail:", articleId.toString());
             redisUtil.delete(articleDetailKey);
             log.info("清除文章详情缓存, 文章ID: {}", articleId);
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class RedisCacheManager {
      */
     public void clearUserArticleCache(Long userId) {
         if (userId != null) {
-            String userArticleKey = RedisKeyConstants.buildCacheKey("article:user", userId + ":*");
+            String userArticleKey = RedisKeyConstants.buildCacheKey("article:user:", userId + ":*");
             redisUtil.deletePattern(userArticleKey);
             log.info("清除用户文章列表缓存, 用户ID: {}", userId);
         }

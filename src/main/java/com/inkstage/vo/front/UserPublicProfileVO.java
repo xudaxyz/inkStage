@@ -87,4 +87,9 @@ public class UserPublicProfileVO {
      */
     private UserStatus status;
 
+    /**
+     * 用户角色ID
+     */
+    private Integer roleId;
+
 }

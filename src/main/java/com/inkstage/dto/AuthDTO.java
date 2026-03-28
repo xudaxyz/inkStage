@@ -24,7 +24,7 @@ public class AuthDTO {
     private String account;
     
     /**
-     * 认证类型：password(密码认证)/ code(验证码认证)
+     * 认证类型
      */
     private AuthType authType;
     

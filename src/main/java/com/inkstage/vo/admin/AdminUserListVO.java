@@ -43,6 +43,11 @@ public class AdminUserListVO {
     private UserRoleEnum userRole;
 
     /**
+     * 用户角色ID
+     */
+    private Integer roleId;
+
+    /**
      * 用户状态
      */
     private UserStatus userStatus;

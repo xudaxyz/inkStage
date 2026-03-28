@@ -31,6 +31,7 @@
         <result column="privacy" property="privacy" javaType="com.inkstage.enums.VisibleStatus"/>
         <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
         <result column="username_last_modified_time" property="usernameLastModifiedTime"/>
+        <result column="role_id" property="roleId"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
@@ -94,86 +95,83 @@
     <sql id="columns">
         id, username, password, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
-        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, create_time, update_time, deleted
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, role_id, create_time, update_time, deleted
     </sql>
 
     <!-- 管理员用户详情列 -->
     <sql id="adminUserDetailColumns">
         id, username, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
-        last_login_time, last_login_ip, register_ip, register_time, privacy, status, create_time, update_time
-    </sql>
-
-    <!-- 热门用户列 -->
-    <sql id="hotUserColumns">
-        id, nickname, avatar, signature, follower_count, article_count
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, role_id, create_time, update_time
     </sql>
 
     <!-- 根据主键查询用户 -->
     <select id="findById" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
-        FROM user WHERE id = #{id} AND deleted = 0
+        FROM user
+        WHERE id = #{id} AND deleted = 0
     </select>
 
     <!-- 根据用户名查询用户 -->
     <select id="findByUsername" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
-        FROM user WHERE username = #{username} AND deleted = 0
+        FROM user
+        WHERE username = #{username} AND deleted = 0
     </select>
 
     <!-- 根据邮箱查询用户 -->
     <select id="findByEmail" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
-        FROM user WHERE email = #{email} AND deleted = 0
+        FROM user
+        WHERE email = #{email} AND deleted = 0
     </select>
 
     <!-- 根据手机号查询用户 -->
     <select id="findByPhone" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
-        FROM user WHERE phone = #{phone} AND deleted = 0
+        FROM user
+        WHERE phone = #{phone} AND deleted = 0
     </select>
 
     <!-- 分页查询用户 -->
     <select id="findByPage" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
-        FROM user u
-        WHERE u.deleted = 0
+        FROM user
+        WHERE deleted = 0
+        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
         <if test="keyword != null and keyword != ''">
-            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
+            AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
         </if>
         <if test="role != null">
-            AND u.id IN (
-                SELECT ur.user_id 
-                FROM user_role ur 
-                WHERE ur.role_id = #{role} AND ur.status = 1
-            )
+            AND role_id = #{role}
         </if>
         <if test="status != null">
-            AND u.status = #{status}
+            AND status = #{status}
         </if>
         <if test="startDate != null">
-            AND u.create_time <![CDATA[ >= ]]>  #{startDate}
+            AND create_time <![CDATA[ >= ]]>  #{startDate}
         </if>
         <if test="endDate != null">
-            AND u.create_time <![CDATA[ <= ]]> #{endDate}
+            AND create_time <![CDATA[ <= ]]> #{endDate}
         </if>
         ORDER BY
-        u.id DESC
+        id DESC
         LIMIT #{offset}, #{pageSize}
     </select>
 
     <!-- 查询热门用户 -->
     <select id="findHotUsers" resultMap="HotUserResultMap">
         SELECT
-        <include refid="hotUserColumns"/>
+        id, nickname, avatar, signature, follower_count, article_count
         FROM user
         WHERE deleted = 0
         AND status = 1 <!-- 正常状态 -->
+        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
         ORDER BY
             follower_count DESC,
             article_count DESC,
@@ -230,6 +228,7 @@
             #{id}
         </foreach>
         AND deleted = 0
+        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
     </select>
 
     <!-- 根据角色查询用户 -->
@@ -295,14 +294,14 @@
         gender, birth_date, location, website, follow_count,
         follower_count, article_count, comment_count, like_count,
         last_login_time, last_login_ip, register_ip, register_time,
-        privacy, status, username_last_modified_time, create_time, update_time, deleted
+        privacy, status, username_last_modified_time, role_id, create_time, update_time, deleted
         ) VALUES (
         #{username}, #{password}, #{nickname}, #{email}, #{emailVerified},
         #{phone}, #{phoneVerified}, #{avatar}, #{coverImage}, #{signature},
         #{gender}, #{birthDate}, #{location}, #{website}, #{followCount},
         #{followerCount}, #{articleCount}, #{commentCount}, #{likeCount},
         #{lastLoginTime}, #{lastLoginIp}, #{registerIp}, #{registerTime},
-        #{privacy}, #{status}, #{usernameLastModifiedTime}, #{createTime}, #{updateTime}, #{deleted}
+        #{privacy}, #{status}, #{usernameLastModifiedTime}, #{roleId}, #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
 
@@ -336,6 +335,7 @@
             <if test="privacy != null">privacy = #{privacy},</if>
             <if test="status != null">status = #{status},</if>
             <if test="usernameLastModifiedTime != null">username_last_modified_time = #{usernameLastModifiedTime},</if>
+            <if test="roleId != null">role_id = #{roleId},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
         </set>
@@ -379,6 +379,7 @@
             <if test="userDetail.location != null">location = #{userDetail.location},</if>
             <if test="userDetail.website != null">website = #{userDetail.website},</if>
             <if test="userDetail.privacy != null">privacy = #{userDetail.privacy},</if>
+            <if test="userDetail.roleId != null">role_id = #{userDetail.roleId},</if>
             update_time = now()
         </set>
         WHERE id = #{userDetail.id}
@@ -404,26 +405,23 @@
     <select id="countByCondition" resultType="java.lang.Long">
         SELECT
         COUNT(*)
-        FROM user u
-        WHERE u.deleted = 0
+        FROM user
+        WHERE deleted = 0
+        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
         <if test="keyword != null and keyword != ''">
-            AND (u.username LIKE CONCAT('%', #{keyword}, '%') OR u.nickname LIKE CONCAT('%', #{keyword}, '%') OR u.email LIKE CONCAT('%', #{keyword}, '%') OR u.phone LIKE CONCAT('%', #{keyword}, '%'))
+            AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
         </if>
         <if test="role != null">
-            AND u.id IN (
-                SELECT ur.user_id 
-                FROM user_role ur 
-                WHERE ur.role_id = #{role} AND ur.status = 1
-            )
+            AND role_id = #{role}
         </if>
         <if test="status != null">
-            AND u.status = #{status}
+            AND status = #{status}
         </if>
         <if test="startDate != null">
-            AND u.create_time <![CDATA[ >= ]]> #{startDate}
+            AND create_time <![CDATA[ >= ]]> #{startDate}
         </if>
         <if test="endDate != null">
-            AND u.create_time <![CDATA[ <= ]]> #{endDate}
+            AND create_time <![CDATA[ <= ]]> #{endDate}
         </if>
     </select>
 
@@ -471,6 +469,7 @@
         id
         FROM user
         WHERE deleted = 0
+        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
     </select>
 
 </mapper>

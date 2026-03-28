@@ -190,9 +190,9 @@ public class UserServiceImpl implements UserService {
         userInfo.setLikeCount(userProfile.getLikeCount());
         userInfo.setFollowCount(userProfile.getFollowCount());
         userInfo.setFollowerCount(userProfile.getFollowerCount());
-        // 获取用户角色
-        List<UserRole> userRoles = userRoleService.getUserRoles(id);
-        userInfo.setRole(UserRoleEnum.fromCode(userRoles.getFirst().getRoleId()));
+        // 设置用户角色和角色ID
+        userInfo.setRoleId(userProfile.getRoleId());
+        userInfo.setRole(UserRoleEnum.fromCode(userProfile.getRoleId() != null ? userProfile.getRoleId() : 2));
         return userInfo;
     }
 
@@ -225,6 +225,7 @@ public class UserServiceImpl implements UserService {
         publicProfileVO.setFollowCount(user.getFollowCount());
         publicProfileVO.setFollowerCount(user.getFollowerCount());
         publicProfileVO.setStatus(user.getStatus());
+        publicProfileVO.setRoleId(user.getRoleId());
         
         return publicProfileVO;
     }
