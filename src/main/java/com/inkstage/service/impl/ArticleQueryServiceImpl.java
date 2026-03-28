@@ -11,11 +11,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
-import com.inkstage.service.ArticleCollectionService;
-import com.inkstage.service.ArticleLikeService;
-import com.inkstage.service.ArticleQueryService;
-import com.inkstage.service.ArticleTagService;
-import com.inkstage.service.FileService;
+import com.inkstage.service.*;
 import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleVO;
@@ -45,6 +41,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
     private final RedisUtil redisUtil;
     private final ArticleLikeService articleLikeService;
     private final ArticleCollectionService articleCollectionService;
+    private final CountService countService;
 
     /**
      * 获取文章列表
@@ -129,14 +126,24 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
             boolean isLiked = articleLikeService.isArticleLiked(id);
             articleDetailVO.setIsLiked(isLiked);
 
+
             // 检查收藏状态
             boolean isCollected = articleCollectionService.isArticleCollected(id);
             articleDetailVO.setIsCollected(isCollected);
+
         } else {
             // 用户未登录, 设置为false
             articleDetailVO.setIsLiked(false);
             articleDetailVO.setIsCollected(false);
         }
+
+        // 更新点赞数
+        Long likeCount = countService.getArticleLikeCount(id);
+        articleDetailVO.setLikeCount(Math.toIntExact(likeCount));
+
+        // 更新收藏数
+        Long collectionCount = countService.getArticleCollectionCount(id);
+        articleDetailVO.setCollectionCount(Math.toIntExact(collectionCount));
 
         return articleDetailVO;
     }

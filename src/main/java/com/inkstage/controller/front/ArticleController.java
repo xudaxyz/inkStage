@@ -42,16 +42,16 @@ public class ArticleController {
     public Result<Long> createArticle(@Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("创建文章DTO: {}", articleCreateDTO);
 
-        if (articleCreateDTO.getTags() != null && !(articleCreateDTO.getTags().size() > 10)) {
+        if (articleCreateDTO.getTags() != null && articleCreateDTO.getTags().size() > 10) {
             log.warn("文章标签数量超过10个");
             throw new BusinessException(ResponseMessage.ARTICLE_TAGS_MAX_TEN);
         }
 
         Long articleId = articleService.createArticle(articleCreateDTO);
         if (articleId != null) {
-            return Result.success(articleId, ResponseMessage.SUCCESS);
+            return Result.success(articleId, ResponseMessage.ARTICLE_CREATE_SUCCESS);
         } else {
-            return Result.error(ResponseMessage.ARTICLE_DELETE_FAILED);
+            return Result.error(ResponseMessage.ARTICLE_CREATE_FAILED);
         }
     }
 

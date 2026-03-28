@@ -398,17 +398,21 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
             throw new BusinessException(templateType + "不能为空");
         }
 
+        int openCount;
+        int closeCount;
         // 简单验证变量格式，检查是否有未闭合的变量标签
-        int openCount = countOccurrences(content, "{{");
-        int closeCount = countOccurrences(content, "}}");
-        if (openCount != closeCount) {
-            throw new BusinessException(templateType + "变量标签未闭合");
-        }
-
-        openCount = countOccurrences(content, "${");
-        closeCount = countOccurrences(content, "}");
-        if (openCount != closeCount) {
-            throw new BusinessException(templateType + "变量标签未闭合");
+        if (content.startsWith("{{")) {
+            openCount = countOccurrences(content, "{{");
+            closeCount = countOccurrences(content, "}}");
+            if (openCount != closeCount) {
+                throw new BusinessException(templateType + "变量标签未闭合");
+            }
+        } else if (content.startsWith("${")) {
+            openCount = countOccurrences(content, "${");
+            closeCount = countOccurrences(content, "}");
+            if (openCount != closeCount) {
+                throw new BusinessException(templateType + "变量标签未闭合");
+            }
         }
     }
 

@@ -96,12 +96,10 @@ public class CountServiceImpl implements CountService {
      */
     private void updateCount(Long articleId, int count, CountType countType) {
         log.info("更新文章: {} - {} 计数 [{}]", articleId, countType, count);
-        String key = RedisKeyConstants.buildHotDataKey("article", articleId + ":" + countType.getType());
-        if (count > 0) {
-            redisUtil.increment(key, count);
-        } else {
-            redisUtil.decrement(key, count);
-        }
+        String key = RedisKeyConstants.buildCacheKey("article:", articleId + ":" + countType.getType());
+        // 由于count有正负之分, 此直接使用increment
+        redisUtil.increment(key, count);
+
         // 设置过期时间为1小时
         redisUtil.expire(key, 1, TimeUnit.HOURS);
 
@@ -114,7 +112,7 @@ public class CountServiceImpl implements CountService {
      */
     private Long getCount(Long articleId, CountType countType) {
         log.info("获取文章计数, 文章ID: {}, 计数类型: {}", articleId, countType);
-        String key = RedisKeyConstants.buildHotDataKey("article", articleId + ":" + countType.getType());
+        String key = RedisKeyConstants.buildCacheKey("article:", articleId + ":" + countType.getType());
         Long count = redisUtil.get(key, Long.class);
         if (count == null) {
             // 从数据库获取初始值
