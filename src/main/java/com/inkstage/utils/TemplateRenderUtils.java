@@ -1,13 +1,10 @@
 package com.inkstage.utils;
 
 import lombok.extern.slf4j.Slf4j;
-import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -17,6 +14,8 @@ import java.util.regex.Pattern;
  */
 @Slf4j
 public class TemplateRenderUtils {
+
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     // 支持两种变量格式：{{variable}} 和 ${variable}
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{(\\w+)}}");
@@ -119,38 +118,55 @@ public class TemplateRenderUtils {
      */
     public static Map<String, Object> buildVariables(String variablesJson, Object... params) {
         Map<String, Object> variables = new HashMap<>();
-
-        // 从variablesJson解析变量定义
-        List<String> varNames = parseVariableNames(variablesJson);
-
-        // 只使用模板中定义的变量，不使用默认变量名
-        for (int i = 0; i < params.length && i < varNames.size(); i++) {
-            if (params[i] != null) {
-                variables.put(varNames.get(i), params[i]);
-            }
+        if (variablesJson == null || variablesJson.isEmpty()) {
+            return variables;
         }
 
+        try {
+            JsonNode rootNode = objectMapper.readTree(variablesJson);
+            if (rootNode.isArray()) {
+                // 处理数组格式：["var1", "var2"] 或 [{"name": "var1", "value": "default"}]
+                processArrayNode(rootNode, variables, params);
+            }
+        } catch (Exception e) {
+            log.warn("构建变量映射失败: {}", e.getMessage());
+        }
         return variables;
     }
 
     /**
-     * 从变量定义JSON中解析变量名
+     * 处理数组格式/对象格式的变量
+     *
+     * @param arrayNode 数组格式的变量定义
+     * @param variables 变量
+     * @param params    参数数组
      */
-    private static List<String> parseVariableNames(String variablesJson) {
-        List<String> varNames = new ArrayList<>();
-        if (variablesJson == null || variablesJson.isEmpty()) {
-            return varNames;
-        }
+    private static void processArrayNode(JsonNode arrayNode, Map<String, Object> variables, Object[] params) {
+        Iterator<JsonNode> elements = arrayNode.iterator();
+        int paramIndex = 0;
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        // 尝试解析为数组
-        try {
-            return objectMapper.readValue(variablesJson, new TypeReference<>() {});
-        } catch (Exception e) {
-            log.warn("解析变量定义失败: {}", e.getMessage());
+        while (elements.hasNext()) {
+            JsonNode element = elements.next();
+            if (element.isString()) {
+                // 字符串数组格式: ["var1", "var2"]
+                String varName = element.asString();
+                if (paramIndex < params.length && params[paramIndex] != null) {
+                    variables.put(varName, params[paramIndex]);
+                    paramIndex++;
+                }
+            } else if (element.isObject()) {
+                // 对象数组格式: [{"name": "var1", "value": "default"}]
+                String varName = element.path("name").asString();
+                if (!varName.isEmpty()) {
+                    // 优先使用传入的参数，否则使用默认值
+                    Object value = (paramIndex < params.length && params[paramIndex] != null)
+                            ? params[paramIndex]
+                            : element.path("value").asString();
+                    variables.put(varName, value);
+                    paramIndex++;
+                }
+            }
         }
-
-        return varNames;
     }
 
     /**

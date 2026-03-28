@@ -3,14 +3,13 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.entity.model.Notification;
-import com.inkstage.enums.NotificationCategory;
-import com.inkstage.enums.NotificationType;
-import com.inkstage.enums.ReadStatus;
+import com.inkstage.enums.*;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.NotificationCacheService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.service.NotificationSettingService;
 import com.inkstage.service.NotificationTemplateService;
+import com.inkstage.service.WebSocketService;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +32,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationCacheService notificationCacheService;
     private final NotificationTemplateService notificationTemplateService;
     private final NotificationSettingService notificationSettingService;
+    private final WebSocketService webSocketService;
 
     @Override
     public List<Notification> getNotificationList(Long userId, NotificationType type) {
@@ -47,10 +47,11 @@ public class NotificationServiceImpl implements NotificationService {
     public boolean markAsRead(Long notificationId) {
         int result = notificationMapper.updateReadStatus(notificationId, ReadStatus.READ);
         if (result > 0) {
-            // 减少未读通知数量
             Notification notification = notificationMapper.selectById(notificationId);
             if (notification != null) {
                 notificationCacheService.decrementUnreadCount(notification.getUserId());
+                int unreadCount = notificationCacheService.getUnreadCount(notification.getUserId());
+                webSocketService.sendUnreadCountToUser(notification.getUserId(), unreadCount);
             }
         }
         return result > 0;
@@ -60,20 +61,20 @@ public class NotificationServiceImpl implements NotificationService {
     public boolean markAllAsRead(Long userId) {
         int result = notificationMapper.updateAllReadStatus(userId, ReadStatus.READ);
         if (result > 0) {
-            // 重置未读通知数量
             notificationCacheService.resetUnreadCount(userId);
+            webSocketService.sendUnreadCountToUser(userId, 0);
         }
         return result > 0;
     }
 
     @Override
     public boolean deleteNotification(Long notificationId) {
-        // 先获取通知信息，用于后续更新缓存
         Notification notification = notificationMapper.selectById(notificationId);
         int result = notificationMapper.deleteById(notificationId);
         if (result > 0 && notification != null && ReadStatus.UNREAD.equals(notification.getReadStatus())) {
-            // 如果删除的是未读通知，减少未读通知数量
             notificationCacheService.decrementUnreadCount(notification.getUserId());
+            int unreadCount = notificationCacheService.getUnreadCount(notification.getUserId());
+            webSocketService.sendUnreadCountToUser(notification.getUserId(), unreadCount);
         }
         return result > 0;
     }
@@ -81,62 +82,129 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public boolean sendNotification(Notification notification) {
         // 构建通知消息DTO
-        NotificationMessageDTO message = new NotificationMessageDTO();
-        message.setUserId(notification.getUserId());
-        message.setContent(notification.getContent());
-        message.setType(notification.getType());
-        message.setRelatedId(notification.getRelatedId());
-        message.setRelatedType(notification.getRelatedType());
-        message.setSenderId(notification.getSenderId());
-        message.setActionUrl(notification.getActionUrl());
-        message.setExtraData(notification.getExtraData());
-        message.setTitle(notification.getTitle());
+        NotificationMessageDTO message = buildMessageDTO(notification);
 
         // 发送到RabbitMQ
         notificationProducer.sendNotification(message);
         return true;
     }
 
-    @Override
-    public boolean sendNotificationWithTemplate(Long userId, NotificationType type, Long relatedId, Long senderId, Object... params) {
-        // 检查用户是否开启了该类型的通知
-        String settingKey = switch (type) {
-            case ARTICLE_PUBLISH -> "articlePublish";
+    /**
+     * 获取通知类型对应的设置键
+     *
+     * @param type 通知类型
+     * @return 设置键
+     */
+    private String getSettingKey(NotificationType type) {
+        return switch (type) {
             case ARTICLE_LIKE -> "articleLike";
+            case ARTICLE_PUBLISH -> "articlePublish";
             case ARTICLE_COLLECTION -> "articleCollection";
-            case ARTICLE_COMMENT -> "articleComment";
             case COMMENT_REPLY -> "commentReply";
+            case ARTICLE_COMMENT -> "articleComment";
             case COMMENT_LIKE -> "commentLike";
             case FOLLOW -> "follow";
-            case MESSAGE -> "message";
             case REPORT -> "report";
+            case MESSAGE -> "message";
             case FEEDBACK -> "feedback";
             case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REPROCESS, ARTICLE_TOP, ARTICLE_RECOMMEND, ARTICLE_DELETE,
                  ARTICLE_ONLINE, ARTICLE_OFFLINE, TAG_DELETE, ARTICLE_REVIEW_REJECT, COMMENT_REVIEW_REJECT,
                  COMMENT_TOP -> "system";
         };
+    }
 
-        if (!notificationSettingService.isNotificationEnabled(userId, settingKey)) {
+    /**
+     * 检查用户是否开启了该类型的通知
+     *
+     * @param userId 用户ID
+     * @param type   通知类型
+     * @return 是否开启
+     */
+    private boolean isNotificationDisabled(Long userId, NotificationType type) {
+        String settingKey = getSettingKey(type);
+        boolean enabled = notificationSettingService.isNotificationEnabled(userId, settingKey);
+        if (!enabled) {
             log.info("用户 ID {} 已关闭 {} 类型的通知", userId, type.getDesc());
-            return false;
         }
+        return !enabled;
+    }
 
-        // 生成通知标题
+    /**
+     * 使用模板生成通知内容
+     *
+     * @param type      通知类型
+     * @param relatedId 关联ID
+     * @param params    模板参数
+     * @return 通知内容对象
+     */
+    private NotificationContent generateContentWithTemplate(NotificationType type, Long relatedId, Object... params) {
         String title = notificationTemplateService.generateTitle(type, params);
-        // 生成通知内容
         String content = notificationTemplateService.generateContent(type, params);
-        // 生成操作链接
         String actionUrl = notificationTemplateService.generateActionUrl(type, relatedId);
+        return new NotificationContent(title, content, actionUrl);
+    }
 
-        // 构建通知对象
+    /**
+     * 构建通知对象
+     *
+     * @param userId    用户ID
+     * @param type      通知类型
+     * @param relatedId 关联ID
+     * @param senderId  发送者ID
+     * @param content   通知内容
+     * @return 通知对象
+     */
+    private Notification buildNotification(Long userId, NotificationType type, Long relatedId,
+                                          Long senderId, NotificationContent content) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setType(type);
-        notification.setTitle(title);
-        notification.setContent(content);
+        notification.setTitle(content.title());
+        notification.setContent(content.content());
         notification.setRelatedId(relatedId);
+        notification.setPriority(Priority.NORMAL);
         notification.setSenderId(senderId);
-        notification.setActionUrl(actionUrl);
+        notification.setActionUrl(content.actionUrl());
+        return notification;
+    }
+
+    /**
+     * 构建通知消息DTO
+     *
+     * @param notification 通知对象
+     * @return 通知消息DTO
+     */
+    private NotificationMessageDTO buildMessageDTO(Notification notification) {
+        NotificationMessageDTO message = new NotificationMessageDTO();
+        message.setUserId(notification.getUserId());
+        message.setContent(notification.getContent());
+        message.setType(notification.getType());
+        message.setRelatedId(notification.getRelatedId());
+        message.setSenderId(notification.getSenderId());
+        message.setRelatedType(notification.getRelatedType());
+        message.setActionUrl(notification.getActionUrl());
+        message.setExtraData(notification.getExtraData());
+        message.setTitle(notification.getTitle());
+        return message;
+    }
+
+    /**
+     * 通知内容记录类
+     */
+    private record NotificationContent(String title, String content, String actionUrl) {}
+
+    @Override
+    public boolean sendNotificationWithTemplate(Long userId, NotificationType type, Long relatedId, Long senderId, Object... params) {
+        // 检查用户是否开启了该类型的通知
+        if (isNotificationDisabled(userId, type)) {
+            return false;
+        }
+
+        // 使用模板生成通知内容
+        NotificationContent content = generateContentWithTemplate(type, relatedId, params);
+
+        // 构建通知对象
+        Notification notification = buildNotification(userId, type, relatedId, senderId, content);
 
         // 发送通知
         return sendNotification(notification);
@@ -148,40 +216,12 @@ public class NotificationServiceImpl implements NotificationService {
             List<NotificationMessageDTO> messages = new ArrayList<>();
             for (Notification notification : notifications) {
                 // 检查用户是否开启了该类型的通知
-                String settingKey = switch (notification.getType()) {
-                    case ARTICLE_PUBLISH -> "articlePublish";
-                    case ARTICLE_LIKE -> "articleLike";
-                    case ARTICLE_COLLECTION -> "articleCollection";
-                    case ARTICLE_COMMENT -> "articleComment";
-                    case COMMENT_REPLY -> "commentReply";
-                    case COMMENT_LIKE -> "commentLike";
-                    case FOLLOW -> "follow";
-                    case MESSAGE -> "message";
-                    case REPORT -> "report";
-                    case FEEDBACK -> "feedback";
-                    case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REJECT, ARTICLE_REVIEW_REPROCESS, ARTICLE_OFFLINE,
-                         ARTICLE_ONLINE, ARTICLE_TOP, ARTICLE_RECOMMEND,
-                         ARTICLE_DELETE, TAG_DELETE, COMMENT_REVIEW_REJECT, COMMENT_TOP -> "system";
-
-                };
-
-                if (!notificationSettingService.isNotificationEnabled(notification.getUserId(), settingKey)) {
-                    log.info("用户 {} 已关闭 {} 类型的通知", notification.getUserId(), notification.getType().getDesc());
+                if (isNotificationDisabled(notification.getUserId(), notification.getType())) {
                     continue;
                 }
 
                 // 构建通知消息DTO
-                NotificationMessageDTO message = new NotificationMessageDTO();
-                message.setUserId(notification.getUserId());
-                message.setType(notification.getType());
-                message.setContent(notification.getContent());
-                message.setRelatedId(notification.getRelatedId());
-                message.setSenderId(notification.getSenderId());
-                message.setRelatedType(notification.getRelatedType());
-                message.setActionUrl(notification.getActionUrl());
-                message.setExtraData(notification.getExtraData());
-                message.setTitle(notification.getTitle());
-
+                NotificationMessageDTO message = buildMessageDTO(notification);
                 messages.add(message);
             }
 
@@ -210,44 +250,15 @@ public class NotificationServiceImpl implements NotificationService {
                 Object[] params = (Object[]) data.getOrDefault("params", new Object[0]);
 
                 // 检查用户是否开启了该类型的通知
-                String settingKey = switch (type) {
-                    case ARTICLE_PUBLISH -> "articlePublish";
-                    case ARTICLE_LIKE -> "articleLike";
-                    case ARTICLE_COLLECTION -> "articleCollection";
-                    case ARTICLE_COMMENT -> "articleComment";
-                    case COMMENT_REPLY -> "commentReply";
-                    case COMMENT_LIKE -> "commentLike";
-                    case FOLLOW -> "follow";
-                    case MESSAGE -> "message";
-                    case REPORT -> "report";
-                    case FEEDBACK -> "feedback";
-                    case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REJECT, ARTICLE_REVIEW_REPROCESS, ARTICLE_OFFLINE,
-                         ARTICLE_ONLINE, ARTICLE_TOP, ARTICLE_RECOMMEND,
-                         ARTICLE_DELETE, TAG_DELETE, COMMENT_REVIEW_REJECT, COMMENT_TOP -> "system";
-
-                };
-
-                if (!notificationSettingService.isNotificationEnabled(userId, settingKey)) {
-                    log.info("用户 {} 已关闭 {} 类型的通知", userId, type.getDesc());
+                if (isNotificationDisabled(userId, type)) {
                     continue;
                 }
 
-                // 生成通知标题
-                String title = notificationTemplateService.generateTitle(type, params);
-                // 生成通知内容
-                String content = notificationTemplateService.generateContent(type, params);
-                // 生成操作链接
-                String actionUrl = notificationTemplateService.generateActionUrl(type, relatedId);
+                // 使用模板生成通知内容
+                NotificationContent content = generateContentWithTemplate(type, relatedId, params);
 
                 // 构建通知对象
-                Notification notification = new Notification();
-                notification.setUserId(userId);
-                notification.setType(type);
-                notification.setTitle(title);
-                notification.setContent(content);
-                notification.setRelatedId(relatedId);
-                notification.setSenderId(senderId);
-                notification.setActionUrl(actionUrl);
+                Notification notification = buildNotification(userId, type, relatedId, senderId, content);
 
                 notifications.add(notification);
             }
@@ -262,7 +273,16 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public int getUnreadCount(Long userId) {
-        return notificationCacheService.getUnreadCount(userId);
+        // 尝试从缓存获取
+        Integer cachedCount = notificationCacheService.getCachedUnreadCount(userId);
+        if (cachedCount != null) {
+            return cachedCount;
+        }
+        // 从数据库查询（处理缓存穿透）
+        int unreadCount = notificationMapper.countUnreadByUserId(userId);
+        // 更新缓存
+        notificationCacheService.cacheUnreadCount(userId, unreadCount);
+        return unreadCount;
     }
 
     @Override

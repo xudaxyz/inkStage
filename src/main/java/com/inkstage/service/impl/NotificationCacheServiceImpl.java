@@ -12,9 +12,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.inkstage.constant.RedisKeyConstants.NOTIFICATION_UNREAD_COUNT;
-import static com.inkstage.constant.RedisKeyConstants.NOTIFICATION_UNREAD_COUNT_BY_CATEGORY;
-import static com.inkstage.constant.RedisKeyConstants.NOTIFICATION_RECENT_LIST;
+import static com.inkstage.constant.RedisKeyConstants.*;
 
 /**
  * 通知缓存服务实现类
@@ -116,12 +114,7 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
     }
 
     @Override
-    public int getUnreadCount(Long userId) {
-        Integer cachedCount = getCachedUnreadCount(userId);
-        if (cachedCount != null) {
-            return cachedCount;
-        }
-        // 缓存不存在，返回0
-        return 0;
+    public Integer getUnreadCount(Long userId) {
+        return getCachedUnreadCount(userId);
     }
 }

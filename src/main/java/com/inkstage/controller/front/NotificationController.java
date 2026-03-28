@@ -31,11 +31,10 @@ public class NotificationController {
      */
     @GetMapping("/list")
     public Result<PageResult<Notification>> getNotificationList(
-            @RequestParam(value = "type", required = false) Integer typeCode,
+            @RequestParam(value = "notificationType", required = false) NotificationType notificationType,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        NotificationType type = typeCode != null ? NotificationType.fromCode(typeCode) : null;
-        PageResult<Notification> pageResult = notificationService.getNotificationListWithPage(type, pageNum, pageSize);
+        PageResult<Notification> pageResult = notificationService.getNotificationListWithPage(notificationType, pageNum, pageSize);
         log.info("通知列表: {}", pageResult);
         return Result.success(pageResult);
     }
@@ -45,11 +44,10 @@ public class NotificationController {
      */
     @GetMapping("/list/page")
     public Result<PageResult<Notification>> getNotificationListWithPage(
-            @RequestParam(value = "type", required = false) Integer typeCode,
+            @RequestParam(value = "notificationType", required = false) NotificationType notificationType,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
             @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize) {
-        NotificationType type = typeCode != null ? NotificationType.fromCode(typeCode) : null;
-        PageResult<Notification> pageResult = notificationService.getNotificationListWithPage(type, pageNum, pageSize);
+        PageResult<Notification> pageResult = notificationService.getNotificationListWithPage(notificationType, pageNum, pageSize);
         return Result.success(pageResult);
     }
 

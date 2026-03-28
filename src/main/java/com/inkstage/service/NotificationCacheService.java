@@ -72,5 +72,5 @@ public interface NotificationCacheService {
     /**
      * 获取用户未读通知数量
      */
-    int getUnreadCount(Long userId);
+    Integer getUnreadCount(Long userId);
 }
