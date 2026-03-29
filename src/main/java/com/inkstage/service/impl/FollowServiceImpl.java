@@ -2,6 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.DeleteStatus;
 import com.inkstage.mapper.FollowMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FollowService;
@@ -10,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,8 +35,8 @@ public class FollowServiceImpl implements FollowService {
     @Transactional(rollbackFor = Exception.class)
     public boolean followUser(Long followerId, Long followingId) {
         // 检查是否已经关注
-        Follow existingFollow = followMapper.findByFollowerAndFollowing(followerId, followingId);
-        if (existingFollow != null) {
+        int followed = followMapper.checkFollowStatus(followerId, followingId);
+        if (followed != 0) {
             log.info("用户 {} 已经关注了用户 {}", followerId, followingId);
             return true;
         }
@@ -43,6 +45,8 @@ public class FollowServiceImpl implements FollowService {
         Follow follow = new Follow();
         follow.setFollowerId(followerId);
         follow.setFollowingId(followingId);
+        follow.setCreateTime(LocalDateTime.now());
+        follow.setDeleted(DeleteStatus.NOT_DELETED);
 
         int result = followMapper.insert(follow);
         if (result > 0) {
@@ -111,8 +115,8 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public boolean checkFollowStatus(Long followerId, Long followingId) {
-        Follow follow = followMapper.findByFollowerAndFollowing(followerId, followingId);
-        return follow != null;
+        int result = followMapper.checkFollowStatus(followerId, followingId);
+        return result > 0;
     }
 
     /**

@@ -20,7 +20,7 @@ public interface FollowMapper {
      * @param followingId 被关注者ID
      * @return 关注关系
      */
-    Follow findByFollowerAndFollowing(@Param("followerId") Long followerId, @Param("followingId") Long followingId);
+    int checkFollowStatus(@Param("followerId") Long followerId, @Param("followingId") Long followingId);
 
     /**
      * 查询用户的关注列表

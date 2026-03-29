@@ -379,10 +379,9 @@ CREATE TABLE `follow`
     `follower_id`  BIGINT   NOT NULL COMMENT '粉丝ID',
     `following_id` BIGINT   NOT NULL COMMENT '关注对象ID',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '关注时间',
-    `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME DEFAULT NULL COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
-    UNIQUE KEY `uk_follower_following` (`follower_id`, `following_id`, `deleted`),
     KEY            `idx_follower_id` (`follower_id`),
     KEY            `idx_following_id` (`following_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='关注表';
