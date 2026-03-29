@@ -11,6 +11,9 @@ public class RedisKeyConstants {
     // 用户刷新令牌前缀
     public static final String USER_REFRESH_TOKEN_PREFIX = "user_refresh_tokens:";
     
+    // 刷新令牌黑名单前缀
+    public static final String REFRESH_TOKEN_BLACKLIST_PREFIX = "refresh_token_blacklist:";
+    
     // 用户登录尝试次数前缀
     public static final String LOGIN_ATTEMPT_PREFIX = "login_attempt:";
     

@@ -169,7 +169,13 @@ public enum ResponseMessage {
     LOGOUT_SUCCESS("登出成功"),
     LOGOUT_FAILED("登出失败"),
     ARTICLE_DELETE_ERROR("删除文章失败"),
-    ARTICLE_CREATE_FAILED("文章创建失败");
+    ARTICLE_CREATE_FAILED("文章创建失败"),
+
+    // 刷新令牌相关消息
+    REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID"),  // 刷新令牌无效，缺少用户ID
+    REFRESH_TOKEN_NOT_FOUND("REFRESH_TOKEN_NOT_FOUND"), // 新令牌已过期或被撤销
+    INVALID_AUDIENCE("INVALID_AUDIENCE"), // 刷新令牌缺少客户端信息
+    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"); // 刷新令牌失败，请重新登录
 
     private final String message;
 

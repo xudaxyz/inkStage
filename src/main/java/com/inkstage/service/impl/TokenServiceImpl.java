@@ -1,5 +1,7 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.common.ResponseCode;
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserRole;
@@ -111,8 +113,8 @@ public class TokenServiceImpl implements TokenService {
         String refreshToken = jwtEncoder.encode(JwtEncoderParameters.from(refreshTokenClaims)).getTokenValue();
 
         // 存储刷新令牌到Redis
-        tokenStoreService.storeRefreshToken(user.getId(), refreshToken, 
-            Duration.ofSeconds(refreshExpiresAt.getEpochSecond() - now.getEpochSecond()));
+        tokenStoreService.storeRefreshToken(user.getId(), refreshToken,
+                Duration.ofSeconds(refreshExpiresAt.getEpochSecond() - now.getEpochSecond()));
 
         // 构建响应
         TokenResponse tokenResponse = new TokenResponse();
@@ -181,14 +183,14 @@ public class TokenServiceImpl implements TokenService {
             // 从令牌中获取用户ID
             String userIdStr = jwt.getSubject();
             if (userIdStr == null) {
-                throw new BusinessException("刷新令牌无效");
+                throw new BusinessException(ResponseCode.TOKEN_INVALID, ResponseMessage.REFRESH_TOKEN_INVALID);
             }
 
             Long userId = Long.parseLong(userIdStr);
 
             // 验证刷新令牌是否在Redis中有效
             if (!tokenStoreService.validateRefreshToken(userId, refreshToken)) {
-                throw new BusinessException("刷新令牌已过期或被撤销");
+                throw new BusinessException(ResponseCode.TOKEN_REVOKED, ResponseMessage.REFRESH_TOKEN_NOT_FOUND);
             }
 
             // 获取用户信息
@@ -196,13 +198,13 @@ public class TokenServiceImpl implements TokenService {
             if (user == null) {
                 // 撤销所有刷新令牌
                 tokenStoreService.revokeAllRefreshTokens(userId);
-                throw new BusinessException("用户不存在");
+                throw new BusinessException(ResponseCode.USER_NOT_FOUND, ResponseMessage.USER_NOT_FOUND);
             }
 
             // 获取客户端id
             List<String> audience = jwt.getAudience();
             if (audience == null || audience.isEmpty()) {
-                throw new BusinessException("Audience 不存在");
+                throw new BusinessException(ResponseCode.TOKEN_INVALID, ResponseMessage.INVALID_AUDIENCE);
             }
             String clientId = jwt.getAudience().getFirst();
 
@@ -227,7 +229,7 @@ public class TokenServiceImpl implements TokenService {
             return generateTokenForUser(user, authDTO);
         } catch (Exception e) {
             log.error("刷新令牌失败: {}", e.getMessage());
-            throw new BusinessException("刷新令牌失败");
+            throw new BusinessException(ResponseCode.TOKEN_REFRESH_FAILED, ResponseMessage.TOKEN_REFRESH_FAILED);
         }
     }
 }

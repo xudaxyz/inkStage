@@ -17,6 +17,13 @@ public enum ResponseCode {
     INTERNAL_SERVER_ERROR(500),
     BUSINESS_ERROR(500),
     ERROR(500),
+
+    // 认证相关错误码
+    TOKEN_INVALID(401),
+    TOKEN_EXPIRED(401),
+    TOKEN_REVOKED(401),
+    TOKEN_REFRESH_FAILED(401),
+    USER_NOT_FOUND(404),
     ;
 
     private final int code;
