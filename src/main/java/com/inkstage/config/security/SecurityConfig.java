@@ -46,7 +46,7 @@ public class SecurityConfig {
         // 禁用CSRF保护, 适用于前后端分离架构
         http
                 // 只处理非OAuth2授权服务器的请求
-                .securityMatcher("/front/**", "/index/**", "/ws/**", "/admin/**")
+                .securityMatcher("/front/**", "/index/**", "/ws/**", "/admin/**", "/upload/**")
                 // 启用CORS支持
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
