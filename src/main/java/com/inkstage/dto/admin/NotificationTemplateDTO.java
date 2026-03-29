@@ -19,11 +19,10 @@ public class NotificationTemplateDTO {
     @NotBlank(message = "模板编码不能为空")
     private String code;
 
-
     /**
      * 模板名称
      */
-    private String name;
+    private String nameTemplate;
 
     /**
      * 通知标题模板
@@ -38,12 +37,12 @@ public class NotificationTemplateDTO {
     /**
      * 通知类型
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 通知渠道
      */
-    private NotificationChannel channel;
+    private NotificationChannel notificationChannel;
 
     /**
      * 操作链接模板

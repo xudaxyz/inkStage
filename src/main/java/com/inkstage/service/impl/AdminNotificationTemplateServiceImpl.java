@@ -76,8 +76,8 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         }
 
         // 默认渠道
-        if (template.getChannel() == null) {
-            template.setChannel(NotificationChannel.SITE);
+        if (template.getNotificationChannel() == null) {
+            template.setNotificationChannel(NotificationChannel.SITE);
         }
 
         return templateMapper.insert(template) > 0;
@@ -285,7 +285,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
             result.setActionUrl(actionUrl);
         }
 
-        result.setType(template.getType());
+        result.setNotificationType(template.getNotificationType());
 
         return result;
     }
@@ -342,7 +342,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
                 message.setUserId(userId);
                 message.setTitle(rendered.getTitle());
                 message.setContent(rendered.getContent());
-                message.setType(rendered.getType());
+                message.setNotificationType(rendered.getNotificationType());
                 message.setRelatedId(relatedId);
                 message.setSenderId(senderId != null ? senderId : 0L);
                 message.setActionUrl(rendered.getActionUrl());

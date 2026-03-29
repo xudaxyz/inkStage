@@ -29,12 +29,12 @@ public interface NotificationTemplateMapper {
     /**
      * 根据通知类型查询模板
      */
-    List<NotificationTemplate> selectByType(@Param("type") NotificationType type);
+    List<NotificationTemplate> selectByType(@Param("notificationType") NotificationType notificationType);
 
     /**
      * 根据通知类型和渠道查询模板
      */
-    NotificationTemplate selectByTypeAndChannel(@Param("type") NotificationType type, @Param("channel") NotificationChannel channel);
+    NotificationTemplate selectByTypeAndChannel(@Param("notificationType") NotificationType notificationType, @Param("notificationChannel") NotificationChannel notificationChannel);
 
     /**
      * 查询所有模板

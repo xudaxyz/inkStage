@@ -99,7 +99,7 @@ public class NotificationConsumer {
     private Notification buildNotification(NotificationMessageDTO message) {
         Notification notification = new Notification();
         notification.setUserId(message.getUserId());
-        notification.setType(message.getType());
+        notification.setNotificationType(message.getNotificationType());
         notification.setContent(message.getContent());
         notification.setReadStatus(ReadStatus.UNREAD);
         notification.setRelatedId(message.getRelatedId());

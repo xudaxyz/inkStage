@@ -21,7 +21,7 @@ public class NotificationEvent extends ApplicationEvent {
     /**
      * 通知类型
      */
-    private final NotificationType type;
+    private final NotificationType notificationType;
 
     /**
      * 通知标题
@@ -58,11 +58,11 @@ public class NotificationEvent extends ApplicationEvent {
      */
     private final String extraData;
 
-    public NotificationEvent(Object source, Long userId, NotificationType type, String title, String content,
+    public NotificationEvent(Object source, Long userId, NotificationType notificationType, String title, String content,
                              Long relatedId, ReportTargetType relatedType, Long senderId, String actionUrl, String extraData) {
         super(source);
         this.userId = userId;
-        this.type = type;
+        this.notificationType = notificationType;
         this.title = title;
         this.content = content;
         this.relatedId = relatedId;
@@ -82,7 +82,7 @@ public class NotificationEvent extends ApplicationEvent {
     public static class Builder {
         private Object source;
         private Long userId;
-        private NotificationType type;
+        private NotificationType notificationType;
         private String title;
         private String content;
         private Long relatedId;
@@ -101,8 +101,8 @@ public class NotificationEvent extends ApplicationEvent {
             return this;
         }
 
-        public Builder type(NotificationType type) {
-            this.type = type;
+        public Builder type(NotificationType notificationType) {
+            this.notificationType = notificationType;
             return this;
         }
 
@@ -142,7 +142,7 @@ public class NotificationEvent extends ApplicationEvent {
         }
 
         public NotificationEvent build() {
-            return new NotificationEvent(source, userId, type, title, content, relatedId, relatedType, senderId, actionUrl, extraData);
+            return new NotificationEvent(source, userId, notificationType, title, content, relatedId, relatedType, senderId, actionUrl, extraData);
         }
     }
 }

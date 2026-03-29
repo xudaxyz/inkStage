@@ -24,7 +24,7 @@ public class NotificationMessageDTO implements Serializable {
     /**
      * 通知类型
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 通知内容

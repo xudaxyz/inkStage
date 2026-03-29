@@ -5,26 +5,28 @@
     <resultMap id="BaseResultMap" type="com.inkstage.entity.model.NotificationTemplate">
         <id column="id" property="id"/>
         <result column="code" property="code"/>
-        <result column="name" property="name"/>
+        <result column="name_template" property="nameTemplate"/>
         <result column="title_template" property="titleTemplate"/>
         <result column="content_template" property="contentTemplate"/>
-        <result column="type" property="type" />
-        <result column="channel" property="channel" />
+        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.NotificationType"/>
+        <result column="notification_channel" property="notificationChannel"
+                javaType="com.inkstage.enums.NotificationChannel"/>
         <result column="action_url_template" property="actionUrlTemplate"/>
         <result column="variables" property="variables"/>
         <result column="description" property="description"/>
-        <result column="priority" property="priority" />
-        <result column="status" property="status" />
+        <result column="priority" property="priority" javaType="com.inkstage.enums.Priority"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
         <result column="create_user_id" property="createUserId"/>
         <result column="update_user_id" property="updateUserId"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="deleted" property="deleted" />
+        <result column="deleted" property="deleted"/>
         <result column="deleted_time" property="deletedTime"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        id, code, name, title_template, content_template, type, channel, action_url_template,
+        id
+        , code, name_template, title_template, content_template, notification_type, notification_channel, action_url_template,
         variables, description, priority, status, create_user_id, update_user_id,
         create_time, update_time, deleted, deleted_time
     </sql>
@@ -47,7 +49,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM notification_template
-        WHERE type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler} AND deleted = 0
+        WHERE notification_type = #{notification_type} AND deleted = 0
         ORDER BY priority DESC, create_time DESC
     </select>
 
@@ -55,8 +57,8 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM notification_template
-        WHERE type = #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
-        AND channel = #{channel,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        WHERE notification_type = #{notification_type}
+        AND notification_channel = #{notification_channel}
         AND status = 1
         AND deleted = 0
         ORDER BY priority DESC
@@ -75,7 +77,7 @@
         SELECT
         <include refid="Base_Column_List"/>
         FROM notification_template
-        WHERE status = #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        WHERE status = #{status}
         AND deleted = 0
         ORDER BY create_time DESC
     </select>
@@ -85,14 +87,14 @@
         <include refid="Base_Column_List"/>
         FROM notification_template
         WHERE deleted = 0
-        <if test="query.type != null">
-            AND type = #{query.type}
+        <if test="query.notificationType != null">
+            AND notification_type = #{query.notificationType}
         </if>
         <if test="query.status != null">
             AND status = #{query.status}
         </if>
         <if test="query.keyword != null and query.keyword != ''">
-            AND (name LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
+            AND (name_template LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
         ORDER BY create_time DESC
         LIMIT #{offset}, #{limit}
@@ -102,46 +104,45 @@
         SELECT COUNT(*)
         FROM notification_template
         WHERE deleted = 0
-        <if test="query.type != null">
-            AND type = #{query.type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+        <if test="query.notificationType != null">
+            AND notification_type = #{query.notificationType}
         </if>
         <if test="query.status != null">
-            AND status = #{query.status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler}
+            AND status = #{query.status}
         </if>
         <if test="query.keyword != null and query.keyword != ''">
-            AND (name LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
+            AND (name_template LIKE CONCAT('%', #{query.keyword}, '%') OR code LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
     </select>
 
     <select id="existsByCode" resultType="boolean">
         SELECT COUNT(*) > 0
         FROM notification_template
-        WHERE code = #{code} AND deleted = 0
+        WHERE code = #{code}
+          AND deleted = 0
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO notification_template (
-            code, name, title_template, content_template, type, channel,
-            action_url_template, variables, description, priority, status,
-            create_user_id, update_user_id, create_time, update_time, deleted
-        ) VALUES (
-            #{code}, #{name}, #{titleTemplate}, #{contentTemplate},
-            #{type},
-            #{channel}, #{actionUrlTemplate}, #{variables}, #{description},
-            #{priority},
-            #{status},
-            #{createUserId}, #{updateUserId}, #{createTime}, #{updateTime}, 0
-        )
+        INSERT INTO notification_template (code, name_template, title_template, content_template, notification_type,
+                                           notification_channel,
+                                           action_url_template, variables, description, priority, status,
+                                           create_user_id, update_user_id, create_time, update_time, deleted)
+        VALUES (#{code}, #{nameTemplate}, #{titleTemplate}, #{contentTemplate},
+                #{notificationType},
+                #{notificationChannel}, #{actionUrlTemplate}, #{variables}, #{description},
+                #{priority},
+                #{status},
+                #{createUserId}, #{updateUserId}, #{createTime}, #{updateTime}, 0)
     </insert>
 
     <update id="update">
         UPDATE notification_template
         <set>
-            <if test="name != null">name = #{name},</if>
+            <if test="nameTemplate != null">name_template = #{nameTemplate},</if>
             <if test="titleTemplate != null">title_template = #{titleTemplate},</if>
             <if test="contentTemplate != null">content_template = #{contentTemplate},</if>
-            <if test="type != null">type = #{type},</if>
-            <if test="channel != null">channel = #{channel},</if>
+            <if test="notificationType != null">notification_type = #{notificationType},</if>
+            <if test="notificationChannel != null">notification_channel = #{notificationChannel},</if>
             <if test="actionUrlTemplate != null">action_url_template = #{actionUrlTemplate},</if>
             <if test="variables != null">variables = #{variables},</if>
             <if test="description != null">description = #{description},</if>
@@ -155,8 +156,10 @@
 
     <update id="deleteById">
         UPDATE notification_template
-        SET deleted = 1, deleted_time = NOW()
-        WHERE id = #{id} AND deleted = 0
+        SET deleted      = 1,
+            deleted_time = NOW()
+        WHERE id = #{id}
+          AND deleted = 0
     </update>
 
 </mapper>

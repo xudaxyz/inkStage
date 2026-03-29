@@ -167,11 +167,11 @@ public class AdminNotificationTemplateController {
     private NotificationTemplate convertToEntity(NotificationTemplateDTO dto) {
         NotificationTemplate template = new NotificationTemplate();
         template.setCode(dto.getCode());
-        template.setName(dto.getName());
+        template.setNameTemplate(dto.getNameTemplate());
         template.setTitleTemplate(dto.getTitleTemplate());
         template.setContentTemplate(dto.getContentTemplate());
-        template.setType(dto.getType());
-        template.setChannel(dto.getChannel());
+        template.setNotificationType(dto.getNotificationType());
+        template.setNotificationChannel(dto.getNotificationChannel());
         template.setActionUrlTemplate(dto.getActionUrlTemplate());
         template.setVariables(dto.getVariables());
         template.setDescription(dto.getDescription());

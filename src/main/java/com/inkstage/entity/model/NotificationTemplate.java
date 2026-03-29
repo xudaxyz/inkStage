@@ -28,7 +28,7 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 模板名称
      */
-    private String name;
+    private String nameTemplate;
 
     /**
      * 通知标题模板(支持占位符如: {{username}})
@@ -43,12 +43,12 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 通知类型(对应NotificationType的code)
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 通知渠道
      */
-    private NotificationChannel channel;
+    private NotificationChannel notificationChannel;
 
     /**
      * 操作链接模板

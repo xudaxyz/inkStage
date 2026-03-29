@@ -28,13 +28,10 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     private final AdminNotificationTemplateService adminNotificationTemplateService;
 
     @Override
-    public String generateTitle(NotificationType type, Object... params) {
-        // 从数据库获取模板
-        NotificationTemplate template = adminNotificationTemplateService.getTemplateByType(type, NotificationChannel.SITE);
-        String variablesJson = template != null ? template.getVariables() : null;
-        Map<String, Object> variables = TemplateRenderUtils.buildVariables(variablesJson, params);
-        String variablesJsonStr = toJson(variables);
-        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(type, NotificationChannel.SITE, variablesJsonStr);
+    public String generateTitle(NotificationType notificationType, Object... params) {
+        // 获取标题模板
+        String variablesJsonStr = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, params);
+        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJsonStr);
         if (preview != null && preview.getTitle() != null) {
             return preview.getTitle();
         }
@@ -43,15 +40,25 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     }
 
     @Override
-    public String generateContent(NotificationType type, Object... params) {
-        // 从数据库获取模板
-        NotificationTemplate template = adminNotificationTemplateService.getTemplateByType(type, NotificationChannel.SITE);
-        String variablesJson = template != null ? template.getVariables() : null;
-        Map<String, Object> variables = TemplateRenderUtils.buildVariables(variablesJson, params);
-        String variablesJsonStr = toJson(variables);
-        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(type, NotificationChannel.SITE, variablesJsonStr);
+    public String generateContent(NotificationType notificationType, Object... params) {
+        // 获取内容模板
+        String variablesJsonStr = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, params);
+        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJsonStr);
         if (preview != null && preview.getContent() != null) {
             return preview.getContent();
+        }
+
+        // 没有找到内容模板，返回空字符串
+        return "";
+    }
+
+    @Override
+    public String generateActionUrl(NotificationType notificationType, Long relatedId) {
+        // 从数据库获取actionUrl模板
+        String variablesJson = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, relatedId);
+        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJson);
+        if (preview != null && preview.getActionUrl() != null) {
+            return preview.getActionUrl();
         }
 
         // 没有找到模板，返回空字符串
@@ -59,17 +66,13 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     }
 
     @Override
-    public String generateActionUrl(NotificationType type, Long relatedId) {
-        // 从数据库获取模板
-        Map<String, Object> variables = TemplateRenderUtils.buildRelatedIdVariables(relatedId);
-        String variablesJson = toJson(variables);
-        TemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(type, NotificationChannel.SITE, variablesJson);
-        if (preview != null && preview.getActionUrl() != null) {
-            return preview.getActionUrl();
-        }
-
-        // 没有找到模板，返回空字符串
-        return "";
+    public String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel notificationChannel, Object... params) {
+        // 从数据库获取内容模板
+        log.info("获取通知模板变量: notificationType={}, notificationChannel={}", notificationType, notificationChannel);
+        NotificationTemplate template = adminNotificationTemplateService.getTemplateByType(notificationType, notificationChannel);
+        String variablesJson = template != null ? template.getVariables() : null;
+        Map<String, Object> variables = TemplateRenderUtils.buildVariables(variablesJson, params);
+        return toJson(variables);
     }
 
     /**

@@ -16,7 +16,7 @@ public class NotificationTemplateQueryDTO extends PageRequest {
     /**
      * 通知类型
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 状态

@@ -28,12 +28,12 @@ public class Notification extends BaseEntity {
     /**
      * 通知类型
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 通知分类
      */
-    private NotificationCategory category;
+    private NotificationCategory notificationCategory;
 
     /**
      * 通知标题

@@ -22,7 +22,7 @@ public class TemplatePreviewVO {
     /**
      * 通知类型
      */
-    private NotificationType type;
+    private NotificationType notificationType;
 
     /**
      * 操作链接

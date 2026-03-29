@@ -40,12 +40,12 @@ public class NotificationEventListener {
     @EventListener
     @Async("notificationTaskExecutor")
     public void handleNotificationEvent(NotificationEvent event) {
-        log.info("接收到通知事件，用户ID: {}, 类型: {}", event.getUserId(), event.getType());
+        log.info("接收到通知事件，用户ID: {}, 类型: {}", event.getUserId(), event.getNotificationType());
 
         try {
             // 检查用户是否开启了该类型的通知
-            if (!isNotificationEnabled(event.getUserId(), event.getType())) {
-                log.info("用户 {} 已关闭 {} 类型的通知", event.getUserId(), event.getType());
+            if (!isNotificationEnabled(event.getUserId(), event.getNotificationType())) {
+                log.info("用户 {} 已关闭 {} 类型的通知", event.getUserId(), event.getNotificationType());
                 return;
             }
 
@@ -78,7 +78,7 @@ public class NotificationEventListener {
     private Notification buildNotification(NotificationEvent event) {
         Notification notification = new Notification();
         notification.setUserId(event.getUserId());
-        notification.setType(event.getType());
+        notification.setNotificationType(event.getNotificationType());
         notification.setTitle(event.getTitle());
         notification.setContent(event.getContent());
         notification.setReadStatus(ReadStatus.UNREAD);
@@ -123,7 +123,7 @@ public class NotificationEventListener {
             message.setUserId(notification.getUserId());
             message.setTitle(notification.getTitle());
             message.setContent(notification.getContent());
-            message.setType(notification.getType());
+            message.setNotificationType(notification.getNotificationType());
             message.setRelatedId(notification.getRelatedId());
             message.setRelatedType(notification.getRelatedType());
             message.setSenderId(notification.getSenderId());

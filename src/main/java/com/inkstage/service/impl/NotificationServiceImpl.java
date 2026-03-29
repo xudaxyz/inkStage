@@ -147,18 +147,18 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 构建通知对象
      *
-     * @param userId    用户ID
-     * @param type      通知类型
-     * @param relatedId 关联ID
-     * @param senderId  发送者ID
-     * @param content   通知内容
+     * @param userId           用户ID
+     * @param notificationType 通知类型
+     * @param relatedId        关联ID
+     * @param senderId         发送者ID
+     * @param content          通知内容
      * @return 通知对象
      */
-    private Notification buildNotification(Long userId, NotificationType type, Long relatedId,
-                                          Long senderId, NotificationContent content) {
+    private Notification buildNotification(Long userId, NotificationType notificationType, Long relatedId,
+                                           Long senderId, NotificationContent content) {
         Notification notification = new Notification();
         notification.setUserId(userId);
-        notification.setType(type);
+        notification.setNotificationType(notificationType);
         notification.setTitle(content.title());
         notification.setContent(content.content());
         notification.setRelatedId(relatedId);
@@ -178,7 +178,7 @@ public class NotificationServiceImpl implements NotificationService {
         NotificationMessageDTO message = new NotificationMessageDTO();
         message.setUserId(notification.getUserId());
         message.setContent(notification.getContent());
-        message.setType(notification.getType());
+        message.setNotificationType(notification.getNotificationType());
         message.setRelatedId(notification.getRelatedId());
         message.setSenderId(notification.getSenderId());
         message.setRelatedType(notification.getRelatedType());
@@ -191,7 +191,8 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 通知内容记录类
      */
-    private record NotificationContent(String title, String content, String actionUrl) {}
+    private record NotificationContent(String title, String content, String actionUrl) {
+    }
 
     @Override
     public boolean sendNotificationWithTemplate(Long userId, NotificationType type, Long relatedId, Long senderId, Object... params) {
@@ -216,7 +217,7 @@ public class NotificationServiceImpl implements NotificationService {
             List<NotificationMessageDTO> messages = new ArrayList<>();
             for (Notification notification : notifications) {
                 // 检查用户是否开启了该类型的通知
-                if (isNotificationDisabled(notification.getUserId(), notification.getType())) {
+                if (isNotificationDisabled(notification.getUserId(), notification.getNotificationType())) {
                     continue;
                 }
 
