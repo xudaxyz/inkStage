@@ -1,13 +1,19 @@
-package com.inkstage.vo;
+package com.inkstage.vo.admin;
 
 import com.inkstage.enums.NotificationType;
 import lombok.Data;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * 模板预览结果VO
  */
 @Data
-public class TemplatePreviewVO {
+public class AdminNotificationTemplatePreviewVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 渲染后的标题

@@ -224,6 +224,9 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             existingArticle.setAllowForward(articleCreateDTO.getAllowForward());
             existingArticle.setTop(articleCreateDTO.getTop());
             existingArticle.setUpdateTime(LocalDateTime.now());
+            
+            // 递增版本号
+            existingArticle.setArticleVersion(existingArticle.getArticleVersion() + 1);
 
             // 如果状态变为已发布或待发布，更新发布时间
             if (ArticleStatus.PUBLISHED == articleCreateDTO.getStatus() || ArticleStatus.PENDING_PUBLISH == articleCreateDTO.getStatus()) {

@@ -2,7 +2,7 @@ package com.inkstage.config.oauth2;
 
 import com.inkstage.mapper.RoleMapper;
 import com.inkstage.mapper.UserRoleMapper;
-import com.inkstage.service.UserCacheService;
+import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;

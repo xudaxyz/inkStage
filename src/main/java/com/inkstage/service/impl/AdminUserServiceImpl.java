@@ -2,21 +2,17 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
-import com.inkstage.entity.model.User;
 import com.inkstage.enums.user.UserStatus;
-import com.inkstage.event.NotificationEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
+import com.inkstage.service.AdminUserService;
 import com.inkstage.service.FileService;
-import com.inkstage.service.UserAdminService;
-import com.inkstage.enums.NotificationType;
 import com.inkstage.vo.admin.AdminUserArticleVO;
 import com.inkstage.vo.admin.AdminUserCommentVO;
 import com.inkstage.vo.admin.AdminUserDetailVO;
 import com.inkstage.vo.admin.AdminUserListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,11 +23,10 @@ import java.util.List;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class UserAdminServiceImpl implements UserAdminService {
+public class AdminUserServiceImpl implements AdminUserService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
-    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public AdminUserDetailVO getUserDetailById(Long id) {
@@ -61,7 +56,7 @@ public class UserAdminServiceImpl implements UserAdminService {
     @Override
     public PageResult<AdminUserListVO> getUsersByPage(AdminUserQueryDTO pageRequest) {
         try {
-            log.debug("管理员分页获取用户, 页码: {}, 每页大小: {}, 关键词: {}", 
+            log.debug("管理员分页获取用户, 页码: {}, 每页大小: {}, 关键词: {}",
                     pageRequest.getPageNum(), pageRequest.getPageSize(), pageRequest.getKeyword());
 
             // 计算偏移量
@@ -160,42 +155,6 @@ public class UserAdminServiceImpl implements UserAdminService {
         }
     }
 
-    @Override
-    public Boolean updateUserStatusWithNotification(Long id, UserStatus userStatus, String reason) {
-        try {
-            log.debug("管理员更新用户状态并发送通知, 用户ID: {}, 状态: {}, 原因: {}", id, userStatus.getDesc(), reason);
-            // 检查用户是否存在
-            User user = userMapper.findById(id);
-            if (user == null) {
-                log.warn("用户不存在, 用户ID: {}", id);
-                throw new BusinessException("用户不存在");
-            }
-            // 执行更新
-            int result = userMapper.updateUserStatus(id, userStatus);
-            boolean success = result > 0;
-            if (success) {
-                // 发布通知事件（异步处理，不阻塞主业务流程）
-                NotificationEvent event = NotificationEvent.builder()
-                        .source(this)
-                        .userId(id)
-                        .type(NotificationType.USER_STATUS_CHANGE)
-                        .title("账号状态变更通知")
-                        .content("您的账号状态已变更为：" + userStatus.getDesc() + "，原因：" + reason)
-                        .senderId(0L)
-                        .build();
-                eventPublisher.publishEvent(event);
-                log.info("管理员更新用户状态并发送通知成功, 用户ID: {}, 新状态: {}", id, userStatus.getDesc());
-            } else {
-                log.warn("更新用户状态失败, 未发送通知, 用户ID: {}", id);
-            }
-            return success;
-        } catch (BusinessException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("管理员更新用户状态并发送通知失败, 用户ID: {}, 状态: {}", id, userStatus.getDesc(), e);
-            throw new BusinessException("更新用户状态失败");
-        }
-    }
 
     @Override
     public List<Long> getUserIdsByRoleCode(String roleCode) {

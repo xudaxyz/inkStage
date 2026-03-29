@@ -51,4 +51,9 @@ public class Tag extends BaseEntity {
      * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
+
+    /**
+     * 标签版本号，用于缓存控制
+     */
+    private Integer tagVersion = 1;
 }

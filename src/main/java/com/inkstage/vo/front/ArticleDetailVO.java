@@ -8,6 +8,8 @@ import com.inkstage.enums.article.OriginalStatus;
 import com.inkstage.enums.user.Gender;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,7 +17,10 @@ import java.util.List;
  * 文章详情VO
  */
 @Data
-public class ArticleDetailVO {
+public class ArticleDetailVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 文章ID

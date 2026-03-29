@@ -9,7 +9,7 @@ import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.enums.StatusEnum;
 import com.inkstage.service.AdminNotificationTemplateService;
-import com.inkstage.vo.TemplatePreviewVO;
+import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -137,9 +137,9 @@ public class AdminNotificationTemplateController {
      */
     @PostMapping("/preview/{code}")
     @AdminAccess
-    public Result<TemplatePreviewVO> previewTemplate(@PathVariable String code,
-                                                     @RequestBody String variables) {
-        TemplatePreviewVO result = templateService.renderTemplate(code, variables);
+    public Result<AdminNotificationTemplatePreviewVO> previewTemplate(@PathVariable String code,
+                                                                      @RequestBody String variables) {
+        AdminNotificationTemplatePreviewVO result = templateService.renderTemplate(code, variables);
         if (result == null) {
             return Result.error("模板渲染失败");
         }

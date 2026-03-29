@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
 import com.inkstage.enums.DeleteStatus;
@@ -8,9 +8,10 @@ import com.inkstage.enums.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleLikeService;
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +35,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     private final CountService countService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional
@@ -59,7 +61,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 增加点赞数
             countService.updateArticleLikeCount(articleId, 1);
             // 缓存点赞状态
-            String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
+            String likeKey = RedisKeyConstants.buildArticleLikeCacheKey(articleId, userId);
             redisUtil.set(likeKey, true, 24, TimeUnit.HOURS);
 
             // 发送点赞通知
@@ -109,8 +111,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 减少点赞数
             countService.updateArticleLikeCount(articleId, -1);
             // 删除缓存
-            String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
-            redisUtil.delete(likeKey);
+            cacheClearService.clearArticleLikeCache(articleId, userId);
             log.info("取消点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }
@@ -121,7 +122,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     public boolean isArticleLiked(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
-        String likeKey = RedisKeyConstants.buildCacheKey("article:like:", articleId + ":" + userId);
+        String likeKey = RedisKeyConstants.buildArticleLikeCacheKey(articleId, userId);
         Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {});
         if (isLiked != null) {
             return isLiked;

@@ -35,6 +35,14 @@ public interface ArticleMapper {
     Article findById(Long id);
 
     /**
+     * 根据文章ID查询文章版本号
+     *
+     * @param id 文章ID
+     * @return 文章版本号
+     */
+    Integer findArticleVersionById(Long id);
+
+    /**
      * 根据ID查询文章详情VO对象
      *
      * @param id 文章ID

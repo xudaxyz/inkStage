@@ -8,8 +8,8 @@ import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.dto.front.MyArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.*;
-import com.inkstage.service.util.ArticleServiceUtils;
-import com.inkstage.utils.RedisCacheManager;
+import com.inkstage.utils.ArticleUtils;
+import com.inkstage.cache.utils.RedisCacheManager;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -31,7 +31,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleCreateService articleCreateService;
     private final ArticleQueryService articleQueryService;
     private final ArticleManagementService articleManagementService;
-    private final ArticleSearchService articleSearchService;
     private final ArticleStatsService articleStatsService;
     private final RedisCacheManager cacheManager;
 
@@ -64,21 +63,14 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public ArticleDetailVO getArticleDetail(Long id) {
-        ArticleServiceUtils.validateArticleId(id, "获取文章详情");
+        ArticleUtils.validateArticleId(id, "获取文章详情");
         return articleQueryService.getArticleDetail(id);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO) {
-        boolean updated = articleCreateService.updateArticle(articleId, articleCreateDTO);
-        if (updated) {
-            // 清除文章详情缓存
-            cacheManager.clearArticleDetailCache(articleId);
-            // 清除文章列表缓存
-            cacheManager.clearArticleListCache();
-        }
-        return updated;
+        return articleCreateService.updateArticle(articleId, articleCreateDTO);
     }
 
     @Override
@@ -93,7 +85,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleListVO> getHotArticles(Integer limit, String timeRange) {
-        limit = ArticleServiceUtils.validateLimit(limit, 10);
+        limit = ArticleUtils.validateLimit(limit, 10);
         if (timeRange == null || timeRange.isEmpty()) {
             timeRange = "week";
         }
@@ -102,27 +94,27 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<ArticleListVO> getLatestArticles(Integer limit) {
-        limit = ArticleServiceUtils.validateLimit(limit, 10);
+        limit = ArticleUtils.validateLimit(limit, 10);
         return articleQueryService.getLatestArticles(limit);
     }
 
     @Override
     public List<ArticleListVO> getBannerArticles(Integer limit) {
-        limit = ArticleServiceUtils.validateLimit(limit, 5);
+        limit = ArticleUtils.validateLimit(limit, 5);
         return articleQueryService.getBannerArticles(limit);
     }
 
     @Override
     public PageResult<ArticleListVO> getUserArticles(Long userId, Integer pageNum, Integer pageSize) {
-        ArticleServiceUtils.validateUserId(userId, "获取用户文章列表");
-        int[] validatedParams = ArticleServiceUtils.validatePageParams(pageNum, pageSize);
+        ArticleUtils.validateUserId(userId, "获取用户文章列表");
+        int[] validatedParams = ArticleUtils.validatePageParams(pageNum, pageSize);
         return articleQueryService.getUserArticles(userId, validatedParams[0], validatedParams[1]);
     }
 
     @Override
     public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
-        ArticleServiceUtils.validateUserId(userId, "获取作者相关文章");
-        limit = ArticleServiceUtils.validateLimit(limit, 5);
+        ArticleUtils.validateUserId(userId, "获取作者相关文章");
+        limit = ArticleUtils.validateLimit(limit, 5);
         return articleQueryService.getUserRelatedArticles(userId, excludeArticleId, limit);
     }
 
@@ -139,8 +131,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, Integer pageNum, Integer pageSize) {
-        int[] validatedParams = ArticleServiceUtils.validatePageParams(pageNum, pageSize);
-        return articleSearchService.searchArticles(keyword, sortBy, validatedParams[0], validatedParams[1]);
+        int[] validatedParams = ArticleUtils.validatePageParams(pageNum, pageSize);
+        return articleQueryService.searchArticles(keyword, sortBy, validatedParams[0], validatedParams[1]);
     }
 }
 

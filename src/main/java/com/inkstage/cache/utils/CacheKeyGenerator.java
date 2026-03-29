@@ -1,6 +1,6 @@
-package com.inkstage.utils;
+package com.inkstage.cache.utils;
 
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 
 /**
  * 缓存键生成工具类
@@ -14,7 +14,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleDetailKey(Long articleId) {
-        return RedisKeyConstants.buildCacheKey("article:detail:", articleId.toString());
+        return RedisKeyConstants.buildArticleDetailCacheKey(articleId);
     }
 
     /**
@@ -25,12 +25,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleListKey(Integer pageNum, Integer pageSize, Long categoryId) {
-        StringBuilder keyBuilder = new StringBuilder();
-        keyBuilder.append(pageNum).append(":").append(pageSize);
-        if (categoryId != null) {
-            keyBuilder.append(":").append(categoryId);
-        }
-        return RedisKeyConstants.buildCacheKey("article:list:", keyBuilder.toString());
+        return RedisKeyConstants.buildArticleListCacheKey(pageNum, pageSize, categoryId, null);
     }
 
     /**
@@ -38,30 +33,19 @@ public class CacheKeyGenerator {
      * @param articleId 文章ID
      * @param pageNum 页码
      * @param pageSize 每页大小
-     * @return 缓存键
-     */
-    public static String generateCommentListKey(Long articleId, Integer pageNum, Integer pageSize) {
-        return RedisKeyConstants.buildCacheKey(
-                "comment:list:",
-                articleId + ":" + pageNum + ":" + pageSize
-        );
-    }
-
-    /**
-     * 生成评论列表缓存键（包含排序和子评论参数）
-     * @param articleId 文章ID
-     * @param pageNum 页码
-     * @param pageSize 每页大小
      * @param sortBy 排序方式
      * @param maxReplies 子评论最大数量
-     * @param replySortBy 子评论排序方式
+     * @param commentVersion 评论版本号
      * @return 缓存键
      */
     public static String generateCommentListKey(Long articleId, Integer pageNum, Integer pageSize, 
-                                               String sortBy, Integer maxReplies, String replySortBy) {
-        return RedisKeyConstants.buildCacheKey(
-                "comment:list:",
-                articleId + ":" + pageNum + ":" + pageSize + ":" + sortBy + ":" + maxReplies + ":" + replySortBy
+                                               String sortBy, Integer maxReplies, Integer commentVersion) {
+        // 简化排序方式标识
+        String sortPrefix = sortBy != null && sortBy.equals("hot") ? "h" : "n";
+        return RedisKeyConstants.buildVersionedCacheKey(
+                RedisKeyConstants.COMMENT_PREFIX,
+                articleId + ":" + pageNum + ":" + pageSize + ":" + sortPrefix + ":" + maxReplies,
+                commentVersion
         );
     }
 
@@ -80,7 +64,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateHotUserKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("user:hot:", limit.toString());
+        return RedisKeyConstants.buildHotUserCacheKey(limit);
     }
 
     /**
@@ -99,7 +83,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleReadCountKey(Long articleId) {
-        return RedisKeyConstants.buildHotDataKey("article:", articleId + ":read");
+        return RedisKeyConstants.buildArticleCountCacheKey(articleId, "read");
     }
 
     /**
@@ -108,7 +92,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateArticleLikeCountKey(Long articleId) {
-        return RedisKeyConstants.buildHotDataKey("article:", articleId + ":like");
+        return RedisKeyConstants.buildArticleCountCacheKey(articleId, "like");
     }
 
     /**
@@ -119,10 +103,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateUserArticleListKey(Long userId, Integer pageNum, Integer pageSize) {
-        return RedisKeyConstants.buildCacheKey(
-                "user:article:list:",
-                userId + ":" + pageNum + ":" + pageSize
-        );
+        return RedisKeyConstants.buildUserArticleListCacheKey(userId, pageNum, pageSize);
     }
 
     /**
@@ -132,7 +113,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateHotArticleKey(Integer limit, String timeRange) {
-        return RedisKeyConstants.buildCacheKey("article:hot:", limit + ":" + timeRange);
+        return RedisKeyConstants.buildArticleHotCacheKey(limit, timeRange);
     }
 
     /**
@@ -141,7 +122,7 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateLatestArticleKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("article:latest:", limit.toString());
+        return RedisKeyConstants.buildLatestArticleCacheKey(limit);
     }
 
     /**
@@ -150,6 +131,6 @@ public class CacheKeyGenerator {
      * @return 缓存键
      */
     public static String generateBannerArticleKey(Integer limit) {
-        return RedisKeyConstants.buildCacheKey("article:banner:", limit.toString());
+        return RedisKeyConstants.buildBannerArticleCacheKey(limit);
     }
 }

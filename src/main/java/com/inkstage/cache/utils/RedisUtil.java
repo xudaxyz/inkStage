@@ -1,4 +1,4 @@
-package com.inkstage.utils;
+package com.inkstage.cache.utils;
 
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;

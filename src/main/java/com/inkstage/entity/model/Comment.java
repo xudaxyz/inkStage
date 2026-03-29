@@ -103,4 +103,9 @@ public class Comment extends BaseEntity {
      * 被举报次数
      */
     private Integer reportCount;
+
+    /**
+     * 评论版本号
+     */
+    private Integer commentVersion = 1;
 }

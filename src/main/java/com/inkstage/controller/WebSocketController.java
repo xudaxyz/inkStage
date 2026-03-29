@@ -23,10 +23,10 @@ public class WebSocketController {
      */
     @MessageMapping("/connect")
     public void handleConnect(@Payload String message) {
+        log.info("收到WebSocket连接请求: {}", message);
         Long userId = UserContext.getCurrentUserId();
         if (userId != null) {
             log.info("用户WebSocket连接: {}", userId);
-            // 可以在这里处理连接逻辑，例如记录连接状态
         }
     }
 

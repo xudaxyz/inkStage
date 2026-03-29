@@ -4,13 +4,18 @@ import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 文章列表VO
  */
 @Data
-public class ArticleListVO {
+public class ArticleListVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 文章ID

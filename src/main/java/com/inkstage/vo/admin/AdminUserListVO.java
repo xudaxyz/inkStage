@@ -4,13 +4,18 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 后台用户列表VO
  */
 @Data
-public class AdminUserListVO {
+public class AdminUserListVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID

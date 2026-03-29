@@ -158,4 +158,9 @@ public class Article extends BaseEntity {
      * 最后一次编辑的时间
      */
     private LocalDateTime lastEditTime;
+
+    /**
+     * 文章版本号，用于缓存控制
+     */
+    private Integer articleVersion = 1;
 }

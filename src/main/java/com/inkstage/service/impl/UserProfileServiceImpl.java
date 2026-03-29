@@ -4,7 +4,9 @@ import com.inkstage.entity.model.User;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
+import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserProfileService;
+import com.inkstage.cache.utils.RedisCacheManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ public class UserProfileServiceImpl implements UserProfileService {
 
     private final UserMapper userMapper;
     private final FileService fileService;
+    private final UserCacheService userCacheService;
+    private final RedisCacheManager cacheManager;
 
     @Override
     public User getUserById(Long id) {
@@ -49,6 +53,9 @@ public class UserProfileServiceImpl implements UserProfileService {
                 log.warn("用户ID: {}不存在!", user.getId());
                 throw new BusinessException("用户不存在");
             }
+            // 递增版本号
+            user.setUserVersion(existingUser.getUserVersion() + 1);
+            
             // 执行更新
             int result = userMapper.updateByPrimaryKeySelective(user);
             if (result == 0) {
@@ -58,6 +65,16 @@ public class UserProfileServiceImpl implements UserProfileService {
             // 重新查询更新后的用户
             User updatedUser = userMapper.findById(user.getId());
             fileService.ensureUserImgIsFullUrl(updatedUser);
+            // 更新缓存
+            userCacheService.updateUserCache(updatedUser);
+            // 清除文章列表相关缓存，因为文章列表包含用户信息
+            if (user.getAvatar() != null) {
+                cacheManager.clearArticleListCache();
+                cacheManager.clearHotArticleCache();
+                cacheManager.clearLatestArticleCache();
+                cacheManager.clearBannerArticleCache();
+                cacheManager.clearUserArticleCache(user.getId());
+            }
             log.info("更新用户信息成功, 用户ID: {}", user.getId());
             return updatedUser;
         } catch (Exception e) {

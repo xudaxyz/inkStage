@@ -4,13 +4,18 @@ import com.inkstage.enums.user.Gender;
 import com.inkstage.enums.user.UserStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 用户公开资料VO
  */
 @Data
-public class UserPublicProfileVO {
+public class UserPublicProfileVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户ID

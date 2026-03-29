@@ -1,8 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.service.TokenStoreService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -182,12 +182,13 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
             log.error("撤销用户所有刷新令牌失败，用户ID: {}", userId, e);
         }
     }
-    
+
     /**
      * 撤销单个刷新令牌的具体实现
-     * @param userId 用户ID
-     * @param tokenId 令牌ID
-     * @param token 令牌值
+     *
+     * @param userId   用户ID
+     * @param tokenId  令牌ID
+     * @param token    令牌值
      * @param tokenKey 令牌在Redis中的键
      */
     private void revokeSingleRefreshToken(Long userId, String tokenId, String token, String tokenKey) {
@@ -197,16 +198,16 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
             if (remainingTime == null || remainingTime <= 0) {
                 remainingTime = 86400L; // 默认1天
             }
-            
+
             // 删除令牌
             redisUtil.delete(tokenKey);
             String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
             redisUtil.sRemove(userTokenKey, tokenId);
-            
+
             // 将令牌添加到黑名单，有效期为原令牌的剩余时间
             String blacklistKey = RedisKeyConstants.REFRESH_TOKEN_BLACKLIST_PREFIX + token.hashCode();
             redisUtil.set(blacklistKey, "1", remainingTime);
-            
+
             log.info("刷新令牌撤销成功并加入黑名单，用户ID: {}, 令牌ID: {}", userId, tokenId);
         } catch (Exception e) {
             log.error("撤销单个刷新令牌失败，用户ID: {}, 令牌ID: {}", userId, tokenId, e);

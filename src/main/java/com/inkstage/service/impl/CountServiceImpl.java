@@ -1,10 +1,10 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.enums.CountType;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.CountService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -96,7 +96,7 @@ public class CountServiceImpl implements CountService {
      */
     private void updateCount(Long articleId, int count, CountType countType) {
         log.info("更新文章: {} - {} 计数 [{}]", articleId, countType, count);
-        String key = RedisKeyConstants.buildCacheKey("article:", articleId + ":" + countType.getType());
+        String key = buildCountCacheKey(articleId, countType);
         // 由于count有正负之分, 此直接使用increment
         redisUtil.increment(key, count);
 
@@ -112,7 +112,7 @@ public class CountServiceImpl implements CountService {
      */
     private Long getCount(Long articleId, CountType countType) {
         log.info("获取文章计数, 文章ID: {}, 计数类型: {}", articleId, countType);
-        String key = RedisKeyConstants.buildCacheKey("article:", articleId + ":" + countType.getType());
+        String key = buildCountCacheKey(articleId, countType);
         Long count = redisUtil.get(key, Long.class);
         if (count == null) {
             // 从数据库获取初始值
@@ -128,6 +128,21 @@ public class CountServiceImpl implements CountService {
             redisUtil.set(key, count, 30, TimeUnit.MINUTES);
         }
         return count;
+    }
+
+    /**
+     * 构建计数缓存键
+     */
+    private String buildCountCacheKey(Long articleId, CountType countType) {
+        String countTypeSuffix = switch (countType) {
+            case ARTICLE_READ_COUNT -> "read";
+            case ARTICLE_LIKE_COUNT -> "like";
+            case ARTICLE_COMMENT_COUNT -> "comment";
+            case ARTICLE_COLLECTION_COUNT -> "collect";
+            case ARTICLE_SHARE_COUNT -> "share";
+            default -> countType.getType();
+        };
+        return RedisKeyConstants.buildArticleCountCacheKey(articleId, countTypeSuffix);
     }
 
 }

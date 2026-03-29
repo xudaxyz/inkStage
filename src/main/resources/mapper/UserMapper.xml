@@ -32,6 +32,7 @@
         <result column="status" property="status" javaType="com.inkstage.enums.user.UserStatus"/>
         <result column="username_last_modified_time" property="usernameLastModifiedTime"/>
         <result column="role_id" property="roleId"/>
+        <result column="user_version" property="userVersion"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
@@ -95,7 +96,7 @@
     <sql id="columns">
         id, username, password, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
-        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, role_id, create_time, update_time, deleted
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, role_id, user_version, create_time, update_time, deleted
     </sql>
 
     <!-- 管理员用户详情列 -->
@@ -109,6 +110,14 @@
     <select id="findById" resultMap="ResultMap">
         SELECT
         <include refid="columns"/>
+        FROM user
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <!-- 根据用户ID查询用户版本号 -->
+    <select id="findUserVersionById" resultType="java.lang.Integer">
+        SELECT
+        user_version
         FROM user
         WHERE id = #{id} AND deleted = 0
     </select>
@@ -336,6 +345,7 @@
             <if test="status != null">status = #{status},</if>
             <if test="usernameLastModifiedTime != null">username_last_modified_time = #{usernameLastModifiedTime},</if>
             <if test="roleId != null">role_id = #{roleId},</if>
+            <if test="userVersion != null">user_version = #{userVersion},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
         </set>

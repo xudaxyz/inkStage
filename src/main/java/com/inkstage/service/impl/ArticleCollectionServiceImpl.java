@@ -1,7 +1,7 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.dto.front.CollectArticleDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleCollection;
@@ -12,8 +12,13 @@ import com.inkstage.enums.NotificationType;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CollectionFolderMapper;
-import com.inkstage.service.*;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.service.ArticleCollectionService;
+import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.service.CollectionFolderService;
+import com.inkstage.service.CountService;
+import com.inkstage.service.FileService;
+import com.inkstage.service.NotificationService;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +46,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     private final CollectionFolderService collectionFolderService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional
@@ -86,7 +92,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 增加数量: {}", folderId, result);
             }
             // 缓存收藏状态
-            String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", collectArticleDTO.getArticleId() + ":" + userId);
+            String collectKey = RedisKeyConstants.buildArticleCollectCacheKey(collectArticleDTO.getArticleId(), userId);
             redisUtil.set(collectKey, true, 24, TimeUnit.HOURS);
 
             // 发送收藏通知
@@ -125,7 +131,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
         // 检查是否已收藏
         if (!isArticleCollected(articleId)) {
-            log.warn("用户未收藏该文章, 文章ID: {}, 用户ID: {}", articleId, userId);
+            log.warn("用户ID{} 未收藏该文章 {}", articleId, userId);
             return false;
         }
 
@@ -145,8 +151,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 减少数量: {}", folderId, result);
             }
             // 删除缓存
-            String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", articleId + ":" + userId);
-            redisUtil.delete(collectKey);
+            cacheClearService.clearArticleCollectCache(articleId, userId);
             log.info("取消收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", articleId, userId, folderId);
             return true;
         }
@@ -157,7 +162,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     public boolean isArticleCollected(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
-        String collectKey = RedisKeyConstants.buildCacheKey("article:collect:", articleId + ":" + userId);
+        String collectKey = RedisKeyConstants.buildArticleCollectCacheKey(articleId, userId);
         Boolean isCollected = redisUtil.get(collectKey, Boolean.class);
         if (isCollected != null) {
             return isCollected;

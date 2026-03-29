@@ -2,7 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.service.FileService;
 import com.inkstage.service.UserStatsService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.vo.front.HotUserVO;
 import com.inkstage.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;

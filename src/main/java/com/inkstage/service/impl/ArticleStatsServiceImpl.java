@@ -2,7 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleStatsService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

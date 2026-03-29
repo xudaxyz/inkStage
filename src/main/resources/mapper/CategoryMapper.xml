@@ -12,6 +12,7 @@
         <result column="description" property="description" />
         <result column="article_count" property="articleCount" />
         <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum" />
+        <result column="category_version" property="categoryVersion" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
@@ -19,7 +20,7 @@
     </resultMap>
 
     <sql id="baseColumns">
-        id, name, slug, parent_id, sort_order, description, article_count, status, create_time, update_time, deleted, deleted_time
+        id, name, slug, parent_id, sort_order, description, article_count, status, category_version, create_time, update_time, deleted, deleted_time
     </sql>
 
     <!-- 获取所有分类 -->
@@ -80,7 +81,8 @@
             parent_id = #{parentId},
             sort_order = #{sortOrder},
             description = #{description},
-            status = #{status}
+            status = #{status},
+            category_version = #{categoryVersion}
         WHERE id = #{id}
     </update>
 
@@ -111,5 +113,10 @@
             article_count = article_count + #{increment}
         WHERE id = #{categoryId}
     </update>
+
+    <!-- 根据分类ID查询分类版本号 -->
+    <select id="findCategoryVersionById" resultType="java.lang.Integer">
+        SELECT category_version FROM category WHERE id = #{id}
+    </select>
 
 </mapper>

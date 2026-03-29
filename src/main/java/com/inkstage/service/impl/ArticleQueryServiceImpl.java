@@ -1,9 +1,9 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
-import com.inkstage.constant.RedisKeyConstants;
-import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Tag;
@@ -11,21 +11,20 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.*;
-import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
-import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import tools.jackson.core.type.TypeReference;
 
 /**
  * 文章查询服务实现类
@@ -36,6 +35,7 @@ import tools.jackson.core.type.TypeReference;
 public class ArticleQueryServiceImpl implements ArticleQueryService {
 
     private final ArticleMapper articleMapper;
+    private final UserMapper userMapper;
     private final ArticleTagService articleTagService;
     private final FileService fileService;
     private final RedisUtil redisUtil;
@@ -48,12 +48,12 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
      */
     public PageResult<ArticleListVO> getArticles(ArticleQueryDTO queryDTO) {
         try {
-            // 生成缓存键
-            String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:list:",
-                    queryDTO.getPageNum() + ":" + queryDTO.getPageSize() + ":" +
-                            (queryDTO.getCategoryId() != null ? queryDTO.getCategoryId() : "null") + ":" +
-                            (queryDTO.getTagId() != null ? queryDTO.getTagId() : "null")
+            // 生成缓存键（使用新的缓存键生成方法，只包含非null参数）
+            String cacheKey = RedisKeyConstants.buildArticleListCacheKey(
+                    queryDTO.getPageNum(),
+                    queryDTO.getPageSize(),
+                    queryDTO.getCategoryId(),
+                    queryDTO.getTagId()
             );
 
             // 尝试从缓存获取
@@ -97,8 +97,20 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
      * 获取文章详情
      */
     public ArticleDetailVO getArticleDetail(Long id) {
-        // 生成缓存键（不包含用户信息，因为缓存的是通用信息）
-        String cacheKey = RedisKeyConstants.buildCacheKey("article:detail:", id.toString());
+        // 查询文章版本号
+        Article article = articleMapper.findById(id);
+        if (article == null) {
+            log.warn("文章: {} 不存在", id);
+            throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
+        }
+        long articleVersion = article.getArticleVersion();
+
+        // 查询用户版本号
+        Integer userVersion = userMapper.findUserVersionById(article.getUserId());
+        long userVersionLong = userVersion != null ? userVersion : 1;
+
+        // 生成带版本号的缓存键（同时包含文章和用户的版本号，使用新的格式）
+        String cacheKey = RedisKeyConstants.buildArticleUserVersionedCacheKey(RedisKeyConstants.ARTICLE_PREFIX, id.toString() + ":user:" + article.getUserId(), articleVersion, userVersionLong);
 
         // 尝试从缓存获取通用信息
         ArticleDetailVO articleDetailVO = redisUtil.get(cacheKey, ArticleDetailVO.class);
@@ -154,10 +166,7 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
     public List<ArticleListVO> getHotArticles(Integer limit, String timeRange) {
         try {
             // 生成缓存键
-            String cacheKey = RedisKeyConstants.buildCacheKey(
-                    "article:hot:",
-                    limit + ":" + timeRange
-            );
+            String cacheKey = RedisKeyConstants.buildArticleHotCacheKey(limit, timeRange);
 
             // 尝试从缓存获取
             List<ArticleListVO> hotArticles = redisUtil.getWithType(cacheKey, new TypeReference<>() {
@@ -251,10 +260,15 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
      */
     public PageResult<ArticleListVO> getUserArticles(Long userId, Integer pageNum, Integer pageSize) {
         try {
-            // 生成缓存键
-            String cacheKey = RedisKeyConstants.buildCacheKey(
+            // 查询用户版本号
+            User user = userMapper.findById(userId);
+            long version = user != null ? user.getUserVersion() : 1;
+
+            // 生成带版本号的缓存键
+            String cacheKey = RedisKeyConstants.buildVersionedCacheKey(
                     "article:user:",
-                    userId + ":" + pageNum + ":" + pageSize
+                    userId + ":" + pageNum + ":" + pageSize,
+                    version
             );
 
             // 尝试从缓存获取
@@ -297,10 +311,15 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
      */
     public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
         try {
-            // 生成缓存键
-            String cacheKey = RedisKeyConstants.buildCacheKey(
+            // 查询用户版本号
+            User user = userMapper.findById(userId);
+            long version = user != null ? user.getUserVersion() : 1;
+
+            // 生成带版本号的缓存键
+            String cacheKey = RedisKeyConstants.buildVersionedCacheKey(
                     "article:user:related:",
-                    userId + ":" + excludeArticleId + ":" + limit
+                    userId + ":" + excludeArticleId + ":" + limit,
+                    version
             );
 
             // 尝试从缓存获取
@@ -421,74 +440,4 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
     }
 
-    /**
-     * 管理员获取文章列表
-     */
-    public PageResult<Article> getArticlesByPage(AdminArticleQueryDTO queryDTO) {
-        try {
-            // 计算偏移量
-            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
-            queryDTO.setOffset(offset);
-
-            // 查询文章列表
-            List<Article> articleList = articleMapper.findByPage(queryDTO);
-            // 查询总记录数
-            long total = articleMapper.countByPage(queryDTO);
-
-            // 构建分页结果
-            return PageResult.build(
-                    articleList,
-                    total,
-                    queryDTO.getPageNum(),
-                    queryDTO.getPageSize()
-            );
-        } catch (Exception e) {
-            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
-            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
-        }
-    }
-
-    /**
-     * 管理员获取文章详情
-     */
-    public Article getArticleById(Long id) {
-        try {
-            Article article = articleMapper.findById(id);
-            if (article == null) {
-                log.warn("文章不存在, 文章ID: {}", id);
-                throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND);
-            }
-            return article;
-        } catch (Exception e) {
-            log.error("管理员获取文章详情失败, 文章ID: {}", id, e);
-            throw new BusinessException(ResponseMessage.ARTICLE_NOT_FOUND, e.getMessage());
-        }
-    }
-
-    /**
-     * 管理员获取文章列表（VO）
-     */
-    public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
-        try {
-            // 计算偏移量
-            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
-            queryDTO.setOffset(offset);
-
-            // 查询文章列表
-            List<AdminArticleVO> articleList = articleMapper.findAdminArticlesByPage(queryDTO);
-            // 查询总记录数
-            long total = articleMapper.countByPage(queryDTO);
-
-            // 构建分页结果
-            return PageResult.build(
-                    articleList,
-                    total,
-                    queryDTO.getPageNum(),
-                    queryDTO.getPageSize()
-            );
-        } catch (Exception e) {
-            log.error("管理员获取文章列表失败, 页码: {}, 每页大小: {}", queryDTO.getPageNum(), queryDTO.getPageSize(), e);
-            throw new BusinessException(ResponseMessage.ARTICLE_LIST_NOT_FOUND, e.getMessage());
-        }
-    }
 }

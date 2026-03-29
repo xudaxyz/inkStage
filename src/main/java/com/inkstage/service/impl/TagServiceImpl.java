@@ -127,6 +127,13 @@ public class TagServiceImpl implements TagService {
             if (tag.getId() == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
+            // 获取现有标签信息
+            Tag existingTag = tagMapper.findById(tag.getId());
+            if (existingTag == null) {
+                throw new BusinessException("标签不存在");
+            }
+            // 递增版本号
+            tag.setTagVersion(existingTag.getTagVersion() + 1);
             // 将slug转换为小写
             if (tag.getSlug() != null && !tag.getSlug().isEmpty()) {
                 tag.setSlug(tag.getSlug().toLowerCase());

@@ -4,7 +4,7 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.User;
 import com.inkstage.mapper.RoleMapper;
 import com.inkstage.mapper.UserRoleMapper;
-import com.inkstage.service.UserCacheService;
+import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.inkstage.service;
+package com.inkstage.cache.service;
 
 import com.inkstage.entity.model.User;
 

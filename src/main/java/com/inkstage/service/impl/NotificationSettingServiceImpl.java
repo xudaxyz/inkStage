@@ -32,15 +32,15 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
     @Override
     public boolean saveNotificationSetting(NotificationSetting setting) {
         NotificationSetting existingSetting = notificationSettingMapper.selectByUserId(setting.getUserId());
+        int result;
         if (existingSetting == null) {
             // 插入新设置
-            int result = notificationSettingMapper.insert(setting);
-            return result > 0;
+            result = notificationSettingMapper.insert(setting);
         } else {
             // 更新现有设置
-            int result = notificationSettingMapper.update(setting);
-            return result > 0;
+            result = notificationSettingMapper.update(setting);
         }
+        return result > 0;
     }
 
     @Override

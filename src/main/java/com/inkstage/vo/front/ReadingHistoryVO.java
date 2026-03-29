@@ -2,13 +2,18 @@ package com.inkstage.vo.front;
 
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 阅读历史VO
  */
 @Data
-public class ReadingHistoryVO {
+public class ReadingHistoryVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 文章ID

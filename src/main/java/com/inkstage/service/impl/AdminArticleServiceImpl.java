@@ -12,9 +12,9 @@ import com.inkstage.service.AdminArticleService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
-import com.inkstage.service.util.ArticleServiceUtils;
+import com.inkstage.utils.ArticleUtils;
 import com.inkstage.enums.NotificationType;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
@@ -99,10 +99,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("更新文章状态, 文章ID: {}, 状态: {}", id, status.getDesc());
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新状态
             int result = articleMapper.updateStatus(id, status);
-            ArticleServiceUtils.checkOperationResult(result, id, "更新文章状态");
+            ArticleUtils.checkOperationResult(result, id, "更新文章状态");
             
             // 发送通知
             if (status == ArticleStatus.OFFLINE) {
@@ -142,10 +142,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("审核通过文章, 文章ID: {}", id);
             // 检查文章是否存在
-            ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新审核状态为通过
             int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.APPROVED);
-            ArticleServiceUtils.checkOperationResult(result, id, "审核通过文章");
+            ArticleUtils.checkOperationResult(result, id, "审核通过文章");
             // 更新文章状态为已发布
             articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
             // 清理相关缓存
@@ -166,10 +166,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("审核拒绝文章, 文章ID: {}, 原因: {}", id, reason);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新审核状态为拒绝
             int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.REJECTED);
-            ArticleServiceUtils.checkOperationResult(result, id, "审核拒绝文章");
+            ArticleUtils.checkOperationResult(result, id, "审核拒绝文章");
             // 发送通知
             notificationService.sendNotificationWithTemplate(
                     article.getUserId(),
@@ -194,10 +194,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("重新审核文章, 文章ID: {}", id);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新审核状态为待审核
             int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.PENDING);
-            ArticleServiceUtils.checkOperationResult(result, id, "重新审核文章");
+            ArticleUtils.checkOperationResult(result, id, "重新审核文章");
             // 发送通知
             notificationService.sendNotificationWithTemplate(
                     article.getUserId(),
@@ -251,10 +251,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("置顶文章, 文章ID: {}", id);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新置顶状态
             int result = articleMapper.updateTopStatus(id, com.inkstage.enums.article.TopStatus.TOP);
-            ArticleServiceUtils.checkOperationResult(result, id, "置顶文章");
+            ArticleUtils.checkOperationResult(result, id, "置顶文章");
             // 发送通知
             notificationService.sendNotificationWithTemplate(
                     article.getUserId(),
@@ -279,10 +279,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("取消置顶文章, 文章ID: {}", id);
             // 检查文章是否存在
-            ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新置顶状态
             int result = articleMapper.updateTopStatus(id, com.inkstage.enums.article.TopStatus.NOT_TOP);
-            ArticleServiceUtils.checkOperationResult(result, id, "取消置顶文章");
+            ArticleUtils.checkOperationResult(result, id, "取消置顶文章");
             log.info("取消置顶文章成功, 文章ID: {}", id);
             return true;
         } catch (BusinessException e) {
@@ -299,10 +299,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("推荐文章, 文章ID: {}", id);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新推荐状态
             int result = articleMapper.updateRecommendStatus(id, com.inkstage.enums.article.RecommendStatus.RECOMMENDED);
-            ArticleServiceUtils.checkOperationResult(result, id, "推荐文章");
+            ArticleUtils.checkOperationResult(result, id, "推荐文章");
             // 发送通知
             notificationService.sendNotificationWithTemplate(
                     article.getUserId(),
@@ -327,10 +327,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("取消推荐文章, 文章ID: {}", id);
             // 检查文章是否存在
-            ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            ArticleUtils.getArticleSafely(articleMapper, id);
             // 更新推荐状态
             int result = articleMapper.updateRecommendStatus(id, com.inkstage.enums.article.RecommendStatus.NOT_RECOMMENDED);
-            ArticleServiceUtils.checkOperationResult(result, id, "取消推荐文章");
+            ArticleUtils.checkOperationResult(result, id, "取消推荐文章");
             log.info("取消推荐文章成功, 文章ID: {}", id);
             return true;
         } catch (BusinessException e) {
@@ -347,7 +347,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("管理员更新文章, 文章ID: {}", id);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
 
             // 更新文章基本信息
             article.setTitle(updateDTO.getTitle());
@@ -377,7 +377,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
 
             // 更新文章
             int result = articleMapper.update(article);
-            ArticleServiceUtils.checkOperationResult(result, id, "更新文章");
+            ArticleUtils.checkOperationResult(result, id, "更新文章");
 
             // 处理标签
             articleTagService.handleArticleTags(id, updateDTO.getTags());
@@ -401,9 +401,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("管理员删除文章, 文章ID: {}", id);
             // 检查文章是否存在
-            Article article = ArticleServiceUtils.getArticleSafely(articleMapper, id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.deleteByAdmin(id);
-            ArticleServiceUtils.checkOperationResult(i, id, "管理员删除文章");
+            ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
             // 发送通知
             notificationService.sendNotificationWithTemplate(
                     article.getUserId(),

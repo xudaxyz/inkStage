@@ -156,4 +156,9 @@ public class User extends BaseEntity {
      * 用户角色ID
      */
     private Integer roleId;
+
+    /**
+     * 用户资料版本号，用于缓存控制
+     */
+    private Integer userVersion = 1;
 }

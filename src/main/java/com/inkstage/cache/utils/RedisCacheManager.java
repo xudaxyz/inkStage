@@ -1,6 +1,6 @@
-package com.inkstage.utils;
+package com.inkstage.cache.utils;
 
-import com.inkstage.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class RedisCacheManager {
      */
     public void clearArticleDetailCache(Long articleId) {
         try {
-            String articleDetailKey = RedisKeyConstants.buildCacheKey("article:detail:", articleId.toString());
+            String articleDetailKey = RedisKeyConstants.buildArticleDetailCacheKey(articleId);
             redisUtil.delete(articleDetailKey);
             log.info("清除文章详情缓存, 文章ID: {}", articleId);
         } catch (Exception e) {
@@ -89,7 +89,7 @@ public class RedisCacheManager {
      */
     public void clearUserArticleCache(Long userId) {
         if (userId != null) {
-            String userArticleKey = RedisKeyConstants.buildCacheKey("article:user:", userId + ":*");
+            String userArticleKey = RedisKeyConstants.buildCacheKey(RedisKeyConstants.USER_ARTICLE_LIST_PREFIX, userId + ":*");
             redisUtil.deletePattern(userArticleKey);
             log.info("清除用户文章列表缓存, 用户ID: {}", userId);
         }
@@ -113,7 +113,7 @@ public class RedisCacheManager {
      */
     public void clearArticleCommentCache(Long articleId) {
         if (articleId != null) {
-            String commentListPattern = RedisKeyConstants.buildCacheKey("comment:list:", articleId + ":*");
+            String commentListPattern = RedisKeyConstants.buildCacheKey(RedisKeyConstants.COMMENT_PREFIX, articleId + ":*");
             redisUtil.deletePattern(commentListPattern);
             log.info("清除文章评论列表缓存, 文章ID: {}", articleId);
         }
@@ -126,7 +126,7 @@ public class RedisCacheManager {
      */
     public void clearArticleCommentRepliesCache(Long parentId) {
         if (parentId != null) {
-            String commentReplyPattern = RedisKeyConstants.buildCacheKey("comment:replies:", parentId + ":*");
+            String commentReplyPattern = RedisKeyConstants.buildCommentReplyPattern(parentId);
             redisUtil.deletePattern(commentReplyPattern);
             log.info("清除文章回复评论列表缓存, 父评论ID: {}", parentId);
         }

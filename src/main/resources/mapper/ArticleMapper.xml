@@ -36,6 +36,7 @@
         <result column="scheduled_publish_time" property="scheduledPublishTime"/>
         <result column="share_token" property="shareToken"/>
         <result column="last_edit_time" property="lastEditTime"/>
+        <result column="article_version" property="articleVersion"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
@@ -45,7 +46,7 @@
     <sql id="baseColumns">
         id, title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
-        allow_forward, original, original_url, last_edit_time, create_time, update_time, deleted, deleted_time,
+        allow_forward, original, original_url, last_edit_time, article_version, create_time, update_time, deleted, deleted_time,
         scheduled_publish_time, share_token, meta_title, meta_description, meta_keywords
     </sql>
 
@@ -746,6 +747,7 @@
             <if test="original != null">original = #{original},</if>
             <if test="originalUrl != null">original_url = #{originalUrl},</if>
             <if test="lastEditTime != null">last_edit_time = #{lastEditTime},</if>
+            <if test="articleVersion != null">article_version = #{articleVersion},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
@@ -847,6 +849,11 @@
     <!-- 根据文章ID获取分享数 -->
     <select id="getShareCount" resultType="java.lang.Long">
         SELECT share_count FROM article WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <!-- 根据文章ID查询文章版本号 -->
+    <select id="findArticleVersionById" resultType="java.lang.Integer">
+        SELECT article_version FROM article WHERE id = #{id} AND deleted = 0
     </select>
 
     <!-- 查询到达定时发布时间且状态为待发布的文章 -->

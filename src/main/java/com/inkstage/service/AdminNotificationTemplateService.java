@@ -7,7 +7,7 @@ import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.enums.NotificationChannel;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.StatusEnum;
-import com.inkstage.vo.TemplatePreviewVO;
+import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 
 import java.util.List;
 
@@ -78,7 +78,7 @@ public interface AdminNotificationTemplateService {
      * @param variables    变量JSON字符串
      * @return 渲染后的标题、内容、类型和链接
      */
-    TemplatePreviewVO renderTemplate(String templateCode, String variables);
+    AdminNotificationTemplatePreviewVO renderTemplate(String templateCode, String variables);
 
     /**
      * 根据通知类型渲染模板
@@ -88,7 +88,7 @@ public interface AdminNotificationTemplateService {
      * @param variables 变量JSON字符串
      * @return 渲染后的标题、内容、类型和链接
      */
-    TemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables);
+    AdminNotificationTemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables);
 
     /**
      * 手动发送通知

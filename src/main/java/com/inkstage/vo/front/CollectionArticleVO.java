@@ -5,13 +5,18 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.OriginalStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 收藏文章列表VO
  */
 @Data
-public class CollectionArticleVO {
+public class CollectionArticleVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 收藏ID

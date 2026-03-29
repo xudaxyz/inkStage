@@ -6,13 +6,18 @@ import com.inkstage.enums.article.RecommendStatus;
 import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
  * 后台文章管理VO
  */
 @Data
-public class AdminArticleVO {
+public class AdminArticleVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 文章ID

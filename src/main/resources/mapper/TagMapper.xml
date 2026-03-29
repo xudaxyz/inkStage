@@ -12,6 +12,7 @@
         <result column="article_count" property="articleCount" />
         <result column="usage_count" property="usageCount" />
         <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum" />
+        <result column="tag_version" property="tagVersion" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
@@ -19,7 +20,7 @@
     </resultMap>
 
     <sql id="baseColumns">
-        id, name, slug, description, user_id, article_count, usage_count, status, create_time, update_time, deleted, deleted_time
+        id, name, slug, description, user_id, article_count, usage_count, status, tag_version, create_time, update_time, deleted, deleted_time
     </sql>
 
     <!-- 获取所有标签 -->
@@ -87,7 +88,8 @@
             name = #{name},
             slug = #{slug},
             description = #{description},
-            status = #{status}
+            status = #{status},
+            tag_version = #{tagVersion}
         WHERE id = #{id}
     </update>
 
@@ -143,6 +145,11 @@
         JOIN article_tag at ON a.id = at.article_id
         WHERE at.tag_id = #{tagId}
           AND a.deleted = 0
+    </select>
+
+    <!-- 根据标签ID查询标签版本号 -->
+    <select id="findTagVersionById" resultType="java.lang.Integer">
+        SELECT tag_version FROM tag WHERE id = #{id}
     </select>
 
 </mapper>

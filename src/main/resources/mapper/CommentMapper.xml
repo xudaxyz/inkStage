@@ -20,6 +20,7 @@
         <result property="userAgent" column="user_agent"/>
         <result property="mentionUserIds" column="mention_user_ids"/>
         <result property="reportCount" column="report_count"/>
+        <result property="commentVersion" column="comment_version"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="deleted" column="deleted"/>
@@ -31,7 +32,7 @@
         id
         , article_id, user_id, parent_id, content, floor, like_count, reply_count, status, top,
           top_order, review_user_id, review_time, review_reason, ip_address, user_agent, mention_user_ids,
-          report_count, create_time, update_time, deleted, deleted_time
+          report_count, comment_version, create_time, update_time, deleted, deleted_time
     </sql>
 
     <!-- 根据文章ID查询评论列表 -->
@@ -130,6 +131,7 @@
         <if test="reviewReason != null">review_reason = #{reviewReason},</if>
         <if test="reviewUserId != null">review_user_id = #{reviewUserId},</if>
         <if test="reviewTime != null">review_time = #{reviewTime},</if>
+        comment_version = comment_version + 1,
             update_time = NOW()
         </set>
         WHERE
@@ -385,5 +387,12 @@
         SELECT COUNT(*)
         FROM comment
         WHERE deleted = 0 AND parent_id = #{parentId}
+    </select>
+
+    <!-- 查询文章的最新评论版本号 -->
+    <select id="findMaxCommentVersionByArticleId" resultType="java.lang.Integer">
+        SELECT MAX(comment_version) as max_version
+        FROM comment
+        WHERE deleted = 0 AND article_id = #{articleId}
     </select>
 </mapper>

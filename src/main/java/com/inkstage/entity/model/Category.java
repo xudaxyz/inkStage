@@ -51,4 +51,9 @@ public class Category extends BaseEntity {
      * 状态(0:禁用,1:正常)
      */
     private StatusEnum status;
+
+    /**
+     * 分类版本号，用于缓存控制
+     */
+    private Integer categoryVersion = 1;
 }

@@ -14,7 +14,7 @@ import com.inkstage.service.AdminNotificationTemplateService;
 import com.inkstage.service.UserService;
 import com.inkstage.utils.TemplateRenderUtils;
 import com.inkstage.utils.UserContext;
-import com.inkstage.vo.TemplatePreviewVO;
+import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -220,7 +220,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     }
 
     @Override
-    public TemplatePreviewVO renderTemplate(String templateCode, String variables) {
+    public AdminNotificationTemplatePreviewVO renderTemplate(String templateCode, String variables) {
         NotificationTemplate template = templateMapper.selectByCode(templateCode);
         if (template == null) {
             throw new BusinessException("模板不存在: " + templateCode);
@@ -231,7 +231,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     }
 
     @Override
-    public TemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables) {
+    public AdminNotificationTemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables) {
         if (channel == null) {
             channel = NotificationChannel.SITE;
         }
@@ -268,8 +268,8 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 内部模板渲染方法
      */
-    private TemplatePreviewVO renderTemplateInternal(NotificationTemplate template, Map<String, Object> variables) {
-        TemplatePreviewVO result = new TemplatePreviewVO();
+    private AdminNotificationTemplatePreviewVO renderTemplateInternal(NotificationTemplate template, Map<String, Object> variables) {
+        AdminNotificationTemplatePreviewVO result = new AdminNotificationTemplatePreviewVO();
 
         // 渲染标题
         String title = TemplateRenderUtils.renderString(template.getTitleTemplate(), variables);
@@ -298,7 +298,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         }
 
         // 渲染模板一次，避免重复渲染
-        TemplatePreviewVO rendered = renderTemplate(manualNotice.getTemplateCode(), manualNotice.getVariables());
+        AdminNotificationTemplatePreviewVO rendered = renderTemplate(manualNotice.getTemplateCode(), manualNotice.getVariables());
         if (rendered == null) {
             return 0;
         }
@@ -310,7 +310,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 批量发送通知
      */
-    private int sendBatchNotifications(List<Long> userIds, TemplatePreviewVO rendered, Long relatedId, Long senderId) {
+    private int sendBatchNotifications(List<Long> userIds, AdminNotificationTemplatePreviewVO rendered, Long relatedId, Long senderId) {
         int successCount = 0;
         final int BATCH_SIZE = 100; // 每批发送100条
 
@@ -333,7 +333,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 发送一批通知
      */
-    private int sendBatch(List<Long> userIds, TemplatePreviewVO rendered, Long relatedId, Long senderId) {
+    private int sendBatch(List<Long> userIds, AdminNotificationTemplatePreviewVO rendered, Long relatedId, Long senderId) {
         int successCount = 0;
 
         for (Long userId : userIds) {

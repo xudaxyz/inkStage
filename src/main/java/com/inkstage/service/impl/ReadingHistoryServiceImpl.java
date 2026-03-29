@@ -1,23 +1,20 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ReadingHistoryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ReadingHistory;
-import com.inkstage.entity.model.User;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.ReadingHistoryMapper;
-import com.inkstage.mapper.UserMapper;
-import com.inkstage.service.ReadingHistoryService;
 import com.inkstage.service.FileService;
+import com.inkstage.service.ReadingHistoryService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReadingHistoryVO;
-import com.inkstage.common.PageResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,11 +28,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
 
     private final ReadingHistoryMapper readingHistoryMapper;
     private final ArticleMapper articleMapper;
-    private final UserMapper userMapper;
     private final FileService fileService;
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Override
     public boolean saveOrUpdateReadingHistory(ReadingHistoryDTO dto) {
@@ -85,7 +78,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
         try {
             Long userId = UserContext.getCurrentUserId();
             if (userId == null) {
-                log.warn("用户未登录，无法获取阅读历史");
+                log.warn("用户未登录");
                 return PageResult.build(null, 0L, page, size);
             }
 
@@ -108,7 +101,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
                 }
             }
 
-            return PageResult.build(voList, (long)total, page, size);
+            return PageResult.build(voList, (long) total, page, size);
         } catch (Exception e) {
             log.error("获取阅读历史列表失败", e);
             return PageResult.build(null, 0L, page, size);
@@ -154,7 +147,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
         try {
             Long userId = UserContext.getCurrentUserId();
             if (userId == null) {
-                log.warn("用户未登录，无法获取阅读历史");
+                log.warn("用户未登录，不获取阅读历史");
                 return null;
             }
 
@@ -187,7 +180,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
 
             // 使用批量查询方法
             List<ReadingHistoryVO> voList = readingHistoryMapper.findByUserIdAndArticleIdsWithDetails(userId, articleIds);
-            
+
             // 处理头像和封面图
             for (ReadingHistoryVO vo : voList) {
                 // 处理头像

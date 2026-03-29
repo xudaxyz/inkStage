@@ -15,7 +15,7 @@ import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.*;
 import com.inkstage.utils.IPUtil;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.inkstage.constant.RedisKeyConstants.LOGIN_ATTEMPT_PREFIX;
-import static com.inkstage.constant.RedisKeyConstants.LOGIN_LOCK_PREFIX;
+import static com.inkstage.cache.constant.RedisKeyConstants.LOGIN_ATTEMPT_PREFIX;
+import static com.inkstage.cache.constant.RedisKeyConstants.LOGIN_LOCK_PREFIX;
 
 /**
  * 用户认证服务实现类

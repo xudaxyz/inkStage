@@ -4,6 +4,8 @@ import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,7 +13,10 @@ import java.util.List;
  * 评论VO
  */
 @Data
-public class ArticleCommentVO {
+public class ArticleCommentVO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     /**
      * 评论ID

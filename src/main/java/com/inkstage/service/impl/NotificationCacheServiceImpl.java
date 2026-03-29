@@ -2,7 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.enums.NotificationCategory;
 import com.inkstage.service.NotificationCacheService;
-import com.inkstage.utils.RedisUtil;
+import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -12,7 +12,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.inkstage.constant.RedisKeyConstants.*;
+import static com.inkstage.cache.constant.RedisKeyConstants.*;
 
 /**
  * 通知缓存服务实现类

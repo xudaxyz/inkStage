@@ -1,4 +1,4 @@
-package com.inkstage.service;
+package com.inkstage.cache.service.impl;
 
 import com.inkstage.service.ArticleQueryService;
 import com.inkstage.service.UserStatsService;

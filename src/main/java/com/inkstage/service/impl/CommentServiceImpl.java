@@ -1,5 +1,9 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.utils.CacheKeyGenerator;
+import com.inkstage.cache.utils.RedisCacheManager;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
@@ -7,7 +11,6 @@ import com.inkstage.dto.front.CommentDTO;
 import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Comment;
-import com.inkstage.enums.CommentCountType;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.ReviewStatus;
@@ -19,10 +22,6 @@ import com.inkstage.service.CommentService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
-import com.inkstage.constant.RedisKeyConstants;
-import com.inkstage.utils.CacheKeyGenerator;
-import com.inkstage.utils.RedisCacheManager;
-import com.inkstage.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +62,10 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("获取文章评论 {}", queryDTO);
 
+        // 获取文章的最新评论版本号
+        Integer maxVersion = commentMapper.findMaxCommentVersionByArticleId(queryDTO.getArticleId());
+        int commentVersion = maxVersion != null ? maxVersion : 1;
+
         // 生成缓存键
         String cacheKey = CacheKeyGenerator.generateCommentListKey(
                 queryDTO.getArticleId(),
@@ -70,7 +73,7 @@ public class CommentServiceImpl implements CommentService {
                 queryDTO.getPageSize(),
                 queryDTO.getSortBy(),
                 queryDTO.getMaxReplies(),
-                queryDTO.getReplySortBy()
+                commentVersion
         );
 
         try {
@@ -427,99 +430,6 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return topLevelComments;
-    }
-
-    /**
-     * 增加评论点赞数
-     *
-     * @param commentId 评论ID
-     * @return 增加后的点赞数
-     */
-    public Long incrementCommentLikeCount(Long commentId) {
-        return incrementCommentCount(commentId, CommentCountType.LIKE);
-    }
-
-    /**
-     * 增加评论回复数
-     *
-     * @param commentId 评论ID
-     * @return 增加后的回复数
-     */
-    public Long incrementCommentReplyCount(Long commentId) {
-        return incrementCommentCount(commentId, CommentCountType.REPLY);
-    }
-
-    /**
-     * 增加评论计数的通用方法
-     *
-     * @param commentId 评论ID
-     * @param countType 计数类型
-     * @return 增加后的计数值
-     */
-    private Long incrementCommentCount(Long commentId, CommentCountType countType) {
-        if (commentId == null || countType == null) {
-            return null;
-        }
-
-        try {
-            // 生成Redis计数器键
-            String countKey = CacheKeyGenerator.generateCommentCountKey(commentId, countType.getValue());
-
-            // 增加Redis计数器
-            Long count = redisUtil.increment(countKey);
-            if (count != null) {
-                log.info("评论{}增加成功, 评论ID: {}, 计数: {}", countType.getDesc(), commentId, count);
-
-                // 异步更新数据库（这里简化处理，实际项目中应使用@Async或消息队列）
-                // 根据countType调用不同的更新方法
-
-                return count;
-            }
-            return null;
-        } catch (Exception e) {
-            log.error("增加评论{}失败, 评论ID: {}", countType.getDesc(), commentId, e);
-            return null;
-        }
-    }
-
-    /**
-     * 获取评论计数
-     *
-     * @param commentId 评论ID
-     * @param countType 计数类型
-     * @return 计数值
-     */
-    public Long getCommentCount(Long commentId, CommentCountType countType) {
-        if (commentId == null || countType == null) {
-            log.warn("评论ID或计数类型为空, 评论ID: {}, 计数类型: {}", commentId, countType);
-            return 0L;
-        }
-
-        try {
-            // 生成Redis计数器键
-            String countKey = CacheKeyGenerator.generateCommentCountKey(commentId, countType.getValue());
-
-            // 获取Redis计数器值
-            Object value = redisUtil.get(countKey);
-            if (value != null) {
-                if (value instanceof Long) {
-                    return (Long) value;
-                } else if (value instanceof String) {
-                    try {
-                        return Long.parseLong((String) value);
-                    } catch (NumberFormatException e) {
-                        log.error("解析评论计数值失败, 评论ID: {}, 计数类型: {}", commentId, countType.getDesc(), e);
-                    }
-                }
-            }
-
-            // 如果Redis中不存在，从数据库获取并更新到Redis
-            // 这里简化处理，实际项目中应从数据库查询
-            return 0L;
-        } catch (Exception e) {
-            log.error("获取评论{}失败, 评论ID: {}", countType.getDesc(), commentId, e);
-            return 0L;
-        }
     }
 
     @Override

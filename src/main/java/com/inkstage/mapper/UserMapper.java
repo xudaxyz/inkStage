@@ -31,6 +31,13 @@ public interface UserMapper {
     User findById(@Param("id") Long id);
 
     /**
+     * 根据用户ID查询用户版本号
+     * @param id 用户ID
+     * @return 用户版本号
+     */
+    Integer findUserVersionById(@Param("id") Long id);
+
+    /**
      * 根据用户名查询用户
      * @param username 用户名
      * @return 用户信息

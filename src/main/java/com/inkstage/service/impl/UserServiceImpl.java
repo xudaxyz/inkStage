@@ -3,7 +3,6 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
-import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
@@ -32,9 +31,8 @@ public class UserServiceImpl implements UserService {
 
     private final UserRegistrationService userRegistrationService;
     private final UserProfileService userProfileService;
-    private final UserAdminService userAdminService;
+    private final AdminUserService adminUserService;
     private final UserStatsService userStatsService;
-    private final UserRoleService userRoleService;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -123,7 +121,7 @@ public class UserServiceImpl implements UserService {
             log.warn("根据ID获取用户详情参数无效, 用户ID: {}", id);
             return null;
         }
-        return userAdminService.getUserDetailById(id);
+        return adminUserService.getUserDetailById(id);
     }
 
     @Override
@@ -136,7 +134,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageResult<AdminUserListVO> getUsersByPage(AdminUserQueryDTO userQueryDTO) {
-        return userAdminService.getUsersByPage(userQueryDTO);
+        return adminUserService.getUsersByPage(userQueryDTO);
     }
 
     @Override
@@ -145,7 +143,7 @@ public class UserServiceImpl implements UserService {
             log.warn("删除用户参数无效, 用户ID: {}", id);
             return;
         }
-        userAdminService.deleteUser(id);
+        adminUserService.deleteUser(id);
     }
 
     @Override
@@ -154,7 +152,7 @@ public class UserServiceImpl implements UserService {
             log.warn("更新用户详情参数无效, 用户ID: {}", id);
             return;
         }
-        userAdminService.updateUserDetail(id, userDetailVO);
+        adminUserService.updateUserDetail(id, userDetailVO);
     }
 
     @Override
@@ -163,7 +161,7 @@ public class UserServiceImpl implements UserService {
             log.warn("更新用户状态参数无效, 用户ID: {}, 状态: {}", id, userStatus);
             return false;
         }
-        return userAdminService.updateUserStatus(id, userStatus);
+        return adminUserService.updateUserStatus(id, userStatus);
     }
 
     @Override
@@ -308,7 +306,7 @@ public class UserServiceImpl implements UserService {
         }
         try {
             log.debug("根据角色代码获取用户ID列表, 角色代码: {}", roleCode);
-            List<Long> userIds = userAdminService.getUserIdsByRoleCode(roleCode);
+            List<Long> userIds = adminUserService.getUserIdsByRoleCode(roleCode);
             log.info("根据角色代码获取用户ID列表成功, 角色代码: {}, 用户数量: {}", roleCode, userIds.size());
             return userIds;
         } catch (Exception e) {
@@ -321,7 +319,7 @@ public class UserServiceImpl implements UserService {
     public List<Long> getAllUserIds() {
         try {
             log.debug("获取所有用户ID列表");
-            List<Long> userIds = userAdminService.getAllUserIds();
+            List<Long> userIds = adminUserService.getAllUserIds();
             log.info("获取所有用户ID列表成功, 用户数量: {}", userIds.size());
             return userIds;
         } catch (Exception e) {

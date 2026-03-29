@@ -31,6 +31,14 @@ public interface TagMapper {
     Tag findById(Long id);
 
     /**
+     * 根据标签ID查询标签版本号
+     *
+     * @param id 标签ID
+     * @return 标签版本号
+     */
+    Integer findTagVersionById(Long id);
+
+    /**
      * 获取所有激活状态的标签
      *
      * @return 激活状态的标签列表

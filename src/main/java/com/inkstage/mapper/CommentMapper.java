@@ -183,4 +183,12 @@ public interface CommentMapper {
      */
     long countRepliesByParentId(@Param("parentId") Long parentId);
 
+    /**
+     * 查询文章的最新评论版本号
+     *
+     * @param articleId 文章ID
+     * @return 最新评论版本号
+     */
+    Integer findMaxCommentVersionByArticleId(@Param("articleId") Long articleId);
+
 }

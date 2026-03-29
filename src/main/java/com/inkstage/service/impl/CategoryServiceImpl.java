@@ -122,6 +122,13 @@ public class CategoryServiceImpl implements CategoryService {
                 log.warn("更新分类失败, 分类ID为空");
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
+            // 获取现有分类信息
+            Category existingCategory = categoryMapper.findById(category.getId());
+            if (existingCategory == null) {
+                throw new BusinessException("分类不存在");
+            }
+            // 递增版本号
+            category.setCategoryVersion(existingCategory.getCategoryVersion() + 1);
             // 将slug转换为小写
             if (category.getSlug() != null && !category.getSlug().isEmpty()) {
                 category.setSlug(category.getSlug().toLowerCase());

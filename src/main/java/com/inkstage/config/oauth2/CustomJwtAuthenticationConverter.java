@@ -4,7 +4,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.mapper.RoleMapper;
 import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.security.UserDetailsImpl;
-import com.inkstage.service.UserCacheService;
+import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;

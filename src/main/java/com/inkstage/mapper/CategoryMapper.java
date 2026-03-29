@@ -29,6 +29,13 @@ public interface CategoryMapper {
     Category findById(Long id);
 
     /**
+     * 根据分类ID查询分类版本号
+     * @param id 分类ID
+     * @return 分类版本号
+     */
+    Integer findCategoryVersionById(Long id);
+
+    /**
      * 获取所有激活状态的分类
      * @return 激活状态的分类列表
      */

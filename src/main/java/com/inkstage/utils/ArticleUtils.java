@@ -1,4 +1,4 @@
-package com.inkstage.service.util;
+package com.inkstage.utils;
 
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Article;
@@ -11,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
  * 提供文章服务相关的通用方法，如参数验证、异常处理等
  */
 @Slf4j
-public class ArticleServiceUtils {
+public class ArticleUtils {
 
     /**
      * 验证文章ID是否有效
