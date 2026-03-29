@@ -4,6 +4,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ArticleCreateDTO;
+import com.inkstage.dto.front.MyArticleQueryDTO;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleLikeService;
@@ -239,7 +240,7 @@ public class ArticleController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         log.info("获取当前用户文章列表, 状态: {}, 关键词: {}, 页码: {}, 每页大小: {}", articleStatus, keyword, pageNum, pageSize);
-        com.inkstage.dto.front.MyArticleQueryDTO queryDTO = new com.inkstage.dto.front.MyArticleQueryDTO();
+        MyArticleQueryDTO queryDTO = new MyArticleQueryDTO();
         queryDTO.setArticleStatus(articleStatus);
         queryDTO.setKeyword(keyword);
         queryDTO.setPageNum(pageNum);

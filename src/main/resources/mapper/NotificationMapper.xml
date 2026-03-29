@@ -6,7 +6,8 @@
     <resultMap id="BaseResultMap" type="com.inkstage.entity.model.Notification">
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
-        <result column="type" property="type" javaType="com.inkstage.enums.NotificationType" />
+        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.NotificationType" />
+        <result column="notification_category" property="notificationCategory" javaType="com.inkstage.enums.NotificationCategory" />
         <result column="title" property="title" />
         <result column="content" property="content" />
         <result column="read_status" property="readStatus" />
@@ -27,7 +28,7 @@
 
     <!-- 基础查询列 -->
     <sql id="Base_Column_List">
-        id, user_id, type, title, content, read_status, read_time, related_id, related_type, 
+        id, user_id, notification_type, notification_category, title, content, read_status, read_time, related_id, related_type,
         sender_id, pushed_status, push_time, priority, action_url, extra_data, 
         create_time, update_time, deleted, deleted_time
     </sql>
@@ -53,7 +54,7 @@
             notification
         WHERE
             user_id = #{userId}
-            AND type = #{type}
+            AND notification_type = #{notificationType}
             AND deleted = 0
         ORDER BY
             create_time DESC
@@ -112,11 +113,11 @@
     <!-- 插入通知 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Notification" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO notification (
-            user_id, type, title, content, read_status, read_time, related_id, related_type, 
+            user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
             sender_id, pushed_status, push_time, priority, action_url, extra_data, 
             create_time, update_time, deleted
         ) VALUES (
-            #{userId}, #{type}, #{title}, #{content}, #{readStatus}, #{readTime}, #{relatedId}, #{relatedType}, 
+            #{userId}, #{notificationType}, #{title}, #{content}, #{readStatus}, #{readTime}, #{relatedId}, #{relatedType},
             #{senderId}, #{pushedStatus}, #{pushTime}, #{priority}, #{actionUrl}, #{extraData},
             NOW(), NOW(), 0
         )
@@ -167,7 +168,7 @@
             notification
         WHERE
             user_id = #{userId}
-            AND type = #{type}
+            AND notification_type = #{notificationType}
             AND deleted = 0
         ORDER BY
             create_time DESC
@@ -193,20 +194,20 @@
             notification
         WHERE
             user_id = #{userId}
-            AND type = #{type}
+            AND notification_type = #{notificationType}
             AND deleted = 0
     </select>
 
     <!-- 批量插入通知 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO notification (
-            user_id, type, title, content, read_status, read_time, related_id, related_type, 
+            user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
             sender_id, pushed_status, push_time, priority, action_url, extra_data, 
             create_time, update_time, deleted
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-                #{item.userId}, #{item.type}, #{item.title}, #{item.content}, #{item.readStatus}, #{item.readTime}, #{item.relatedId}, #{item.relatedType}, 
+                #{item.userId}, #{item.notificationType}, #{item.title}, #{item.content}, #{item.readStatus}, #{item.readTime}, #{item.relatedId}, #{item.relatedType},
                 #{item.senderId}, #{item.pushedStatus}, #{item.pushTime}, #{item.priority}, #{item.actionUrl}, #{item.extraData},
                 NOW(), NOW(), 0
             )
@@ -239,7 +240,7 @@
             update_time = NOW()
         WHERE
             user_id = #{userId}
-            AND type = #{type}
+            AND notification_type = #{notificationType}
     </update>
 
 </mapper>

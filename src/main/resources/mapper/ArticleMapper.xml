@@ -413,15 +413,18 @@
         comment_count
         FROM
         article
-        WHERE
-        deleted = 0
-        AND user_id = #{userId}
-        <if test="articleStatus != null and articleStatus.code != 0">
-            AND article_status = #{articleStatus.code}
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
+        <where>
+            deleted = 0 AND user_id = #{userId}
+            <if test="articleStatus != null and articleStatus.code == 0">
+                AND article_status IN (1,2,3,4)
+            </if>
+            <if test="articleStatus != null and articleStatus.code != 0">
+                AND article_status = #{articleStatus.code}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
         ORDER BY
         create_time DESC
         LIMIT #{limit} OFFSET #{offset}
@@ -433,15 +436,18 @@
         COUNT(DISTINCT a.id)
         FROM
         article a
-        WHERE
-        a.deleted = 0
-        AND a.user_id = #{userId}
-        <if test="articleStatus != null and articleStatus.code != 0">
-            AND article_status = #{articleStatus.code}
-        </if>
-        <if test="keyword != null and keyword != ''">
-            AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
+        <where>
+            deleted = 0 AND user_id = #{userId}
+            <if test="articleStatus != null and articleStatus.code == 0">
+                AND article_status IN (1,2,3,4)
+            </if>
+            <if test="articleStatus != null and articleStatus.code != 0">
+                AND article_status = #{articleStatus.code}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
     </select>
 
     <!-- 搜索文章查询 -->
