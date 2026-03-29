@@ -82,6 +82,8 @@
         a.user_id,
         u.avatar,
         u.nickname,
+        u.gender,
+        u.signature,
         u.article_count,
         u.follow_count,
         u.follower_count,

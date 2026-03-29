@@ -55,7 +55,7 @@ public class ArticleDetailVO implements Serializable {
     /**
      * 文章状态
      */
-    private ArticleStatus status;
+    private ArticleStatus articleStatus;
 
     /**
      * 可见性状态
