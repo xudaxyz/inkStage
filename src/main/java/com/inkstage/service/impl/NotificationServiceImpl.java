@@ -3,21 +3,19 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.entity.model.Notification;
-import com.inkstage.enums.*;
+import com.inkstage.enums.NotificationCategory;
+import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.Priority;
+import com.inkstage.enums.ReadStatus;
 import com.inkstage.mapper.NotificationMapper;
-import com.inkstage.service.NotificationCacheService;
-import com.inkstage.service.NotificationService;
-import com.inkstage.service.NotificationSettingService;
-import com.inkstage.service.NotificationTemplateService;
-import com.inkstage.service.WebSocketService;
+import com.inkstage.service.*;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * 通知服务实现类
@@ -132,16 +130,23 @@ public class NotificationServiceImpl implements NotificationService {
     /**
      * 使用模板生成通知内容
      *
-     * @param type      通知类型
-     * @param relatedId 关联ID
-     * @param params    模板参数
+     * @param notificationType 通知类型
+     * @param relatedId        关联ID
+     * @param params           模板参数
      * @return 通知内容对象
      */
-    private NotificationContent generateContentWithTemplate(NotificationType type, Long relatedId, Object... params) {
-        String title = notificationTemplateService.generateTitle(type, params);
-        String content = notificationTemplateService.generateContent(type, params);
-        String actionUrl = notificationTemplateService.generateActionUrl(type, relatedId);
-        return new NotificationContent(title, content, actionUrl);
+    private Map<String, String> generateContentWithTemplate(NotificationType notificationType, Long relatedId, Object... params) {
+        params = Stream.concat(Arrays.stream(params), Stream.of(relatedId)).toArray();
+        Map<String, String> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
+        if (notificationContent == null) {
+            notificationContent = new HashMap<>();
+            notificationContent.put("title", "title");
+            notificationContent.put("content", "content");
+            notificationContent.put("actionUrl", "actionUrl");
+            return notificationContent;
+        }
+        log.warn("生成通知内容结果：{}", notificationContent);
+        return notificationContent;
     }
 
     /**
@@ -155,16 +160,16 @@ public class NotificationServiceImpl implements NotificationService {
      * @return 通知对象
      */
     private Notification buildNotification(Long userId, NotificationType notificationType, Long relatedId,
-                                           Long senderId, NotificationContent content) {
+                                           Long senderId, Map<String, String> content) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setNotificationType(notificationType);
-        notification.setTitle(content.title());
-        notification.setContent(content.content());
+        notification.setTitle(content.get("title"));
+        notification.setContent(content.get("content"));
         notification.setRelatedId(relatedId);
         notification.setPriority(Priority.NORMAL);
         notification.setSenderId(senderId);
-        notification.setActionUrl(content.actionUrl());
+        notification.setActionUrl(content.get("actionUrl"));
         return notification;
     }
 
@@ -188,11 +193,6 @@ public class NotificationServiceImpl implements NotificationService {
         return message;
     }
 
-    /**
-     * 通知内容记录类
-     */
-    private record NotificationContent(String title, String content, String actionUrl) {
-    }
 
     @Override
     public boolean sendNotificationWithTemplate(Long userId, NotificationType type, Long relatedId, Long senderId, Object... params) {
@@ -202,7 +202,7 @@ public class NotificationServiceImpl implements NotificationService {
         }
 
         // 使用模板生成通知内容
-        NotificationContent content = generateContentWithTemplate(type, relatedId, params);
+        Map<String, String> content = generateContentWithTemplate(type, relatedId, params);
 
         // 构建通知对象
         Notification notification = buildNotification(userId, type, relatedId, senderId, content);
@@ -256,7 +256,7 @@ public class NotificationServiceImpl implements NotificationService {
                 }
 
                 // 使用模板生成通知内容
-                NotificationContent content = generateContentWithTemplate(type, relatedId, params);
+                Map<String, String> content = generateContentWithTemplate(type, relatedId, params);
 
                 // 构建通知对象
                 Notification notification = buildNotification(userId, type, relatedId, senderId, content);

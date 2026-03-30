@@ -3,6 +3,8 @@ package com.inkstage.service;
 import com.inkstage.enums.NotificationChannel;
 import com.inkstage.enums.NotificationType;
 
+import java.util.Map;
+
 /**
  * 通知模板服务
  */
@@ -11,18 +13,7 @@ public interface NotificationTemplateService {
     /**
      * 生成通知标题
      */
-    String generateTitle(NotificationType type, Object... params);
-
-    /**
-     * 生成通知内容
-     */
-    String generateContent(NotificationType type, Object... params);
-
-    /**
-     * 生成通知操作链接
-     */
-    String generateActionUrl(NotificationType type, Long relatedId);
-
+    Map<String, String> generateNotificationContent(NotificationType type, Object... params);
 
     /**
      * 从模板中获取变量

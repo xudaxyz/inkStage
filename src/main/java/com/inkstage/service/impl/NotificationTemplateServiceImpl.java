@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -27,50 +28,32 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     private final AdminNotificationTemplateService adminNotificationTemplateService;
 
     @Override
-    public String generateTitle(NotificationType notificationType, Object... params) {
-        // 获取标题模板
+    public Map<String, String> generateNotificationContent(NotificationType notificationType, Object... params) {
+        // 获取标题、内容、url变量模板
         String variablesJsonStr = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, params);
         AdminNotificationTemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJsonStr);
-        if (preview != null && preview.getTitle() != null) {
-            return preview.getTitle();
+        if (preview == null) {
+            return null;
         }
 
-        return null;
+        Map<String, String> notificationTemplatePreview = new HashMap<>();
+        notificationTemplatePreview.put("title", preview.getTitle());
+        notificationTemplatePreview.put("content", preview.getContent());
+        notificationTemplatePreview.put("actionUrl", preview.getActionUrl());
+
+        return notificationTemplatePreview;
     }
 
-    @Override
-    public String generateContent(NotificationType notificationType, Object... params) {
-        // 获取内容模板
-        String variablesJsonStr = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, params);
-        AdminNotificationTemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJsonStr);
-        if (preview != null && preview.getContent() != null) {
-            return preview.getContent();
-        }
-
-        // 没有找到内容模板，返回空字符串
-        return "";
-    }
-
-    @Override
-    public String generateActionUrl(NotificationType notificationType, Long relatedId) {
-        // 从数据库获取actionUrl模板
-        String variablesJson = getVariablesFromTemplate(notificationType, NotificationChannel.SITE, relatedId);
-        AdminNotificationTemplatePreviewVO preview = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, variablesJson);
-        if (preview != null && preview.getActionUrl() != null) {
-            return preview.getActionUrl();
-        }
-
-        // 没有找到模板，返回空字符串
-        return "";
-    }
 
     @Override
     public String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel notificationChannel, Object... params) {
         // 从数据库获取内容模板
-        log.info("获取通知模板变量: notificationType={}, notificationChannel={}", notificationType, notificationChannel);
+        log.info("获取通知模板变量: notificationType={}, notificationChannel={}, params={}", notificationType, notificationChannel, params);
         NotificationTemplate template = adminNotificationTemplateService.getTemplateByType(notificationType, notificationChannel);
         String variablesJson = template != null ? template.getVariables() : null;
+        log.info("通知模板变量:转换前: {}, 转换后: {}", variablesJson, params);
         Map<String, Object> variables = TemplateRenderUtils.buildVariables(variablesJson, params);
+        log.info("生成的变量: {}",variables);
         return toJson(variables);
     }
 
