@@ -137,7 +137,7 @@ public enum ResponseMessage {
     COMMENT_CREATE_SUCCESS("创建评论成功"),
     COMMENT_UPDATE_SUCCESS("更新评论成功"),
     COMMENT_DELETE_SUCCESS("删除评论成功"),
-    COMMENT_STATUS_UPDATE_SUCCESS("更新评论状态成功"),
+    COMMENT_REVIEW_STATUS_UPDATE_SUCCESS("更新评论审核状态成功"),
     COMMENT_TOP_UPDATE_SUCCESS("更新评论置顶状态成功"),
     
     // 用户相关成功消息

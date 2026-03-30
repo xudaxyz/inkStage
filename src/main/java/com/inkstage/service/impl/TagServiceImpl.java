@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -50,15 +51,15 @@ public class TagServiceImpl implements TagService {
             if (keyword != null && !keyword.isEmpty()) {
                 keyword = keyword.toLowerCase();
             }
-            
+
             // 获取总记录数
             Long total = tagMapper.countByKeyword(keyword);
 
             Integer offset = (pageNum - 1) * pageSize;
-            
+
             // 获取分页数据
             List<Tag> tags = tagMapper.findByKeyword(keyword, offset, pageSize);
-            
+
             // 构建分页结果
             return PageResult.build(tags, total, pageNum, pageSize);
         } catch (Exception e) {
@@ -93,7 +94,6 @@ public class TagServiceImpl implements TagService {
     }
 
 
-
     @Override
     public Tag addTag(Tag tag) {
         log.info("添加标签: {}", tag.getName());
@@ -112,6 +112,9 @@ public class TagServiceImpl implements TagService {
             if (tag.getSlug() != null && !tag.getSlug().isEmpty()) {
                 tag.setSlug(tag.getSlug().toLowerCase());
             }
+            tag.setUserId(UserContext.getCurrentUserId());
+            tag.setTagVersion(1); // 新标签版本号设为1
+            tag.setCreateTime(LocalDateTime.now());
             tagMapper.insert(tag);
             return tag;
         } catch (Exception e) {
@@ -153,16 +156,16 @@ public class TagServiceImpl implements TagService {
             if (id == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
-            
+
             // 获取标签信息
             Tag tag = tagMapper.findById(id);
             if (tag == null) {
                 throw new BusinessException("标签不存在");
             }
-            
+
             // 获取使用该标签的所有用户ID
             List<Long> userIds = tagMapper.findUserIdsByTagId(id);
-            
+
             // 发送通知
             for (Long userId : userIds) {
                 String message;
@@ -173,7 +176,7 @@ public class TagServiceImpl implements TagService {
                     // 对使用者的通知
                     message = "您使用的标签" + tag.getName() + "已被删除";
                 }
-                
+
                 notificationService.sendNotificationWithTemplate(
                         userId,
                         NotificationType.TAG_DELETE,
@@ -183,7 +186,7 @@ public class TagServiceImpl implements TagService {
                         "标签不符合平台规范"
                 );
             }
-            
+
             // 执行删除操作
             tagMapper.deleteById(id);
             log.info("删除标签并发送通知成功, 标签ID: {}", id);
@@ -229,13 +232,13 @@ public class TagServiceImpl implements TagService {
             tag.setStatus(StatusEnum.ENABLED);
             tag.setArticleCount(1); // 新标签，文章数设为1
             tag.setUsageCount(1); // 使用次数设置为1
-            
+
             // 设置当前用户ID
             User currentUser = UserContext.getCurrentUser();
             if (currentUser != null) {
                 tag.setUserId(currentUser.getId());
             }
-            
+
             tagMapper.insert(tag);
             log.info("创建新标签成功: {}", tag.getName());
             return tag.getId();

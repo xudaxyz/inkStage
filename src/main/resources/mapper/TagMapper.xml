@@ -76,9 +76,9 @@
     <!-- 插入标签 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Tag" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO tag (
-            name, slug, description, user_id, article_count, usage_count, status
+            name, slug, description, user_id, article_count, usage_count, status, tag_version, create_time
         ) VALUES (
-            #{name}, #{slug}, #{description}, #{userId}, #{articleCount}, #{usageCount}, #{status}
+            #{name}, #{slug}, #{description}, #{userId}, #{articleCount}, #{usageCount}, #{status}, #{tagVersion}, #{createTime}
         )
     </insert>
 
@@ -101,7 +101,7 @@
     <!-- 更新标签状态 -->
     <update id="updateStatus">
         UPDATE tag SET
-            status = #{status}
+            status = #{status}, update_time = #{updateTime}
         WHERE id = #{id}
     </update>
 

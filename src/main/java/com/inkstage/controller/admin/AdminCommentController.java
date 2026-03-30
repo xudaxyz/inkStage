@@ -75,7 +75,7 @@ public class AdminCommentController {
     }
 
     /**
-     * 更新评论状态
+     * 更新评论审核状态
      *
      * @param id           评论ID
      * @param reviewStatus 审核状态
@@ -89,7 +89,7 @@ public class AdminCommentController {
                                          @RequestParam(required = false) String reviewReason) {
         log.info("管理员更新评论状态, 评论ID: {}, 审核状态: {}, 审核原因: {}", id, reviewStatus.getDesc(), reviewReason);
         boolean result = commentService.updateCommentStatus(id, reviewStatus, reviewReason);
-        return Result.success(result, ResponseMessage.COMMENT_STATUS_UPDATE_SUCCESS);
+        return Result.success(result, ResponseMessage.COMMENT_REVIEW_STATUS_UPDATE_SUCCESS);
     }
 
     /**

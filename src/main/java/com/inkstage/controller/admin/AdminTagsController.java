@@ -107,7 +107,7 @@ public class AdminTagsController {
      */
     @PutMapping("/status/{id}")
     @AdminAccess
-    public Result<Tag> updateTagStatus(@PathVariable Long id, @RequestBody StatusEnum status) {
+    public Result<Tag> updateTagStatus(@PathVariable Long id, @RequestParam StatusEnum status) {
         log.info("管理员更新标签状态, 标签ID: {}, 状态: {}", id, status);
         Tag updatedTag = tagService.updateTagStatus(id, status);
         return Result.success(updatedTag, ResponseMessage.TAG_STATUS_UPDATE_SUCCESS);

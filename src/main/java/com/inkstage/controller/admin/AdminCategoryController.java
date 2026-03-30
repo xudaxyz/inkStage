@@ -107,7 +107,7 @@ public class AdminCategoryController {
      */
     @PutMapping("/status/{id}")
     @AdminAccess
-    public Result<Category> updateCategoryStatus(@PathVariable Long id, @RequestBody StatusEnum status) {
+    public Result<Category> updateCategoryStatus(@PathVariable Long id, @RequestParam StatusEnum status) {
         log.info("管理员更新分类状态, 分类ID: {}, 状态: {}", id, status);
         Category updatedCategory = categoryService.updateCategoryStatus(id, status);
         return Result.success(updatedCategory, ResponseMessage.CATEGORY_STATUS_UPDATE_SUCCESS);

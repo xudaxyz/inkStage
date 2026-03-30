@@ -522,58 +522,54 @@ public class CommentServiceImpl implements CommentService {
             throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
         }
 
-        try {
-            // 检查评论是否存在
-            Comment comment = commentMapper.findById(id);
-            if (comment == null) {
-                log.warn("评论不存在, 评论ID: {}", id);
-                throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
-            }
-
-            // 检查是否为父评论，子评论无法置顶
-            if (comment.getParentId() != null && comment.getParentId() > 0) {
-                log.warn("子评论无法置顶, 评论ID: {}", id);
-                throw new BusinessException("子评论无法置顶");
-            }
-
-            // 如果是设置为置顶状态
-            if (top == TopStatus.TOP) {
-                // 检查文章是否已有置顶评论
-                Comment existingTopComment = commentMapper.findTopCommentByArticleId(comment.getArticleId());
-                if (existingTopComment != null && !existingTopComment.getId().equals(id)) {
-                    // 取消已有置顶评论
-                    commentMapper.updateTop(existingTopComment.getId(), TopStatus.NOT_TOP.getCode(), 0);
-                    log.info("取消已有置顶评论, 评论ID: {}", existingTopComment.getId());
-                }
-            }
-
-            // 更新评论置顶状态
-            int result = commentMapper.updateTop(id, top.getCode(), topOrder);
-            if (result <= 0) {
-                log.warn("更新评论置顶状态失败, 评论ID: {}", id);
-                throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
-            }
-
-            // 发送通知
-            if (top == TopStatus.TOP) {
-                // 评论置顶通知
-                notificationService.sendNotificationWithTemplate(
-                        comment.getUserId(),
-                        NotificationType.COMMENT_TOP,
-                        comment.getArticleId(),
-                        0L, // 系统发送
-                        "您的评论已被置顶"
-                );
-            }
-
-            // 清除评论列表缓存
-            cacheManager.clearArticleCommentCache(comment.getArticleId());
-
-            return true;
-        } catch (Exception e) {
-            log.error("更新评论置顶状态失败, 评论ID: {}", id, e);
-            throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED, e.getMessage());
+        // 检查评论是否存在
+        Comment comment = commentMapper.findById(id);
+        if (comment == null) {
+            log.warn("评论不存在, 评论ID: {}", id);
+            throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
         }
+
+        // 检查是否为父评论，子评论无法置顶
+        if (comment.getParentId() != null && comment.getParentId() > 0) {
+            log.warn("子评论无法置顶, 评论ID: {}", id);
+            throw new BusinessException("子评论无法置顶");
+        }
+
+        // 如果是设置为置顶状态
+        if (top == TopStatus.TOP) {
+            // 检查文章是否已有置顶评论
+            Comment existingTopComment = commentMapper.findTopCommentByArticleId(comment.getArticleId());
+            if (existingTopComment != null && !existingTopComment.getId().equals(id)) {
+                // 取消已有置顶评论
+                commentMapper.updateTop(existingTopComment.getId(), TopStatus.NOT_TOP.getCode(), 0);
+                log.info("取消已有置顶评论, 评论ID: {}", existingTopComment.getId());
+            }
+        }
+
+        // 更新评论置顶状态
+        int result = commentMapper.updateTop(id, top.getCode(), topOrder);
+        if (result <= 0) {
+            log.warn("更新评论置顶状态失败, 评论ID: {}", id);
+            throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
+        }
+
+        // 发送通知
+        if (top == TopStatus.TOP) {
+            // 评论置顶通知
+            notificationService.sendNotificationWithTemplate(
+                    comment.getUserId(),
+                    NotificationType.COMMENT_TOP,
+                    comment.getArticleId(),
+                    0L, // 系统发送
+                    "您的评论已被置顶"
+            );
+        }
+
+        // 清除评论列表缓存
+        cacheManager.clearArticleCommentCache(comment.getArticleId());
+
+        return true;
+
     }
 
     @Override
@@ -581,6 +577,16 @@ public class CommentServiceImpl implements CommentService {
         if (comment == null || comment.getId() == null) {
             log.warn("评论ID为空");
             throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
+        }
+        Comment existedComments = commentMapper.findById(comment.getId());
+        if (existedComments == null) {
+            log.warn("评论{}不存在", comment.getId());
+            throw new BusinessException(ResponseMessage.COMMENT_NOT_FOUND);
+        }
+        // 如果是子评论, 禁止置顶
+        if (existedComments.getParentId() != null && existedComments.getParentId() > 0 && TopStatus.TOP.equals(comment.getTop())) {
+            log.warn("子评论禁止置顶, 评论ID: {}", comment.getId());
+            throw new BusinessException("子评论无法置顶");
         }
         return commentMapper.updateById(comment) > 0;
     }

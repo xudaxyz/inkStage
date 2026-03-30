@@ -615,8 +615,10 @@
         <if test="query.articleStatus != null">
             AND a.article_status = #{query.articleStatus}
         </if>
+        <if test="query.topStatus != null">
+            AND a.top = #{query.topStatus}
+        </if>
         ORDER BY
-        a.top DESC,
         a.create_time DESC
         LIMIT #{query.offset}, #{query.pageSize}
     </select>

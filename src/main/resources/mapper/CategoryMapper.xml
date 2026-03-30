@@ -67,22 +67,41 @@
     <!-- 添加分类 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Category">
         INSERT INTO category (
-            name, slug, parent_id, sort_order, description, article_count, status
+            name, slug, parent_id, sort_order, description, article_count, status, category_version
         ) VALUES (
-            #{name}, #{slug}, #{parentId}, #{sortOrder}, #{description}, #{articleCount}, #{status}
+            #{name}, #{slug}, #{parentId}, #{sortOrder}, #{description}, #{articleCount}, #{status}, #{categoryVersion}
         )
     </insert>
 
     <!-- 更新分类 -->
     <update id="update" parameterType="com.inkstage.entity.model.Category">
-        UPDATE category SET
-            name = #{name},
-            slug = #{slug},
-            parent_id = #{parentId},
-            sort_order = #{sortOrder},
-            description = #{description},
-            status = #{status},
-            category_version = #{categoryVersion}
+        UPDATE category
+        <set>
+            <if test="name != null">
+                name = #{name},
+            </if>
+            <if test="slug != null">
+                slug = #{slug},
+            </if>
+            <if test="parentId != null">
+                parent_id = #{parentId},
+            </if>
+            <if test="sortOrder != null">
+                sort_order = #{sortOrder},
+            </if>
+            <if test="description != null">
+                description = #{description},
+            </if>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="categoryVersion != null">
+                category_version = #{categoryVersion},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
         WHERE id = #{id}
     </update>
 

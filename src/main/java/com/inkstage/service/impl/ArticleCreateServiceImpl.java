@@ -7,6 +7,7 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.DeleteStatus;
 import com.inkstage.enums.NotificationType;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
@@ -317,7 +318,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
         article.setMetaDescription(dto.getMetaDescription());
         article.setMetaKeywords(dto.getMetaKeywords());
         article.setScheduledPublishTime(dto.getScheduledPublishTime());
-        article.setTop(dto.getTop());
+        article.setTop(dto.getTop() != null ? dto.getTop() : TopStatus.NOT_TOP);
         article.setLastEditTime(LocalDateTime.now());
         article.setCreateTime(LocalDateTime.now());
         article.setUpdateTime(LocalDateTime.now());

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -106,6 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (category.getSlug() != null && !category.getSlug().isEmpty()) {
                 category.setSlug(category.getSlug().toLowerCase());
             }
+            category.setCategoryVersion(1); // 设置初始版本号为1
             categoryMapper.insert(category);
             return category;
         } catch (Exception e) {
@@ -133,6 +135,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (category.getSlug() != null && !category.getSlug().isEmpty()) {
                 category.setSlug(category.getSlug().toLowerCase());
             }
+            category.setUpdateTime(LocalDateTime.now());
             categoryMapper.update(category);
             return category;
         } catch (Exception e) {
