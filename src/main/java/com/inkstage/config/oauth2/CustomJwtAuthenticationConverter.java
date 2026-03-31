@@ -1,8 +1,8 @@
 package com.inkstage.config.oauth2;
 
 import com.inkstage.entity.model.User;
-import com.inkstage.mapper.RoleMapper;
-import com.inkstage.mapper.UserRoleMapper;
+import com.inkstage.service.RoleService;
+import com.inkstage.service.UserRoleService;
 import com.inkstage.security.UserDetailsImpl;
 import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserService;
@@ -26,18 +26,17 @@ import java.util.Optional;
 @Slf4j
 public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt, AbstractAuthenticationToken> {
 
-    private final JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter;
     private final UserService userService;
     private final UserCacheService userCacheService;
-    private final UserRoleMapper userRoleMapper;
-    private final RoleMapper roleMapper;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
 
-    public CustomJwtAuthenticationConverter(UserService userService, UserCacheService userCacheService, RoleMapper roleMapper, UserRoleMapper userRoleMapper) {
+    public CustomJwtAuthenticationConverter(UserService userService, UserCacheService userCacheService, RoleService roleService, UserRoleService userRoleService) {
         this.userService = userService;
         this.userCacheService = userCacheService;
-        this.roleMapper = roleMapper;
-        this.userRoleMapper = userRoleMapper;
-        grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+        this.roleService = roleService;
+        this.userRoleService = userRoleService;
+        JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         // 配置权限前缀
         grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
         // 配置权限声明名称
@@ -68,7 +67,7 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
         User user = loadUser(userId, username);
 
         // 构建UserDetailsImpl
-        UserDetailsImpl userDetails = new UserDetailsImpl(user, userRoleMapper, roleMapper);
+        UserDetailsImpl userDetails = new UserDetailsImpl(user, userRoleService, roleService);
 
         // 使用UserDetailsImpl中的权限信息
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();

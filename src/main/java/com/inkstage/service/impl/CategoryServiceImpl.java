@@ -9,6 +9,8 @@ import com.inkstage.mapper.CategoryMapper;
 import com.inkstage.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -44,15 +46,15 @@ public class CategoryServiceImpl implements CategoryService {
             if (keyword != null && !keyword.isEmpty()) {
                 keyword = keyword.toLowerCase();
             }
-            
+
             // 获取总记录数
             Long total = categoryMapper.countByKeyword(keyword);
 
             int offset = (pageNum - 1) * pageSize;
-            
+
             // 获取分页数据
             List<Category> categories = categoryMapper.findByKeyword(keyword, offset, pageSize);
-            
+
             // 构建分页结果
             return PageResult.build(categories, total, pageNum, pageSize);
         } catch (Exception e) {
@@ -76,6 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Cacheable(value = "categories", key = "'active'")
     public List<Category> getActiveCategories() {
         log.info("获取激活状态分类");
         try {
@@ -87,6 +90,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public Category addCategory(Category category) {
         log.info("添加分类: {}", category.getName());
         try {
@@ -117,6 +121,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public Category updateCategory(Category category) {
         log.info("更新分类: {}", category.getId());
         try {
@@ -145,6 +150,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public void deleteCategory(Long id) {
         log.info("删除分类: {}", id);
         try {
@@ -159,6 +165,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @CacheEvict(value = "categories", allEntries = true)
     public Category updateCategoryStatus(Long id, StatusEnum status) {
         log.info("更新分类状态: {}, {}", id, status);
         try {

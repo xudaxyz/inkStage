@@ -13,8 +13,8 @@
         <file>./doc/logs/inkstage.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <fileNamePattern>./doc/logs/inkstage-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
-            <maxFileSize>100MB</maxFileSize>
-            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+            <maxHistory>10</maxHistory>
             <totalSizeCap>1GB</totalSizeCap>
         </rollingPolicy>
         <encoder>

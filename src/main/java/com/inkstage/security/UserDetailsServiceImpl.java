@@ -2,9 +2,9 @@ package com.inkstage.security;
 
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.User;
-import com.inkstage.mapper.RoleMapper;
-import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.cache.service.UserCacheService;
+import com.inkstage.service.RoleService;
+import com.inkstage.service.UserRoleService;
 import com.inkstage.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +26,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserService userService;
     private final UserCacheService userCacheService;
-    private final UserRoleMapper userRoleMapper;
-    private final RoleMapper roleMapper;
+    private final UserRoleService userRoleService;
+    private final RoleService roleService;
 
     @NonNull
     @Override
@@ -54,7 +54,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         userCacheService.cacheUser(user);
 
         // 构建UserDetails对象
-        return new UserDetailsImpl(user, userRoleMapper, roleMapper);
+        return new UserDetailsImpl(user, userRoleService, roleService);
     }
 
     /**
@@ -70,7 +70,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         Optional<User> cachedUser = userCacheService.getUserFromCache(userId);
         if (cachedUser.isPresent()) {
             log.debug("从缓存中获取用户信息: {}", userId);
-            return new UserDetailsImpl(cachedUser.get(), userRoleMapper, roleMapper);
+            return new UserDetailsImpl(cachedUser.get(), userRoleService, roleService);
         }
 
         // 从数据库中获取
@@ -84,7 +84,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             // 缓存用户信息
             userCacheService.cacheUser(user);
 
-            return new UserDetailsImpl(user, userRoleMapper, roleMapper);
+            return new UserDetailsImpl(user, userRoleService, roleService);
         } catch (NumberFormatException e) {
             log.error("无效的用户ID格式: {}", userId, e);
             throw new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND.getMessage() + ": " + userId);

@@ -1,7 +1,10 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.entity.model.Role;
+import com.inkstage.mapper.RoleMapper;
 import com.inkstage.service.RoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -11,5 +14,12 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
+    private final RoleMapper roleMapper;
+
+    @Override
+    @Cacheable(value = "roles", key = "#id")
+    public Role getRoleById(Long id) {
+        return roleMapper.selectByPrimaryKey(id.intValue());
+    }
 
 }

@@ -8,6 +8,8 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,6 +25,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     private final UserRoleMapper userRoleMapper;
 
     @Override
+    @CacheEvict(value = "userRoles", key = "#user.id")
     public void createUserRole(User user) {
         // 为新注册用户分配默认角色(普通用户)
         UserRole userRole = new UserRole();
@@ -33,16 +36,18 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRole.setStatus(StatusEnum.ENABLED); // 启用状态
         userRole.setCreateTime(LocalDateTime.now());
         userRole.setDeleted(DeleteStatus.NOT_DELETED);
-        
+
         userRoleMapper.insert(userRole);
     }
 
     @Override
+    @Cacheable(value = "userRoles", key = "#userId")
     public List<UserRole> getUserRoles(Long userId) {
         return userRoleMapper.selectByUserId(userId);
     }
 
     @Override
+    @CacheEvict(value = "userRoles", key = "#userId")
     public Boolean updateUserRole(Long userId, UserRoleEnum userRole) {
         int result = userRoleMapper.updateUserRole(userId, userRole);
         return result > 0;

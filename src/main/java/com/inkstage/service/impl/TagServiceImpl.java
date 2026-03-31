@@ -14,6 +14,8 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.enums.notification.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,6 +88,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @Cacheable(value = "tags", key = "'active'")
     public List<Tag> getActiveTags() {
         log.info("获取激活状态标签列表");
         try {
@@ -98,6 +101,7 @@ public class TagServiceImpl implements TagService {
 
 
     @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public Tag addTag(Tag tag) {
         log.info("添加标签: {}", tag.getName());
         try {
@@ -127,6 +131,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public Tag updateTag(Tag tag) {
         log.info("更新标签: {}", tag.getId());
         try {
@@ -153,6 +158,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public void deleteTag(Long id) {
         log.info("删除标签: {}", id);
         try {
@@ -191,6 +197,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
+    @CacheEvict(value = "tags", allEntries = true)
     public Tag updateTagStatus(Long id, StatusEnum status) {
         log.info("更新标签状态: {}, {}", id, status);
         try {
