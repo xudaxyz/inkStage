@@ -147,6 +147,11 @@
         <if test="query.categoryId != null and query.categoryId != 0">
             AND a.category_id = #{query.categoryId}
         </if>
+        <if test="query.tagId != null and query.tagId != 0">
+            AND a.id IN (
+                SELECT article_id FROM article_tag WHERE tag_id = #{query.tagId}
+            )
+        </if>
         <if test="query.keyword != null and query.keyword != ''">
             AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
         </if>
@@ -171,6 +176,11 @@
         a.deleted = 0 and a.article_status = 3
         <if test="query.categoryId != null and query.categoryId != 0">
             AND a.category_id = #{query.categoryId}
+        </if>
+        <if test="query.tagId != null and query.tagId != 0">
+            AND a.id IN (
+                SELECT article_id FROM article_tag WHERE tag_id = #{query.tagId}
+            )
         </if>
         <if test="query.keyword != null and query.keyword != ''">
             AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))

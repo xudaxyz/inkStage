@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.config.rabbitmq.RabbitMQConfig;
 import com.inkstage.entity.model.Notification;
 import com.inkstage.entity.model.NotificationSetting;
+import com.inkstage.entity.model.User;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.*;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,7 @@ public class NotificationConsumer {
                         NotificationSetting setting = notificationSettingService.getNotificationSetting(notification.getUserId());
                         if (setting != null && setting.getEmailNotification()) {
                             // 获取用户信息
-                            com.inkstage.entity.model.User user = userService.getUserById(notification.getUserId());
+                            User user = userService.getUserById(notification.getUserId());
                             if (user != null && user.getEmail() != null && !user.getEmail().isEmpty()) {
                                 // 构建邮件内容
                                 String subject = notification.getTitle();
