@@ -2,7 +2,6 @@ package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Article;
-import com.inkstage.entity.model.Comment;
 import com.inkstage.entity.model.Notification;
 import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.enums.notification.NotificationType;
