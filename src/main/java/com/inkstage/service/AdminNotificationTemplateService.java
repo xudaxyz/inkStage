@@ -4,9 +4,9 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 
 import java.util.List;
@@ -54,12 +54,12 @@ public interface AdminNotificationTemplateService {
     /**
      * 根据类型获取模板
      */
-    List<NotificationTemplate> getTemplatesByType(NotificationType type);
+    List<NotificationTemplate> getTemplatesByType(NotificationType notificationType);
 
     /**
      * 根据类型和渠道获取单个模板
      */
-    NotificationTemplate getTemplateByType(NotificationType type, NotificationChannel channel);
+    NotificationTemplate getTemplateByTypeAndChannel(NotificationType notificationType, NotificationChannel channel);
 
     /**
      * 启用/禁用模板

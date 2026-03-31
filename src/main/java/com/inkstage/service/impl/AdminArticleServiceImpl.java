@@ -13,7 +13,7 @@ import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.ArticleUtils;
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminArticleDetailVO;

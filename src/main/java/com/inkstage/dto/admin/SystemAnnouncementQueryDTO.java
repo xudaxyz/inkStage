@@ -2,7 +2,7 @@ package com.inkstage.dto.admin;
 
 import com.inkstage.common.PageRequest;
 import com.inkstage.enums.AnnouncementType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

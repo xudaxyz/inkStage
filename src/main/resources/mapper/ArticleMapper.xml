@@ -25,9 +25,9 @@
                 javaType="com.inkstage.enums.article.RecommendStatus"/>
         <result column="visible" property="visible" javaType="com.inkstage.enums.VisibleStatus"/>
         <result column="allow_comment" property="allowComment"
-                javaType="com.inkstage.enums.AllowStatus"/>
+                javaType="com.inkstage.enums.common.AllowStatus"/>
         <result column="allow_forward" property="allowForward"
-                javaType="com.inkstage.enums.AllowStatus"/>
+                javaType="com.inkstage.enums.common.AllowStatus"/>
         <result column="original" property="original" javaType="com.inkstage.enums.article.OriginalStatus"/>
         <result column="original_url" property="originalUrl"/>
         <result column="meta_title" property="metaTitle"/>
@@ -39,7 +39,7 @@
         <result column="article_version" property="articleVersion"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
         <result column="deleted_time" property="deletedTime"/>
     </resultMap>
 

@@ -1,7 +1,7 @@
 package com.inkstage.vo.admin;
 
 import com.inkstage.entity.model.Tag;
-import com.inkstage.enums.AllowStatus;
+import com.inkstage.enums.common.AllowStatus;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.article.ArticleStatus;

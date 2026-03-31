@@ -2,7 +2,7 @@ package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.ConfigType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

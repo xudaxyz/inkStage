@@ -1,9 +1,8 @@
 package com.inkstage.service;
 
-import com.inkstage.common.PageRequest;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Category;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 
 import java.util.List;
 

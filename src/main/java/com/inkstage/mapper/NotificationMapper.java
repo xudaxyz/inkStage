@@ -1,8 +1,8 @@
 package com.inkstage.mapper;
 
 import com.inkstage.entity.model.Notification;
-import com.inkstage.enums.NotificationCategory;
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationCategory;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.ReadStatus;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;

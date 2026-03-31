@@ -3,7 +3,7 @@ package com.inkstage.controller.admin;
 import com.inkstage.annotation.AdminAccess;
 import com.inkstage.common.Result;
 import com.inkstage.dto.admin.ManualNotificationDTO;
-import com.inkstage.enums.NotificationCategory;
+import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.service.AdminNotificationTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

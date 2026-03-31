@@ -50,7 +50,7 @@ spring:
       direct:
         acknowledge-mode: auto
         message-converter:
-          allowed-list: com.inkstage.dto.NotificationMessageDTO,com.inkstage.enums.NotificationType,com.inkstage.enums.ReportTargetType,java.lang.Enum
+          allowed-list: com.inkstage.dto.NotificationMessageDTO,com.inkstage.enums.notification.NotificationType,com.inkstage.enums.ReportTargetType,java.lang.Enum
       simple:
         acknowledge-mode: auto
         # 并发消费配置
@@ -59,7 +59,7 @@ spring:
         # 批量消费配置
         prefetch: 10
         message-converter:
-          allowed-list: com.inkstage.dto.NotificationMessageDTO,com.inkstage.enums.NotificationType,com.inkstage.enums.ReportTargetType,java.lang.Enum
+          allowed-list: com.inkstage.dto.NotificationMessageDTO,com.inkstage.enums.notification.NotificationType,com.inkstage.enums.ReportTargetType,java.lang.Enum
 
   # Jackson 配置
   jackson:

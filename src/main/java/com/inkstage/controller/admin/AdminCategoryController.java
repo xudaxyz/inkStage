@@ -5,7 +5,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.entity.model.Category;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

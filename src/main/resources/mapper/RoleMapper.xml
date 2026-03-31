@@ -8,12 +8,12 @@
         <result column="name" property="name"/>
         <result column="code" property="code"/>
         <result column="description" property="description"/>
-        <result column="system_role" property="systemRole" javaType="com.inkstage.enums.DefaultStatus"/>
+        <result column="system_role" property="systemRole" javaType="com.inkstage.enums.common.DefaultStatus"/>
         <result column="level" property="level"/>
-        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
     </resultMap>
 
     <sql id="columns">

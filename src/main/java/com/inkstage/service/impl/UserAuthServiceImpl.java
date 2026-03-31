@@ -4,7 +4,7 @@ import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
 import com.inkstage.entity.model.UserRole;
-import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.VerificationStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.auth.AuthType;

@@ -1,8 +1,8 @@
 package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.DefaultStatus;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.DefaultStatus;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.auth.AuthType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

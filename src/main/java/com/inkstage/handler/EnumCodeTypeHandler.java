@@ -5,6 +5,8 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.OriginalStatus;
 import com.inkstage.enums.article.RecommendStatus;
 import com.inkstage.enums.article.TopStatus;
+import com.inkstage.enums.common.*;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.user.Gender;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;

@@ -1,10 +1,10 @@
 package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
-import com.inkstage.enums.Priority;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.enums.common.Priority;
+import com.inkstage.enums.common.StatusEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -28,7 +28,17 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 模板名称
      */
-    private String nameTemplate;
+    private String name;
+
+    /**
+     * 通知类型
+     */
+    private NotificationType notificationType;
+
+    /**
+     * 通知渠道
+     */
+    private NotificationChannel notificationChannel;
 
     /**
      * 通知标题模板(支持占位符如: {{username}})
@@ -41,24 +51,9 @@ public class NotificationTemplate extends BaseEntity {
     private String contentTemplate;
 
     /**
-     * 通知类型(对应NotificationType的code)
-     */
-    private NotificationType notificationType;
-
-    /**
-     * 通知渠道
-     */
-    private NotificationChannel notificationChannel;
-
-    /**
      * 操作链接模板
      */
     private String actionUrlTemplate;
-
-    /**
-     * 模板变量定义(描述各占位符含义)
-     */
-    private String variables;
 
     /**
      * 模板描述
@@ -66,7 +61,7 @@ public class NotificationTemplate extends BaseEntity {
     private String description;
 
     /**
-     * 优先级(0:普通, 1:重要, 2:紧急)
+     * 优先级
      */
     private Priority priority;
 
@@ -76,12 +71,27 @@ public class NotificationTemplate extends BaseEntity {
     private StatusEnum status;
 
     /**
+     * 其他数据
+     */
+    private String extraData;
+
+    /**
      * 创建人ID
      */
     private Long createUserId;
 
     /**
+     * 创建人名称
+     */
+    private String createUserName;
+
+    /**
      * 更新人ID
      */
     private Long updateUserId;
+
+    /**
+     * 更新人名称
+     */
+    private String updateUserName;
 }

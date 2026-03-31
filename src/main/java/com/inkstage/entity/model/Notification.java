@@ -3,6 +3,9 @@ package com.inkstage.entity.model;
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.*;
 import com.inkstage.enums.PushedStatus;
+import com.inkstage.enums.common.Priority;
+import com.inkstage.enums.notification.NotificationCategory;
+import com.inkstage.enums.notification.NotificationType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

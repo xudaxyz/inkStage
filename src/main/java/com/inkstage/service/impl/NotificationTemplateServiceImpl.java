@@ -1,11 +1,10 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.NotificationTemplate;
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.service.AdminNotificationTemplateService;
 import com.inkstage.service.NotificationTemplateService;
-import com.inkstage.utils.TemplateRenderUtils;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,11 +48,12 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     public String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel notificationChannel, Object... params) {
         // 从数据库获取内容模板
         log.info("获取通知模板变量: notificationType={}, notificationChannel={}, params={}", notificationType, notificationChannel, params);
-        NotificationTemplate template = adminNotificationTemplateService.getTemplateByType(notificationType, notificationChannel);
-        String variablesJson = template != null ? template.getVariables() : null;
-        log.info("通知模板变量:转换前: {}, 转换后: {}", variablesJson, params);
-        Map<String, Object> variables = TemplateRenderUtils.buildVariables(variablesJson, params);
-        log.info("生成的变量: {}",variables);
+        NotificationTemplate template = adminNotificationTemplateService.getTemplateByTypeAndChannel(notificationType, notificationChannel);
+        // 构建变量映射
+        Map<String, Object> variables = new HashMap<>();
+        // 这里可以根据通知类型和参数构建相应的变量
+        // 例如：如果是文章相关通知，可以从params中获取文章信息
+        log.info("生成的变量: {}", variables);
         return toJson(variables);
     }
 

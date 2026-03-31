@@ -2,8 +2,6 @@ package com.inkstage.enums;
 
 import lombok.Getter;
 
-import java.util.Objects;
-
 /**
  * 模板类型枚举
  */

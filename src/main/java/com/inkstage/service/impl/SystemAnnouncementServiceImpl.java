@@ -3,7 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.mapper.SystemAnnouncementMapper;
 import com.inkstage.service.SystemAnnouncementService;
 import com.inkstage.utils.UserContext;

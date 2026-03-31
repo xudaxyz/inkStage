@@ -1,6 +1,6 @@
 package com.inkstage.dto;
 
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.ReportTargetType;
 import lombok.Data;
 

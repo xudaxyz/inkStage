@@ -1,6 +1,6 @@
 package com.inkstage.vo.admin;
 
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationType;
 import lombok.Data;
 
 import java.io.Serial;

@@ -2,7 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.ArticleTag;
 import com.inkstage.entity.model.Tag;
-import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleTagMapper;
 import com.inkstage.mapper.TagMapper;

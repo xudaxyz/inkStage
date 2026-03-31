@@ -2,7 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.mapper.FollowMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FollowService;

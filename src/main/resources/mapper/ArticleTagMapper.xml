@@ -8,7 +8,7 @@
         <result property="tagId" column="tag_id"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
-        <result property="deleted" column="deleted" javaType="com.inkstage.enums.DeleteStatus" />
+        <result property="deleted" column="deleted" javaType="com.inkstage.enums.common.DeleteStatus" />
         <result property="deletedTime" column="deleted_time"/>
 
     </resultMap>

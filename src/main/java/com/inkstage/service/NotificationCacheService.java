@@ -1,6 +1,6 @@
 package com.inkstage.service;
 
-import com.inkstage.enums.NotificationCategory;
+import com.inkstage.enums.notification.NotificationCategory;
 
 import java.util.Map;
 

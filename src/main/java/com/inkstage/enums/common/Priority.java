@@ -1,5 +1,6 @@
-package com.inkstage.enums;
+package com.inkstage.enums.common;
 
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 /**
@@ -7,10 +8,12 @@ import lombok.Getter;
  */
 @Getter
 public enum Priority implements EnumCode {
-    LOW(3, "低"),
-    NORMAL(2, "中"),
+    URGENT(0, "紧急"),
     HIGH(1, "高"),
-    URGENT(0, "紧急");
+    HIGH_NORMAL(2, "较高"),
+    NORMAL(3, "中等"),
+    LOW(4, "低"),
+    VERY_LOW(5, "非常低");
 
     private final Integer code;
     private final String desc;

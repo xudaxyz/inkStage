@@ -2,9 +2,9 @@ package com.inkstage.mapper;
 
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.enums.common.StatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

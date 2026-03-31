@@ -3,7 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.CollectArticleDTO;
 import com.inkstage.entity.model.CollectionFolder;
-import com.inkstage.enums.DefaultStatus;
+import com.inkstage.enums.common.DefaultStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.CollectionFolderMapper;
 import com.inkstage.service.CollectionFolderService;

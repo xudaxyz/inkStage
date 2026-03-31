@@ -1,7 +1,7 @@
 package com.inkstage.dto.front;
 
 import com.inkstage.enums.CollectionStatus;
-import com.inkstage.enums.DefaultStatus;
+import com.inkstage.enums.common.DefaultStatus;
 import lombok.Data;
 
 import java.io.Serial;

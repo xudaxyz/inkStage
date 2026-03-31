@@ -1,4 +1,4 @@
-package com.inkstage.enums;
+package com.inkstage.enums.notification;
 
 import lombok.Getter;
 

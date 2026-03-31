@@ -11,11 +11,11 @@
         <result column="sort_order" property="sortOrder" />
         <result column="description" property="description" />
         <result column="article_count" property="articleCount" />
-        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum" />
+        <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum" />
         <result column="category_version" property="categoryVersion" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
-        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus" />
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus" />
         <result column="deleted_time" property="deletedTime" />
     </resultMap>
 

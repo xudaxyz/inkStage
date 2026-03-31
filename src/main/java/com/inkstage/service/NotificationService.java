@@ -2,8 +2,8 @@ package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Notification;
-import com.inkstage.enums.NotificationCategory;
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationCategory;
+import com.inkstage.enums.notification.NotificationType;
 
 import java.util.List;
 import java.util.Map;

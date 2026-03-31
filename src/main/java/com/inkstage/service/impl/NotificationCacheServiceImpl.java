@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.enums.NotificationCategory;
+import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.service.NotificationCacheService;
 import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.inkstage.entity.base;
 
-import com.inkstage.enums.DeleteStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import lombok.Data;
 
 import java.io.Serial;

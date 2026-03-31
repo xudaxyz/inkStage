@@ -1,5 +1,6 @@
-package com.inkstage.enums;
+package com.inkstage.enums.common;
 
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 /**
@@ -8,7 +9,7 @@ import lombok.Getter;
  * NO: 否
  */
 @Getter
-public enum DefaultStatus implements EnumCode{
+public enum DefaultStatus implements EnumCode {
     YES(1, "是"),
     NO(0, "否");
 

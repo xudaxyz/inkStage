@@ -7,7 +7,7 @@ import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.service.AdminNotificationTemplateService;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import jakarta.validation.Valid;
@@ -167,15 +167,17 @@ public class AdminNotificationTemplateController {
     private NotificationTemplate convertToEntity(NotificationTemplateDTO dto) {
         NotificationTemplate template = new NotificationTemplate();
         template.setCode(dto.getCode());
-        template.setNameTemplate(dto.getNameTemplate());
-        template.setTitleTemplate(dto.getTitleTemplate());
-        template.setContentTemplate(dto.getContentTemplate());
+        template.setName(dto.getName());
         template.setNotificationType(dto.getNotificationType());
         template.setNotificationChannel(dto.getNotificationChannel());
+
+        template.setTitleTemplate(dto.getTitleTemplate());
+        template.setContentTemplate(dto.getContentTemplate());
         template.setActionUrlTemplate(dto.getActionUrlTemplate());
-        template.setVariables(dto.getVariables());
+
         template.setDescription(dto.getDescription());
         template.setPriority(dto.getPriority());
+        template.setExtraData(dto.getExtraData());
         return template;
     }
 

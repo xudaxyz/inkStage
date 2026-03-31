@@ -3,6 +3,7 @@ package com.inkstage.entity.model;
 import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.*;
 import com.inkstage.enums.article.*;
+import com.inkstage.enums.common.AllowStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

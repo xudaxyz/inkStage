@@ -3,7 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Category;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.CategoryMapper;
 import com.inkstage.service.CategoryService;

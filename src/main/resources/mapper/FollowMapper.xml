@@ -9,7 +9,7 @@
         <result column="following_id" property="followingId"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="deleted" property="deleted" javaType="com.inkstage.enums.DeleteStatus"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
         <result column="deleted_time" property="deletedTime"/>
     </resultMap>
 

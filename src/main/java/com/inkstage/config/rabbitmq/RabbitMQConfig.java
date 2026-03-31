@@ -93,9 +93,9 @@ public class RabbitMQConfig {
     public SimpleMessageConverter messageConverter() {
         SimpleMessageConverter converter = new SimpleMessageConverter();
         // 添加允许反序列化的类
-        List<String> allowedList = new ArrayList<String>();
+        List<String> allowedList = new ArrayList<>();
         allowedList.add("com.inkstage.dto.NotificationMessageDTO");
-        allowedList.add("com.inkstage.enums.NotificationType");
+        allowedList.add("com.inkstage.enums.notification.NotificationType");
         allowedList.add("com.inkstage.enums.ReportTargetType");
         allowedList.add("java.lang.Enum");
         converter.setAllowedListPatterns(allowedList);

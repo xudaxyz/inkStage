@@ -10,7 +10,7 @@
         <result property="assignedBy" column="assigned_by"/>
         <result property="assignedAt" column="assigned_at"/>
         <result property="expiresAt" column="expires_at"/>
-        <result property="status" column="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result property="status" column="status" javaType="com.inkstage.enums.common.StatusEnum"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
         <result property="deleted" column="deleted"/>

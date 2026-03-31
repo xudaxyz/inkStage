@@ -1,7 +1,7 @@
 package com.inkstage.service;
 
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
 
 import java.util.Map;
 

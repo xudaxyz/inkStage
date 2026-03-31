@@ -3,7 +3,7 @@ package com.inkstage.service;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 
 import java.util.List;
 

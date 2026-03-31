@@ -2,7 +2,7 @@ package com.inkstage.mapper;
 
 import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.enums.common.StatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

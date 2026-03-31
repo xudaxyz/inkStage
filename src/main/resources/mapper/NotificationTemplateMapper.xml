@@ -5,17 +5,16 @@
     <resultMap id="BaseResultMap" type="com.inkstage.entity.model.NotificationTemplate">
         <id column="id" property="id"/>
         <result column="code" property="code"/>
-        <result column="name_template" property="nameTemplate"/>
+        <result column="name" property="name"/>
         <result column="title_template" property="titleTemplate"/>
         <result column="content_template" property="contentTemplate"/>
-        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.NotificationType"/>
+        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.notification.NotificationType"/>
         <result column="notification_channel" property="notificationChannel"
-                javaType="com.inkstage.enums.NotificationChannel"/>
+                javaType="com.inkstage.enums.notification.NotificationChannel"/>
         <result column="action_url_template" property="actionUrlTemplate"/>
-        <result column="variables" property="variables"/>
         <result column="description" property="description"/>
-        <result column="priority" property="priority" javaType="com.inkstage.enums.Priority"/>
-        <result column="status" property="status" javaType="com.inkstage.enums.StatusEnum"/>
+        <result column="priority" property="priority" javaType="com.inkstage.enums.common.Priority"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
         <result column="create_user_id" property="createUserId"/>
         <result column="update_user_id" property="updateUserId"/>
         <result column="create_time" property="createTime"/>
@@ -26,8 +25,8 @@
 
     <sql id="Base_Column_List">
         id
-        , code, name_template, title_template, content_template, notification_type, notification_channel, action_url_template,
-        variables, description, priority, status, create_user_id, update_user_id,
+        , code, name, title_template, content_template, notification_type, notification_channel, action_url_template,
+        description, priority, status, create_user_id, update_user_id,
         create_time, update_time, deleted, deleted_time
     </sql>
 
@@ -123,13 +122,13 @@
     </select>
 
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO notification_template (code, name_template, title_template, content_template, notification_type,
+        INSERT INTO notification_template (code, name, title_template, content_template, notification_type,
                                            notification_channel,
-                                           action_url_template, variables, description, priority, status,
+                                           action_url_template, description, priority, status,
                                            create_user_id, update_user_id, create_time, update_time, deleted)
-        VALUES (#{code}, #{nameTemplate}, #{titleTemplate}, #{contentTemplate},
+        VALUES (#{code}, #{name}, #{titleTemplate}, #{contentTemplate},
                 #{notificationType},
-                #{notificationChannel}, #{actionUrlTemplate}, #{variables}, #{description},
+                #{notificationChannel}, #{actionUrlTemplate}, #{description},
                 #{priority},
                 #{status},
                 #{createUserId}, #{updateUserId}, #{createTime}, #{updateTime}, 0)
@@ -138,13 +137,12 @@
     <update id="update">
         UPDATE notification_template
         <set>
-            <if test="nameTemplate != null">name_template = #{nameTemplate},</if>
+            <if test="name != null">name = #{name},</if>
             <if test="titleTemplate != null">title_template = #{titleTemplate},</if>
             <if test="contentTemplate != null">content_template = #{contentTemplate},</if>
             <if test="notificationType != null">notification_type = #{notificationType},</if>
             <if test="notificationChannel != null">notification_channel = #{notificationChannel},</if>
             <if test="actionUrlTemplate != null">action_url_template = #{actionUrlTemplate},</if>
-            <if test="variables != null">variables = #{variables},</if>
             <if test="description != null">description = #{description},</if>
             <if test="priority != null">priority = #{priority},</if>
             <if test="status != null">status = #{status},</if>

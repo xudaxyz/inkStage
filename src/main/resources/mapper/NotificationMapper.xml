@@ -6,8 +6,8 @@
     <resultMap id="BaseResultMap" type="com.inkstage.entity.model.Notification">
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
-        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.NotificationType" />
-        <result column="notification_category" property="notificationCategory" javaType="com.inkstage.enums.NotificationCategory" />
+        <result column="notification_type" property="notificationType" javaType="com.inkstage.enums.notification.NotificationType" />
+        <result column="notification_category" property="notificationCategory" javaType="com.inkstage.enums.notification.NotificationCategory" />
         <result column="title" property="title" />
         <result column="content" property="content" />
         <result column="read_status" property="readStatus" />

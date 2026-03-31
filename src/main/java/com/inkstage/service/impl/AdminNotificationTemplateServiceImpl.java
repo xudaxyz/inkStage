@@ -5,14 +5,16 @@ import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
-import com.inkstage.enums.NotificationChannel;
-import com.inkstage.enums.NotificationType;
-import com.inkstage.enums.StatusEnum;
+import com.inkstage.entity.model.User;
+import com.inkstage.enums.common.StatusEnum;
+import com.inkstage.enums.notification.NotificationChannel;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.NotificationTemplateMapper;
 import com.inkstage.service.AdminNotificationTemplateService;
 import com.inkstage.service.UserService;
-import com.inkstage.utils.TemplateRenderUtils;
+import com.inkstage.utils.SpELTemplateRender;
+import com.inkstage.utils.TemplateValidator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import lombok.RequiredArgsConstructor;
@@ -65,10 +67,10 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         }
 
         // 设置创建信息
-        template.setCreateUserId(UserContext.getCurrentUserId());
-        template.setUpdateUserId(UserContext.getCurrentUserId());
+        User currentUser = UserContext.getCurrentUser();
+        template.setCreateUserId(currentUser.getId());
+        template.setCreateUserName(currentUser.getNickname());
         template.setCreateTime(LocalDateTime.now());
-        template.setUpdateTime(LocalDateTime.now());
 
         // 默认启用
         if (template.getStatus() == null) {
@@ -108,7 +110,9 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         // 验证模板语法
         validateTemplate(template);
 
-        template.setUpdateUserId(UserContext.getCurrentUserId());
+        User currentUser = UserContext.getCurrentUser();
+        template.setUpdateUserId(currentUser.getId());
+        template.setUpdateUserName(currentUser.getNickname());
         template.setUpdateTime(LocalDateTime.now());
 
         return templateMapper.update(template) > 0;
@@ -157,7 +161,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     @Override
     public PageResult<NotificationTemplate> getTemplatePage(NotificationTemplateQueryDTO templateQuery) {
         int offset = (templateQuery.getPageNum() - 1) * templateQuery.getPageSize();
-        var list = templateMapper.selectPageByQuery(templateQuery, offset, templateQuery.getPageSize());
+        List<NotificationTemplate> list = templateMapper.selectPageByQuery(templateQuery, offset, templateQuery.getPageSize());
         long total = templateMapper.countByQuery(templateQuery);
         return PageResult.build(list, total, templateQuery.getPageNum(), templateQuery.getPageSize());
     }
@@ -175,20 +179,20 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 根据类型获取通知模板
      *
-     * @param type 通知类型
+     * @param notificationType 通知类型
      * @return 通知模板列表
      */
     @Override
-    public List<NotificationTemplate> getTemplatesByType(NotificationType type) {
-        return templateMapper.selectByType(type);
+    public List<NotificationTemplate> getTemplatesByType(NotificationType notificationType) {
+        return templateMapper.selectByType(notificationType);
     }
 
     @Override
-    public NotificationTemplate getTemplateByType(NotificationType type, NotificationChannel channel) {
+    public NotificationTemplate getTemplateByTypeAndChannel(NotificationType notificationType, NotificationChannel channel) {
         if (channel == null) {
             channel = NotificationChannel.SITE;
         }
-        return templateMapper.selectByTypeAndChannel(type, channel);
+        return templateMapper.selectByTypeAndChannel(notificationType, channel);
     }
 
     /**
@@ -205,6 +209,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         template.setId(id);
         template.setStatus(status);
         template.setUpdateUserId(UserContext.getCurrentUserId());
+        template.setUpdateUserName(UserContext.getCurrentUser().getNickname());
         return templateMapper.update(template) > 0;
     }
 
@@ -249,16 +254,14 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 解析变量JSON字符串
      */
-    private HashMap<String, Object> parseVariables(String variables) {
+    private Map<String, Object> parseVariables(String variables) {
         if (variables == null || variables.isEmpty()) {
             return new HashMap<>();
         }
 
         ObjectMapper objectMapper = new ObjectMapper();
-        // 尝试解析为HashMap
         try {
-            return objectMapper.readValue(variables, new TypeReference<>() {
-            });
+            return objectMapper.readValue(variables, new TypeReference<HashMap<String, Object>>() {});
         } catch (Exception e) {
             log.error("解析变量JSON失败: {}", e.getMessage());
             throw new BusinessException("变量格式错误: " + e.getMessage());
@@ -272,16 +275,16 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         AdminNotificationTemplatePreviewVO result = new AdminNotificationTemplatePreviewVO();
 
         // 渲染标题
-        String title = TemplateRenderUtils.renderString(template.getTitleTemplate(), variables);
+        String title = SpELTemplateRender.render(template.getTitleTemplate(), variables);
         result.setTitle(title);
 
         // 渲染内容
-        String content = TemplateRenderUtils.renderString(template.getContentTemplate(), variables);
+        String content = SpELTemplateRender.render(template.getContentTemplate(), variables);
         result.setContent(content);
 
         // 渲染链接
         if (template.getActionUrlTemplate() != null && !template.getActionUrlTemplate().isEmpty()) {
-            String actionUrl = TemplateRenderUtils.renderString(template.getActionUrlTemplate(), variables);
+            String actionUrl = SpELTemplateRender.render(template.getActionUrlTemplate(), variables);
             result.setActionUrl(actionUrl);
         }
 
@@ -371,77 +374,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
     @Override
     public boolean validateTemplate(NotificationTemplate template) {
-        // 验证标题模板
-        validateTemplateContent(template.getTitleTemplate(), "标题模板");
-
-        // 验证内容模板
-        validateTemplateContent(template.getContentTemplate(), "内容模板");
-
-        // 验证链接模板（如果有）
-        if (template.getActionUrlTemplate() != null && !template.getActionUrlTemplate().isEmpty()) {
-            validateTemplateContent(template.getActionUrlTemplate(), "链接模板");
-        }
-
-        // 验证变量定义（如果有）
-        if (template.getVariables() != null && !template.getVariables().isEmpty()) {
-            validateVariablesDefinition(template.getVariables());
-        }
-
-        return true;
-    }
-
-    /**
-     * 验证模板内容语法
-     */
-    private void validateTemplateContent(String content, String templateType) {
-        if (content == null || content.isEmpty()) {
-            throw new BusinessException(templateType + "不能为空");
-        }
-
-        int openCount;
-        int closeCount;
-        // 简单验证变量格式，检查是否有未闭合的变量标签
-        if (content.startsWith("{{")) {
-            openCount = countOccurrences(content, "{{");
-            closeCount = countOccurrences(content, "}}");
-            if (openCount != closeCount) {
-                throw new BusinessException(templateType + "变量标签未闭合");
-            }
-        } else if (content.startsWith("${")) {
-            openCount = countOccurrences(content, "${");
-            closeCount = countOccurrences(content, "}");
-            if (openCount != closeCount) {
-                throw new BusinessException(templateType + "变量标签未闭合");
-            }
-        }
-    }
-
-    /**
-     * 验证变量定义
-     */
-    private void validateVariablesDefinition(String variables) {
-        try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.readValue(variables, new TypeReference<>() {
-            });
-        } catch (Exception e) {
-            throw new BusinessException("变量定义格式错误: " + e.getMessage());
-        }
-    }
-
-    /**
-     * 统计字符串中指定子串的出现次数
-     */
-    private int countOccurrences(String text, String substring) {
-        if (text == null || substring == null || substring.isEmpty()) {
-            return 0;
-        }
-        int count = 0;
-        int index = 0;
-        while ((index = text.indexOf(substring, index)) != -1) {
-            count++;
-            index += substring.length();
-        }
-        return count;
+        // 使用 TemplateValidator 验证模板
+        return TemplateValidator.validate(template);
     }
 }

@@ -4,6 +4,7 @@ import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.entity.model.Notification;
 import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.enums.ReadStatus;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.event.NotificationEvent;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.*;
@@ -94,7 +95,7 @@ public class NotificationEventListener {
     /**
      * 检查用户是否开启了该类型的通知
      */
-    private boolean isNotificationEnabled(Long userId, com.inkstage.enums.NotificationType type) {
+    private boolean isNotificationEnabled(Long userId, NotificationType type) {
         String settingKey = switch (type) {
             case ARTICLE_PUBLISH -> "articlePublish";
             case ARTICLE_LIKE -> "articleLike";

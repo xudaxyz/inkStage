@@ -1,6 +1,7 @@
-package com.inkstage.enums;
+package com.inkstage.enums.common;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.inkstage.enums.EnumCode;
 import lombok.Getter;
 
 @Getter
