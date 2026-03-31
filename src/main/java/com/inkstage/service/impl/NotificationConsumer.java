@@ -30,7 +30,7 @@ public class NotificationConsumer {
      */
     @RabbitListener(queues = RabbitMQConfig.NOTIFICATION_QUEUE)
     public void handleNotification(Notification notification) {
-        log.info("开始处理通知消息，用户ID: {}", notification.getUserId());
+        log.info("开始处理通知消息: {}", notification);
 
         try {
             // 保存到数据库

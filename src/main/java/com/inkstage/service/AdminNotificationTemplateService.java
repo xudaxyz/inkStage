@@ -4,12 +4,13 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
+import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.notification.NotificationChannel;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 通知模板管理服务(后台管理)
@@ -52,16 +53,6 @@ public interface AdminNotificationTemplateService {
     List<NotificationTemplate> getAllTemplates();
 
     /**
-     * 根据类型获取模板
-     */
-    List<NotificationTemplate> getTemplatesByType(NotificationType notificationType);
-
-    /**
-     * 根据类型和渠道获取单个模板
-     */
-    NotificationTemplate getTemplateByTypeAndChannel(NotificationType notificationType, NotificationChannel channel);
-
-    /**
      * 启用/禁用模板
      */
     boolean updateTemplateStatus(Long id, StatusEnum status);
@@ -88,7 +79,7 @@ public interface AdminNotificationTemplateService {
      * @param variables 变量JSON字符串
      * @return 渲染后的标题、内容、类型和链接
      */
-    AdminNotificationTemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables);
+    Map<String, Object> renderTemplateByType(NotificationType type, NotificationChannel channel, Map<String, Object> variables);
 
     /**
      * 手动发送通知

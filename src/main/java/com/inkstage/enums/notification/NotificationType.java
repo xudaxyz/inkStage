@@ -21,7 +21,7 @@ public enum NotificationType implements EnumCode {
     ARTICLE_REVIEW_REJECT(802, "文章审核拒绝通知"),
     ARTICLE_REVIEW_REPROCESS(803, "文章重新审核通知"),
     ARTICLE_OFFLINE(804, "文章下架通知"),
-    ARTICLE_ONLINE(805, "文章上架通知"),
+    ARTICLE_ONLINE(805, "文章重新上架通知"),
     ARTICLE_TOP(806, "文章置顶通知"),
     ARTICLE_RECOMMEND(807, "文章推荐通知"),
     ARTICLE_DELETE(808, "文章删除通知"),

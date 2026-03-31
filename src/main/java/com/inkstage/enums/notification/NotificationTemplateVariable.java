@@ -18,7 +18,6 @@ public enum NotificationTemplateVariable {
     // 文章相关变量
     ARTICLE_ID("articleId", "文章ID"),
     ARTICLE_TITLE("articleTitle", "文章标题"),
-    ARTICLE_CONTENT("articleContent", "文章内容"),
     ARTICLE_USER_ID("articleUserId", "文章作者ID"),
     ARTICLE_USERNAME("articleUsername", "文章作者名称"),
     ARTICLE_URL("articleUrl", "文章链接"),
@@ -28,7 +27,7 @@ public enum NotificationTemplateVariable {
     // 评论相关变量
     COMMENT_ID("commentId", "评论ID"),
     COMMENT_CONTENT("commentContent", "评论内容"),
-    COMMENT_AUTHOR("commentAuthor", "评论作者"),
+    COMMENT_USERNAME("commentUsername", "评论作者名称"),
 
     // 标签相关
     TAG_ID("tagId", "标签ID"),

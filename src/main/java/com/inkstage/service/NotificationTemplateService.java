@@ -1,6 +1,5 @@
 package com.inkstage.service;
 
-import com.inkstage.enums.notification.NotificationChannel;
 import com.inkstage.enums.notification.NotificationType;
 
 import java.util.Map;
@@ -13,19 +12,10 @@ public interface NotificationTemplateService {
 
     /**
      * 生成通知内容
+     *
      * @param notificationType 通知类型
-     * @param params 通知模板中的变量
+     * @param params           通知模板中的变量
      * @return 通知内容
      */
     Map<String, Object> generateNotificationContent(NotificationType notificationType, Map<String, Object> params);
-
-    /**
-     * 从模板中获取变量
-     * @param notificationType 通知类型
-     * @param notificationChannel 通知渠道
-     * @param params 通知模板中的变量
-     * @return 变量字符串
-     */
-    String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel  notificationChannel,Map<String, Object> params);
-
 }

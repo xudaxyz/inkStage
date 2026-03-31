@@ -1,7 +1,9 @@
 package com.inkstage.event.listener;
 
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.PushedStatus;
 import com.inkstage.enums.ReadStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.event.NotificationEvent;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.NotificationCacheService;
@@ -82,12 +84,18 @@ public class NotificationEventListener {
         notification.setTitle(event.getTitle());
         notification.setContent(event.getContent());
         notification.setReadStatus(ReadStatus.UNREAD);
+        notification.setPushedStatus(PushedStatus.PUSHED);
+        LocalDateTime now = LocalDateTime.now();
+        notification.setPushTime(now);
         notification.setRelatedId(event.getRelatedId());
         notification.setRelatedType(event.getRelatedType());
         notification.setSenderId(event.getSenderId());
         notification.setActionUrl(event.getActionUrl());
         notification.setExtraData(event.getExtraData());
-        notification.setCreateTime(LocalDateTime.now());
+        notification.setCreateTime(now);
+        notification.setUpdateTime(now);
+        notification.setDeleted(DeleteStatus.NOT_DELETED);
+
         return notification;
     }
 

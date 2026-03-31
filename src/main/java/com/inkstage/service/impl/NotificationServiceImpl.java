@@ -2,9 +2,10 @@ package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Article;
-import com.inkstage.entity.model.Comment;
 import com.inkstage.entity.model.Notification;
+import com.inkstage.enums.PushedStatus;
 import com.inkstage.enums.ReadStatus;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.Priority;
 import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
@@ -102,16 +103,11 @@ public class NotificationServiceImpl implements NotificationService {
         if (isNotificationDisabled(userId, notificationType)) {
             return false;
         }
-        params.put("notificationTime", LocalDateTime.now().toString());
+        params.put(NotificationTemplateVariable.NOTIFICATION_TIME.getKey(), LocalDateTime.now().toString());
+        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
 
         // 使用模板生成通知内容
         Map<String, Object> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
-        if (notificationContent == null) {
-            notificationContent = new HashMap<>();
-            notificationContent.put("title", "");
-            notificationContent.put("content", "");
-            notificationContent.put("actionUrl", "");
-        }
         log.info("生成通知内容结果：{}", notificationContent);
 
         // 构建通知对象
@@ -127,18 +123,10 @@ public class NotificationServiceImpl implements NotificationService {
         params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
         params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
         params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), article.getId());
+        params.put(NotificationTemplateVariable.RELATED_ID.getKey(), article.getId());
+        log.info("发送文章通知，相关变量：{}", params);
         boolean result = sendNotificationWithTemplate(userId, notificationType, params);
-        log.info("发送通知结果：{}", result);
-    }
-
-    @Override
-    public void sendCommentNotification(Long userId, NotificationType notificationType, Comment comment) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(NotificationTemplateVariable.COMMENT_ID.getKey(), comment.getId());
-        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
-        params.put(NotificationTemplateVariable.COMMENT_CONTENT.getKey(), comment.getContent());
-        params.put(NotificationTemplateVariable.COMMENT_AUTHOR.getKey(), comment.getUserId());
-        sendNotificationWithTemplate(userId, notificationType, params);
+        log.info("文章发送通知结果：{}", result);
     }
 
     @Override
@@ -278,12 +266,19 @@ public class NotificationServiceImpl implements NotificationService {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setNotificationType(notificationType);
+        notification.setPriority(Priority.NORMAL);
+        notification.setPushedStatus(PushedStatus.PUSHED);
+        notification.setPushTime(LocalDateTime.now());
+        notification.setReadStatus(ReadStatus.UNREAD);
         notification.setTitle((String) content.get("title"));
         notification.setContent((String) content.get("content"));
         notification.setRelatedId((Long) content.get("relatedId"));
-        notification.setPriority(Priority.NORMAL);
         notification.setSenderId((Long) content.get("senderId"));
         notification.setActionUrl((String) content.get("actionUrl"));
+        notification.setExtraData((String) content.get("extraData"));
+        notification.setCreateTime(LocalDateTime.now());
+        notification.setUpdateTime(LocalDateTime.now());
+        notification.setDeleted(DeleteStatus.NOT_DELETED);
         return notification;
     }
 }

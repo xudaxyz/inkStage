@@ -94,10 +94,19 @@ public class RabbitMQConfig {
         SimpleMessageConverter converter = new SimpleMessageConverter();
         // 添加允许反序列化的类
         List<String> allowedList = new ArrayList<>();
-        allowedList.add("com.inkstage.dto.NotificationMessageDTO");
+        allowedList.add("com.inkstage.entity.base.BaseEntity");
+        allowedList.add("com.inkstage.entity.model.Notification");
         allowedList.add("com.inkstage.enums.notification.NotificationType");
+        allowedList.add("com.inkstage.enums.notification.NotificationCategory");
+        allowedList.add("com.inkstage.enums.ReadStatus");
         allowedList.add("com.inkstage.enums.ReportTargetType");
+        allowedList.add("com.inkstage.enums.PushedStatus");
+        allowedList.add("com.inkstage.enums.common.Priority");
+        allowedList.add("com.inkstage.enums.common.DeleteStatus");
         allowedList.add("java.lang.Enum");
+        allowedList.add("java.util.Map");
+        allowedList.add("java.util.HashMap");
+        allowedList.add("java.time.Ser");
         converter.setAllowedListPatterns(allowedList);
         return converter;
     }

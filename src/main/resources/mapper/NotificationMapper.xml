@@ -119,7 +119,7 @@
         ) VALUES (
             #{userId}, #{notificationType}, #{title}, #{content}, #{readStatus}, #{readTime}, #{relatedId}, #{relatedType},
             #{senderId}, #{pushedStatus}, #{pushTime}, #{priority}, #{actionUrl}, #{extraData},
-            NOW(), NOW(), 0
+            #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>
 

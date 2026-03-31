@@ -111,10 +111,8 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                     Map<String, Object> params = new HashMap<>();
                     params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), articleTitle);
                     params.put(NotificationTemplateVariable.RELATED_ID.getKey(), collectArticleDTO.getArticleId());
-                    params.put(NotificationTemplateVariable.COLLECTOR_ID.getKey(), userId);
-                    params.put(NotificationTemplateVariable.COLLECTOR_NAME.getKey(), currentUserNickname);
-                    params.put(NotificationTemplateVariable.ARTICLE_USERNAME.getKey(), currentUserNickname);
-
+                    params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), collectArticleDTO.getArticleId());
+                    params.put(NotificationTemplateVariable.USERNAME.getKey(), currentUserNickname);
                     notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_COLLECTION, params);
                 }
             }

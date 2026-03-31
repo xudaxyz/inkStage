@@ -55,15 +55,6 @@ public interface NotificationService {
     void sendArticleNotification(Long userId, NotificationType notificationType, Article article);
 
     /**
-     * 发送评论通知
-     *
-     * @param userId           用户ID
-     * @param notificationType 通知类型
-     * @param comment          评论内容
-     */
-    void sendCommentNotification(Long userId, NotificationType notificationType, Comment comment);
-
-    /**
      * 批量发送通知
      *
      * @param notifications 通知列表

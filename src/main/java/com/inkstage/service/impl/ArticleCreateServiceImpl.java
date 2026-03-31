@@ -5,6 +5,7 @@ import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
@@ -20,6 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 文章创建和更新服务实现类
@@ -81,7 +84,11 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             }
 
             // 发送文章发布通知
-            notificationService.sendArticleNotification(currentUser.getId(), NotificationType.ARTICLE_PUBLISH, article);
+            Map<String, Object> params = new HashMap<>();
+            params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
+            params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), article.getId());
+            params.put(NotificationTemplateVariable.RELATED_ID.getKey(), article.getId());
+            notificationService.sendNotificationWithTemplate(currentUser.getId(), NotificationType.ARTICLE_PUBLISH, params);
 
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
             return article.getId();

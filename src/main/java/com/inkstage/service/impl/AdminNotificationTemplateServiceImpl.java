@@ -183,25 +183,6 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     }
 
     /**
-     * 根据类型获取通知模板
-     *
-     * @param notificationType 通知类型
-     * @return 通知模板列表
-     */
-    @Override
-    public List<NotificationTemplate> getTemplatesByType(NotificationType notificationType) {
-        return templateMapper.selectByType(notificationType);
-    }
-
-    @Override
-    public NotificationTemplate getTemplateByTypeAndChannel(NotificationType notificationType, NotificationChannel channel) {
-        if (channel == null) {
-            channel = NotificationChannel.SITE;
-        }
-        return templateMapper.selectByTypeAndChannel(notificationType, channel);
-    }
-
-    /**
      * 更新通知模板状态
      *
      * @param id     模板ID
@@ -238,11 +219,17 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         }
 
         Map<String, Object> variablesMap = parseVariables(variables);
-        return renderTemplateInternal(template, variablesMap);
+        AdminNotificationTemplatePreviewVO templatePreviewVO = new AdminNotificationTemplatePreviewVO();
+        templatePreviewVO.setTitle((String) variablesMap.get("title"));
+        templatePreviewVO.setContent((String) variablesMap.get("content"));
+        templatePreviewVO.setActionUrl((String) variablesMap.get("actionUrl"));
+        templatePreviewVO.setNotificationType((NotificationType) variablesMap.get("notificationType"));
+
+        return templatePreviewVO;
     }
 
     @Override
-    public AdminNotificationTemplatePreviewVO renderTemplateByType(NotificationType type, NotificationChannel channel, String variables) {
+    public Map<String, Object> renderTemplateByType(NotificationType type, NotificationChannel channel, Map<String, Object> variables) {
         if (channel == null) {
             channel = NotificationChannel.SITE;
         }
@@ -253,8 +240,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
             return null;
         }
 
-        Map<String, Object> variablesMap = parseVariables(variables);
-        return renderTemplateInternal(template, variablesMap);
+        return renderTemplateInternal(template, variables);
     }
 
     /**
@@ -278,26 +264,25 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     /**
      * 内部模板渲染方法
      */
-    private AdminNotificationTemplatePreviewVO renderTemplateInternal(NotificationTemplate template, Map<String, Object> variables) {
-        AdminNotificationTemplatePreviewVO result = new AdminNotificationTemplatePreviewVO();
-
+    private Map<String, Object> renderTemplateInternal(NotificationTemplate template, Map<String, Object> variables) {
         // 渲染标题
         String title = SpELTemplateRender.render(template.getTitleTemplate(), variables);
-        result.setTitle(title);
+        variables.put("title", title);
 
         // 渲染内容
         String content = SpELTemplateRender.render(template.getContentTemplate(), variables);
-        result.setContent(content);
+        variables.put("content", content);
 
         // 渲染链接
         if (template.getActionUrlTemplate() != null && !template.getActionUrlTemplate().isEmpty()) {
             String actionUrl = SpELTemplateRender.render(template.getActionUrlTemplate(), variables);
-            result.setActionUrl(actionUrl);
+            variables.put("actionUrl", actionUrl);
         }
 
-        result.setNotificationType(template.getNotificationType());
+        variables.put("notificationType", template.getNotificationType());
 
-        return result;
+        log.info("渲染后的变量: {}", variables);
+        return variables;
     }
 
     @Override
