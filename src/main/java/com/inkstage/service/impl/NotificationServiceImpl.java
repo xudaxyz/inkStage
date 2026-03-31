@@ -1,12 +1,14 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.dto.NotificationMessageDTO;
+import com.inkstage.entity.model.Article;
+import com.inkstage.entity.model.Comment;
 import com.inkstage.entity.model.Notification;
-import com.inkstage.enums.notification.NotificationCategory;
-import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.enums.common.Priority;
 import com.inkstage.enums.ReadStatus;
+import com.inkstage.enums.common.Priority;
+import com.inkstage.enums.notification.NotificationCategory;
+import com.inkstage.enums.notification.NotificationTemplateVariable;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.*;
 import com.inkstage.utils.UserContext;
@@ -14,8 +16,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
-import java.util.stream.Stream;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 通知服务实现类
@@ -32,14 +36,6 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationSettingService notificationSettingService;
     private final WebSocketService webSocketService;
 
-    @Override
-    public List<Notification> getNotificationList(Long userId, NotificationType type) {
-        if (type == null) {
-            return notificationMapper.selectByUserId(userId);
-        } else {
-            return notificationMapper.selectByUserIdAndType(userId, type);
-        }
-    }
 
     @Override
     public boolean markAsRead(Long notificationId) {
@@ -79,195 +75,84 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean sendNotification(Notification notification) {
-        // 构建通知消息DTO
-        NotificationMessageDTO message = buildMessageDTO(notification);
-
         // 发送到RabbitMQ
-        notificationProducer.sendNotification(message);
+        notificationProducer.sendNotification(notification);
         return true;
-    }
-
-    /**
-     * 获取通知类型对应的设置键
-     *
-     * @param type 通知类型
-     * @return 设置键
-     */
-    private String getSettingKey(NotificationType type) {
-        return switch (type) {
-            case ARTICLE_LIKE -> "articleLike";
-            case ARTICLE_PUBLISH -> "articlePublish";
-            case ARTICLE_COLLECTION -> "articleCollection";
-            case COMMENT_REPLY -> "commentReply";
-            case ARTICLE_COMMENT -> "articleComment";
-            case COMMENT_LIKE -> "commentLike";
-            case FOLLOW -> "follow";
-            case REPORT -> "report";
-            case MESSAGE -> "message";
-            case FEEDBACK -> "feedback";
-            case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REPROCESS, ARTICLE_TOP, ARTICLE_RECOMMEND, ARTICLE_DELETE,
-                 ARTICLE_ONLINE, ARTICLE_OFFLINE, TAG_DELETE, ARTICLE_REVIEW_REJECT, COMMENT_REVIEW_REJECT,
-                 COMMENT_TOP -> "system";
-        };
     }
 
     /**
      * 检查用户是否开启了该类型的通知
      *
-     * @param userId 用户ID
-     * @param type   通知类型
+     * @param userId           用户ID
+     * @param notificationType 通知类型
      * @return 是否开启
      */
-    private boolean isNotificationDisabled(Long userId, NotificationType type) {
-        String settingKey = getSettingKey(type);
-        boolean enabled = notificationSettingService.isNotificationEnabled(userId, settingKey);
+    private boolean isNotificationDisabled(Long userId, NotificationType notificationType) {
+        boolean enabled = notificationSettingService.isNotificationEnabled(userId, notificationType);
         if (!enabled) {
-            log.info("用户 ID {} 已关闭 {} 类型的通知", userId, type.getDesc());
+            log.info("用户 ID {} 已关闭 {} 类型的通知", userId, notificationType.getDesc());
         }
         return !enabled;
     }
 
-    /**
-     * 使用模板生成通知内容
-     *
-     * @param notificationType 通知类型
-     * @param relatedId        关联ID
-     * @param params           模板参数
-     * @return 通知内容对象
-     */
-    private Map<String, String> generateContentWithTemplate(NotificationType notificationType, Long relatedId, Object... params) {
-        params = Stream.concat(Arrays.stream(params), Stream.of(relatedId)).toArray();
-        Map<String, String> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
-        if (notificationContent == null) {
-            notificationContent = new HashMap<>();
-            notificationContent.put("title", "title");
-            notificationContent.put("content", "content");
-            notificationContent.put("actionUrl", "actionUrl");
-            return notificationContent;
-        }
-        log.warn("生成通知内容结果：{}", notificationContent);
-        return notificationContent;
-    }
-
-    /**
-     * 构建通知对象
-     *
-     * @param userId           用户ID
-     * @param notificationType 通知类型
-     * @param relatedId        关联ID
-     * @param senderId         发送者ID
-     * @param content          通知内容
-     * @return 通知对象
-     */
-    private Notification buildNotification(Long userId, NotificationType notificationType, Long relatedId,
-                                           Long senderId, Map<String, String> content) {
-        Notification notification = new Notification();
-        notification.setUserId(userId);
-        notification.setNotificationType(notificationType);
-        notification.setTitle(content.get("title"));
-        notification.setContent(content.get("content"));
-        notification.setRelatedId(relatedId);
-        notification.setPriority(Priority.NORMAL);
-        notification.setSenderId(senderId);
-        notification.setActionUrl(content.get("actionUrl"));
-        return notification;
-    }
-
-    /**
-     * 构建通知消息DTO
-     *
-     * @param notification 通知对象
-     * @return 通知消息DTO
-     */
-    private NotificationMessageDTO buildMessageDTO(Notification notification) {
-        NotificationMessageDTO message = new NotificationMessageDTO();
-        message.setUserId(notification.getUserId());
-        message.setContent(notification.getContent());
-        message.setNotificationType(notification.getNotificationType());
-        message.setRelatedId(notification.getRelatedId());
-        message.setSenderId(notification.getSenderId());
-        message.setRelatedType(notification.getRelatedType());
-        message.setActionUrl(notification.getActionUrl());
-        message.setExtraData(notification.getExtraData());
-        message.setTitle(notification.getTitle());
-        return message;
-    }
-
 
     @Override
-    public boolean sendNotificationWithTemplate(Long userId, NotificationType type, Long relatedId, Long senderId, Object... params) {
+    public boolean sendNotificationWithTemplate(Long userId, NotificationType notificationType, Map<String, Object> params) {
         // 检查用户是否开启了该类型的通知
-        if (isNotificationDisabled(userId, type)) {
+        if (isNotificationDisabled(userId, notificationType)) {
             return false;
         }
+        params.put("notificationTime", LocalDateTime.now().toString());
 
         // 使用模板生成通知内容
-        Map<String, String> content = generateContentWithTemplate(type, relatedId, params);
+        Map<String, Object> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
+        if (notificationContent == null) {
+            notificationContent = new HashMap<>();
+            notificationContent.put("title", "");
+            notificationContent.put("content", "");
+            notificationContent.put("actionUrl", "");
+        }
+        log.info("生成通知内容结果：{}", notificationContent);
 
         // 构建通知对象
-        Notification notification = buildNotification(userId, type, relatedId, senderId, content);
+        Notification notification = buildNotification(userId, notificationType, notificationContent);
 
         // 发送通知
         return sendNotification(notification);
     }
 
     @Override
-    public boolean sendBatchNotifications(List<Notification> notifications) {
-        try {
-            List<NotificationMessageDTO> messages = new ArrayList<>();
-            for (Notification notification : notifications) {
-                // 检查用户是否开启了该类型的通知
-                if (isNotificationDisabled(notification.getUserId(), notification.getNotificationType())) {
-                    continue;
-                }
-
-                // 构建通知消息DTO
-                NotificationMessageDTO message = buildMessageDTO(notification);
-                messages.add(message);
-            }
-
-            // 批量发送到RabbitMQ
-            if (!messages.isEmpty()) {
-                notificationProducer.sendBatchNotifications(messages);
-            }
-
-            return true;
-        } catch (Exception e) {
-            log.error("批量发送通知失败", e);
-            return false;
-        }
+    public void sendArticleNotification(Long userId, NotificationType notificationType, Article article) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
+        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
+        params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), article.getId());
+        boolean result = sendNotificationWithTemplate(userId, notificationType, params);
+        log.info("发送通知结果：{}", result);
     }
 
     @Override
-    public boolean sendBatchNotificationsWithTemplate(List<Map<String, Object>> notificationDataList) {
+    public void sendCommentNotification(Long userId, NotificationType notificationType, Comment comment) {
+        Map<String, Object> params = new HashMap<>();
+        params.put(NotificationTemplateVariable.COMMENT_ID.getKey(), comment.getId());
+        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
+        params.put(NotificationTemplateVariable.COMMENT_CONTENT.getKey(), comment.getContent());
+        params.put(NotificationTemplateVariable.COMMENT_AUTHOR.getKey(), comment.getUserId());
+        sendNotificationWithTemplate(userId, notificationType, params);
+    }
+
+    @Override
+    public boolean sendBatchNotifications(List<Notification> notifications) {
         try {
-            List<Notification> notifications = new ArrayList<>();
-
-            for (Map<String, Object> data : notificationDataList) {
-                Long userId = (Long) data.get("userId");
-                NotificationType type = (NotificationType) data.get("type");
-                Long relatedId = (Long) data.get("relatedId");
-                Long senderId = (Long) data.get("senderId");
-                Object[] params = (Object[]) data.getOrDefault("params", new Object[0]);
-
-                // 检查用户是否开启了该类型的通知
-                if (isNotificationDisabled(userId, type)) {
-                    continue;
-                }
-
-                // 使用模板生成通知内容
-                Map<String, String> content = generateContentWithTemplate(type, relatedId, params);
-
-                // 构建通知对象
-                Notification notification = buildNotification(userId, type, relatedId, senderId, content);
-
-                notifications.add(notification);
+            // 过滤掉已关闭通知类型的用户消息
+            notifications = notifications.stream().filter(notification -> !isNotificationDisabled(notification.getUserId(), notification.getNotificationType())).toList();
+            // 批量发送到RabbitMQ
+            if (!notifications.isEmpty()) {
+                notificationProducer.sendBatchNotifications(notifications);
             }
-
-            // 批量发送通知
-            return sendBatchNotifications(notifications);
+            return true;
         } catch (Exception e) {
-            log.error("批量发送带模板的通知失败", e);
+            log.error("批量发送通知失败", e);
             return false;
         }
     }
@@ -378,9 +263,27 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<Notification> getAggregatedNotifications(Long userId) {
-        // 实现通知聚合逻辑
-        // 这里简化实现，实际项目中需要根据聚合键进行分组
-        // 聚合逻辑...
         return notificationMapper.selectByUserId(userId);
+    }
+
+    /**
+     * 构建通知对象
+     *
+     * @param userId           用户ID
+     * @param notificationType 通知类型
+     * @param content          通知内容
+     * @return 通知对象
+     */
+    private Notification buildNotification(Long userId, NotificationType notificationType, Map<String, Object> content) {
+        Notification notification = new Notification();
+        notification.setUserId(userId);
+        notification.setNotificationType(notificationType);
+        notification.setTitle((String) content.get("title"));
+        notification.setContent((String) content.get("content"));
+        notification.setRelatedId((Long) content.get("relatedId"));
+        notification.setPriority(Priority.NORMAL);
+        notification.setSenderId((Long) content.get("senderId"));
+        notification.setActionUrl((String) content.get("actionUrl"));
+        return notification;
     }
 }

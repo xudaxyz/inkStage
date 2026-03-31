@@ -34,6 +34,7 @@ public class SpELTemplateRender {
         }
 
         if (variables == null) {
+            log.warn("渲染模板时变量为null，返回原始模板");
             return template;
         }
 
@@ -43,9 +44,10 @@ public class SpELTemplateRender {
             // 替换 ${variable} 格式的变量
             result = renderWithPattern(result, DOLLAR_PATTERN, variables);
 
+            log.debug("模板渲染成功，原始模板: {}, 渲染结果: {}", template, result);
             return result;
         } catch (Exception e) {
-            log.error("渲染模板失败: {}", e.getMessage());
+            log.error("渲染模板失败: {}, 模板: {}", e.getMessage(), template);
             return template; // 渲染失败时返回原始模板
         }
     }
@@ -59,30 +61,38 @@ public class SpELTemplateRender {
         int lastEnd = 0;
 
         while (matcher.find()) {
-            // 追加匹配前的内容
-            sb.append(template, lastEnd, matcher.start());
+            try {
+                // 追加匹配前的内容
+                sb.append(template, lastEnd, matcher.start());
 
-            String variableName = matcher.group(1);
-            // 验证变量是否在枚举类中定义
-            if (!NotificationTemplateVariable.isValidKey(variableName)) {
-                log.warn("模板中使用了未定义的变量: {}", variableName);
-                // 未定义的变量保持原样
-                sb.append(matcher.group());
-            } else {
-                // 使用 SpEL 解析变量
-                String expression = "#" + variableName;
-                StandardEvaluationContext context = new StandardEvaluationContext();
-                // 将所有变量放入上下文
-                variables.forEach(context::setVariable);
-
-                try {
-                    Object value = parser.parseExpression(expression).getValue(context);
-                    sb.append(value != null ? value.toString() : "");
-                } catch (Exception e) {
-                    log.warn("解析变量失败: {}", e.getMessage());
-                    // 解析失败时保持原样
+                String variableName = matcher.group(1);
+                // 验证变量是否在枚举类中定义
+                if (NotificationTemplateVariable.isInvalidKey(variableName)) {
+                    log.warn("模板中使用了未定义的变量: {}, 模板: {}", variableName, template);
+                    // 未定义的变量保持原样
                     sb.append(matcher.group());
+                } else {
+                    // 使用 SpEL 解析变量
+                    String expression = "#" + variableName;
+                    StandardEvaluationContext context = new StandardEvaluationContext();
+                    // 将所有变量放入上下文
+                    variables.forEach(context::setVariable);
+
+                    try {
+                        Object value = parser.parseExpression(expression).getValue(context);
+                        String valueStr = value != null ? value.toString() : "";
+                        sb.append(valueStr);
+                        log.debug("变量解析成功: {} = {}", variableName, valueStr);
+                    } catch (Exception e) {
+                        log.warn("解析变量失败: {}, 变量名: {}, 模板: {}", e.getMessage(), variableName, template);
+                        // 解析失败时保持原样
+                        sb.append(matcher.group());
+                    }
                 }
+            } catch (Exception e) {
+                log.error("处理模板变量时出错: {}, 模板: {}", e.getMessage(), template);
+                // 出错时保持原样
+                sb.append(template, lastEnd, matcher.end());
             }
 
             lastEnd = matcher.end();

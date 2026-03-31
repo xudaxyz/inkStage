@@ -1,9 +1,9 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
+import com.inkstage.entity.model.Notification;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
@@ -348,16 +348,16 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
         for (Long userId : userIds) {
             try {
-                NotificationMessageDTO message = new NotificationMessageDTO();
-                message.setUserId(userId);
-                message.setTitle(rendered.getTitle());
-                message.setContent(rendered.getContent());
-                message.setNotificationType(rendered.getNotificationType());
-                message.setRelatedId(relatedId);
-                message.setSenderId(senderId != null ? senderId : 0L);
-                message.setActionUrl(rendered.getActionUrl());
+                Notification notification = new Notification();
+                notification.setUserId(userId);
+                notification.setTitle(rendered.getTitle());
+                notification.setContent(rendered.getContent());
+                notification.setNotificationType(rendered.getNotificationType());
+                notification.setRelatedId(relatedId);
+                notification.setSenderId(senderId != null ? senderId : 0L);
+                notification.setActionUrl(rendered.getActionUrl());
 
-                rabbitTemplate.convertAndSend(NOTIFICATION_EXCHANGE, NOTIFICATION_ROUTING_KEY, message);
+                rabbitTemplate.convertAndSend(NOTIFICATION_EXCHANGE, NOTIFICATION_ROUTING_KEY, notification);
                 successCount++;
             } catch (Exception e) {
                 log.error("发送通知失败，用户ID: {}", userId, e);

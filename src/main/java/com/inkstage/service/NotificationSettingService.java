@@ -1,6 +1,7 @@
 package com.inkstage.service;
 
 import com.inkstage.entity.model.NotificationSetting;
+import com.inkstage.enums.notification.NotificationType;
 
 /**
  * 通知设置服务
@@ -20,7 +21,7 @@ public interface NotificationSettingService {
     /**
      * 检查用户是否开启了某种类型的通知
      */
-    boolean isNotificationEnabled(Long userId, String notificationType);
+    boolean isNotificationEnabled(Long userId, NotificationType notificationType);
 
     /**
      * 获取默认的通知设置

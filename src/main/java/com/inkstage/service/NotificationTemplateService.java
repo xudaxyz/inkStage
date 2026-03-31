@@ -10,10 +10,14 @@ import java.util.Map;
  */
 public interface NotificationTemplateService {
 
+
     /**
-     * 生成通知标题
+     * 生成通知内容
+     * @param notificationType 通知类型
+     * @param params 通知模板中的变量
+     * @return 通知内容
      */
-    Map<String, String> generateNotificationContent(NotificationType type, Object... params);
+    Map<String, Object> generateNotificationContent(NotificationType notificationType, Map<String, Object> params);
 
     /**
      * 从模板中获取变量
@@ -22,6 +26,6 @@ public interface NotificationTemplateService {
      * @param params 通知模板中的变量
      * @return 变量字符串
      */
-    String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel  notificationChannel, Object... params);
+    String getVariablesFromTemplate(NotificationType notificationType, NotificationChannel  notificationChannel,Map<String, Object> params);
 
 }

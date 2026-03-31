@@ -1,13 +1,12 @@
 package com.inkstage.event.listener;
 
-import com.inkstage.dto.NotificationMessageDTO;
 import com.inkstage.entity.model.Notification;
-import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.enums.ReadStatus;
-import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.event.NotificationEvent;
 import com.inkstage.mapper.NotificationMapper;
-import com.inkstage.service.*;
+import com.inkstage.service.NotificationCacheService;
+import com.inkstage.service.NotificationSettingService;
+import com.inkstage.service.WebSocketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
@@ -30,8 +29,6 @@ public class NotificationEventListener {
     private final NotificationCacheService notificationCacheService;
     private final WebSocketService webSocketService;
     private final NotificationSettingService notificationSettingService;
-    private final EmailService emailService;
-    private final UserService userService;
 
     /**
      * 处理通知事件
@@ -45,7 +42,8 @@ public class NotificationEventListener {
 
         try {
             // 检查用户是否开启了该类型的通知
-            if (!isNotificationEnabled(event.getUserId(), event.getNotificationType())) {
+            boolean enabled = notificationSettingService.isNotificationEnabled(event.getUserId(), event.getNotificationType());
+            if (!enabled) {
                 log.info("用户 {} 已关闭 {} 类型的通知", event.getUserId(), event.getNotificationType());
                 return;
             }
@@ -61,10 +59,11 @@ public class NotificationEventListener {
                 notificationCacheService.incrementUnreadCount(event.getUserId());
 
                 // 发送WebSocket实时通知
-                sendWebSocketNotification(event.getUserId(), notification);
+                webSocketService.sendNotificationToUser(event.getUserId(), notification);
 
-                // 发送邮件通知（如果开启）
-                sendEmailNotification(event.getUserId(), event.getTitle(), event.getContent(), event.getActionUrl());
+                // 发送未读数量更新
+                int unreadCount = notificationCacheService.getUnreadCount(event.getUserId());
+                webSocketService.sendUnreadCountToUser(event.getUserId(), unreadCount);
             } else {
                 log.error("通知保存失败，用户ID: {}", event.getUserId());
             }
@@ -92,74 +91,4 @@ public class NotificationEventListener {
         return notification;
     }
 
-    /**
-     * 检查用户是否开启了该类型的通知
-     */
-    private boolean isNotificationEnabled(Long userId, NotificationType type) {
-        String settingKey = switch (type) {
-            case ARTICLE_PUBLISH -> "articlePublish";
-            case ARTICLE_LIKE -> "articleLike";
-            case ARTICLE_COLLECTION -> "articleCollection";
-            case ARTICLE_COMMENT -> "articleComment";
-            case COMMENT_REPLY -> "commentReply";
-            case COMMENT_LIKE -> "commentLike";
-            case FOLLOW -> "follow";
-            case MESSAGE -> "message";
-            case REPORT -> "report";
-            case FEEDBACK -> "feedback";
-            case SYSTEM, USER_STATUS_CHANGE, ARTICLE_REVIEW_REPROCESS, ARTICLE_TOP, ARTICLE_RECOMMEND,
-                 ARTICLE_DELETE, ARTICLE_ONLINE, ARTICLE_OFFLINE, TAG_DELETE, ARTICLE_REVIEW_REJECT,
-                 COMMENT_REVIEW_REJECT, COMMENT_TOP -> "system";
-        };
-
-        return notificationSettingService.isNotificationEnabled(userId, settingKey);
-    }
-
-    /**
-     * 发送WebSocket实时通知
-     */
-    private void sendWebSocketNotification(Long userId, Notification notification) {
-        try {
-            NotificationMessageDTO message = new NotificationMessageDTO();
-            message.setUserId(notification.getUserId());
-            message.setTitle(notification.getTitle());
-            message.setContent(notification.getContent());
-            message.setNotificationType(notification.getNotificationType());
-            message.setRelatedId(notification.getRelatedId());
-            message.setRelatedType(notification.getRelatedType());
-            message.setSenderId(notification.getSenderId());
-            message.setActionUrl(notification.getActionUrl());
-            message.setExtraData(notification.getExtraData());
-
-            webSocketService.sendNotificationToUser(userId, notification);
-
-            // 发送未读数量更新
-            int unreadCount = notificationCacheService.getUnreadCount(userId);
-            webSocketService.sendUnreadCountToUser(userId, unreadCount);
-        } catch (Exception e) {
-            log.warn("发送WebSocket通知失败，用户ID: {}", userId, e);
-        }
-    }
-
-    /**
-     * 发送邮件通知
-     */
-    private void sendEmailNotification(Long userId, String title, String content, String actionUrl) {
-        try {
-            NotificationSetting setting = notificationSettingService.getNotificationSetting(userId);
-            if (setting == null || !setting.getEmailNotification()) {
-                return;
-            }
-
-            com.inkstage.entity.model.User user = userService.getUserById(userId);
-            if (user == null || user.getEmail() == null || user.getEmail().isEmpty()) {
-                return;
-            }
-
-            String emailContent = content + "\n\n点击查看详情: " + actionUrl;
-            emailService.sendNotificationEmail(user.getEmail(), title, emailContent);
-        } catch (Exception e) {
-            log.warn("发送邮件通知失败，用户ID: {}", userId, e);
-        }
-    }
 }

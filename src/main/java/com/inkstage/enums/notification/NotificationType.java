@@ -17,16 +17,17 @@ public enum NotificationType implements EnumCode {
     REPORT(600, "举报处理通知"),
     FEEDBACK(700, "反馈处理通知"),
     USER_STATUS_CHANGE(800, "用户状态变更通知"),
-    ARTICLE_REVIEW_REJECT(801, "文章审核拒绝通知"),
-    ARTICLE_REVIEW_REPROCESS(802, "文章重新审核通知"),
-    ARTICLE_OFFLINE(803, "文章下架通知"),
-    ARTICLE_ONLINE(804, "文章上架通知"),
-    ARTICLE_TOP(805, "文章置顶通知"),
-    ARTICLE_RECOMMEND(806, "文章推荐通知"),
-    ARTICLE_DELETE(807, "文章删除通知"),
-    TAG_DELETE(808, "标签删除通知"),
-    COMMENT_REVIEW_REJECT(809, "评论审核拒绝通知"),
-    COMMENT_TOP(810, "评论置顶通知");
+    ARTICLE_REVIEW_APPROVE(801, "文章审核通过通知"),
+    ARTICLE_REVIEW_REJECT(802, "文章审核拒绝通知"),
+    ARTICLE_REVIEW_REPROCESS(803, "文章重新审核通知"),
+    ARTICLE_OFFLINE(804, "文章下架通知"),
+    ARTICLE_ONLINE(805, "文章上架通知"),
+    ARTICLE_TOP(806, "文章置顶通知"),
+    ARTICLE_RECOMMEND(807, "文章推荐通知"),
+    ARTICLE_DELETE(808, "文章删除通知"),
+    TAG_DELETE(809, "标签删除通知"),
+    COMMENT_REVIEW_REJECT(810, "评论审核拒绝通知"),
+    COMMENT_TOP(811, "评论置顶通知");
 
 
     private final Integer code;

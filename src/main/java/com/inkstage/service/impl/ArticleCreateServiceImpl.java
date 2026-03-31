@@ -81,13 +81,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             }
 
             // 发送文章发布通知
-            notificationService.sendNotificationWithTemplate(
-                    currentUser.getId(),
-                    NotificationType.ARTICLE_PUBLISH,
-                    article.getId(),
-                    0L, // 系统发送
-                    article.getTitle()
-            );
+            notificationService.sendArticleNotification(currentUser.getId(), NotificationType.ARTICLE_PUBLISH, article);
 
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
             return article.getId();
@@ -225,7 +219,7 @@ public class ArticleCreateServiceImpl implements ArticleCreateService {
             existingArticle.setAllowForward(articleCreateDTO.getAllowForward());
             existingArticle.setTop(articleCreateDTO.getTop());
             existingArticle.setUpdateTime(LocalDateTime.now());
-            
+
             // 递增版本号
             existingArticle.setArticleVersion(existingArticle.getArticleVersion() + 1);
 

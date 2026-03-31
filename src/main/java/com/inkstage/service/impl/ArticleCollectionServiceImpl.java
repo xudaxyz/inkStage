@@ -8,6 +8,7 @@ import com.inkstage.entity.model.ArticleCollection;
 import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
@@ -27,7 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -105,14 +108,14 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
                 // 只有当收藏者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    notificationService.sendNotificationWithTemplate(
-                            articleUserId,
-                            NotificationType.ARTICLE_COLLECTION,
-                            collectArticleDTO.getArticleId(),
-                            userId,
-                            currentUserNickname,
-                            articleTitle
-                    );
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), articleTitle);
+                    params.put(NotificationTemplateVariable.RELATED_ID.getKey(), collectArticleDTO.getArticleId());
+                    params.put(NotificationTemplateVariable.COLLECTOR_ID.getKey(), userId);
+                    params.put(NotificationTemplateVariable.COLLECTOR_NAME.getKey(), currentUserNickname);
+                    params.put(NotificationTemplateVariable.ARTICLE_USERNAME.getKey(), currentUserNickname);
+
+                    notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_COLLECTION, params);
                 }
             }
 

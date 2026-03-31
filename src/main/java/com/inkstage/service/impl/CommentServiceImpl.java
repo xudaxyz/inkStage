@@ -217,33 +217,16 @@ public class CommentServiceImpl implements CommentService {
             // 回复评论
             Comment parentComment = commentMapper.findById(comment.getParentId());
             if (parentComment != null && !parentComment.getUserId().equals(currentUserId)) {
-                notificationService.sendNotificationWithTemplate(
-                        parentComment.getUserId(),
-                        NotificationType.COMMENT_REPLY,
-                        comment.getArticleId(),
-                        currentUserId,
-                        currentUserNickname,
-                        comment.getContent()
-                );
+                notificationService.sendCommentNotification(comment.getUserId(), NotificationType.COMMENT_REPLY, comment);
             }
         } else {
             // 文章评论
             Article article = articleMapper.findById(comment.getArticleId());
             if (article != null) {
                 Long articleUserId = article.getUserId();
-                String articleTitle = article.getTitle();
-
                 // 只有当评论者不是文章作者时才发送通知
                 if (!currentUserId.equals(articleUserId)) {
-                    notificationService.sendNotificationWithTemplate(
-                            articleUserId,
-                            NotificationType.ARTICLE_COMMENT,
-                            comment.getArticleId(),
-                            currentUserId,
-                            currentUserNickname,
-                            articleTitle,
-                            comment.getContent()
-                    );
+                    notificationService.sendCommentNotification(comment.getUserId(), NotificationType.ARTICLE_COMMENT, comment);
                 }
             }
         }
@@ -494,13 +477,7 @@ public class CommentServiceImpl implements CommentService {
             // 发送通知
             if (status == ReviewStatus.REJECTED) {
                 // 评论审核拒绝通知
-                notificationService.sendNotificationWithTemplate(
-                        comment.getUserId(),
-                        NotificationType.COMMENT_REVIEW_REJECT,
-                        comment.getArticleId(),
-                        0L, // 系统发送
-                        reviewReason
-                );
+                notificationService.sendCommentNotification(comment.getUserId(), NotificationType.COMMENT_REVIEW_REJECT, comment);
             }
 
             // 清除评论列表缓存
@@ -556,13 +533,7 @@ public class CommentServiceImpl implements CommentService {
         // 发送通知
         if (top == TopStatus.TOP) {
             // 评论置顶通知
-            notificationService.sendNotificationWithTemplate(
-                    comment.getUserId(),
-                    NotificationType.COMMENT_TOP,
-                    comment.getArticleId(),
-                    0L, // 系统发送
-                    "您的评论已被置顶"
-            );
+            notificationService.sendCommentNotification(comment.getUserId(), NotificationType.COMMENT_TOP, comment);
         }
 
         // 清除评论列表缓存

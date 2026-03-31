@@ -4,6 +4,7 @@ import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
@@ -20,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -74,14 +77,13 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 
                 // 只有当点赞者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    notificationService.sendNotificationWithTemplate(
-                            articleUserId,
-                            NotificationType.ARTICLE_LIKE,
-                            articleId,
-                            userId,
-                            currentUserNickname,
-                            articleTitle
-                    );
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), articleTitle);
+                    params.put(NotificationTemplateVariable.RELATED_ID.getKey(), articleId);
+                    params.put(NotificationTemplateVariable.COLLECTOR_ID.getKey(), userId);
+                    params.put(NotificationTemplateVariable.COLLECTOR_NAME.getKey(), currentUserNickname);
+                    params.put(NotificationTemplateVariable.ARTICLE_USERNAME.getKey(), currentUserNickname);
+                    notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_LIKE, params);
                 }
             }
 
@@ -123,7 +125,8 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         Long userId = UserContext.getCurrentUser().getId();
         // 先从缓存获取
         String likeKey = RedisKeyConstants.buildArticleLikeCacheKey(articleId, userId);
-        Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {});
+        Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {
+        });
         if (isLiked != null) {
             return isLiked;
         }

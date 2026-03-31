@@ -1,6 +1,7 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.NotificationSetting;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.NotificationSettingMapper;
 import com.inkstage.service.NotificationSettingService;
 import lombok.RequiredArgsConstructor;
@@ -44,22 +45,9 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
     }
 
     @Override
-    public boolean isNotificationEnabled(Long userId, String notificationType) {
-        NotificationSetting setting = getNotificationSetting(userId);
-        return switch (notificationType) {
-            case "articlePublish" -> setting.getArticlePublishNotification();
-            case "articleLike" -> setting.getArticleLikeNotification();
-            case "articleCollection" -> setting.getArticleCollectionNotification();
-            case "articleComment" -> setting.getArticleCommentNotification();
-            case "commentReply" -> setting.getCommentReplyNotification();
-            case "commentLike" -> setting.getCommentLikeNotification();
-            case "follow" -> setting.getFollowNotification();
-            case "message" -> setting.getMessageNotification();
-            case "report" -> setting.getReportNotification();
-            case "feedback" -> setting.getFeedbackNotification();
-            case "system" -> setting.getSystemNotification();
-            default -> true; // 默认为开启
-        };
+    public boolean isNotificationEnabled(Long userId, NotificationType notificationType) {
+        return true;
+
     }
 
     @Override

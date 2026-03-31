@@ -25,21 +25,31 @@ public class TemplateValidator {
      */
     public static boolean validate(NotificationTemplate template) {
         try {
-            if (template != null) {
-                // 验证标题模板
-                validateTemplatePart(template.getTitleTemplate(), "标题模板");
-
-                // 验证内容模板
-                validateTemplatePart(template.getContentTemplate(), "内容模板");
-
-                // 验证链接模板(如果有)
-                if (template.getActionUrlTemplate() != null && !template.getActionUrlTemplate().isEmpty()) {
-                    validateTemplatePart(template.getActionUrlTemplate(), "链接模板");
-                }
+            if (template == null) {
+                log.warn("验证模板时模板为null");
+                return false;
             }
+            
+            log.debug("开始验证通知模板: {}", template.getCode());
+            
+            // 验证标题模板
+            validateTemplatePart(template.getTitleTemplate(), "标题模板");
+
+            // 验证内容模板
+            validateTemplatePart(template.getContentTemplate(), "内容模板");
+
+            // 验证链接模板(如果有)
+            if (template.getActionUrlTemplate() != null && !template.getActionUrlTemplate().isEmpty()) {
+                validateTemplatePart(template.getActionUrlTemplate(), "链接模板");
+            }
+            
+            log.debug("通知模板验证成功: {}", template.getCode());
             return true;
         } catch (BusinessException e) {
-            log.error("模板验证失败{}", e.getMessage());
+            log.error("模板验证失败: {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            log.error("模板验证时发生未知错误: {}", e.getMessage(), e);
             return false;
         }
     }
@@ -52,6 +62,7 @@ public class TemplateValidator {
      */
     private static void validateTemplatePart(String templatePart, String partType) {
         if (templatePart != null && !templatePart.isEmpty()) {
+            log.debug("验证{}: {}", partType, templatePart);
             // 使用正则表达式验证模板语法
             validateVariablesInTemplate(templatePart, partType);
         }
@@ -68,8 +79,11 @@ public class TemplateValidator {
         while (matcher.find()) {
             String variableName = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
             // 检查变量是否在枚举类中定义
-            if (!NotificationTemplateVariable.isValidKey(variableName)) {
+            if (NotificationTemplateVariable.isInvalidKey(variableName)) {
+                log.error("{}中使用了未定义的变量: {}", templateType, variableName);
                 throw new BusinessException(templateType + "中使用了未定义的变量: " + variableName);
+            } else {
+                log.debug("{}中使用了合法变量: {}", templateType, variableName);
             }
         }
     }

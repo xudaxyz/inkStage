@@ -19,14 +19,21 @@ public enum NotificationTemplateVariable {
     ARTICLE_ID("articleId", "文章ID"),
     ARTICLE_TITLE("articleTitle", "文章标题"),
     ARTICLE_CONTENT("articleContent", "文章内容"),
-    ARTICLE_AUTHOR("articleAuthor", "文章作者"),
+    ARTICLE_USER_ID("articleUserId", "文章作者ID"),
+    ARTICLE_USERNAME("articleUsername", "文章作者名称"),
     ARTICLE_URL("articleUrl", "文章链接"),
-    
+    COLLECTOR_ID("collectorId", "收藏者ID"),
+    COLLECTOR_NAME("collectorName", "收藏者名称"),
+
     // 评论相关变量
     COMMENT_ID("commentId", "评论ID"),
     COMMENT_CONTENT("commentContent", "评论内容"),
     COMMENT_AUTHOR("commentAuthor", "评论作者"),
-    
+
+    // 标签相关
+    TAG_ID("tagId", "标签ID"),
+    TAG_NAME("tagName", "标签名称"),
+
     // 系统相关变量
     SYSTEM_TIME("systemTime", "系统时间"),
     SYSTEM_NAME("systemName", "系统名称"),
@@ -66,8 +73,8 @@ public enum NotificationTemplateVariable {
     /**
      * 检查key是否是有效的变量
      */
-    public static boolean isValidKey(String key) {
-        return getByKey(key) != null;
+    public static boolean isInvalidKey(String key) {
+        return getByKey(key) == null;
     }
     
     /**

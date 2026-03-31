@@ -5,6 +5,7 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.StatusEnum;
+import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.service.TagService;
@@ -18,7 +19,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 标签服务实现类
@@ -168,23 +171,12 @@ public class TagServiceImpl implements TagService {
 
             // 发送通知
             for (Long userId : userIds) {
-                String message;
-                if (tag.getUserId() != null && tag.getUserId().equals(userId)) {
-                    // 对创建者的通知
-                    message = "您创建的标签" + tag.getName() + "已被删除";
-                } else {
-                    // 对使用者的通知
-                    message = "您使用的标签" + tag.getName() + "已被删除";
-                }
+                Map<String, Object> params = new HashMap<>();
+                params.put(NotificationTemplateVariable.TAG_ID.getKey(), tag.getId());
+                params.put(NotificationTemplateVariable.TAG_NAME.getKey(), tag.getName());
+                params.put(NotificationTemplateVariable.USER_ID.getKey(), tag.getUserId());
 
-                notificationService.sendNotificationWithTemplate(
-                        userId,
-                        NotificationType.TAG_DELETE,
-                        id,
-                        0L, // 系统发送
-                        message,
-                        "标签不符合平台规范"
-                );
+                notificationService.sendNotificationWithTemplate(userId, NotificationType.TAG_DELETE, params);
             }
 
             // 执行删除操作
