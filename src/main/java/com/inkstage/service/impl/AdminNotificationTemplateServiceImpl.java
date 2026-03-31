@@ -6,6 +6,7 @@ import com.inkstage.dto.admin.ManualNotificationDTO;
 import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.notification.NotificationChannel;
 import com.inkstage.enums.notification.NotificationType;
@@ -75,6 +76,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         template.setCreateTime(LocalDateTime.now());
         template.setUpdateTime(LocalDateTime.now());
         template.setTemplateVersion(1L);
+        template.setDeleted(DeleteStatus.NOT_DELETED);
 
         // 默认启用
         if (template.getStatus() == null) {
