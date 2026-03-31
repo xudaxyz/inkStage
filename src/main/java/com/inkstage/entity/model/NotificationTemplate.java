@@ -28,7 +28,7 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 模板名称
      */
-    private String name;
+    private String templateName;
 
     /**
      * 通知类型
@@ -78,12 +78,17 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 创建人ID
      */
+    private Long templateVersion;
+
+    /**
+     * 创建人ID
+     */
     private Long createUserId;
 
     /**
      * 创建人名称
      */
-    private String createUserName;
+    private String createUsername;
 
     /**
      * 更新人ID
@@ -93,5 +98,5 @@ public class NotificationTemplate extends BaseEntity {
     /**
      * 更新人名称
      */
-    private String updateUserName;
+    private String updateUsername;
 }

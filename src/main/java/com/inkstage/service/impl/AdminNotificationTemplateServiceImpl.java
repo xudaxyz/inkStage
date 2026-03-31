@@ -69,8 +69,12 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         // 设置创建信息
         User currentUser = UserContext.getCurrentUser();
         template.setCreateUserId(currentUser.getId());
-        template.setCreateUserName(currentUser.getNickname());
+        template.setUpdateUserId(currentUser.getId());
+        template.setCreateUsername(currentUser.getNickname());
+        template.setUpdateUsername(currentUser.getNickname());
         template.setCreateTime(LocalDateTime.now());
+        template.setUpdateTime(LocalDateTime.now());
+        template.setTemplateVersion(1L);
 
         // 默认启用
         if (template.getStatus() == null) {
@@ -112,7 +116,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
         User currentUser = UserContext.getCurrentUser();
         template.setUpdateUserId(currentUser.getId());
-        template.setUpdateUserName(currentUser.getNickname());
+        template.setUpdateUsername(currentUser.getNickname());
         template.setUpdateTime(LocalDateTime.now());
 
         return templateMapper.update(template) > 0;
@@ -209,7 +213,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
         template.setId(id);
         template.setStatus(status);
         template.setUpdateUserId(UserContext.getCurrentUserId());
-        template.setUpdateUserName(UserContext.getCurrentUser().getNickname());
+        template.setUpdateUsername(UserContext.getCurrentUser().getNickname());
         return templateMapper.update(template) > 0;
     }
 
@@ -261,7 +265,8 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(variables, new TypeReference<HashMap<String, Object>>() {});
+            return objectMapper.readValue(variables, new TypeReference<HashMap<String, Object>>() {
+            });
         } catch (Exception e) {
             log.error("解析变量JSON失败: {}", e.getMessage());
             throw new BusinessException("变量格式错误: " + e.getMessage());

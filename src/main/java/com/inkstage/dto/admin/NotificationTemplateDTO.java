@@ -28,7 +28,7 @@ public class NotificationTemplateDTO implements Serializable {
     /**
      * 模板名称
      */
-    private String name;
+    private String templateName;
 
     /**
      * 通知类型
