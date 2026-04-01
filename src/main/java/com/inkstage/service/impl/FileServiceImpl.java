@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.User;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.service.FileService;
 import com.inkstage.service.strategy.StorageStrategy;
 import com.inkstage.service.strategy.StorageStrategyFactory;
@@ -40,9 +41,9 @@ public class FileServiceImpl implements FileService {
     };
 
     /**
-     * 最大文件大小(5MB)
+     * 最大文件大小(10MB)
      */
-    private static final long MAX_FILE_SIZE = 5 * 1024 * 1024;
+    private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
     @Override
     public String convertToFullUrl(String fileUrl) {
@@ -271,7 +272,7 @@ public class FileServiceImpl implements FileService {
      */
     private void validateFileSize(MultipartFile file) {
         if (file.getSize() > MAX_FILE_SIZE) {
-            throw new IllegalArgumentException("文件大小不能超过5MB");
+            throw new BusinessException("文件大小不能超过10MB");
         }
     }
 
