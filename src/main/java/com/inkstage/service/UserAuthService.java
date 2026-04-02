@@ -25,6 +25,13 @@ public interface UserAuthService {
     TokenResponse login(AuthDTO authDTO);
 
     /**
+     * 管理员登录
+     * @param authDTO 认证请求DTO
+     * @return 登录结果, 包含令牌信息
+     */
+    TokenResponse adminLogin(AuthDTO authDTO);
+
+    /**
      * 用户登出
      *
      * @param userId 用户ID

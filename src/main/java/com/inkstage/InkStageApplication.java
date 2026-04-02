@@ -20,7 +20,7 @@ public class InkStageApplication {
         try {
             SpringApplication.run(InkStageApplication.class, args);
         } catch (Exception e) {
-            log.warn("Start Service Error: {}", e.getMessage());
+            log.error("Start Service Error: {}.", e.getMessage(), e);
         }
     }
 

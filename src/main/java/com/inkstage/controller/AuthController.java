@@ -59,6 +59,26 @@ public class AuthController {
         }
     }
 
+
+
+    /**
+     * 用户登录
+     *
+     * @param authDTO 认证请求DTO
+     * @return 登录结果, 包含令牌信息
+     */
+    @PostMapping("/admin/login")
+    public Result<TokenResponse> adminLogin(@RequestBody @Valid AuthDTO authDTO) {
+        log.info("管理员登录: {}", authDTO);
+        TokenResponse tokenResponse = userAuthService.adminLogin(authDTO);
+        if (tokenResponse != null) {
+            return Result.success(tokenResponse, ResponseMessage.LOGIN_SUCCESS);
+        } else {
+            return Result.error(ResponseMessage.LOGIN_FAILED);
+        }
+    }
+
+
     /**
      * 发送验证码
      *

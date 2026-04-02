@@ -25,14 +25,14 @@ public class UploadController {
     private final UserService userService;
 
     /**
-     * 上传封面图
+     * 上传用户封面图
      *
      * @param file 上传的文件
      * @return 上传结果, 包含文件URL
      */
     @PostMapping("/user/cover-image")
     @UserAccess
-    public Result<String> uploadCover(@RequestParam("image") MultipartFile file, @RequestParam(required = false) Long expiry) {
+    public Result<String> uploadUserCoverImage(@RequestParam("image") MultipartFile file, @RequestParam(required = false) Long expiry) {
         // 从UserContext中获取当前用户ID
         Long userId = UserContext.getCurrentUserId();
 
@@ -85,7 +85,7 @@ public class UploadController {
      */
     @PostMapping("/article/cover-image")
     @UserAccess
-    public Result<String> uploadArticleCover(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long expiry) {
+    public Result<String> uploadArticleCoverImage(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long expiry) {
         log.info("上传文章封面图片:{}", file.getOriginalFilename());
         // 从UserContext中获取当前用户ID
         Long userId = UserContext.getCurrentUserId();
@@ -98,6 +98,27 @@ public class UploadController {
     }
 
     /**
+     * 即时上传图片
+     *
+     * @param file 上传的文件
+     * @return 上传结果, 包含文件URL
+     */
+    @PostMapping("/article/image")
+    @UserAccess
+    public Result<String> uploadArticleImage(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long expiry) {
+        log.info("上传图片:{}", file.getOriginalFilename());
+        // 从UserContext中获取当前用户ID
+        Long userId = UserContext.getCurrentUserId();
+
+        // 调用文件服务上传文章封面图
+        long expiryTime = expiry != null ? expiry : 604800; // 默认7天
+        String coverUrl = fileService.uploadArticleImage(file, userId, expiryTime);
+        String fullUrl = fileService.getFullUrl(coverUrl);
+        log.info("文章图片上传成功:{}", fullUrl);
+        return Result.success(fullUrl, ResponseMessage.UPLOAD_SUCCESS);
+    }
+
+    /**
      * 删除文件
      *
      * @param fileName 文件名称(文件路径)
@@ -105,7 +126,7 @@ public class UploadController {
      */
     @DeleteMapping("/delete")
     @UserAccess
-    public Result<Boolean> deleteFile(@RequestParam("file") String fileName) {
+    public Result<?> deleteFile(@RequestParam("file") String fileName) {
         // 从UserContext中获取当前用户ID
         Long userId = UserContext.getCurrentUserId();
 
@@ -117,7 +138,7 @@ public class UploadController {
         // 调用文件服务删除文件
         fileService.deleteFile(fileName);
 
-        return Result.success(true, ResponseMessage.FILE_DELETE_SUCCESS);
+        return Result.success(ResponseMessage.FILE_DELETE_SUCCESS);
     }
 
 }

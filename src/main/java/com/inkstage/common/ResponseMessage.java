@@ -65,6 +65,7 @@ public enum ResponseMessage {
     TAG_HAS_ARTICLES("标签下存在文章, 不能删除"),
     REGISTER_FAILED("用户注册失败！"),
     ACCOUNT_NOT_FOUND("账号不存在"),
+    ACCOUNT_PASSWORD_INCORRECT("账号或密码错误"),
     SEND_CODE_FAILED("验证码发送失败"),
     SEND_CODE_SUCCESS("验证码发送成功"),
     CAPTCHA_REQUIRED("验证码不能为空"),
@@ -170,6 +171,7 @@ public enum ResponseMessage {
     LOGOUT_FAILED("登出失败"),
     ARTICLE_DELETE_ERROR("删除文章失败"),
     ARTICLE_CREATE_FAILED("文章创建失败"),
+    ADMIN_ONLY("仅管理员可访问"),
 
     // 刷新令牌相关消息
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID"),  // 刷新令牌无效，缺少用户ID

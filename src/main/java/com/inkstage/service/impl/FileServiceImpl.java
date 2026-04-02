@@ -212,6 +212,13 @@ public class FileServiceImpl implements FileService {
         return uploadFile(file, bucketName, objectName, expiry);
     }
 
+    @Override
+    public String uploadArticleImage(MultipartFile file, Long userId, long expiry) {
+        String bucketName = minioProperties.getBucketName();
+        String objectName = generateObjectName("articles", userId, file.getOriginalFilename());
+        return uploadFile(file, bucketName, objectName, expiry);
+    }
+
     /**
      * 生成唯一的对象名称
      *

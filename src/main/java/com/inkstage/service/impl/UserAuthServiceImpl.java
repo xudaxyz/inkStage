@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserAuth;
@@ -101,6 +102,32 @@ public class UserAuthServiceImpl implements UserAuthService {
             log.error("用户登录异常，账号: {}", authDTO.getAccount(), e);
             throw new BusinessException("登录失败，请稍后重试");
         }
+    }
+
+    @Override
+    public TokenResponse adminLogin(AuthDTO authDTO) {
+        User user = getUserByAccount(authDTO.getAccount());
+        if (user == null) {
+            incrementLoginAttempts(authDTO.getAccount());
+            throw new BusinessException(ResponseMessage.ACCOUNT_PASSWORD_INCORRECT);
+        }
+        UserRoleEnum userRoleEnum = UserRoleEnum.fromCode(user.getRoleId());
+        if (UserRoleEnum.SUPER_ADMIN != userRoleEnum && UserRoleEnum.ADMIN != userRoleEnum) {
+            incrementLoginAttempts(authDTO.getAccount());
+            throw new BusinessException(ResponseMessage.ADMIN_ONLY);
+        }
+
+        UserAuth userAuth = userAuthMapper.findByUserIdAndType(user.getId(), AuthType.USERNAME);
+        if (userAuth == null || !passwordEncoder.matches(authDTO.getPassword(), userAuth.getAuthCredential())) {
+            incrementLoginAttempts(authDTO.getAccount());
+            throw new BusinessException(ResponseMessage.ACCOUNT_PASSWORD_INCORRECT);
+        }
+
+        // 重置登录尝试次数
+        resetLoginAttempts(authDTO.getAccount());
+
+        // 生成令牌
+        return tokenService.generateTokenForUser(user, authDTO);
     }
 
     @Override

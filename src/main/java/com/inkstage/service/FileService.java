@@ -75,6 +75,15 @@ public interface FileService {
     String uploadArticleCoverImage(MultipartFile file, Long userId, long expiry);
 
     /**
+     * 上传文章图片
+     * @param file 上传的文件
+     * @param userId 用户ID
+     * @param expiry URL有效期(秒)
+     * @return 文件访问URL
+     */
+    String uploadArticleImage(MultipartFile file, Long userId, long expiry);
+
+    /**
      * 删除文件
      *
      * @param objectName 对象名称(文件路径)
