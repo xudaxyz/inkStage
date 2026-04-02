@@ -7,6 +7,12 @@ import lombok.Data;
  */
 @Data
 public class TrendDataVO {
+    /**
+     * 时间值
+     */
     private String timeValue;
+    /**
+     * 值
+     */
     private long value;
 }

@@ -24,9 +24,9 @@ public class ScheduledPublishServiceImpl {
 
     /**
      * 定时检查并发布文章
-     * 每5分钟执行一次
+     * 每10分钟执行一次
      */
-    @Scheduled(cron = "0 */5 * * * ?")
+    @Scheduled(cron = "0 */10 * * * ?")
     @Transactional(rollbackFor = Exception.class)
     public void checkAndPublishArticles() {
         log.info("开始检查定时发布文章");

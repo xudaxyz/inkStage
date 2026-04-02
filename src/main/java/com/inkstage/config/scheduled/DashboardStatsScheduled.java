@@ -17,9 +17,9 @@ public class DashboardStatsScheduled {
     private final DashboardStatsService dashboardStatsService;
 
     /**
-     * 每分钟更新核心统计数据
+     * 更新核心统计数据
      */
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void updateCoreStats() {
         log.info("开始更新仪表盘核心统计数据");
         try {
@@ -31,9 +31,9 @@ public class DashboardStatsScheduled {
     }
 
     /**
-     * 每分钟更新趋势数据
+     * 更新趋势数据
      */
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void updateTrendData() {
         log.info("开始更新仪表盘趋势数据");
         try {
@@ -45,9 +45,9 @@ public class DashboardStatsScheduled {
     }
 
     /**
-     * 每分钟更新分布数据
+     * 更新分布数据
      */
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void updateDistributionData() {
         log.info("开始更新仪表盘分布数据");
         try {
@@ -59,9 +59,9 @@ public class DashboardStatsScheduled {
     }
 
     /**
-     * 每分钟清理过期的趋势数据
+     * 更新过期趋势数据
      */
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void cleanOldTrendData() {
         log.info("开始清理过期的仪表盘趋势数据");
         try {
@@ -73,9 +73,9 @@ public class DashboardStatsScheduled {
     }
 
     /**
-     * 每分钟更新一次实时数据（用于测试）
+     * 更新实时数据
      */
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     public void updateRealtimeData() {
         log.debug("开始更新仪表盘实时数据");
         try {
