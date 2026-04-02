@@ -60,7 +60,6 @@ public class AuthController {
     }
 
 
-
     /**
      * 用户登录
      *
@@ -72,9 +71,9 @@ public class AuthController {
         log.info("管理员登录: {}", authDTO);
         TokenResponse tokenResponse = userAuthService.adminLogin(authDTO);
         if (tokenResponse != null) {
-            return Result.success(tokenResponse, ResponseMessage.LOGIN_SUCCESS);
+            return Result.success(tokenResponse, ResponseMessage.ADMIN_LOGIN_SUCCESS);
         } else {
-            return Result.error(ResponseMessage.LOGIN_FAILED);
+            return Result.error(ResponseMessage.ADMIN_LOGIN_FAILED);
         }
     }
 
@@ -121,7 +120,7 @@ public class AuthController {
     /**
      * 用户登出
      *
-     * @param userId 用户ID
+     * @param userId       用户ID
      * @param refreshToken 刷新令牌
      * @return 登出结果
      */
