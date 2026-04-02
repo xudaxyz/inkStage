@@ -204,5 +204,15 @@
             user_id = #{userId}
             AND deleted = 0
     </select>
-    
+
+    <!-- 统计所有收藏总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT
+            COUNT(*)
+        FROM
+            article_collection
+        WHERE
+            deleted = 0
+    </select>
+
 </mapper>

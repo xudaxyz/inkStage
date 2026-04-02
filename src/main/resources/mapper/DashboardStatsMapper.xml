@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.DashboardStatsMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="BaseResultMap" type="com.inkstage.entity.model.DashboardStats">
+        <id column="id" property="id"/>
+        <result column="stat_key" property="statKey"/>
+        <result column="stat_value" property="statValue"/>
+        <result column="data_type" property="dataType"/>
+        <result column="time_value" property="timeValue"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <!-- 基础列 -->
+    <sql id="Base_Column_List">
+        id, stat_key, stat_value, data_type, time_value, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 根据ID查询 -->
+    <select id="findById" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dashboard_stats
+        WHERE id = #{id}
+        AND deleted = 0
+    </select>
+
+    <!-- 根据统计键查询 -->
+    <select id="findByStatKey" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dashboard_stats
+        WHERE stat_key = #{statKey}
+        AND deleted = 0
+        AND time_value IS NULL
+    </select>
+
+    <!-- 根据数据类型查询 -->
+    <select id="findByDataType" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dashboard_stats
+        WHERE data_type = #{dataType}
+        AND deleted = 0
+        ORDER BY time_value DESC
+    </select>
+
+    <!-- 根据统计键和时间值查询 -->
+    <select id="findByStatKeyAndTimeValue" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dashboard_stats
+        WHERE stat_key = #{statKey}
+        AND time_value = #{timeValue}
+        AND deleted = 0
+    </select>
+
+    <!-- 查询趋势数据 -->
+    <select id="findTrendData" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM dashboard_stats
+        WHERE stat_key = #{statKey}
+        AND data_type = 'trend'
+        AND deleted = 0
+        ORDER BY time_value DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO dashboard_stats (
+            stat_key,
+            stat_value,
+            data_type,
+            time_value,
+            create_time,
+            update_time,
+            deleted
+        ) VALUES (
+            #{statKey},
+            #{statValue},
+            #{dataType},
+            #{timeValue},
+            NOW(),
+            NOW(),
+            #{deleted}
+        )
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        UPDATE dashboard_stats
+        SET
+            stat_key = #{statKey},
+            stat_value = #{statValue},
+            data_type = #{dataType},
+            time_value = #{timeValue},
+            update_time = NOW()
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <!-- 根据统计键更新 -->
+    <update id="updateByStatKey">
+        UPDATE dashboard_stats
+        SET
+            stat_value = #{statValue},
+            update_time = NOW()
+        WHERE stat_key = #{statKey}
+        AND deleted = 0
+        AND time_value IS NULL
+    </update>
+
+    <!-- 根据统计键和时间值更新 -->
+    <update id="updateByStatKeyAndTimeValue">
+        UPDATE dashboard_stats
+        SET
+            stat_value = #{statValue},
+            update_time = NOW()
+        WHERE stat_key = #{statKey}
+        AND time_value = #{timeValue}
+        AND deleted = 0
+    </update>
+
+    <!-- 根据ID删除 -->
+    <update id="deleteById">
+        UPDATE dashboard_stats
+        SET
+            deleted = 1,
+            deleted_time = NOW()
+        WHERE id = #{id}
+        AND deleted = 0
+    </update>
+
+    <!-- 根据统计键删除 -->
+    <update id="deleteByStatKey">
+        UPDATE dashboard_stats
+        SET
+            deleted = 1,
+            deleted_time = NOW()
+        WHERE stat_key = #{statKey}
+        AND deleted = 0
+    </update>
+
+    <!-- 删除指定时间之前的趋势数据 -->
+    <update id="deleteOldTrendData">
+        UPDATE dashboard_stats
+        SET
+            deleted = 1,
+            deleted_time = NOW()
+        WHERE data_type = 'trend'
+        AND time_value &lt; #{timeValue}
+        AND deleted = 0
+    </update>
+
+</mapper>

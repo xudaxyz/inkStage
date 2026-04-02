@@ -191,4 +191,18 @@ public interface CommentMapper {
      */
     Integer findMaxCommentVersionByArticleId(@Param("articleId") Long articleId);
 
+    /**
+     * 统计所有评论总数
+     *
+     * @return 评论总数
+     */
+    long countAll();
+
+    /**
+     * 统计待审核评论数量
+     *
+     * @return 待审核评论数量
+     */
+    long countPendingReviews();
+
 }

@@ -228,4 +228,23 @@ public interface UserMapper {
      */
     List<Long> findAllUserIds();
 
+    /**
+     * 统计所有用户总数
+     * @return 用户总数
+     */
+    long countAll();
+
+    /**
+     * 统计待审核用户数量
+     * @return 待审核用户数量
+     */
+    long countPendingReviews();
+
+    /**
+     * 统计指定日期新增用户数
+     * @param date 日期（格式：yyyy-MM-dd）
+     * @return 新增用户数
+     */
+    long countNewUsersByDate(@Param("date") String date);
+
 }

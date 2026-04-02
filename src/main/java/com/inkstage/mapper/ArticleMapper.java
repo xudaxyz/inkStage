@@ -17,6 +17,7 @@ import org.apache.ibatis.annotations.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 文章Mapper接口
@@ -215,6 +216,21 @@ public interface ArticleMapper {
      * @return 分享数
      */
     Long getShareCount(@Param("id") Long id);
+
+    /**
+     * 统计总阅读数
+     *
+     * @return 总阅读数
+     */
+    long countTotalReads();
+
+    /**
+     * 统计指定日期的阅读数
+     *
+     * @param date 日期（格式：yyyy-MM-dd）
+     * @return 阅读数
+     */
+    long countReadsByDate(@Param("date") String date);
 
     // ==================== 新增（Create） ====================
     
@@ -418,4 +434,19 @@ public interface ArticleMapper {
      * @return 文章详情VO对象
      */
     AdminArticleDetailVO findAdminDetailById(@Param("id") Long id);
+
+    /**
+     * 统计待审核文章数量
+     *
+     * @return 待审核文章数量
+     */
+    long countPendingReviews();
+
+    /**
+     * 获取文章分类分布
+     *
+     * @return 分类分布列表，包含分类名称和文章数量
+     */
+    List<Map<String, Object>> getCategoryDistribution();
+
 }

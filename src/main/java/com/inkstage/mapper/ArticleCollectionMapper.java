@@ -128,4 +128,11 @@ public interface ArticleCollectionMapper {
             @Param("keyword") String keyword
     );
 
+    /**
+     * 统计所有收藏总数
+     *
+     * @return 收藏总数
+     */
+    long countAll();
+
 }

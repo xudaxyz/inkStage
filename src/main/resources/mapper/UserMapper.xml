@@ -482,4 +482,30 @@
         AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
     </select>
 
+    <!-- 统计所有用户总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM user
+        WHERE deleted = 0
+    </select>
+
+    <!-- 统计待审核用户数量 -->
+    <select id="countPendingReviews" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM user
+        WHERE deleted = 0
+        AND status = 0
+    </select>
+
+    <!-- 统计指定日期新增用户数 -->
+    <select id="countNewUsersByDate" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM user
+        WHERE deleted = 0
+        AND DATE(create_time) = #{date}
+    </select>
+
 </mapper>

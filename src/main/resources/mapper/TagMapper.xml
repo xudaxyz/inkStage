@@ -152,4 +152,21 @@
         SELECT tag_version FROM tag WHERE id = #{id}
     </select>
 
+    <!-- 统计所有标签总数 -->
+    <select id="countAll" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM tag
+        WHERE deleted = 0
+    </select>
+
+    <!-- 统计待审核标签数量 -->
+    <select id="countPendingReviews" resultType="java.lang.Long">
+        SELECT
+        COUNT(*)
+        FROM tag
+        WHERE deleted = 0
+        AND (slug = '' or slug is null)
+    </select>
+
 </mapper>

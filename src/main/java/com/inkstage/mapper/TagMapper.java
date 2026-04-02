@@ -156,4 +156,18 @@ public interface TagMapper {
      */
     List<Long> findUserIdsByTagId(@Param("tagId") Long tagId);
 
+    /**
+     * 统计所有标签总数
+     *
+     * @return 标签总数
+     */
+    long countAll();
+
+    /**
+     * 统计待审核标签数量
+     *
+     * @return 待审核标签数量
+     */
+    long countPendingReviews();
+
 }
