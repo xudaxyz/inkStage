@@ -376,6 +376,7 @@
     <update id="updateAdminUserDetail">
         UPDATE user
         <set>
+            <if test="userDetail.username != null">username = #{userDetail.username},</if>
             <if test="userDetail.nickname != null">nickname = #{userDetail.nickname},</if>
             <if test="userDetail.email != null">email = #{userDetail.email},</if>
             <if test="userDetail.emailVerified != null">email_verified = #{userDetail.emailVerified},</if>
@@ -417,7 +418,7 @@
         COUNT(*)
         FROM user
         WHERE deleted = 0
-        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
+        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
         <if test="keyword != null and keyword != ''">
             AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
         </if>
@@ -479,7 +480,7 @@
         id
         FROM user
         WHERE deleted = 0
-        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
+        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
     </select>
 
     <!-- 统计所有用户总数 -->
