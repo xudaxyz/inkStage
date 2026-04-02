@@ -381,17 +381,18 @@ public class CommentServiceImpl implements CommentService {
             commentMap.put(comment.getId(), comment);
         }
 
-        // 第二步: 构建评论树
+        // 第二步: 构建评论树 - 实现知乎式评论结构（只有一级和二级评论）
         for (ArticleCommentVO comment : comments) {
             Long parentId = comment.getParentId();
             if (parentId == null || parentId == 0) {
                 // 顶级评论
                 topLevelComments.add(comment);
             } else {
-                // 回复评论, 添加到父评论的回复列表中
-                ArticleCommentVO parentComment = commentMap.get(parentId);
-                if (parentComment != null) {
-                    parentComment.getReplies().add(comment);
+                // 查找顶级评论：如果父评论是二级评论，找到对应的顶级评论
+                ArticleCommentVO topComment = findTopComment(commentMap, parentId);
+                if (topComment != null) {
+                    // 将所有回复都添加到顶级评论的回复列表中
+                    topComment.getReplies().add(comment);
                 }
             }
         }
@@ -419,6 +420,25 @@ public class CommentServiceImpl implements CommentService {
         }
 
         return topLevelComments;
+    }
+
+    /**
+     * 查找顶级评论
+     * @param commentMap 评论Map
+     * @param commentId 评论ID
+     * @return 顶级评论
+     */
+    private ArticleCommentVO findTopComment(Map<Long, ArticleCommentVO> commentMap, Long commentId) {
+        ArticleCommentVO comment = commentMap.get(commentId);
+        if (comment == null) {
+            return null;
+        }
+        // 如果是顶级评论，直接返回
+        if (comment.getParentId() == null || comment.getParentId() == 0) {
+            return comment;
+        }
+        // 递归查找顶级评论
+        return findTopComment(commentMap, comment.getParentId());
     }
 
     @Override

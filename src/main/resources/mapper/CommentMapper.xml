@@ -57,11 +57,16 @@
         u.nickname,
         u.avatar,
         u.gender,
-        u.status as user_status
+        u.status as user_status,
+        ru.id as replied_user_id,
+        ru.nickname as replied_user_name,
+        ru.avatar as replied_user_avatar
         FROM
         comment c
         LEFT JOIN user u ON c.user_id = u.id
         LEFT JOIN article a ON c.article_id = a.id
+        LEFT JOIN comment pc ON c.parent_id = pc.id
+        LEFT JOIN user ru ON pc.user_id = ru.id
         WHERE
         c.deleted = 0
         AND c.article_id = #{query.articleId}
@@ -359,11 +364,16 @@
         u.nickname,
         u.avatar,
         u.gender,
-        u.status as user_status
+        u.status as user_status,
+        ru.id as replied_user_id,
+        ru.nickname as replied_user_name,
+        ru.avatar as replied_user_avatar
         FROM
         comment c
         LEFT JOIN user u ON c.user_id = u.id
         LEFT JOIN article a ON c.article_id = a.id
+        LEFT JOIN comment pc ON c.parent_id = pc.id
+        LEFT JOIN user ru ON pc.user_id = ru.id
         WHERE
         c.deleted = 0
         AND c.parent_id = #{parentId}

@@ -116,4 +116,19 @@ public class ArticleCommentVO implements Serializable {
      * 回复评论列表
      */
     private List<ArticleCommentVO> replies;
+
+    /**
+     * 被回复用户ID
+     */
+    private Long repliedUserId;
+
+    /**
+     * 被回复用户昵称
+     */
+    private String repliedUserName;
+
+    /**
+     * 被回复用户头像
+     */
+    private String repliedUserAvatar;
 }
