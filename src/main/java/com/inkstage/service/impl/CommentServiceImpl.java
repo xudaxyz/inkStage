@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.utils.RedisCacheManager;
+import com.inkstage.cache.service.CommentCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
@@ -26,15 +26,11 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,12 +46,9 @@ public class CommentServiceImpl implements CommentService {
     private final CountService countService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
-    private final RedisCacheManager cacheManager;
+    private final CommentCacheService commentCacheService;
 
     @Override
-    @Cacheable(value = "comment:list",
-            key = "#queryDTO.articleId + ':' + #queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.sortBy ?: 'default') + ':' + (#queryDTO.maxReplies ?: 0) + ':' + (#root.target.getCommentVersion(#queryDTO.articleId))",
-            unless = "#result == null")
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
         if (queryDTO == null || queryDTO.getArticleId() == null || queryDTO.getPageNum() == null || queryDTO.getPageSize() == null) {
             log.warn("获取评论参数不完整, queryDTO: {}", queryDTO);
@@ -64,42 +57,19 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("获取文章评论 {}", queryDTO);
 
-        try {
-            int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
-            queryDTO.setOffset(offset);
-            // 查询评论列表
-            List<ArticleCommentVO> articleCommentVOList = commentMapper.findCommentsByArticleId(queryDTO);
-            if (articleCommentVOList == null || articleCommentVOList.isEmpty()) {
-                return null;
-            }
+        // 委托给缓存服务
+        PageResult<ArticleCommentVO> result = commentCacheService.getComments(queryDTO);
 
-            // 将扁平评论列表转换为树形结构
-            articleCommentVOList = buildCommentTree(articleCommentVOList, queryDTO.getMaxReplies(), queryDTO.getReplySortBy());
-
-            // 查询总记录数
-            Long total = commentMapper.countCommentsByArticleId(queryDTO);
-
-            // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
-
-            return PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
-        } catch (Exception e) {
-            log.error("获取评论列表失败, 文章ID: {}", queryDTO.getArticleId(), e);
-            return null;
+        // 确保评论图片的URL完整
+        if (result != null && result.getRecord() != null) {
+            fileService.ensureCommentImageAreFullUrl(result.getRecord());
         }
-    }
 
-    /**
-     * 获取评论版本号
-     */
-    private int getCommentVersion(Long articleId) {
-        Integer maxVersion = commentMapper.findMaxCommentVersionByArticleId(articleId);
-        return maxVersion != null ? maxVersion : 1;
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean createComment(CommentDTO commentDTO) {
         if (commentDTO == null || commentDTO.getArticleId() == null || commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             log.warn("创建评论参数不完整, commentDTO: {}", commentDTO);
@@ -145,6 +115,10 @@ public class CommentServiceImpl implements CommentService {
                 countService.updateArticleCommentCount(comment.getArticleId(), updated);
                 sendCommentNotification(comment, article, currentUser);
             }
+
+            // 清理缓存
+            commentCacheService.cleanCacheAfterCommentCreate(comment.getArticleId(), comment.getParentId());
+
             return updated >= 1;
         } catch (Exception e) {
             log.error("创建评论失败, 文章ID: {}", commentDTO.getArticleId(), e);
@@ -183,7 +157,7 @@ public class CommentServiceImpl implements CommentService {
             int newReplyCount = parentComment.getReplyCount() != null ? parentComment.getReplyCount() + 1 : 1;
             return commentMapper.updateReplyCount(parentId, newReplyCount);
         }
-        return 1;
+        return 0;
     }
 
     /**
@@ -200,22 +174,21 @@ public class CommentServiceImpl implements CommentService {
             Comment parentComment = commentMapper.findById(comment.getParentId());
 
             if (parentComment != null && !parentComment.getUserId().equals(currentUser.getId())) {
-                // 发送评论通知
-                notificationService.sendNotificationWithTemplate(article.getUserId(), NotificationType.COMMENT_REPLY, params);
+                // 发送评论通知给父评论作者
+                notificationService.sendNotificationWithTemplate(parentComment.getUserId(), NotificationType.COMMENT_REPLY, params);
             }
         } else {
             // 文章评论
             Long articleUserId = article.getUserId();
-            // 只有当评论者不是文章作者时才发送通知
+            // 只有当评论者不是文章作者时才发送通知给文章作者
             if (!currentUser.getId().equals(articleUserId)) {
-                notificationService.sendNotificationWithTemplate(comment.getUserId(), NotificationType.ARTICLE_COMMENT, params);
+                notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_COMMENT, params);
             }
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean updateComment(CommentDTO commentDTO) {
         if (commentDTO == null || commentDTO.getId() == null || commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             log.warn("更新评论参数不完整, commentDTO: {}", commentDTO);
@@ -254,6 +227,10 @@ public class CommentServiceImpl implements CommentService {
             if (!updated) {
                 log.warn("评论更新失败, 评论ID: {}", commentDTO.getId());
             }
+
+            // 清理缓存
+            commentCacheService.cleanCacheAfterCommentUpdate(comment.getId(), comment.getArticleId());
+
             return updated;
         } catch (Exception e) {
             log.error("更新评论失败, 评论ID: {}", commentDTO.getId(), e);
@@ -263,7 +240,6 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean deleteComment(Long commentId) {
         if (commentId == null) {
             log.warn("删除评论参数为空");
@@ -292,6 +268,10 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ResponseMessage.DELETED_FORBIDDEN);
             }
 
+            // 保存评论信息用于后续清理缓存
+            Long articleId = comment.getArticleId();
+            Long parentId = comment.getParentId();
+
             // 删除评论
             int result = commentMapper.deleteById(commentId);
             if (result <= 0) {
@@ -301,14 +281,18 @@ public class CommentServiceImpl implements CommentService {
 
             // 如果是回复评论，更新父评论的回复数
             int updated = 1;
-            if (comment.getParentId() != null && comment.getParentId() > 0) {
-                updated = updateParentCommentReplyCountDecrease(comment.getParentId());
+            if (parentId != null && parentId > 0) {
+                updated = updateParentCommentReplyCountDecrease(parentId);
             }
 
             if (updated >= 1) {
                 // 减少文章评论数
-                countService.updateArticleCommentCount(comment.getArticleId(), -updated);
+                countService.updateArticleCommentCount(articleId, -updated);
             }
+
+            // 清理缓存
+            commentCacheService.cleanCacheAfterCommentDelete(articleId, parentId);
+
             return updated >= 1;
         } catch (Exception e) {
             log.error("删除评论失败, 评论ID: {}", commentId, e);
@@ -325,119 +309,27 @@ public class CommentServiceImpl implements CommentService {
             int newReplyCount = parentComment.getReplyCount() != null && parentComment.getReplyCount() > 0 ? parentComment.getReplyCount() - 1 : 0;
             return commentMapper.updateReplyCount(parentId, newReplyCount);
         }
-        return 1;
+        return 0;
     }
 
-    /**
-     * 将扁平的评论列表转换为树形结构
-     *
-     * @param comments    扁平评论列表
-     * @param maxReplies  子评论最大返回数量
-     * @param replySortBy 子评论排序方式
-     * @return 树形评论列表
-     */
-    private List<ArticleCommentVO> buildCommentTree(List<ArticleCommentVO> comments, Integer maxReplies, String replySortBy) {
-        if (comments == null || comments.isEmpty()) {
-            return null;
-        }
-
-        // 存储所有评论的Map, 用于快速查找
-        Map<Long, ArticleCommentVO> commentMap = new HashMap<>();
-        // 存储顶级评论
-        List<ArticleCommentVO> topLevelComments = new ArrayList<>();
-
-        // 第一步: 将所有评论放入Map, 并初始化回复列表
-        for (ArticleCommentVO comment : comments) {
-            comment.setReplies(new ArrayList<>());
-            commentMap.put(comment.getId(), comment);
-        }
-
-        // 第二步: 构建评论树 - 实现知乎式评论结构（只有一级和二级评论）
-        for (ArticleCommentVO comment : comments) {
-            Long parentId = comment.getParentId();
-            if (parentId == null || parentId == 0) {
-                // 顶级评论
-                topLevelComments.add(comment);
-            } else {
-                // 查找顶级评论：如果父评论是二级评论，找到对应的顶级评论
-                ArticleCommentVO topComment = findTopComment(commentMap, parentId);
-                if (topComment != null) {
-                    // 将所有回复都添加到顶级评论的回复列表中
-                    topComment.getReplies().add(comment);
-                }
-            }
-        }
-
-        // 第三步: 对每个顶级评论的子评论进行排序和数量限制
-        for (ArticleCommentVO topComment : topLevelComments) {
-            List<ArticleCommentVO> replies = topComment.getReplies();
-            if (replies != null && !replies.isEmpty()) {
-                // 子评论排序
-                if ("hot".equals(replySortBy)) {
-                    replies.sort((a, b) -> {
-                        int likeCountA = a.getLikeCount() != null ? a.getLikeCount() : 0;
-                        int likeCountB = b.getLikeCount() != null ? b.getLikeCount() : 0;
-                        return likeCountB - likeCountA;
-                    });
-                } else if ("new".equals(replySortBy)) {
-                    replies.sort((a, b) -> b.getCreateTime().compareTo(a.getCreateTime()));
-                }
-
-                // 限制子评论数量
-                if (maxReplies != null && maxReplies > 0 && replies.size() > maxReplies) {
-                    topComment.setReplies(replies.subList(0, maxReplies));
-                }
-            }
-        }
-
-        return topLevelComments;
-    }
-
-    /**
-     * 查找顶级评论
-     *
-     * @param commentMap 评论Map
-     * @param commentId  评论ID
-     * @return 顶级评论
-     */
-    private ArticleCommentVO findTopComment(Map<Long, ArticleCommentVO> commentMap, Long commentId) {
-        ArticleCommentVO comment = commentMap.get(commentId);
-        if (comment == null) {
-            return null;
-        }
-        // 如果是顶级评论，直接返回
-        if (comment.getParentId() == null || comment.getParentId() == 0) {
-            return comment;
-        }
-        // 递归查找顶级评论
-        return findTopComment(commentMap, comment.getParentId());
-    }
 
     @Override
     public PageResult<ArticleCommentVO> getCommentsByPage(AdminCommentQueryDTO pageRequest) {
         try {
             log.info("管理员分页获取评论列表, 页码: {}, 每页大小: {}", pageRequest.getPageNum(), pageRequest.getPageSize());
 
-            // 计算偏移量
-            int offset = (pageRequest.getPageNum() - 1) * pageRequest.getPageSize();
-            pageRequest.setOffset(offset);
+            // 委托给缓存服务
+            PageResult<ArticleCommentVO> pageResult = commentCacheService.getCommentsByPage(pageRequest);
 
-            // 查询评论列表
-            List<ArticleCommentVO> articleCommentVOList = commentMapper.findCommentsByPage(pageRequest);
             // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
-            // 查询总记录数
-            Long total = commentMapper.countCommentsByPage(pageRequest);
+            if (pageResult != null && pageResult.getRecord() != null) {
+                fileService.ensureCommentImageAreFullUrl(pageResult.getRecord());
+            }
 
-            // 构建分页结果
-            PageResult<ArticleCommentVO> pageResult = PageResult.build(
-                    articleCommentVOList,
-                    total,
+            log.info("管理员分页获取评论列表成功, 总数: {}, 页码: {}, 每页大小: {}",
+                    pageResult != null ? pageResult.getTotal() : 0,
                     pageRequest.getPageNum(),
-                    pageRequest.getPageSize()
-            );
-
-            log.info("管理员分页获取评论列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, pageRequest.getPageNum(), pageRequest.getPageSize());
+                    pageRequest.getPageSize());
             return pageResult;
         } catch (Exception e) {
             log.error(ResponseMessage.COMMENT_NOT_FOUND.getMessage(), e);
@@ -484,7 +376,7 @@ public class CommentServiceImpl implements CommentService {
             }
 
             // 清除评论列表缓存
-            cacheManager.clearArticleCommentCache(comment.getArticleId());
+            commentCacheService.cleanCacheAfterCommentReview(comment.getArticleId());
 
             return true;
         } catch (Exception e) {
@@ -534,7 +426,7 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 清除评论列表缓存
-        cacheManager.clearArticleCommentCache(comment.getArticleId());
+        commentCacheService.cleanCacheAfterCommentTop(comment.getArticleId());
 
         return true;
 
@@ -560,9 +452,6 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @Cacheable(value = "comment:replies",
-            key = "#parentId + ':' + #pageNum + ':' + #pageSize + ':' + (#sortBy ?: 'default')",
-            unless = "#result == null")
     public PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy) {
         if (parentId == null || pageNum == null || pageSize == null) {
             log.warn("获取子评论参数不完整, parentId: {}, pageNum: {}, pageSize: {}", parentId, pageNum, pageSize);
@@ -571,28 +460,15 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("获取子评论列表, 父评论ID: {}, 页码: {}, 每页大小: {}, 排序方式: {}", parentId, pageNum, pageSize, sortBy);
 
-        try {
-            // 计算偏移量
-            int offset = (pageNum - 1) * pageSize;
+        // 委托给缓存服务
+        PageResult<ArticleCommentVO> result = commentCacheService.getReplies(parentId, pageNum, pageSize, sortBy);
 
-            // 查询子评论列表
-            List<ArticleCommentVO> replies = commentMapper.findRepliesByParentId(parentId, offset, pageSize, sortBy);
-            if (replies == null || replies.isEmpty()) {
-                return null;
-            }
-
-            // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(replies);
-
-            // 查询子评论总数
-            Long total = commentMapper.countRepliesByParentId(parentId);
-
-            // 构建分页结果
-            return PageResult.build(replies, total, pageNum, pageSize);
-        } catch (Exception e) {
-            log.error("获取子评论列表失败, 父评论ID: {}", parentId, e);
-            return null;
+        // 确保评论图片的URL完整
+        if (result != null && result.getRecord() != null) {
+            fileService.ensureCommentImageAreFullUrl(result.getRecord());
         }
+
+        return result;
     }
 
 }
