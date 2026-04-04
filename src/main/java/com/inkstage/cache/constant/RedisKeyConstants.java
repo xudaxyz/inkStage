@@ -6,118 +6,118 @@ package com.inkstage.cache.constant;
 public class RedisKeyConstants {
 
     // 刷新令牌前缀
-    public static final String REFRESH_TOKEN_PREFIX = "refresh_token:";
+    public static final String REFRESH_TOKEN_PREFIX = "inkstage:refresh_token:";
 
     // 用户刷新令牌前缀
-    public static final String USER_REFRESH_TOKEN_PREFIX = "user:refresh_tokens:";
+    public static final String USER_REFRESH_TOKEN_PREFIX = "inkstage:user:refresh_tokens:";
 
     // 刷新令牌黑名单前缀
-    public static final String REFRESH_TOKEN_BLACKLIST_PREFIX = "refresh_token_blacklist:";
+    public static final String REFRESH_TOKEN_BLACKLIST_PREFIX = "inkstage:refresh_token_blacklist:";
 
     // 用户登录尝试次数前缀
-    public static final String LOGIN_ATTEMPT_PREFIX = "login:attempt:";
+    public static final String LOGIN_ATTEMPT_PREFIX = "inkstage:login:attempt:";
 
     // 用户登录锁定前缀
-    public static final String LOGIN_LOCK_PREFIX = "login:lock:";
+    public static final String LOGIN_LOCK_PREFIX = "inkstage:login:lock:";
 
     // 用户会话前缀
-    public static final String USER_SESSION_PREFIX = "user_session:";
+    public static final String USER_SESSION_PREFIX = "inkstage:user_session:";
 
     // 验证码前缀
-    public static final String VERIFICATION_CODE_PREFIX = "verify:";
+    public static final String VERIFICATION_CODE_PREFIX = "inkstage:verify:";
 
     // 用户信息缓存前缀
-    public static final String USER_INFO_PREFIX = "user:info:";
+    public static final String USER_INFO_PREFIX = "inkstage:user:info:";
 
     // 管理员信息缓存前缀
-    public static final String ADMIN_INFO_PREFIX = "admin:info:";
+    public static final String ADMIN_INFO_PREFIX = "inkstage:admin:info:";
 
     // 权限缓存前缀
-    public static final String PERMISSION_PREFIX = "permission:";
+    public static final String PERMISSION_PREFIX = "inkstage:permission:";
 
     // 角色缓存前缀
-    public static final String ROLE_PREFIX = "role:";
+    public static final String ROLE_PREFIX = "inkstage:role:";
 
     // 限流前缀
-    public static final String RATE_LIMIT_PREFIX = "rate:";
+    public static final String RATE_LIMIT_PREFIX = "inkstage:rate:";
 
     // 分布式锁前缀
-    public static final String LOCK_PREFIX = "lock:";
+    public static final String LOCK_PREFIX = "inkstage:lock:";
 
     // 系统配置前缀
-    public static final String SYSTEM_CONFIG_PREFIX = "sys_config:";
+    public static final String SYSTEM_CONFIG_PREFIX = "inkstage:sys_config:";
 
     // 热点数据前缀
-    public static final String HOT_DATA_PREFIX = "hot:";
+    public static final String HOT_DATA_PREFIX = "inkstage:hot:";
 
     // 通知未读计数
-    public static final String NOTIFICATION_UNREAD_COUNT = "notify:unread:count:";
+    public static final String NOTIFICATION_UNREAD_COUNT = "inkstage:notify:unread:count:";
 
     // 通知按分类未读计数
-    public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "notify:unread:category:";
+    public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "inkstage:notify:unread:category:";
 
     // 通知最近列表
-    public static final String NOTIFICATION_RECENT_LIST = "notify:recent:list:";
+    public static final String NOTIFICATION_RECENT_LIST = "inkstage:notify:recent:list:";
 
     // 用户前缀
-    public static final String USER_PREFIX = "user:";
+    public static final String USER_PREFIX = "inkstage:user:";
 
     // 文章前缀
-    public static final String ARTICLE_PREFIX = "article:";
+    public static final String ARTICLE_PREFIX = "inkstage:article:";
 
     // 文章列表前缀
-    public static final String ARTICLES_PREFIX = "articles:";
+    public static final String ARTICLES_PREFIX = "inkstage:articles:";
 
     // 文章热点前缀
-    public static final String ARTICLE_HOT_PREFIX = "article:hot:";
+    public static final String ARTICLE_HOT_PREFIX = "inkstage:article:hot:";
 
     // 文章计数前缀
-    public static final String ARTICLE_COUNT_PREFIX = "article:";
+    public static final String ARTICLE_COUNT_PREFIX = "inkstage:article:";
 
     // 分类前缀
-    public static final String CATEGORY_PREFIX = "category:";
+    public static final String CATEGORY_PREFIX = "inkstage:category:";
 
     // 标签前缀
-    public static final String TAG_PREFIX = "tag:";
+    public static final String TAG_PREFIX = "inkstage:tag:";
 
     // 评论前缀
-    public static final String COMMENT_PREFIX = "comment:";
+    public static final String COMMENT_PREFIX = "inkstage:comment:";
 
     // 评论回复前缀
-    public static final String COMMENT_REPLY_PREFIX = "comment:reply:";
+    public static final String COMMENT_REPLY_PREFIX = "inkstage:comment:reply:";
 
     // 关注前缀
-    public static final String FOLLOW_PREFIX = "follow:";
+    public static final String FOLLOW_PREFIX = "inkstage:follow:";
 
     // 阅读历史前缀
-    public static final String READING_HISTORY_PREFIX = "reading:history:";
+    public static final String READING_HISTORY_PREFIX = "inkstage:reading:history:";
 
     // 文章详情前缀
-    public static final String ARTICLE_DETAIL_PREFIX = "article:detail:";
+    public static final String ARTICLE_DETAIL_PREFIX = "inkstage:article:detail:";
 
     // 文章收藏前缀
-    public static final String ARTICLE_COLLECT_PREFIX = "article:collect:";
+    public static final String ARTICLE_COLLECT_PREFIX = "inkstage:article:collect:";
 
     // 文章点赞前缀
-    public static final String ARTICLE_LIKE_PREFIX = "article:like:";
+    public static final String ARTICLE_LIKE_PREFIX = "inkstage:article:like:";
 
     // 用户文章列表前缀
-    public static final String USER_ARTICLE_LIST_PREFIX = "user:articles:";
+    public static final String USER_ARTICLE_LIST_PREFIX = "inkstage:user:articles:";
 
     // 热门用户前缀
-    public static final String USER_HOT_PREFIX = "user:hot:";
+    public static final String USER_HOT_PREFIX = "inkstage:user:hot:";
 
     // 最新文章前缀
-    public static final String ARTICLE_LATEST_PREFIX = "article:latest:";
+    public static final String ARTICLE_LATEST_PREFIX = "inkstage:article:latest:";
 
     // 轮播文章前缀
-    public static final String ARTICLE_BANNER_PREFIX = "article:banner:";
+    public static final String ARTICLE_BANNER_PREFIX = "inkstage:article:banner:";
 
     // 文章搜索前缀
-    public static final String ARTICLE_SEARCH_PREFIX = "article:search:";
+    public static final String ARTICLE_SEARCH_PREFIX = "inkstage:article:search:";
 
     // 我的文章列表前缀
-    public static final String ARTICLE_MY_PREFIX = "cache:article:my:";
+    public static final String ARTICLE_MY_PREFIX = "inkstage:cache:article:my:";
 
     // @Cache注解使用的缓存名称
     public static final String CACHE_DASHBOARD = "dashboard";
@@ -141,17 +141,17 @@ public class RedisKeyConstants {
     public static final String CACHE_ARTICLE_SEARCH = "article:search";
     public static final String CACHE_ARTICLE_MY = "article:my";
     public static final String CACHE_CATEGORIES = "categories";
-    public static final String CACHE_USER_ROLES = "userRoles";
+    public static final String CACHE_USER_ROLES = "user:roles";
     public static final String CACHE_ROLES = "roles";
     public static final String CACHE_TAGS = "tags";
 
     // RedisUtil使用的缓存名称
-    public static final String CACHE_ARTICLE_COUNT = "article:count";
-    public static final String CACHE_NOTIFICATION_UNREAD = "notification:unread";
-    public static final String CACHE_NOTIFICATION_RECENT = "notification:recent";
-    public static final String CACHE_VERIFY_CODE = "verify:code";
-    public static final String CACHE_LOGIN_ATTEMPT = "login:attempt";
-    public static final String CACHE_LOGIN_LOCK = "login:lock";
+    public static final String CACHE_ARTICLE_COUNT = "inkstage:article:count";
+    public static final String CACHE_NOTIFICATION_UNREAD = "inkstage:notification:unread";
+    public static final String CACHE_NOTIFICATION_RECENT = "inkstage:notification:recent";
+    public static final String CACHE_VERIFY_CODE = "inkstage:verify:code";
+    public static final String CACHE_LOGIN_ATTEMPT = "inkstage:login:attempt";
+    public static final String CACHE_LOGIN_LOCK = "inkstage:login:lock";
 
     // 版本号前缀
     public static final String VERSION_PREFIX = "v:";
@@ -165,6 +165,16 @@ public class RedisKeyConstants {
      */
     public static String buildCacheKey(String prefix, String key) {
         return prefix + key;
+    }
+
+    /**
+     * 构建完整的缓存键（包含前缀）
+     *
+     * @param key 键
+     * @return 完整的缓存键
+     */
+    public static String buildFullCacheKey(String key) {
+        return "inkstage:" + key;
     }
 
     /**

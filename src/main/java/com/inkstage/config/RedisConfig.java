@@ -21,7 +21,7 @@ import java.time.Duration;
  * Redis配置类
  * 配置RedisTemplate和StringRedisTemplate, 提供更好的序列化支持
  * 适配Spring Data Redis 4.0+版本
- * 启用Spring Cache注解支持，提供声明式缓存功能
+ * 启用Spring Cache注解支持, 提供声明式缓存功能
  */
 @Configuration
 @EnableCaching
@@ -65,37 +65,37 @@ public class RedisConfig {
 
     /**
      * 配置Redis缓存管理器
-     * 为不同的缓存名称设置不同的过期时间，以优化缓存性能和内存使用
+     * 为不同的缓存名称设置不同的过期时间, 以优化缓存性能和内存使用
      *
      * @param factory Redis连接工厂
      * @return Redis缓存管理器
      */
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory factory) {
-        // 使用Spring Data Redis 4.0+推荐的JSON序列化器，用于序列化缓存值
+        // 使用Spring Data Redis 4.0+推荐的JSON序列化器, 用于序列化缓存值
         RedisSerializer<@NotNull Object> jsonSerializer = RedisSerializer.json();
-        // 使用字符串序列化器，用于序列化缓存键
+        // 使用字符串序列化器, 用于序列化缓存键
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
 
         // 基础缓存配置
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
                 // 默认缓存过期时间：30分钟
                 .entryTtl(Duration.ofMinutes(30))
-                // 缓存键前缀：inkstage[is]:，避免与其他项目的缓存键冲突
-                .prefixCacheNameWith("is:")
+                // 缓存键前缀：inkstage:, 避免与其他项目的缓存键冲突
+                .prefixCacheNameWith("inkstage:")
                 // 配置缓存键序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置缓存值序列化方式
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
         // 为不同的缓存名称设置不同的过期时间
-        // 策略：更新频率越高的缓存，过期时间越短
+        // 策略：更新频率越高的缓存, 过期时间越短
         // 添加随机偏移量(±5分钟)防止缓存雪崩
         return RedisCacheManager.builder(factory)
                 // 文章列表缓存：20分钟(实时性要求较高)
                 .withCacheConfiguration("article:list", defaultConfig.entryTtl(
                         Duration.ofMinutes(20).plusSeconds((long) (Math.random() * 600))))
-                // 文章详情缓存：2小时(更新频率低，但访问量大)
+                // 文章详情缓存：2小时(更新频率低, 但访问量大)
                 .withCacheConfiguration("article:detail", defaultConfig.entryTtl(
                         Duration.ofHours(2).plusSeconds((long) (Math.random() * 600))))
                 // 热门文章缓存：15分钟(更新频率较高)
@@ -142,6 +142,18 @@ public class RedisConfig {
                 // 阅读历史缓存：30分钟
                 .withCacheConfiguration("reading:history", defaultConfig.entryTtl(
                         Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
+                // 分类缓存：1小时
+                .withCacheConfiguration("categories", defaultConfig.entryTtl(
+                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
+                // 标签缓存：1小时
+                .withCacheConfiguration("tags", defaultConfig.entryTtl(
+                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
+                // 角色缓存：7天(角色表基本不会变动)
+                .withCacheConfiguration("roles", defaultConfig.entryTtl(
+                        Duration.ofDays(7).plusSeconds((long) (Math.random() * 600))))
+                // 用户角色缓存：1天(依赖于角色数据, 变动也较少)
+                .withCacheConfiguration("user:roles", defaultConfig.entryTtl(
+                        Duration.ofDays(1).plusSeconds((long) (Math.random() * 600))))
                 // RedisUtil使用的缓存配置
                 // 文章计数缓存：1小时
                 .withCacheConfiguration("article:count", defaultConfig.entryTtl(
