@@ -89,7 +89,7 @@ public class CacheClearServiceImpl implements CacheClearService {
     public void clearArticleSearchCache() {
         try {
             // 搜索缓存使用article:search:前缀
-            redisUtil.deletePattern("article:search:*");
+            redisUtil.deletePattern(ARTICLE_SEARCH_PREFIX + "*");
             log.info("清除文章搜索缓存完成");
         } catch (Exception e) {
             log.error("清除文章搜索缓存失败", e);
@@ -327,6 +327,41 @@ public class CacheClearServiceImpl implements CacheClearService {
             log.warn("清除所有缓存完成");
         } catch (Exception e) {
             log.error("清除所有缓存失败", e);
+        }
+    }
+    
+    // ==================== 通用方法 ====================
+    
+    @Override
+    public void clearCacheByPattern(String pattern) {
+        try {
+            redisUtil.deletePattern(pattern);
+            log.info("清除缓存, 模式: {}", pattern);
+        } catch (Exception e) {
+            log.error("清除缓存失败, 模式: {}", pattern, e);
+        }
+    }
+    
+    @Override
+    public void clearCacheByKey(String key) {
+        try {
+            redisUtil.delete(key);
+            log.info("清除缓存, 键: {}", key);
+        } catch (Exception e) {
+            log.error("清除缓存失败, 键: {}", key, e);
+        }
+    }
+    
+    @Override
+    public void clearMyArticleListCache(Long userId) {
+        if (userId != null) {
+            try {
+                String myArticleListKey = ARTICLE_MY_PREFIX + "*";
+                redisUtil.deletePattern(myArticleListKey);
+                log.info("清除我的文章列表缓存完成");
+            } catch (Exception e) {
+                log.error("清除我的文章列表缓存失败", e);
+            }
         }
     }
 }

@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.mapper.SystemAnnouncementMapper;
 import com.inkstage.service.SystemAnnouncementService;
@@ -29,7 +30,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean createAnnouncement(SystemAnnouncement announcement) {
         announcement.setCreateUserId(UserContext.getCurrentUserId());
         announcement.setUpdateUserId(UserContext.getCurrentUserId());
@@ -43,7 +44,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean updateAnnouncement(SystemAnnouncement announcement) {
         SystemAnnouncement existing = announcementMapper.selectById(announcement.getId());
         if (existing == null) {
@@ -58,13 +59,13 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean deleteAnnouncement(Long id) {
         return announcementMapper.deleteById(id) > 0;
     }
 
     @Override
-    @Cacheable(value = "announcement",
+    @Cacheable(value = RedisKeyConstants.CACHE_ANNOUNCEMENT,
             key = "#id",
             unless = "#result == null")
     public SystemAnnouncement getAnnouncementById(Long id) {
@@ -87,7 +88,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     }
 
     @Override
-    @Cacheable(value = "announcement",
+    @Cacheable(value = RedisKeyConstants.CACHE_ANNOUNCEMENT,
             key = "'published'",
             unless = "#result == null or #result.isEmpty()")
     public List<SystemAnnouncement> getPublishedAnnouncements() {
@@ -96,7 +97,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean publishAnnouncement(Long id) {
         SystemAnnouncement announcement = new SystemAnnouncement();
         announcement.setId(id);
@@ -108,7 +109,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean expireAnnouncement(Long id) {
         SystemAnnouncement announcement = new SystemAnnouncement();
         announcement.setId(id);
@@ -120,7 +121,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
-    @CacheEvict(value = "announcement", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ANNOUNCEMENT, allEntries = true)
     public boolean incrementReadCount(Long id) {
         return announcementMapper.incrementReadCount(id) > 0;
     }

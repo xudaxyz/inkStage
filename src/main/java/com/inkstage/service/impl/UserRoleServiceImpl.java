@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.common.DeleteStatus;
@@ -25,7 +26,7 @@ public class UserRoleServiceImpl implements UserRoleService {
     private final UserRoleMapper userRoleMapper;
 
     @Override
-    @CacheEvict(value = "userRoles", key = "#user.id")
+    @CacheEvict(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#user.id")
     public void createUserRole(User user) {
         // 为新注册用户分配默认角色(普通用户)
         UserRole userRole = new UserRole();
@@ -41,13 +42,13 @@ public class UserRoleServiceImpl implements UserRoleService {
     }
 
     @Override
-    @Cacheable(value = "userRoles", key = "#userId")
+    @Cacheable(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#userId")
     public List<UserRole> getUserRoles(Long userId) {
         return userRoleMapper.selectByUserId(userId);
     }
 
     @Override
-    @CacheEvict(value = "userRoles", key = "#userId")
+    @CacheEvict(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#userId")
     public Boolean updateUserRole(Long userId, UserRoleEnum userRole) {
         int result = userRoleMapper.updateUserRole(userId, userRole);
         return result > 0;

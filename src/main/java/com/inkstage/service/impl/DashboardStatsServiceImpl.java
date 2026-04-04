@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.DashboardStats;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.mapper.*;
@@ -35,7 +36,7 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
     private final ArticleCollectionMapper articleCollectionMapper;
 
     @Override
-    @Cacheable(value = "dashboard",
+    @Cacheable(value = RedisKeyConstants.CACHE_DASHBOARD,
             key = "#limit",
             unless = "#result == null")
     public DashboardStatsVO getDashboardStats(int limit) {
@@ -53,7 +54,7 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "dashboard", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_DASHBOARD, allEntries = true)
     public boolean refreshDashboardStats() {
         try {
             calculateCoreStats();

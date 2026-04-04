@@ -7,6 +7,7 @@ import com.inkstage.entity.model.ReadingHistory;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.ReadingHistoryMapper;
 import com.inkstage.service.FileService;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.service.ReadingHistoryService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReadingHistoryVO;
@@ -33,7 +34,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     private final FileService fileService;
 
     @Override
-    @CacheEvict(value = "reading:history", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean saveOrUpdateReadingHistory(ReadingHistoryDTO dto) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -72,7 +73,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @Cacheable(value = "reading:history",
+    @Cacheable(value = RedisKeyConstants.CACHE_READING_HISTORY,
             key = "#page + ':' + #size",
             unless = "#result == null")
     public PageResult<ReadingHistoryVO> getReadingHistoryList(Integer page, Integer size) {
@@ -115,7 +116,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @CacheEvict(value = "reading:history", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean deleteReadingHistory(Long articleId) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -133,7 +134,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @CacheEvict(value = "reading:history", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean clearReadingHistory() {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -151,7 +152,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @Cacheable(value = "reading:history",
+    @Cacheable(value = RedisKeyConstants.CACHE_READING_HISTORY,
             key = "'article:' + #articleId",
             unless = "#result == null")
     public ReadingHistoryVO getReadingHistoryByArticleId(Long articleId) {

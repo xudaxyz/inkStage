@@ -56,7 +56,7 @@ public interface CacheClearService {
      * 清除文章点赞缓存
      *
      * @param articleId 文章ID
-     * @param userId 用户ID
+     * @param userId    用户ID
      */
     void clearArticleLikeCache(Long articleId, Long userId);
 
@@ -64,7 +64,7 @@ public interface CacheClearService {
      * 清除文章收藏缓存
      *
      * @param articleId 文章ID
-     * @param userId 用户ID
+     * @param userId    用户ID
      */
     void clearArticleCollectCache(Long articleId, Long userId);
 
@@ -180,4 +180,27 @@ public interface CacheClearService {
      * 清除所有缓存（慎用）
      */
     void clearAllCache();
+
+    // ==================== 通用方法 ====================
+
+    /**
+     * 清除指定模式的缓存
+     *
+     * @param pattern 缓存键模式
+     */
+    void clearCacheByPattern(String pattern);
+
+    /**
+     * 清除指定键的缓存
+     *
+     * @param key 缓存键
+     */
+    void clearCacheByKey(String key);
+
+    /**
+     * 清除我的文章列表缓存
+     *
+     * @param userId 用户ID
+     */
+    void clearMyArticleListCache(Long userId);
 }

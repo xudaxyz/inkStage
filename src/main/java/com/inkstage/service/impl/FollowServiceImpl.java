@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
@@ -36,7 +37,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"follow:status", "follow:list"},
+    @CacheEvict(value = {RedisKeyConstants.CACHE_FOLLOW_STATUS, RedisKeyConstants.CACHE_FOLLOW_LIST},
             key = "#followerId + ':' + #followingId",
             allEntries = true)
     public boolean followUser(Long followerId, Long followingId) {
@@ -86,7 +87,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {"follow:status", "follow:list"},
+    @CacheEvict(value = {RedisKeyConstants.CACHE_FOLLOW_STATUS, RedisKeyConstants.CACHE_FOLLOW_LIST},
             key = "#followerId + ':' + #followingId",
             allEntries = true)
     public boolean unfollowUser(Long followerId, Long followingId) {
@@ -125,7 +126,7 @@ public class FollowServiceImpl implements FollowService {
      * @return 是否已关注
      */
     @Override
-    @Cacheable(value = "follow:status",
+    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_STATUS,
             key = "#followerId + ':' + #followingId",
             unless = "#result == null")
     public boolean checkFollowStatus(Long followerId, Long followingId) {
@@ -142,7 +143,7 @@ public class FollowServiceImpl implements FollowService {
      * @return 关注的用户ID列表
      */
     @Override
-    @Cacheable(value = "follow:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
             key = "'following:' + #followerId + ':' + #offset + ':' + #limit",
             unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowingList(Long followerId, Integer offset, Integer limit) {
@@ -158,7 +159,7 @@ public class FollowServiceImpl implements FollowService {
      * @return 粉丝ID列表
      */
     @Override
-    @Cacheable(value = "follow:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
             key = "'follower:' + #followingId + ':' + #offset + ':' + #limit",
             unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowerList(Long followingId, Integer offset, Integer limit) {
@@ -172,7 +173,7 @@ public class FollowServiceImpl implements FollowService {
      * @return 关注数
      */
     @Override
-    @Cacheable(value = "follow:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
             key = "'following:count:' + #followerId",
             unless = "#result == null")
     public long getFollowingCount(Long followerId) {
@@ -186,7 +187,7 @@ public class FollowServiceImpl implements FollowService {
      * @return 粉丝数
      */
     @Override
-    @Cacheable(value = "follow:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
             key = "'follower:count:' + #followingId",
             unless = "#result == null")
     public long getFollowerCount(Long followingId) {

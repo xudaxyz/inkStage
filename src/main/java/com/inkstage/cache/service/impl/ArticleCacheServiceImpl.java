@@ -1,5 +1,6 @@
 package com.inkstage.cache.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
@@ -34,7 +35,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 文章详情缓存 ====================
 
     @Override
-    @Cacheable(value = "article:detail", key = "#id", unless = "#result == null")
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_DETAIL, key = "#id", unless = "#result == null")
     public ArticleDetailVO getArticleDetail(Long id) {
         ArticleDetailVO articleDetailVO = articleMapper.findDetailById(id);
         if (articleDetailVO == null) {
@@ -51,7 +52,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:detail", key = "#id")
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_DETAIL, key = "#id")
     public void clearArticleDetailCache(Long id) {
         log.info("清理文章详情缓存成功, id: {}", id);
     }
@@ -59,7 +60,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 文章列表缓存 ====================
 
     @Override
-    @Cacheable(value = "article:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_LIST,
             key = "#pageNum + ':' + #pageSize + ':' + (#categoryId ?: 0) + ':' + (#tagId ?: 0)",
             unless = "#result == null")
     public PageResult<ArticleListVO> getArticles(int pageNum, int pageSize, Long categoryId, Long tagId) {
@@ -81,7 +82,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:list", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_LIST, allEntries = true)
     public void clearArticleListCache() {
         log.info("清理文章列表缓存成功");
     }
@@ -89,7 +90,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 热门文章缓存 ====================
 
     @Override
-    @Cacheable(value = "article:hot",
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_HOT,
             key = "#limit + ':' + (#timeRange ?: 'week')",
             unless = "#result == null")
     public List<ArticleListVO> getHotArticles(Integer limit, String timeRange) {
@@ -101,7 +102,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:hot", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_HOT, allEntries = true)
     public void clearHotArticlesCache() {
         log.info("清理热门文章缓存成功");
     }
@@ -109,7 +110,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 最新文章缓存 ====================
 
     @Override
-    @Cacheable(value = "article:latest", key = "#limit", unless = "#result == null")
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_LATEST, key = "#limit", unless = "#result == null")
     public List<ArticleListVO> getLatestArticles(Integer limit) {
         List<ArticleListVO> latestArticles = articleMapper.findLatestArticles(limit);
         fileService.ensureArticleImageAreFullUrl(latestArticles);
@@ -119,7 +120,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:latest", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_LATEST, allEntries = true)
     public void clearLatestArticlesCache() {
         log.info("清理最新文章缓存成功");
     }
@@ -127,7 +128,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 轮播图文章缓存 ====================
 
     @Override
-    @Cacheable(value = "article:banner", key = "#limit", unless = "#result == null")
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_BANNER, key = "#limit", unless = "#result == null")
     public List<ArticleListVO> getBannerArticles(Integer limit) {
         List<ArticleListVO> bannerArticles = articleMapper.findBannerArticles(limit);
         fileService.ensureArticleImageAreFullUrl(bannerArticles);
@@ -137,7 +138,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:banner", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_BANNER, allEntries = true)
     public void clearBannerArticlesCache() {
         log.info("清理轮播图文章缓存成功");
     }
@@ -145,7 +146,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 用户文章缓存 ====================
 
     @Override
-    @Cacheable(value = "article:user",
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_USER,
             key = "#userId + ':' + #pageNum + ':' + #pageSize",
             unless = "#result == null")
     public PageResult<ArticleListVO> getUserArticles(Long userId, Integer pageNum, Integer pageSize) {
@@ -160,7 +161,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:user", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_USER, allEntries = true)
     public void clearUserArticlesCache() {
         log.info("清理用户文章缓存成功");
     }
@@ -168,7 +169,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 作者相关文章缓存 ====================
 
     @Override
-    @Cacheable(value = "article:user:related",
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_USER_RELATED,
             key = "#userId + ':' + #excludeArticleId + ':' + #limit",
             unless = "#result == null")
     public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
@@ -180,7 +181,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:user:related", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_USER_RELATED, allEntries = true)
     public void clearUserRelatedArticlesCache() {
         log.info("清理作者相关文章缓存成功");
     }
@@ -188,7 +189,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 搜索缓存 ====================
 
     @Override
-    @Cacheable(value = "article:search",
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_SEARCH,
             key = "#keyword + ':' + (#sortBy ?: 'default') + ':' + #pageNum + ':' + #pageSize",
             unless = "#result == null or #result.total == 0")
     public PageResult<ArticleListVO> searchArticles(String keyword, String sortBy, Integer pageNum, Integer pageSize) {
@@ -203,7 +204,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     }
 
     @Override
-    @CacheEvict(value = "article:search", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_SEARCH, allEntries = true)
     public void clearSearchArticlesCache() {
         log.info("清理搜索文章缓存成功");
     }
@@ -212,15 +213,15 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
     @Override
     @CacheEvict(value = {
-            "article:list",
-            "article:detail",
-            "article:hot",
-            "article:latest",
-            "article:banner",
-            "article:user",
-            "article:user:related",
-            "article:my",
-            "article:search"
+            RedisKeyConstants.CACHE_ARTICLE_LIST,
+            RedisKeyConstants.CACHE_ARTICLE_DETAIL,
+            RedisKeyConstants.CACHE_ARTICLE_HOT,
+            RedisKeyConstants.CACHE_ARTICLE_LATEST,
+            RedisKeyConstants.CACHE_ARTICLE_BANNER,
+            RedisKeyConstants.CACHE_ARTICLE_USER,
+            RedisKeyConstants.CACHE_ARTICLE_USER_RELATED,
+            RedisKeyConstants.CACHE_ARTICLE_MY,
+            RedisKeyConstants.CACHE_ARTICLE_SEARCH
     }, allEntries = true)
     public void clearAllArticleCache() {
         log.info("清理所有文章缓存成功");

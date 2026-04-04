@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.Role;
 import com.inkstage.mapper.RoleMapper;
 import com.inkstage.service.RoleService;
@@ -17,7 +18,7 @@ public class RoleServiceImpl implements RoleService {
     private final RoleMapper roleMapper;
 
     @Override
-    @Cacheable(value = "roles", key = "#id")
+    @Cacheable(value = RedisKeyConstants.CACHE_ROLES, key = "#id")
     public Role getRoleById(Long id) {
         return roleMapper.selectByPrimaryKey(id.intValue());
     }

@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Tag;
@@ -88,7 +89,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Cacheable(value = "tags", key = "'active'")
+    @Cacheable(value = RedisKeyConstants.CACHE_TAGS, key = "'active'")
     public List<Tag> getActiveTags() {
         log.info("获取激活状态标签列表");
         try {
@@ -101,7 +102,7 @@ public class TagServiceImpl implements TagService {
 
 
     @Override
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag addTag(Tag tag) {
         log.info("添加标签: {}", tag.getName());
         try {
@@ -131,7 +132,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag updateTag(Tag tag) {
         log.info("更新标签: {}", tag.getId());
         try {
@@ -158,7 +159,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public void deleteTag(Long id) {
         log.info("删除标签: {}", id);
         try {
@@ -197,7 +198,7 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = "tags", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag updateTagStatus(Long id, StatusEnum status) {
         log.info("更新标签状态: {}, {}", id, status);
         try {

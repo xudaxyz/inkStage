@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Category;
@@ -78,7 +79,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Cacheable(value = "categories", key = "'active'")
+    @Cacheable(value = RedisKeyConstants.CACHE_CATEGORIES, key = "'active'")
     public List<Category> getActiveCategories() {
         log.info("获取激活状态分类");
         try {
@@ -90,7 +91,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category addCategory(Category category) {
         log.info("添加分类: {}", category.getName());
         try {
@@ -121,7 +122,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category updateCategory(Category category) {
         log.info("更新分类: {}", category.getId());
         try {
@@ -150,7 +151,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public void deleteCategory(Long id) {
         log.info("删除分类: {}", id);
         try {
@@ -165,7 +166,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = "categories", allEntries = true)
+    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category updateCategoryStatus(Long id, StatusEnum status) {
         log.info("更新分类状态: {}, {}", id, status);
         try {

@@ -1,5 +1,6 @@
 package com.inkstage.cache.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleLikeMapper;
@@ -23,7 +24,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
     // ==================== 收藏相关缓存 ====================
 
     @Override
-    @Cacheable(value = "collection:status",
+    @Cacheable(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
             key = "#userId + ':' + #articleId",
             unless = "#result == null")
     public boolean isArticleCollected(Long articleId, Long userId) {
@@ -33,25 +34,23 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
     }
 
     @Override
-    @CacheEvict(value = "collection:status",
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
             key = "#userId + ':' + #articleId")
     public void clearCollectionStatusCache(Long articleId, Long userId) {
         log.debug("清理收藏状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
-        // 缓存清理由@CacheEvict注解处理
     }
 
     @Override
-    @CacheEvict(value = "collection:status",
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
             key = "#userId + ':*'")
     public void clearUserCollectionCache(Long userId) {
         log.debug("清理用户所有收藏缓存, 用户ID: {}", userId);
-        // 缓存清理由@CacheEvict注解处理
     }
 
     // ==================== 点赞相关缓存 ====================
 
     @Override
-    @Cacheable(value = "like:status",
+    @Cacheable(value = RedisKeyConstants.CACHE_LIKE_STATUS,
             key = "#userId + ':' + #articleId",
             unless = "#result == null")
     public boolean isArticleLiked(Long articleId, Long userId) {
@@ -61,19 +60,17 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
     }
 
     @Override
-    @CacheEvict(value = "like:status",
+    @CacheEvict(value = RedisKeyConstants.CACHE_LIKE_STATUS,
             key = "#userId + ':' + #articleId")
     public void clearLikeStatusCache(Long articleId, Long userId) {
         log.debug("清理点赞状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
-        // 缓存清理由@CacheEvict注解处理
     }
 
     @Override
-    @CacheEvict(value = "like:status",
+    @CacheEvict(value = RedisKeyConstants.CACHE_LIKE_STATUS,
             key = "#userId + ':*'")
     public void clearUserLikeCache(Long userId) {
         log.debug("清理用户所有点赞缓存, 用户ID: {}", userId);
-        // 缓存清理由@CacheEvict注解处理
     }
 
     // ==================== 批量操作 ====================

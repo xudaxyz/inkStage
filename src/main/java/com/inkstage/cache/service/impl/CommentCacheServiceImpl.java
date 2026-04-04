@@ -7,6 +7,7 @@ import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.mapper.CommentMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.CommentUtils;
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     // ==================== 前台评论查询缓存 ====================
 
     @Override
-    @Cacheable(value = "comment:list",
+    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_LIST,
             key = "#queryDTO.articleId + ':' + #queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.sortBy ?: 'default') + ':' + (#queryDTO.maxReplies ?: 0) + ':' + #root.target.getCommentVersion(#queryDTO.articleId)",
             unless = "#result == null")
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
@@ -70,7 +71,7 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     }
 
     @Override
-    @Cacheable(value = "comment:replies",
+    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_REPLIES,
             key = "#parentId + ':' + #pageNum + ':' + #pageSize + ':' + (#sortBy ?: 'default')",
             unless = "#result == null")
     public PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy) {
@@ -104,7 +105,7 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     }
 
     @Override
-    @Cacheable(value = "comment:admin",
+    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_ADMIN,
             key = "#queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.keyword ?: '') + ':' + (#queryDTO.status ?: 0)",
             unless = "#result == null")
     public PageResult<ArticleCommentVO> getCommentsByPage(AdminCommentQueryDTO queryDTO) {
@@ -139,22 +140,22 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     // ==================== 缓存清理方法 ====================
 
     @Override
-    @CacheEvict(value = "comment:list", key = "#articleId + ':*'")
+    @CacheEvict(value = RedisKeyConstants.CACHE_COMMENT_LIST, key = "#articleId + ':*'")
     public void clearArticleCommentCache(Long articleId) {
         log.info("清除文章评论缓存, 文章ID: {}", articleId);
     }
 
     @Override
-    @CacheEvict(value = "comment:replies", key = "#parentId + ':*'")
+    @CacheEvict(value = RedisKeyConstants.CACHE_COMMENT_REPLIES, key = "#parentId + ':*'")
     public void clearCommentRepliesCache(Long parentId) {
         log.info("清除子评论缓存, 父评论ID: {}", parentId);
     }
 
     @Override
     @CacheEvict(value = {
-            "comment:list",
-            "comment:replies",
-            "comment:admin"
+            RedisKeyConstants.CACHE_COMMENT_LIST,
+            RedisKeyConstants.CACHE_COMMENT_REPLIES,
+            RedisKeyConstants.CACHE_COMMENT_ADMIN
     }, allEntries = true)
     public void clearAllCommentCache() {
         log.info("清除所有评论缓存成功");

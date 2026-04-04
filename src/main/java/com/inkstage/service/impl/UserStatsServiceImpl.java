@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.service.UserStatsService;
@@ -23,7 +24,7 @@ public class UserStatsServiceImpl implements UserStatsService {
     private final FileService fileService;
 
     @Override
-    @Cacheable(value = "user:hot",
+    @Cacheable(value = RedisKeyConstants.CACHE_USER_HOT,
             key = "#limit",
             unless = "#result == null or #result.isEmpty()")
     public List<HotUserVO> getHotUsers(Integer limit) {
