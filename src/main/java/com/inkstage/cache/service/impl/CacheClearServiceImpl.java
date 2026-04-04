@@ -5,6 +5,7 @@ import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import static com.inkstage.cache.constant.RedisKeyConstants.*;
@@ -320,48 +321,37 @@ public class CacheClearServiceImpl implements CacheClearService {
     }
 
     @Override
-    public void clearAllCache() {
-        try {
-            // 慎用：清除所有缓存
-            redisUtil.deletePattern("*");
-            log.warn("清除所有缓存完成");
-        } catch (Exception e) {
-            log.error("清除所有缓存失败", e);
-        }
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
+            key = "#userId + ':' + #articleId")
+    public void clearCollectionStatusCache(Long articleId, Long userId) {
+        log.debug("清理收藏状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
     }
-    
-    // ==================== 通用方法 ====================
-    
+
     @Override
-    public void clearCacheByPattern(String pattern) {
-        try {
-            redisUtil.deletePattern(pattern);
-            log.info("清除缓存, 模式: {}", pattern);
-        } catch (Exception e) {
-            log.error("清除缓存失败, 模式: {}", pattern, e);
-        }
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
+            key = "#userId + ':*'")
+    public void clearUserCollectionCache(Long userId) {
+        log.debug("清理用户所有收藏缓存, 用户ID: {}", userId);
     }
-    
+
     @Override
-    public void clearCacheByKey(String key) {
-        try {
-            redisUtil.delete(key);
-            log.info("清除缓存, 键: {}", key);
-        } catch (Exception e) {
-            log.error("清除缓存失败, 键: {}", key, e);
-        }
+    @CacheEvict(value = USER_ARTICLE_LIST_PREFIX,
+            key = "#userId + ':*'")
+    public void clearUserArticleCache(Long userId) {
+        log.debug("清理用户文章相关缓存, 用户ID: {}", userId);
     }
-    
+
     @Override
-    public void clearMyArticleListCache(Long userId) {
-        if (userId != null) {
-            try {
-                String myArticleListKey = ARTICLE_MY_PREFIX + "*";
-                redisUtil.deletePattern(myArticleListKey);
-                log.info("清除我的文章列表缓存完成");
-            } catch (Exception e) {
-                log.error("清除我的文章列表缓存失败", e);
-            }
+    public void cleanCacheAfterArticleCreate(Long articleId, Long userId) {
+        try {
+            // 创建文章后清理：最新文章、用户文章、搜索缓存
+            clearLatestArticleCache();
+            clearUserArticleListCache(userId);
+            clearArticleSearchCache();
+            log.info("文章创建后清理缓存成功, 文章ID: {}", articleId);
+        } catch (Exception e) {
+            log.error("文章创建后清理缓存失败, 文章ID: {}", articleId, e);
         }
     }
+
 }

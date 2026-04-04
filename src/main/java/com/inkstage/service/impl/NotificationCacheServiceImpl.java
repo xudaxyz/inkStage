@@ -1,8 +1,8 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.service.NotificationCacheService;
-import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -10,7 +10,6 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import static com.inkstage.cache.constant.RedisKeyConstants.*;
 
@@ -28,7 +27,7 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
     @Override
     public void cacheUnreadCount(Long userId, int count) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        redisUtil.set(key, count, 30, TimeUnit.MINUTES);
+        redisUtil.set(key, count);
     }
 
     @Override
@@ -36,7 +35,7 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
         String key = NOTIFICATION_UNREAD_COUNT_BY_CATEGORY + userId;
         try {
             String json = objectMapper.writeValueAsString(countMap);
-            redisUtil.set(key, json, 30, TimeUnit.MINUTES);
+            redisUtil.set(key, json);
         } catch (Exception e) {
             log.error("缓存未读数量失败", e);
         }
@@ -75,7 +74,7 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
     @Override
     public void cacheRecentNotifications(Long userId, String notifications) {
         String key = NOTIFICATION_RECENT_LIST + userId;
-        redisUtil.set(key, notifications, 5, TimeUnit.MINUTES);
+        redisUtil.set(key, notifications);
     }
 
     @Override

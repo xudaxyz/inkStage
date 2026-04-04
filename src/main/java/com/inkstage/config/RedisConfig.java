@@ -142,6 +142,25 @@ public class RedisConfig {
                 // 阅读历史缓存：30分钟
                 .withCacheConfiguration("reading:history", defaultConfig.entryTtl(
                         Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
+                // RedisUtil使用的缓存配置
+                // 文章计数缓存：1小时
+                .withCacheConfiguration("article:count", defaultConfig.entryTtl(
+                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
+                // 通知未读数缓存：30分钟
+                .withCacheConfiguration("notification:unread", defaultConfig.entryTtl(
+                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
+                // 通知最近列表缓存：5分钟
+                .withCacheConfiguration("notification:recent", defaultConfig.entryTtl(
+                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
+                // 验证码缓存：5分钟
+                .withCacheConfiguration("verify:code", defaultConfig.entryTtl(
+                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
+                // 登录尝试缓存：15分钟
+                .withCacheConfiguration("login:attempt", defaultConfig.entryTtl(
+                        Duration.ofMinutes(15).plusSeconds((long) (Math.random() * 60))))
+                // 登录锁定缓存：15分钟
+                .withCacheConfiguration("login:lock", defaultConfig.entryTtl(
+                        Duration.ofMinutes(15).plusSeconds((long) (Math.random() * 60))))
                 .build();
     }
 

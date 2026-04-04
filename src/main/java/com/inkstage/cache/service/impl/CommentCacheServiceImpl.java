@@ -11,7 +11,6 @@ import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -136,95 +135,6 @@ public class CommentCacheServiceImpl implements CommentCacheService {
             return null;
         }
     }
-
-    // ==================== 缓存清理方法 ====================
-
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_COMMENT_LIST, key = "#articleId + ':*'")
-    public void clearArticleCommentCache(Long articleId) {
-        log.info("清除文章评论缓存, 文章ID: {}", articleId);
-    }
-
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_COMMENT_REPLIES, key = "#parentId + ':*'")
-    public void clearCommentRepliesCache(Long parentId) {
-        log.info("清除子评论缓存, 父评论ID: {}", parentId);
-    }
-
-    @Override
-    @CacheEvict(value = {
-            RedisKeyConstants.CACHE_COMMENT_LIST,
-            RedisKeyConstants.CACHE_COMMENT_REPLIES,
-            RedisKeyConstants.CACHE_COMMENT_ADMIN
-    }, allEntries = true)
-    public void clearAllCommentCache() {
-        log.info("清除所有评论缓存成功");
-    }
-
-    // ==================== 场景化缓存清理 ====================
-
-    @Override
-    public void cleanCacheAfterCommentCreate(Long articleId, Long parentId) {
-        try {
-            // 创建评论后清理：文章评论缓存、父评论回复缓存
-            clearArticleCommentCache(articleId);
-            if (parentId != null && parentId > 0) {
-                clearCommentRepliesCache(parentId);
-            }
-            log.info("评论创建后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("评论创建后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterCommentUpdate(Long commentId, Long articleId) {
-        try {
-            // 更新评论后清理：文章评论缓存
-            clearArticleCommentCache(articleId);
-            log.info("评论更新后清理缓存成功, 评论ID: {}", commentId);
-        } catch (Exception e) {
-            log.error("评论更新后清理缓存失败, 评论ID: {}", commentId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterCommentDelete(Long articleId, Long parentId) {
-        try {
-            // 删除评论后清理：文章评论缓存、父评论回复缓存
-            clearArticleCommentCache(articleId);
-            if (parentId != null && parentId > 0) {
-                clearCommentRepliesCache(parentId);
-            }
-            log.info("评论删除后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("评论删除后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterCommentReview(Long articleId) {
-        try {
-            // 审核评论后清理：文章评论缓存
-            clearArticleCommentCache(articleId);
-            log.info("评论审核后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("评论审核后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterCommentTop(Long articleId) {
-        try {
-            // 置顶评论后清理：文章评论缓存
-            clearArticleCommentCache(articleId);
-            log.info("评论置顶后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("评论置顶后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    // ==================== 辅助方法 ====================
 
     /**
      * 获取评论版本号

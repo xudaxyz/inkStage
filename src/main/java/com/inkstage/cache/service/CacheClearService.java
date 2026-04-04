@@ -6,6 +6,7 @@ package com.inkstage.cache.service;
  */
 public interface CacheClearService {
 
+
     // ==================== 文章相关缓存清除 ====================
 
     /**
@@ -56,7 +57,7 @@ public interface CacheClearService {
      * 清除文章点赞缓存
      *
      * @param articleId 文章ID
-     * @param userId    用户ID
+     * @param userId 用户ID
      */
     void clearArticleLikeCache(Long articleId, Long userId);
 
@@ -64,7 +65,7 @@ public interface CacheClearService {
      * 清除文章收藏缓存
      *
      * @param articleId 文章ID
-     * @param userId    用户ID
+     * @param userId 用户ID
      */
     void clearArticleCollectCache(Long articleId, Long userId);
 
@@ -177,30 +178,25 @@ public interface CacheClearService {
     void clearVerifyCodeCache(String account, String purpose);
 
     /**
-     * 清除所有缓存（慎用）
-     */
-    void clearAllCache();
-
-    // ==================== 通用方法 ====================
-
-    /**
-     * 清除指定模式的缓存
+     * 清理收藏状态缓存
      *
-     * @param pattern 缓存键模式
+     * @param articleId 文章ID
+     * @param userId 用户ID
      */
-    void clearCacheByPattern(String pattern);
+    void clearCollectionStatusCache(Long articleId, Long userId);
 
     /**
-     * 清除指定键的缓存
-     *
-     * @param key 缓存键
-     */
-    void clearCacheByKey(String key);
-
-    /**
-     * 清除我的文章列表缓存
+     * 清理用户所有收藏相关缓存
      *
      * @param userId 用户ID
      */
-    void clearMyArticleListCache(Long userId);
+    void clearUserCollectionCache(Long userId);
+
+    /**
+     * 清理用户文章相关缓存
+     * @param userId 用户ID
+     */
+    void clearUserArticleCache(Long userId);
+
+    void cleanCacheAfterArticleCreate(Long articleId, Long userId);
 }

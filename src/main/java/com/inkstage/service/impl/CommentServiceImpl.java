@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.cache.service.CommentCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
@@ -47,6 +48,7 @@ public class CommentServiceImpl implements CommentService {
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
     private final CommentCacheService commentCacheService;
+    private final CacheClearService cacheClearService;
 
     @Override
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
@@ -116,8 +118,11 @@ public class CommentServiceImpl implements CommentService {
                 sendCommentNotification(comment, article, currentUser);
             }
 
-            // 清理缓存
-            commentCacheService.cleanCacheAfterCommentCreate(comment.getArticleId(), comment.getParentId());
+            // 清理文章评论缓存、父评论回复缓存
+            cacheClearService.clearArticleCommentCache(comment.getArticleId());
+            if (comment.getParentId() != null && comment.getParentId() > 0) {
+                cacheClearService.clearCommentReplyCache(comment.getParentId());
+            }
 
             return updated >= 1;
         } catch (Exception e) {
@@ -228,8 +233,8 @@ public class CommentServiceImpl implements CommentService {
                 log.warn("评论更新失败, 评论ID: {}", commentDTO.getId());
             }
 
-            // 清理缓存
-            commentCacheService.cleanCacheAfterCommentUpdate(comment.getId(), comment.getArticleId());
+            // 清理文章评论缓存
+            cacheClearService.clearArticleCommentCache(comment.getArticleId());
 
             return updated;
         } catch (Exception e) {
@@ -290,8 +295,11 @@ public class CommentServiceImpl implements CommentService {
                 countService.updateArticleCommentCount(articleId, -updated);
             }
 
-            // 清理缓存
-            commentCacheService.cleanCacheAfterCommentDelete(articleId, parentId);
+            // 清理文章评论缓存、父评论回复缓存
+            cacheClearService.clearArticleCommentCache(articleId);
+            if (parentId != null && parentId > 0) {
+                cacheClearService.clearCommentReplyCache(parentId);
+            }
 
             return updated >= 1;
         } catch (Exception e) {
@@ -375,8 +383,8 @@ public class CommentServiceImpl implements CommentService {
                 notificationService.sendNotificationWithTemplate(comment.getUserId(), NotificationType.COMMENT_REVIEW_REJECT, params);
             }
 
-            // 清除评论列表缓存
-            commentCacheService.cleanCacheAfterCommentReview(comment.getArticleId());
+            // 清理文章评论缓存
+            cacheClearService.clearArticleCommentCache(comment.getArticleId());
 
             return true;
         } catch (Exception e) {
@@ -426,7 +434,8 @@ public class CommentServiceImpl implements CommentService {
         }
 
         // 清除评论列表缓存
-        commentCacheService.cleanCacheAfterCommentTop(comment.getArticleId());
+        // 清理文章评论缓存
+        cacheClearService.clearArticleCommentCache(comment.getArticleId());
 
         return true;
 

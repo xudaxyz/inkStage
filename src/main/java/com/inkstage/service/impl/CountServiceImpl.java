@@ -1,16 +1,14 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.enums.CountType;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.CountService;
-import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * 文章计数服务实现类
@@ -100,9 +98,6 @@ public class CountServiceImpl implements CountService {
         // 由于count有正负之分, 此直接使用increment
         redisUtil.increment(key, count);
 
-        // 设置过期时间为1小时
-        redisUtil.expire(key, 1, TimeUnit.HOURS);
-
         // 异步更新到数据库
         syncArticleCount(articleId, countType, count);
     }
@@ -124,8 +119,8 @@ public class CountServiceImpl implements CountService {
                 case ARTICLE_SHARE_COUNT -> articleMapper.getShareCount(articleId);
                 default -> throw new IllegalArgumentException("未知的计数类型: " + countType);
             };
-            // 缓存到Redis
-            redisUtil.set(key, count, 30, TimeUnit.MINUTES);
+            // 缓存到Redis（过期时间由RedisConfig统一配置）
+            redisUtil.set(key, count);
         }
         return count;
     }

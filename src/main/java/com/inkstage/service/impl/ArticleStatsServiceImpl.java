@@ -9,8 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.concurrent.TimeUnit;
-
 /**
  * 文章统计服务实现类
  */
@@ -30,9 +28,6 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
             // 先更新Redis中的计数（使用Redis的原子操作）
             String cacheKey = RedisKeyConstants.buildArticleCountCacheKey(articleId, "read");
             redisUtil.increment(cacheKey, count);
-
-            // 设置过期时间为1小时
-            redisUtil.expire(cacheKey, 1, TimeUnit.HOURS);
 
             // 异步更新数据库
             syncArticleReadCount(articleId, count);

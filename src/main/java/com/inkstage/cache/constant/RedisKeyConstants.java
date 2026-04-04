@@ -86,6 +86,12 @@ public class RedisKeyConstants {
     // 评论回复前缀
     public static final String COMMENT_REPLY_PREFIX = "comment:reply:";
 
+    // 关注前缀
+    public static final String FOLLOW_PREFIX = "follow:";
+
+    // 阅读历史前缀
+    public static final String READING_HISTORY_PREFIX = "reading:history:";
+
     // 文章详情前缀
     public static final String ARTICLE_DETAIL_PREFIX = "article:detail:";
 
@@ -138,6 +144,14 @@ public class RedisKeyConstants {
     public static final String CACHE_USER_ROLES = "userRoles";
     public static final String CACHE_ROLES = "roles";
     public static final String CACHE_TAGS = "tags";
+
+    // RedisUtil使用的缓存名称
+    public static final String CACHE_ARTICLE_COUNT = "article:count";
+    public static final String CACHE_NOTIFICATION_UNREAD = "notification:unread";
+    public static final String CACHE_NOTIFICATION_RECENT = "notification:recent";
+    public static final String CACHE_VERIFY_CODE = "verify:code";
+    public static final String CACHE_LOGIN_ATTEMPT = "login:attempt";
+    public static final String CACHE_LOGIN_LOCK = "login:lock";
 
     // 版本号前缀
     public static final String VERSION_PREFIX = "v:";

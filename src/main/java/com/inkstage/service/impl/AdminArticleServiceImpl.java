@@ -1,6 +1,7 @@
 package com.inkstage.service.impl;
 
 
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.admin.AdminArticleUpdateDTO;
@@ -12,7 +13,6 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.AdminArticleService;
-import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
@@ -39,7 +39,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final FileService fileService;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
-    private final ArticleCacheService articleCacheService;
+    private final CacheClearService cacheClearService;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -77,7 +77,11 @@ public class AdminArticleServiceImpl implements AdminArticleService {
      * 清理文章相关缓存（管理员操作后）
      */
     private void clearCacheAfterAdminOperation(Long articleId) {
-        articleCacheService.cleanCacheAfterAdminOperation(articleId);
+        // 清理文章详情、列表、热门、搜索缓存
+        cacheClearService.clearArticleDetailCache(articleId);
+        cacheClearService.clearArticleListCache();
+        cacheClearService.clearHotArticleCache();
+        cacheClearService.clearArticleSearchCache();
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.service.ArticleCacheService;
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
@@ -43,8 +43,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CategoryService categoryService;
-    private final ArticleCacheService articleCacheService;
     private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -98,7 +98,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
 
             // 清理相关缓存
-            articleCacheService.cleanCacheAfterArticleCreate(article.getId(), currentUser.getId());
+            cacheClearService.cleanCacheAfterArticleCreate(article.getId(), currentUser.getId());
 
             return article.getId();
         } catch (Exception e) {
@@ -186,8 +186,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     asyncArticleProcessService.processArticleMarkdown(articleId, content);
                 }
 
-                // 清理相关缓存
-                articleCacheService.cleanCacheAfterArticleUpdate(articleId, currentUser.getId());
+                // 清理文章详情、列表、搜索缓存
+                cacheClearService.clearArticleDetailCache(articleId);
+                cacheClearService.clearArticleListCache();
+                cacheClearService.clearArticleSearchCache();
 
                 log.info("文章更新成功, 文章ID: {}, 用户ID: {}", articleId, currentUser.getId());
             } else {
@@ -232,8 +234,13 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     }
                 }
 
-                // 清理相关缓存
-                articleCacheService.cleanCacheAfterArticleDelete(articleId, currentUser.getId());
+                // 清理所有相关缓存
+                cacheClearService.clearArticleDetailCache(articleId);
+                cacheClearService.clearArticleListCache();
+                cacheClearService.clearHotArticleCache();
+                cacheClearService.clearLatestArticleCache();
+                cacheClearService.clearUserArticleListCache(currentUser.getId());
+                cacheClearService.clearArticleSearchCache();
             }
             log.info("删除文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
             return success;
@@ -275,8 +282,13 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     }
                 }
 
-                // 清理相关缓存
-                articleCacheService.cleanCacheAfterArticleDelete(articleId, currentUserId);
+                // 清理所有相关缓存
+                cacheClearService.clearUserArticleListCache(currentUserId);
+                cacheClearService.clearArticleDetailCache(articleId);
+                cacheClearService.clearArticleListCache();
+                cacheClearService.clearLatestArticleCache();
+                cacheClearService.clearHotArticleCache();
+                cacheClearService.clearArticleSearchCache();
             }
             log.info("彻底删除文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
             return success;

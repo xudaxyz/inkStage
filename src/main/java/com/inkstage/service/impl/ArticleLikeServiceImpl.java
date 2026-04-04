@@ -8,6 +8,7 @@ import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
@@ -30,10 +31,11 @@ import java.util.Map;
 public class ArticleLikeServiceImpl implements ArticleLikeService {
 
     private final ArticleLikeMapper articleLikeMapper;
+    private final ArticleMapper articleMapper;
     private final CountService countService;
     private final NotificationService notificationService;
-    private final ArticleMapper articleMapper;
     private final InteractionCacheService interactionCacheService;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional
@@ -79,7 +81,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             }
 
             // 清理点赞状态缓存
-            interactionCacheService.clearLikeStatusCache(articleId, userId);
+            cacheClearService.clearArticleLikeCache(articleId, userId);
             log.info("点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }
@@ -106,7 +108,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
             // 减少点赞数
             countService.updateArticleLikeCount(articleId, -1);
             // 清理点赞状态缓存
-            interactionCacheService.clearLikeStatusCache(articleId, userId);
+            cacheClearService.clearArticleLikeCache(articleId, userId);
             log.info("取消点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }

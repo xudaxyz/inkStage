@@ -1,18 +1,17 @@
 package com.inkstage.cache.service.impl;
 
 import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
-import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -51,12 +50,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return articleDetailVO;
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_DETAIL, key = "#id")
-    public void clearArticleDetailCache(Long id) {
-        log.info("清理文章详情缓存成功, id: {}", id);
-    }
-
     // ==================== 文章列表缓存 ====================
 
     @Override
@@ -81,12 +74,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return PageResult.build(articleList, total, pageNum, pageSize);
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_LIST, allEntries = true)
-    public void clearArticleListCache() {
-        log.info("清理文章列表缓存成功");
-    }
-
     // ==================== 热门文章缓存 ====================
 
     @Override
@@ -101,12 +88,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return hotArticles;
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_HOT, allEntries = true)
-    public void clearHotArticlesCache() {
-        log.info("清理热门文章缓存成功");
-    }
-
     // ==================== 最新文章缓存 ====================
 
     @Override
@@ -119,12 +100,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return latestArticles;
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_LATEST, allEntries = true)
-    public void clearLatestArticlesCache() {
-        log.info("清理最新文章缓存成功");
-    }
-
     // ==================== 轮播图文章缓存 ====================
 
     @Override
@@ -135,12 +110,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         log.info("获取轮播图文章成功, limit: {}", limit);
         return bannerArticles;
-    }
-
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_BANNER, allEntries = true)
-    public void clearBannerArticlesCache() {
-        log.info("清理轮播图文章缓存成功");
     }
 
     // ==================== 用户文章缓存 ====================
@@ -160,12 +129,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         return PageResult.build(articleList, total, pageNum, pageSize);
     }
 
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_USER, allEntries = true)
-    public void clearUserArticlesCache() {
-        log.info("清理用户文章缓存成功");
-    }
-
     // ==================== 作者相关文章缓存 ====================
 
     @Override
@@ -178,12 +141,6 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         log.debug("从数据库获取作者相关文章, userId: {}, limit: {}", userId, limit);
         return relatedArticles;
-    }
-
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_USER_RELATED, allEntries = true)
-    public void clearUserRelatedArticlesCache() {
-        log.info("清理作者相关文章缓存成功");
     }
 
     // ==================== 搜索缓存 ====================
@@ -201,87 +158,5 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         log.info("搜索文章成功, 关键词: {}, 总数: {}", keyword, total);
         return PageResult.build(articleList, total, pageNum, pageSize);
-    }
-
-    @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_ARTICLE_SEARCH, allEntries = true)
-    public void clearSearchArticlesCache() {
-        log.info("清理搜索文章缓存成功");
-    }
-
-    // ==================== 全局缓存操作 ====================
-
-    @Override
-    @CacheEvict(value = {
-            RedisKeyConstants.CACHE_ARTICLE_LIST,
-            RedisKeyConstants.CACHE_ARTICLE_DETAIL,
-            RedisKeyConstants.CACHE_ARTICLE_HOT,
-            RedisKeyConstants.CACHE_ARTICLE_LATEST,
-            RedisKeyConstants.CACHE_ARTICLE_BANNER,
-            RedisKeyConstants.CACHE_ARTICLE_USER,
-            RedisKeyConstants.CACHE_ARTICLE_USER_RELATED,
-            RedisKeyConstants.CACHE_ARTICLE_MY,
-            RedisKeyConstants.CACHE_ARTICLE_SEARCH
-    }, allEntries = true)
-    public void clearAllArticleCache() {
-        log.info("清理所有文章缓存成功");
-    }
-
-    // ==================== 场景化缓存清理实现 ====================
-
-    @Override
-    public void cleanCacheAfterArticleCreate(Long articleId, Long userId) {
-        try {
-            // 创建文章后清理：最新文章、用户文章、搜索缓存
-            clearLatestArticlesCache();
-            clearUserArticlesCache();
-            clearSearchArticlesCache();
-            log.info("文章创建后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("文章创建后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterArticleUpdate(Long articleId, Long userId) {
-        try {
-            // 更新文章后清理：文章详情、列表、搜索缓存
-            clearArticleDetailCache(articleId);
-            clearArticleListCache();
-            clearSearchArticlesCache();
-            log.info("文章更新后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("文章更新后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterArticleDelete(Long articleId, Long userId) {
-        try {
-            // 删除文章后清理：所有相关缓存
-            clearArticleDetailCache(articleId);
-            clearArticleListCache();
-            clearHotArticlesCache();
-            clearLatestArticlesCache();
-            clearUserArticlesCache();
-            clearSearchArticlesCache();
-            log.info("文章删除后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("文章删除后清理缓存失败, 文章ID: {}", articleId, e);
-        }
-    }
-
-    @Override
-    public void cleanCacheAfterAdminOperation(Long articleId) {
-        try {
-            // 管理员操作后清理：文章详情、列表、热门、搜索缓存
-            clearArticleDetailCache(articleId);
-            clearArticleListCache();
-            clearHotArticlesCache();
-            clearSearchArticlesCache();
-            log.info("管理员操作后清理缓存成功, 文章ID: {}", articleId);
-        } catch (Exception e) {
-            log.error("管理员操作后清理缓存失败, 文章ID: {}", articleId, e);
-        }
     }
 }

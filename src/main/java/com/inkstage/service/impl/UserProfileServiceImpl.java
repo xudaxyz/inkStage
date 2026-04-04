@@ -1,12 +1,12 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.entity.model.User;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.cache.service.UserCacheService;
 import com.inkstage.service.UserProfileService;
-import com.inkstage.cache.utils.RedisCacheManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -22,7 +22,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     private final UserMapper userMapper;
     private final FileService fileService;
     private final UserCacheService userCacheService;
-    private final RedisCacheManager cacheManager;
+    private final CacheClearService cacheClearService;
 
     @Override
     public User getUserById(Long id) {
@@ -69,11 +69,11 @@ public class UserProfileServiceImpl implements UserProfileService {
             userCacheService.updateUserCache(updatedUser);
             // 清除文章列表相关缓存，因为文章列表包含用户信息
             if (user.getAvatar() != null) {
-                cacheManager.clearArticleListCache();
-                cacheManager.clearHotArticleCache();
-                cacheManager.clearLatestArticleCache();
-                cacheManager.clearBannerArticleCache();
-                cacheManager.clearUserArticleCache(user.getId());
+                cacheClearService.clearArticleListCache();
+                cacheClearService.clearHotArticleCache();
+                cacheClearService.clearLatestArticleCache();
+                cacheClearService.clearBannerArticleCache();
+                cacheClearService.clearUserArticleCache(user.getId());
             }
             log.info("更新用户信息成功, 用户ID: {}", user.getId());
             return updatedUser;

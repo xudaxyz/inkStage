@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.CollectArticleDTO;
 import com.inkstage.entity.model.Article;
@@ -47,6 +48,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
     private final InteractionCacheService interactionCacheService;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional
@@ -113,7 +115,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
             }
 
             // 清理收藏状态缓存
-            interactionCacheService.clearCollectionStatusCache(collectArticleDTO.getArticleId(), userId);
+            cacheClearService.clearCollectionStatusCache(collectArticleDTO.getArticleId(), userId);
             log.info("收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", collectArticleDTO.getArticleId(), userId, folderId);
             return true;
         }
@@ -149,7 +151,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 减少数量: {}", folderId, result);
             }
             // 清理收藏状态缓存
-            interactionCacheService.clearCollectionStatusCache(articleId, userId);
+            cacheClearService.clearCollectionStatusCache(articleId, userId);
             log.info("取消收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", articleId, userId, folderId);
             return true;
         }
