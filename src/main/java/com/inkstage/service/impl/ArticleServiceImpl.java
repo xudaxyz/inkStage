@@ -9,7 +9,6 @@ import com.inkstage.dto.front.MyArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.*;
 import com.inkstage.utils.ArticleUtils;
-import com.inkstage.cache.utils.RedisCacheManager;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.MyArticleListVO;
@@ -28,32 +27,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ArticleServiceImpl implements ArticleService {
 
-    private final ArticleCreateService articleCreateService;
+    private final ArticleCommandService articleCommandService;
     private final ArticleQueryService articleQueryService;
     private final ArticleManagementService articleManagementService;
     private final ArticleStatsService articleStatsService;
-    private final RedisCacheManager cacheManager;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createArticle(ArticleCreateDTO articleCreateDTO) {
-        Long articleId = articleCreateService.createArticle(articleCreateDTO);
-        // 清除相关缓存
-        cacheManager.clearArticleListCache();
-        return articleId;
+        return articleCommandService.createArticle(articleCreateDTO);
     }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long saveDraft(Long id, ArticleCreateDTO dto) {
-        return articleCreateService.saveDraft(id, dto);
+        return articleCommandService.saveDraft(id, dto);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteArticle(Long id) {
-        return articleManagementService.deleteArticle(id);
+        return articleCommandService.deleteArticle(id);
     }
 
     @Override
@@ -70,7 +64,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO) {
-        return articleCreateService.updateArticle(articleId, articleCreateDTO);
+        return articleCommandService.updateArticle(articleId, articleCreateDTO);
     }
 
     @Override
@@ -80,7 +74,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public boolean permanentDeleteArticle(Long id) {
-        return articleManagementService.permanentDeleteArticle(id);
+        return articleCommandService.permanentDeleteArticle(id);
     }
 
     @Override
@@ -135,4 +129,3 @@ public class ArticleServiceImpl implements ArticleService {
         return articleQueryService.searchArticles(keyword, sortBy, validatedParams[0], validatedParams[1]);
     }
 }
-

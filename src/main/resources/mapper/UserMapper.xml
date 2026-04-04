@@ -152,7 +152,7 @@
         <include refid="columns"/>
         FROM user
         WHERE deleted = 0
-        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
+        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
         <if test="keyword != null and keyword != ''">
             AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
         </if>
@@ -180,7 +180,7 @@
         FROM user
         WHERE deleted = 0
         AND status = 1 <!-- 正常状态 -->
-        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
+        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
         ORDER BY
             follower_count DESC,
             article_count DESC,
@@ -237,7 +237,7 @@
             #{id}
         </foreach>
         AND deleted = 0
-        AND (role_id IS NULL OR role_id = 2) <!-- 只包含普通用户 -->
+        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
     </select>
 
     <!-- 根据角色查询用户 -->

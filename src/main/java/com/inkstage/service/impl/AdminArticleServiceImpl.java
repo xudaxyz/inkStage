@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.utils.RedisUtil;
+
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.admin.AdminArticleUpdateDTO;
@@ -12,6 +12,7 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.AdminArticleService;
+import com.inkstage.service.ArticleCacheService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
@@ -38,7 +39,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final FileService fileService;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
-    private final RedisUtil redisUtil;
+    private final ArticleCacheService articleCacheService;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -73,26 +74,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     }
 
     /**
-     * 清理文章相关缓存
+     * 清理文章相关缓存（管理员操作后）
      */
-    private void clearArticleCache() {
-        try {
-            // 清理热门文章缓存
-            redisUtil.deletePattern("article:hot:*");
-            // 清理最新文章缓存
-            redisUtil.deletePattern("article:latest:*");
-            // 清理轮播图文章缓存
-            redisUtil.deletePattern("article:banner:*");
-            // 清理文章列表缓存
-            redisUtil.deletePattern("article:list:*");
-            // 清理用户文章缓存
-            redisUtil.deletePattern("article:user:*");
-            // 清理搜索缓存
-            redisUtil.deletePattern("article:search:*");
-            log.info("文章缓存清理成功");
-        } catch (Exception e) {
-            log.error("清理文章缓存失败", e);
-        }
+    private void clearCacheAfterAdminOperation(Long articleId) {
+        articleCacheService.cleanCacheAfterAdminOperation(articleId);
     }
 
     @Override
@@ -115,7 +100,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             }
 
             // 清理相关缓存
-            clearArticleCache();
+            clearCacheAfterAdminOperation(id);
 
             log.info("更新文章状态并发送通知成功, 文章ID: {}, 状态: {}", id, status.getDesc());
             return result > 0;
@@ -140,7 +125,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 发送文章审核通过通知
             notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_REVIEW_APPROVE, article);
             // 清理相关缓存
-            clearArticleCache();
+            clearCacheAfterAdminOperation(id);
 
             log.info("审核通过文章成功, 文章ID: {}", id);
             return true;
@@ -225,6 +210,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             ArticleUtils.checkOperationResult(result, id, "置顶文章");
             // 发送通知
             notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_TOP, article);
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
             log.info("置顶文章并发送通知成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -243,6 +231,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 更新置顶状态
             int result = articleMapper.updateTopStatus(id, com.inkstage.enums.article.TopStatus.NOT_TOP);
             ArticleUtils.checkOperationResult(result, id, "取消置顶文章");
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
             log.info("取消置顶文章成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -263,6 +254,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             ArticleUtils.checkOperationResult(result, id, "推荐文章");
             // 发送通知
             notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_RECOMMEND, article);
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
             log.info("推荐文章并发送通知成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -281,6 +275,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 更新推荐状态
             int result = articleMapper.updateRecommendStatus(id, com.inkstage.enums.article.RecommendStatus.NOT_RECOMMENDED);
             ArticleUtils.checkOperationResult(result, id, "取消推荐文章");
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
             log.info("取消推荐文章成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -330,6 +327,9 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 处理标签
             articleTagService.handleArticleTags(id, updateDTO.getTags());
 
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
             log.info("管理员更新文章成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -353,7 +353,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 发送通知
             notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_DELETE, article);
             // 清理相关缓存
-            clearArticleCache();
+            clearCacheAfterAdminOperation(id);
 
             log.info("管理员删除文章并发送通知成功, 文章ID: {}", id);
             return i > 0;
