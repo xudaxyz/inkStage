@@ -128,6 +128,20 @@ public class RedisConfig {
                 // 用户热门缓存：1小时
                 .withCacheConfiguration("user:hot", defaultConfig.entryTtl(
                         Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
+                // 关注相关缓存：30分钟
+                .withCacheConfiguration("follow:status", defaultConfig.entryTtl(
+                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
+                .withCacheConfiguration("follow:list", defaultConfig.entryTtl(
+                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
+                // 仪表盘统计缓存：5分钟
+                .withCacheConfiguration("dashboard", defaultConfig.entryTtl(
+                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
+                // 系统公告缓存：1小时
+                .withCacheConfiguration("announcement", defaultConfig.entryTtl(
+                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
+                // 阅读历史缓存：30分钟
+                .withCacheConfiguration("reading:history", defaultConfig.entryTtl(
+                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
                 .build();
     }
 

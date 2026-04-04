@@ -8,6 +8,8 @@ import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.FollowService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,12 +29,16 @@ public class FollowServiceImpl implements FollowService {
 
     /**
      * 关注用户
-     * @param followerId 关注者ID
+     *
+     * @param followerId  关注者ID
      * @param followingId 被关注者ID
      * @return 是否关注成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"follow:status", "follow:list"},
+            key = "#followerId + ':' + #followingId",
+            allEntries = true)
     public boolean followUser(Long followerId, Long followingId) {
         // 检查是否已经关注
         int followed = followMapper.checkFollowStatus(followerId, followingId);
@@ -73,12 +79,16 @@ public class FollowServiceImpl implements FollowService {
 
     /**
      * 取消关注用户
-     * @param followerId 关注者ID
+     *
+     * @param followerId  关注者ID
      * @param followingId 被关注者ID
      * @return 是否取消关注成功
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {"follow:status", "follow:list"},
+            key = "#followerId + ':' + #followingId",
+            allEntries = true)
     public boolean unfollowUser(Long followerId, Long followingId) {
         int result = followMapper.delete(followerId, followingId);
         if (result > 0) {
@@ -109,11 +119,15 @@ public class FollowServiceImpl implements FollowService {
 
     /**
      * 检查关注状态
-     * @param followerId 关注者ID
+     *
+     * @param followerId  关注者ID
      * @param followingId 被关注者ID
      * @return 是否已关注
      */
     @Override
+    @Cacheable(value = "follow:status",
+            key = "#followerId + ':' + #followingId",
+            unless = "#result == null")
     public boolean checkFollowStatus(Long followerId, Long followingId) {
         int result = followMapper.checkFollowStatus(followerId, followingId);
         return result > 0;
@@ -121,44 +135,60 @@ public class FollowServiceImpl implements FollowService {
 
     /**
      * 获取用户的关注列表
+     *
      * @param followerId 关注者ID
-     * @param offset 偏移量
-     * @param limit 限制数量
+     * @param offset     偏移量
+     * @param limit      限制数量
      * @return 关注的用户ID列表
      */
     @Override
+    @Cacheable(value = "follow:list",
+            key = "'following:' + #followerId + ':' + #offset + ':' + #limit",
+            unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowingList(Long followerId, Integer offset, Integer limit) {
         return followMapper.findFollowingIds(followerId, offset, limit);
     }
 
     /**
      * 获取用户的粉丝列表
+     *
      * @param followingId 被关注者ID
-     * @param offset 偏移量
-     * @param limit 限制数量
+     * @param offset      偏移量
+     * @param limit       限制数量
      * @return 粉丝ID列表
      */
     @Override
+    @Cacheable(value = "follow:list",
+            key = "'follower:' + #followingId + ':' + #offset + ':' + #limit",
+            unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowerList(Long followingId, Integer offset, Integer limit) {
         return followMapper.findFollowerIds(followingId, offset, limit);
     }
 
     /**
      * 获取用户的关注数
+     *
      * @param followerId 关注者ID
      * @return 关注数
      */
     @Override
+    @Cacheable(value = "follow:list",
+            key = "'following:count:' + #followerId",
+            unless = "#result == null")
     public long getFollowingCount(Long followerId) {
         return followMapper.countFollowing(followerId);
     }
 
     /**
      * 获取用户的粉丝数
+     *
      * @param followingId 被关注者ID
      * @return 粉丝数
      */
     @Override
+    @Cacheable(value = "follow:list",
+            key = "'follower:count:' + #followingId",
+            unless = "#result == null")
     public long getFollowerCount(Long followingId) {
         return followMapper.countFollowers(followingId);
     }

@@ -8,6 +8,8 @@ import com.inkstage.vo.admin.DashboardStatsVO;
 import com.inkstage.vo.admin.stat.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,9 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
     private final ArticleCollectionMapper articleCollectionMapper;
 
     @Override
+    @Cacheable(value = "dashboard",
+            key = "#limit",
+            unless = "#result == null")
     public DashboardStatsVO getDashboardStats(int limit) {
         DashboardStatsVO dashboardStatsVO = new DashboardStatsVO();
 
@@ -48,6 +53,7 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
 
     @Override
     @Transactional
+    @CacheEvict(value = "dashboard", allEntries = true)
     public boolean refreshDashboardStats() {
         try {
             calculateCoreStats();

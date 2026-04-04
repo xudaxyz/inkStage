@@ -9,6 +9,8 @@ import com.inkstage.service.SystemAnnouncementService;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +29,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean createAnnouncement(SystemAnnouncement announcement) {
         announcement.setCreateUserId(UserContext.getCurrentUserId());
         announcement.setUpdateUserId(UserContext.getCurrentUserId());
@@ -40,6 +43,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean updateAnnouncement(SystemAnnouncement announcement) {
         SystemAnnouncement existing = announcementMapper.selectById(announcement.getId());
         if (existing == null) {
@@ -54,19 +58,23 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean deleteAnnouncement(Long id) {
         return announcementMapper.deleteById(id) > 0;
     }
 
     @Override
+    @Cacheable(value = "announcement",
+            key = "#id",
+            unless = "#result == null")
     public SystemAnnouncement getAnnouncementById(Long id) {
         return announcementMapper.selectById(id);
     }
 
     @Override
     public PageResult<SystemAnnouncement> getAnnouncementPage(Integer pageNum, Integer pageSize,
-                                                             AnnouncementType type, StatusEnum status,
-                                                             String keyword) {
+                                                              AnnouncementType type, StatusEnum status,
+                                                              String keyword) {
         int offset = (pageNum - 1) * pageSize;
         List<SystemAnnouncement> list = announcementMapper.selectPage(offset, pageSize, type, status, keyword);
         long total = announcementMapper.count(type, status, keyword);
@@ -79,12 +87,16 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     }
 
     @Override
+    @Cacheable(value = "announcement",
+            key = "'published'",
+            unless = "#result == null or #result.isEmpty()")
     public List<SystemAnnouncement> getPublishedAnnouncements() {
         return announcementMapper.selectByStatus(StatusEnum.ENABLED);
     }
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean publishAnnouncement(Long id) {
         SystemAnnouncement announcement = new SystemAnnouncement();
         announcement.setId(id);
@@ -96,6 +108,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean expireAnnouncement(Long id) {
         SystemAnnouncement announcement = new SystemAnnouncement();
         announcement.setId(id);
@@ -107,6 +120,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     @Transactional
+    @CacheEvict(value = "announcement", allEntries = true)
     public boolean incrementReadCount(Long id) {
         return announcementMapper.incrementReadCount(id) > 0;
     }

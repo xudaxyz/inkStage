@@ -12,6 +12,8 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReadingHistoryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -31,6 +33,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     private final FileService fileService;
 
     @Override
+    @CacheEvict(value = "reading:history", allEntries = true)
     public boolean saveOrUpdateReadingHistory(ReadingHistoryDTO dto) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -69,6 +72,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
+    @Cacheable(value = "reading:history",
+            key = "#page + ':' + #size",
+            unless = "#result == null")
     public PageResult<ReadingHistoryVO> getReadingHistoryList(Integer page, Integer size) {
         return getReadingHistoryListWithDetails(page, size);
     }
@@ -109,6 +115,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
+    @CacheEvict(value = "reading:history", allEntries = true)
     public boolean deleteReadingHistory(Long articleId) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -126,6 +133,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
+    @CacheEvict(value = "reading:history", allEntries = true)
     public boolean clearReadingHistory() {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -143,6 +151,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
+    @Cacheable(value = "reading:history",
+            key = "'article:' + #articleId",
+            unless = "#result == null")
     public ReadingHistoryVO getReadingHistoryByArticleId(Long articleId) {
         try {
             Long userId = UserContext.getCurrentUserId();
