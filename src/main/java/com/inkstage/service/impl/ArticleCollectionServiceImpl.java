@@ -1,11 +1,11 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.dto.front.CollectArticleDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleCollection;
 import com.inkstage.entity.model.CollectionFolder;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
@@ -14,12 +14,11 @@ import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CollectionFolderMapper;
 import com.inkstage.service.ArticleCollectionService;
-import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.CollectionFolderService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
-import com.inkstage.cache.utils.RedisUtil;
+import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 文章收藏服务实现类
@@ -43,13 +41,12 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
     private final ArticleCollectionMapper articleCollectionMapper;
     private final CollectionFolderMapper collectionFolderMapper;
-    private final RedisUtil redisUtil;
     private final CountService countService;
     private final FileService fileService;
     private final CollectionFolderService collectionFolderService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
-    private final CacheClearService cacheClearService;
+    private final InteractionCacheService interactionCacheService;
 
     @Override
     @Transactional
@@ -57,9 +54,10 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         log.info("收藏文章, 文章ID: {}, 文件夹ID: {}, 文件夹名称: {}",
                 collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId(), collectArticleDTO.getFolderName());
 
-        Long userId = UserContext.getCurrentUser().getId();
+        User currentUser = UserContext.getCurrentUser();
+        Long userId = currentUser.getId();
         // 检查是否已收藏
-        if (isArticleCollected(collectArticleDTO.getArticleId())) {
+        if (interactionCacheService.isArticleCollected(collectArticleDTO.getArticleId(), userId)) {
             log.warn("用户已收藏该文章, 文章ID: {}, 用户ID: {}", collectArticleDTO.getArticleId(), userId);
             return false;
         }
@@ -94,12 +92,9 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 collectionFolderMapper.updateArticleCount(folderId, result);
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 增加数量: {}", folderId, result);
             }
-            // 缓存收藏状态
-            String collectKey = RedisKeyConstants.buildArticleCollectCacheKey(collectArticleDTO.getArticleId(), userId);
-            redisUtil.set(collectKey, true, 24, TimeUnit.HOURS);
 
             // 发送收藏通知
-            String currentUserNickname = UserContext.getCurrentUser().getNickname();
+            String currentUserNickname = currentUser.getNickname();
             // 从文章服务获取文章信息
             Article article = articleMapper.findById(collectArticleDTO.getArticleId());
             if (article != null) {
@@ -117,6 +112,8 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 }
             }
 
+            // 清理收藏状态缓存
+            interactionCacheService.clearCollectionStatusCache(collectArticleDTO.getArticleId(), userId);
             log.info("收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", collectArticleDTO.getArticleId(), userId, folderId);
             return true;
         }
@@ -131,7 +128,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         Long userId = UserContext.getCurrentUser().getId();
 
         // 检查是否已收藏
-        if (!isArticleCollected(articleId)) {
+        if (!interactionCacheService.isArticleCollected(articleId, userId)) {
             log.warn("用户ID{} 未收藏该文章 {}", articleId, userId);
             return false;
         }
@@ -151,8 +148,8 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
                 collectionFolderMapper.updateArticleCount(folderId, -1);
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 减少数量: {}", folderId, result);
             }
-            // 删除缓存
-            cacheClearService.clearArticleCollectCache(articleId, userId);
+            // 清理收藏状态缓存
+            interactionCacheService.clearCollectionStatusCache(articleId, userId);
             log.info("取消收藏成功, 文章ID: {}, 用户ID: {}, 文件夹ID: {}", articleId, userId, folderId);
             return true;
         }
@@ -162,19 +159,8 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     @Override
     public boolean isArticleCollected(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
-        // 先从缓存获取
-        String collectKey = RedisKeyConstants.buildArticleCollectCacheKey(articleId, userId);
-        Boolean isCollected = redisUtil.get(collectKey, Boolean.class);
-        if (isCollected != null) {
-            return isCollected;
-        }
-
-        // 从数据库查询
-        boolean result = articleCollectionMapper.findByArticleIdAndUserId(articleId, userId) != null;
-
-        // 更新缓存
-        redisUtil.set(collectKey, result, 24, TimeUnit.HOURS);
-        return result;
+        // 使用缓存服务查询收藏状态
+        return interactionCacheService.isArticleCollected(articleId, userId);
     }
 
     @Override
@@ -241,7 +227,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         Long userId = UserContext.getCurrentUser().getId();
 
         // 检查是否已收藏
-        if (!isArticleCollected(articleId)) {
+        if (!interactionCacheService.isArticleCollected(articleId, userId)) {
             log.warn("用户未收藏该文章, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;
         }
@@ -268,13 +254,13 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         int updateResult = articleCollectionMapper.update(collection);
 
         if (updateResult > 0) {
-            // 更新源文件夹文章数量（减少）
+            // 更新源文件夹文章数量(减少)
             if (sourceFolderId != null && sourceFolderId > 0) {
                 collectionFolderMapper.updateArticleCount(sourceFolderId, -1);
                 log.info("更新源收藏文件夹文章数量, 文件夹ID: {}, 减少数量: 1", sourceFolderId);
             }
 
-            // 更新目标文件夹文章数量（增加）
+            // 更新目标文件夹文章数量(增加)
             if (targetFolderId > 0) {
                 collectionFolderMapper.updateArticleCount(targetFolderId, 1);
                 log.info("更新目标收藏文件夹文章数量, 文件夹ID: {}, 增加数量: 1", targetFolderId);

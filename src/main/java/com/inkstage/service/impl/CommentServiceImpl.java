@@ -1,9 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
-import com.inkstage.cache.utils.CacheKeyGenerator;
 import com.inkstage.cache.utils.RedisCacheManager;
-import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
@@ -12,11 +9,11 @@ import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Comment;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.ReviewStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.enums.ReviewStatus;
-import com.inkstage.enums.article.TopStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CommentMapper;
@@ -29,16 +26,16 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 评论服务实现类
@@ -50,13 +47,15 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
     private final FileService fileService;
-    private final RedisUtil redisUtil;
     private final CountService countService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
     private final RedisCacheManager cacheManager;
 
     @Override
+    @Cacheable(value = "comment:list",
+            key = "#queryDTO.articleId + ':' + #queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.sortBy ?: 'default') + ':' + (#queryDTO.maxReplies ?: 0) + ':' + (#root.target.getCommentVersion(#queryDTO.articleId))",
+            unless = "#result == null")
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
         if (queryDTO == null || queryDTO.getArticleId() == null || queryDTO.getPageNum() == null || queryDTO.getPageSize() == null) {
             log.warn("获取评论参数不完整, queryDTO: {}", queryDTO);
@@ -65,28 +64,7 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("获取文章评论 {}", queryDTO);
 
-        // 获取文章的最新评论版本号
-        Integer maxVersion = commentMapper.findMaxCommentVersionByArticleId(queryDTO.getArticleId());
-        int commentVersion = maxVersion != null ? maxVersion : 1;
-
-        // 生成缓存键
-        String cacheKey = CacheKeyGenerator.generateCommentListKey(
-                queryDTO.getArticleId(),
-                queryDTO.getPageNum(),
-                queryDTO.getPageSize(),
-                queryDTO.getSortBy(),
-                queryDTO.getMaxReplies(),
-                commentVersion
-        );
-
         try {
-            // 尝试从缓存获取
-            PageResult<ArticleCommentVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
-            });
-            if (pageResult != null) {
-                return pageResult;
-            }
-
             int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
             queryDTO.setOffset(offset);
             // 查询评论列表
@@ -103,20 +81,25 @@ public class CommentServiceImpl implements CommentService {
 
             // 确保评论图片的URL完整
             fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
-            pageResult = PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
 
-            // 更新缓存
-            redisUtil.set(cacheKey, pageResult, 5, TimeUnit.MINUTES);
-
-            return pageResult;
+            return PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
         } catch (Exception e) {
             log.error("获取评论列表失败, 文章ID: {}", queryDTO.getArticleId(), e);
             return null;
         }
     }
 
+    /**
+     * 获取评论版本号
+     */
+    private int getCommentVersion(Long articleId) {
+        Integer maxVersion = commentMapper.findMaxCommentVersionByArticleId(articleId);
+        return maxVersion != null ? maxVersion : 1;
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean createComment(CommentDTO commentDTO) {
         if (commentDTO == null || commentDTO.getArticleId() == null || commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             log.warn("创建评论参数不完整, commentDTO: {}", commentDTO);
@@ -158,14 +141,6 @@ public class CommentServiceImpl implements CommentService {
             }
 
             if (updated >= 1) {
-                // 清除评论列表缓存
-                cacheManager.clearArticleCommentCache(comment.getArticleId());
-
-                // 清除回复评论ID列表缓存
-                if (comment.getParentId() != null && comment.getParentId() > 0) {
-                    cacheManager.clearArticleCommentRepliesCache(comment.getParentId());
-                }
-
                 // 增加文章评论数
                 countService.updateArticleCommentCount(comment.getArticleId(), updated);
                 sendCommentNotification(comment, article, currentUser);
@@ -240,6 +215,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean updateComment(CommentDTO commentDTO) {
         if (commentDTO == null || commentDTO.getId() == null || commentDTO.getContent() == null || commentDTO.getContent().trim().isEmpty()) {
             log.warn("更新评论参数不完整, commentDTO: {}", commentDTO);
@@ -275,10 +251,7 @@ public class CommentServiceImpl implements CommentService {
             comment.setUpdateTime(LocalDateTime.now());
 
             boolean updated = commentMapper.updateById(comment) > 0;
-            if (updated) {
-                // 清除评论列表缓存
-                cacheManager.clearArticleCommentCache(comment.getArticleId());
-            } else {
+            if (!updated) {
                 log.warn("评论更新失败, 评论ID: {}", commentDTO.getId());
             }
             return updated;
@@ -290,6 +263,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "comment:list", allEntries = true)
     public boolean deleteComment(Long commentId) {
         if (commentId == null) {
             log.warn("删除评论参数为空");
@@ -334,9 +308,6 @@ public class CommentServiceImpl implements CommentService {
             if (updated >= 1) {
                 // 减少文章评论数
                 countService.updateArticleCommentCount(comment.getArticleId(), -updated);
-
-                // 清除评论列表缓存
-                cacheManager.clearArticleCommentCache(comment.getArticleId());
             }
             return updated >= 1;
         } catch (Exception e) {
@@ -424,8 +395,9 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 查找顶级评论
+     *
      * @param commentMap 评论Map
-     * @param commentId 评论ID
+     * @param commentId  评论ID
      * @return 顶级评论
      */
     private ArticleCommentVO findTopComment(Map<Long, ArticleCommentVO> commentMap, Long commentId) {
@@ -588,6 +560,9 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Cacheable(value = "comment:replies",
+            key = "#parentId + ':' + #pageNum + ':' + #pageSize + ':' + (#sortBy ?: 'default')",
+            unless = "#result == null")
     public PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy) {
         if (parentId == null || pageNum == null || pageSize == null) {
             log.warn("获取子评论参数不完整, parentId: {}, pageNum: {}, pageSize: {}", parentId, pageNum, pageSize);
@@ -596,20 +571,7 @@ public class CommentServiceImpl implements CommentService {
 
         log.info("获取子评论列表, 父评论ID: {}, 页码: {}, 每页大小: {}, 排序方式: {}", parentId, pageNum, pageSize, sortBy);
 
-        // 生成缓存键
-        String cacheKey = RedisKeyConstants.buildCacheKey(
-                "comment:replies:",
-                parentId + ":" + pageNum + ":" + pageSize + ":" + sortBy
-        );
-
         try {
-            // 尝试从缓存获取
-            PageResult<ArticleCommentVO> pageResult = redisUtil.getWithType(cacheKey, new TypeReference<>() {
-            });
-            if (pageResult != null) {
-                return pageResult;
-            }
-
             // 计算偏移量
             int offset = (pageNum - 1) * pageSize;
 
@@ -626,12 +588,7 @@ public class CommentServiceImpl implements CommentService {
             Long total = commentMapper.countRepliesByParentId(parentId);
 
             // 构建分页结果
-            pageResult = PageResult.build(replies, total, pageNum, pageSize);
-
-            // 更新缓存
-            redisUtil.set(cacheKey, pageResult, 5, TimeUnit.MINUTES);
-
-            return pageResult;
+            return PageResult.build(replies, total, pageNum, pageSize);
         } catch (Exception e) {
             log.error("获取子评论列表失败, 父评论ID: {}", parentId, e);
             return null;

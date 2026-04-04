@@ -1,18 +1,22 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.enums.article.TopStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
-import com.inkstage.service.*;
+import com.inkstage.service.ArticleCommandService;
+import com.inkstage.service.ArticleTagService;
+import com.inkstage.service.CategoryService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.MarkdownUtils;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -39,8 +43,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CategoryService categoryService;
-    private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
     private final ArticleCacheService articleCacheService;
+    private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)

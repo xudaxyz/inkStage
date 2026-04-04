@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
 import com.inkstage.enums.common.DeleteStatus;
@@ -9,21 +9,17 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleLikeService;
-import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
-import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 文章点赞服务实现类
@@ -34,11 +30,10 @@ import java.util.concurrent.TimeUnit;
 public class ArticleLikeServiceImpl implements ArticleLikeService {
 
     private final ArticleLikeMapper articleLikeMapper;
-    private final RedisUtil redisUtil;
     private final CountService countService;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
-    private final CacheClearService cacheClearService;
+    private final InteractionCacheService interactionCacheService;
 
     @Override
     @Transactional
@@ -47,7 +42,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         log.info("点赞文章, 文章ID: {}, 用户ID: {}", articleId, userId);
 
         // 检查是否已点赞
-        if (isArticleLiked(articleId)) {
+        if (interactionCacheService.isArticleLiked(articleId, userId)) {
             log.warn("用户已点赞该文章, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;
         }
@@ -63,9 +58,6 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         if (result > 0) {
             // 增加点赞数
             countService.updateArticleLikeCount(articleId, 1);
-            // 缓存点赞状态
-            String likeKey = RedisKeyConstants.buildArticleLikeCacheKey(articleId, userId);
-            redisUtil.set(likeKey, true, 24, TimeUnit.HOURS);
 
             // 发送点赞通知
             String currentUserNickname = UserContext.getCurrentUser().getNickname();
@@ -86,6 +78,8 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
                 }
             }
 
+            // 清理点赞状态缓存
+            interactionCacheService.clearLikeStatusCache(articleId, userId);
             log.info("点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }
@@ -100,7 +94,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         log.info("取消点赞, 文章ID: {}, 用户ID: {}", articleId, userId);
 
         // 检查是否已点赞
-        if (!isArticleLiked(articleId)) {
+        if (!interactionCacheService.isArticleLiked(articleId, userId)) {
             log.warn("用户未点赞该文章, 文章ID: {}, 用户ID: {}", articleId, userId);
             return false;
         }
@@ -111,8 +105,8 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         if (result > 0) {
             // 减少点赞数
             countService.updateArticleLikeCount(articleId, -1);
-            // 删除缓存
-            cacheClearService.clearArticleLikeCache(articleId, userId);
+            // 清理点赞状态缓存
+            interactionCacheService.clearLikeStatusCache(articleId, userId);
             log.info("取消点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;
         }
@@ -122,20 +116,8 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     @Override
     public boolean isArticleLiked(Long articleId) {
         Long userId = UserContext.getCurrentUser().getId();
-        // 先从缓存获取
-        String likeKey = RedisKeyConstants.buildArticleLikeCacheKey(articleId, userId);
-        Boolean isLiked = redisUtil.getWithType(likeKey, new TypeReference<>() {
-        });
-        if (isLiked != null) {
-            return isLiked;
-        }
-
-        // 从数据库查询
-        boolean result = articleLikeMapper.findByArticleIdAndUserId(articleId, userId) != null;
-
-        // 更新缓存
-        redisUtil.set(likeKey, result, 24, TimeUnit.HOURS);
-        return result;
+        // 使用缓存服务查询点赞状态
+        return interactionCacheService.isArticleLiked(articleId, userId);
     }
 
 }

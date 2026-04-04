@@ -1,12 +1,12 @@
-package com.inkstage.service.impl;
+package com.inkstage.cache.service.impl;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
-import com.inkstage.service.ArticleCacheService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
+import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import lombok.RequiredArgsConstructor;

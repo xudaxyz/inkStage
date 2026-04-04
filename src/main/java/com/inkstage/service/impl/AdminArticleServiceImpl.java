@@ -12,7 +12,7 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.AdminArticleService;
-import com.inkstage.service.ArticleCacheService;
+import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
