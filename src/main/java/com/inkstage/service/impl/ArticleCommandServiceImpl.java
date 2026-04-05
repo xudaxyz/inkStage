@@ -383,6 +383,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setMetaDescription(articleCreateDTO.getMetaDescription());
         article.setMetaKeywords(articleCreateDTO.getMetaKeywords());
         article.setTop(TopStatus.NOT_TOP);
+        article.setVisible(articleCreateDTO.getVisible());
+        article.setAllowForward(articleCreateDTO.getAllowForward());
         article.setPublishTime(LocalDateTime.now());
         article.setCreateTime(LocalDateTime.now());
         article.setUpdateTime(LocalDateTime.now());
@@ -392,6 +394,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setCommentCount(0);
         article.setCollectionCount(0);
         article.setShareCount(0);
+        article.setArticleVersion(1);
         return article;
     }
 }

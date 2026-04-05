@@ -82,7 +82,7 @@ public class RedisConfig {
                 // 默认缓存过期时间：30分钟
                 .entryTtl(Duration.ofMinutes(30))
                 // 缓存键前缀：inkstage:, 避免与其他项目的缓存键冲突
-                .prefixCacheNameWith("inkstage:")
+                .computePrefixWith(cacheName -> "inkstage:" + cacheName + ":")
                 // 配置缓存键序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置缓存值序列化方式

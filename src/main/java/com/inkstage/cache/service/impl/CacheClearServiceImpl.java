@@ -348,6 +348,7 @@ public class CacheClearServiceImpl implements CacheClearService {
             clearLatestArticleCache();
             clearUserArticleListCache(userId);
             clearArticleSearchCache();
+            clearArticleListCache();
             log.info("文章创建后清理缓存成功, 文章ID: {}", articleId);
         } catch (Exception e) {
             log.error("文章创建后清理缓存失败, 文章ID: {}", articleId, e);
