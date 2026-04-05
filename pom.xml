@@ -180,6 +180,12 @@
             <artifactId>flexmark-all</artifactId>
             <version>${flexmark.version}</version>
         </dependency>
+        <!-- HanLP NLP库 -->
+        <dependency>
+            <groupId>com.hankcs</groupId>
+            <artifactId>hanlp</artifactId>
+            <version>portable-1.8.5</version>
+        </dependency>
     </dependencies>
 
     <build>

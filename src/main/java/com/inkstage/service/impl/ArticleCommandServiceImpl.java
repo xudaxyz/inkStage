@@ -18,6 +18,7 @@ import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.CategoryService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.MarkdownUtils;
+import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -371,7 +372,14 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setTitle(articleCreateDTO.getTitle());
         article.setContent(articleCreateDTO.getContent());
         article.setContentHtml(MarkdownUtils.markdownToHtml(articleCreateDTO.getContent()));
-        article.setSummary(articleCreateDTO.getSummary());
+
+        // 生成摘要
+        String summary = articleCreateDTO.getSummary();
+        if (summary == null || summary.trim().isEmpty()) {
+            summary = SummaryGenerator.generateSummary(articleCreateDTO.getContent());
+        }
+        article.setSummary(summary);
+
         article.setCoverImage(articleCreateDTO.getCoverImage());
         article.setCategoryId(articleCreateDTO.getCategoryId());
         article.setArticleStatus(articleCreateDTO.getStatus());

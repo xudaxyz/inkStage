@@ -5,6 +5,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.exception.BusinessException;
@@ -232,6 +233,8 @@ public class TagServiceImpl implements TagService {
             tag.setStatus(StatusEnum.ENABLED);
             tag.setArticleCount(1); // 新标签，文章数设为1
             tag.setUsageCount(1); // 使用次数设置为1
+            tag.setDeleted(DeleteStatus.NOT_DELETED); // 删除状态设置为未删除
+            tag.setCreateTime(LocalDateTime.now()); // 创建时间设置为当前时间
 
             // 设置当前用户ID
             User currentUser = UserContext.getCurrentUser();

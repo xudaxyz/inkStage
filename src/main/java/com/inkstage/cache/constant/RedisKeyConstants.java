@@ -132,7 +132,6 @@ public class RedisKeyConstants {
     public static final String CACHE_COLLECTION_STATUS = "collection:status";
     public static final String CACHE_LIKE_STATUS = "like:status";
     public static final String CACHE_ARTICLE_DETAIL = "article:detail";
-    public static final String CACHE_ARTICLE_LIST = "article:list";
     public static final String CACHE_ARTICLE_HOT = "article:hot";
     public static final String CACHE_ARTICLE_LATEST = "article:latest";
     public static final String CACHE_ARTICLE_BANNER = "article:banner";
