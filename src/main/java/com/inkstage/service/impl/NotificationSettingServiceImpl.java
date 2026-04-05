@@ -1,7 +1,9 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.dto.front.NotificationSettingDTO;
 import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.NotificationSettingMapper;
 import com.inkstage.service.NotificationSettingService;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +48,8 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
 
     @Override
     public boolean isNotificationEnabled(Long userId, NotificationType notificationType) {
-        return true;
-
+        Integer result = notificationSettingMapper.checkNotificationEnabled(userId, notificationType.getCode());
+        return result == 1;
     }
 
     @Override
@@ -72,4 +74,17 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
         setting.setEmailNotification(false);
         return setting;
     }
+
+    @Override
+    public boolean updateNotificationSetting(Long userId, NotificationSettingDTO notificationSettingDTO) {
+        try {
+            String notificationTypeName = notificationSettingDTO.getNotificationType().getName();
+            log.info("更新用户 {} 通知设置 {} 为: {}", userId, notificationTypeName, notificationSettingDTO.getNotificationValue());
+            return notificationSettingMapper.updateNotificationSetting(userId, notificationTypeName, notificationSettingDTO.getNotificationValue());
+        } catch (Exception e) {
+            log.error("更新用户通知设置失败 {}", userId, e);
+            throw new BusinessException("更新用户通知设置失败", e);
+        }
+    }
+
 }

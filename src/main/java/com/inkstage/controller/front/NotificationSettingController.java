@@ -1,6 +1,7 @@
 package com.inkstage.controller.front;
 
 import com.inkstage.common.Result;
+import com.inkstage.dto.front.NotificationSettingDTO;
 import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.service.NotificationSettingService;
 import com.inkstage.utils.UserContext;
@@ -48,4 +49,15 @@ public class NotificationSettingController {
         boolean result = notificationSettingService.saveNotificationSetting(defaultSetting);
         return Result.success(result);
     }
+
+    /**
+     * 更新单个通知设置
+     */
+    @PutMapping("/update")
+    public Result<Boolean> updateNotificationSetting(@RequestBody NotificationSettingDTO notificationSettingDTO) {
+        Long userId = UserContext.getCurrentUserId();
+        boolean result = notificationSettingService.updateNotificationSetting(userId, notificationSettingDTO);
+        return Result.success(result);
+    }
+
 }

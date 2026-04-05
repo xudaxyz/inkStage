@@ -1,5 +1,6 @@
 package com.inkstage.service;
 
+import com.inkstage.dto.front.NotificationSettingDTO;
 import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.enums.notification.NotificationType;
 
@@ -27,4 +28,9 @@ public interface NotificationSettingService {
      * 获取默认的通知设置
      */
     NotificationSetting getDefaultNotificationSetting(Long userId);
+
+    /**
+     * 更新单个通知设置
+     */
+    boolean updateNotificationSetting(Long userId, NotificationSettingDTO notificationSettingDTO);
 }
