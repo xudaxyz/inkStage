@@ -60,8 +60,8 @@
     <!-- 获取所有激活状态的标签 -->
     <select id="findActiveTags" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM tag
-        WHERE status = 1
-        ORDER BY id ASC
+        WHERE status = 1 AND deleted = 0
+        ORDER BY usage_count DESC
     </select>
 
     <!-- 根据文章ID获取标签 -->
@@ -84,12 +84,18 @@
 
     <!-- 更新标签 -->
     <update id="update" parameterType="com.inkstage.entity.model.Tag">
-        UPDATE tag SET
-            name = #{name},
-            slug = #{slug},
-            description = #{description},
-            status = #{status},
-            tag_version = #{tagVersion}
+        UPDATE tag
+        <set>
+        <if test="name != null">name = #{name},</if>
+        <if test="slug != null">slug = #{slug},</if>
+        <if test="description != null">description = #{description},</if>
+        <if test="status != null">status = #{status},</if>
+        <if test="articleCount != null">article_count = #{articleCount},</if>
+        <if test="usageCount != null">usage_count = #{usageCount},</if>
+        <if test="tagVersion != null">tag_version = #{tagVersion},</if>
+        <if test="updateTime != null">update_time = #{updateTime},</if>
+        <if test="deleted != null">deleted = #{deleted}</if>
+        </set>
         WHERE id = #{id}
     </update>
 

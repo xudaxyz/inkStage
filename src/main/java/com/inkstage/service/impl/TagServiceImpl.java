@@ -225,6 +225,8 @@ public class TagServiceImpl implements TagService {
                 log.info("标签已存在: {}", tag.getName());
                 // 标签已存在，更新文章数
                 existingTag.setArticleCount(existingTag.getArticleCount() + 1);
+                existingTag.setUsageCount(existingTag.getUsageCount() + 1);
+                existingTag.setUpdateTime(LocalDateTime.now());
                 tagMapper.update(existingTag);
                 return existingTag.getId();
             }
