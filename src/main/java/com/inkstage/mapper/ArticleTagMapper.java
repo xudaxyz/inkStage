@@ -23,9 +23,8 @@ public interface ArticleTagMapper {
      * 批量插入文章标签关联
      *
      * @param articleTags 文章标签关联列表
-     * @return 影响行数
      */
-    int batchInsert(List<ArticleTag> articleTags);
+    void batchInsert(List<ArticleTag> articleTags);
 
     /**
      * 删除文章的所有标签关联

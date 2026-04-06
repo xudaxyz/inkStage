@@ -14,7 +14,7 @@ import java.util.List;
 public interface TagMapper {
 
     // ==================== 查询（Read） ====================
-    
+
     /**
      * 获取所有标签
      *
@@ -56,8 +56,8 @@ public interface TagMapper {
     /**
      * 根据关键字分页获取标签
      *
-     * @param keyword 关键字
-     * @param offset 分页偏移量
+     * @param keyword  关键字
+     * @param offset   分页偏移量
      * @param pageSize 每页大小
      * @return 标签列表
      */
@@ -96,7 +96,7 @@ public interface TagMapper {
     Tag findBySlug(@Param("slug") String slug);
 
     // ==================== 新增（Create） ====================
-    
+
     /**
      * 插入标签
      *
@@ -106,9 +106,8 @@ public interface TagMapper {
     int insert(Tag tag);
 
 
-
     // ==================== 更新（Update） ====================
-    
+
     /**
      * 更新标签
      *
@@ -127,7 +126,7 @@ public interface TagMapper {
     int updateStatus(@Param("id") Long id, @Param("status") StatusEnum status);
 
     // ==================== 删除（Delete） ====================
-    
+
     /**
      * 根据ID删除标签
      *
@@ -137,9 +136,8 @@ public interface TagMapper {
     int deleteById(Long id);
 
 
-
     // ==================== 统计（Count） ====================
-    
+
     /**
      * 根据关键字统计标签总数
      *
@@ -147,7 +145,7 @@ public interface TagMapper {
      * @return 总数
      */
     long countByKeyword(@Param("keyword") String keyword);
-    
+
     /**
      * 根据标签ID获取使用该标签的所有用户ID
      *
@@ -169,5 +167,17 @@ public interface TagMapper {
      * @return 待审核标签数量
      */
     long countPendingReviews();
+
+    /**
+     * 更新标签统计数据
+     *
+     * @param tagId              标签ID
+     * @param articleCountChange 文章数量变化值
+     * @param usageCountChange   使用次数变化值
+     * @return 影响行数
+     */
+    int updateTagStats(@Param("tagId") Long tagId,
+                       @Param("articleCountChange") int articleCountChange,
+                       @Param("usageCountChange") int usageCountChange);
 
 }
