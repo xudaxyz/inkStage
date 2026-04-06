@@ -79,8 +79,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             User user = userMapper.findById(currentUser.getId());
             if (user != null) {
                 int articleCount = user.getArticleCount() != null ? user.getArticleCount() : 0;
-                user.setArticleCount(articleCount + 1);
-                userMapper.updateByPrimaryKeySelective(user);
+                log.info("更新用户文章数, 用户ID: {}, 原文章数: {}", currentUser.getId(), articleCount);
+                User updateUser = new User();
+                updateUser.setId(currentUser.getId());
+                updateUser.setArticleCount(articleCount + 1);
+                userMapper.updateByPrimaryKeySelective(updateUser);
             }
 
             // 对于大文章，异步处理Markdown转换
