@@ -71,12 +71,12 @@ spring:
 
 
 
-  # Mail配置
+  # Mail配置 - 需配置邮箱后才可使用邮箱服务
   mail:
-    host: smtp.163.com
+    host: smtp.gmail.com # 需手动设置mail配置并授权密码
     port: 465
-    username: inkstage@163.com
-    password: LRrqgV9VFpQ9sM9c # 授权密码
+    username: inkstage # 需手动设置mail配置并授权密码
+    password: inkstage # 需手动设置mail配置并授权密码
     default-encoding: UTF-8
     properties:
       mail:
