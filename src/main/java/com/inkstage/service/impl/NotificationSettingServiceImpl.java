@@ -49,7 +49,11 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
     @Override
     public boolean isNotificationEnabled(Long userId, NotificationType notificationType) {
         Integer result = notificationSettingMapper.checkNotificationEnabled(userId, notificationType.getCode());
-        return result == 1;
+        if (result == null) {
+            return false;
+        } else {
+            return result == 1;
+        }
     }
 
     @Override
