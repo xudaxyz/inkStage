@@ -104,9 +104,6 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_ADMIN,
-            key = "#queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.keyword ?: '') + ':' + (#queryDTO.status ?: 0)",
-            unless = "#result == null")
     public PageResult<ArticleCommentVO> getCommentsByPage(AdminCommentQueryDTO queryDTO) {
         try {
             // 计算偏移量
