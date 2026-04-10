@@ -1,136 +1,74 @@
 package com.inkstage.cache.constant;
 
+import java.time.Duration;
+
 /**
  * Redis键常量类
+ * 统一管理Redis缓存键和过期时间
  */
 public class RedisKeyConstants {
 
-    // 刷新令牌前缀
+    // ==================== 基础配置 ====================
+
+    /**
+     * 模块前缀
+     */
+    public static final String MODULE_PREFIX = "inkstage:";
+
+    /**
+     * 版本号前缀
+     */
+    public static final String VERSION_PREFIX = "v:";
+
+    // ==================== 前缀常量（全大写带下划线） ====================
+
+    // 认证相关
     public static final String REFRESH_TOKEN_PREFIX = "inkstage:refresh_token:";
-
-    // 用户刷新令牌前缀
     public static final String USER_REFRESH_TOKEN_PREFIX = "inkstage:user:refresh_tokens:";
-
-    // 刷新令牌黑名单前缀
-    public static final String REFRESH_TOKEN_BLACKLIST_PREFIX = "inkstage:refresh_token_blacklist:";
-
-    // 用户登录尝试次数前缀
+    public static final String REFRESH_TOKEN_BLACKLIST_PREFIX = "inkstage:refresh_token_black:";
     public static final String LOGIN_ATTEMPT_PREFIX = "inkstage:login:attempt:";
-
-    // 用户登录锁定前缀
     public static final String LOGIN_LOCK_PREFIX = "inkstage:login:lock:";
-
-    // 用户会话前缀
     public static final String USER_SESSION_PREFIX = "inkstage:user_session:";
-
-    // 验证码前缀
     public static final String VERIFICATION_CODE_PREFIX = "inkstage:verify:";
 
-    // 用户信息缓存前缀
-    public static final String USER_INFO_PREFIX = "inkstage:user:info:";
-
-    // 管理员信息缓存前缀
-    public static final String ADMIN_INFO_PREFIX = "inkstage:admin:info:";
-
-    // 权限缓存前缀
-    public static final String PERMISSION_PREFIX = "inkstage:permission:";
-
-    // 角色缓存前缀
-    public static final String ROLE_PREFIX = "inkstage:role:";
-
-    // 限流前缀
-    public static final String RATE_LIMIT_PREFIX = "inkstage:rate:";
-
-    // 分布式锁前缀
-    public static final String LOCK_PREFIX = "inkstage:lock:";
-
-    // 系统配置前缀
-    public static final String SYSTEM_CONFIG_PREFIX = "inkstage:sys_config:";
-
-    // 热点数据前缀
-    public static final String HOT_DATA_PREFIX = "inkstage:hot:";
-
-    // 通知未读计数
-    public static final String NOTIFICATION_UNREAD_COUNT = "inkstage:notify:unread:count:";
-
-    // 通知按分类未读计数
-    public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "inkstage:notify:unread:category:";
-
-    // 通知最近列表
-    public static final String NOTIFICATION_RECENT_LIST = "inkstage:notify:recent:list:";
-
-    // 用户前缀
+    // 用户相关
     public static final String USER_PREFIX = "inkstage:user:";
-
-    // 文章前缀
-    public static final String ARTICLE_PREFIX = "inkstage:article:";
-
-    // 文章列表前缀
-    public static final String ARTICLES_PREFIX = "inkstage:articles:";
-
-    // 文章热点前缀
-    public static final String ARTICLE_HOT_PREFIX = "inkstage:article:hot:";
-
-    // 文章计数前缀
-    public static final String ARTICLE_COUNT_PREFIX = "inkstage:article:";
-
-    // 分类前缀
-    public static final String CATEGORY_PREFIX = "inkstage:category:";
-
-    // 标签前缀
-    public static final String TAG_PREFIX = "inkstage:tag:";
-
-    // 评论前缀
-    public static final String COMMENT_PREFIX = "inkstage:comment:";
-
-    // 评论回复前缀
-    public static final String COMMENT_REPLY_PREFIX = "inkstage:comment:reply:";
-
-    // 关注前缀
-    public static final String FOLLOW_PREFIX = "inkstage:follow:";
-
-    // 阅读历史前缀
-    public static final String READING_HISTORY_PREFIX = "inkstage:reading:history:";
-
-    // 文章详情前缀
-    public static final String ARTICLE_DETAIL_PREFIX = "inkstage:article:detail:";
-
-    // 文章收藏前缀
-    public static final String ARTICLE_COLLECT_PREFIX = "inkstage:article:collect:";
-
-    // 文章点赞前缀
-    public static final String ARTICLE_LIKE_PREFIX = "inkstage:article:like:";
-
-    // 用户文章列表前缀
+    public static final String USER_INFO_PREFIX = "inkstage:user:info:";
+    public static final String ADMIN_INFO_PREFIX = "inkstage:admin:info:";
     public static final String USER_ARTICLE_LIST_PREFIX = "inkstage:user:articles:";
-
-    // 热门用户前缀
     public static final String USER_HOT_PREFIX = "inkstage:user:hot:";
 
-    // 最新文章前缀
+    // 文章相关
+    public static final String ARTICLE_PREFIX = "inkstage:article:";
+    public static final String ARTICLES_PREFIX = "inkstage:articles:";
+    public static final String ARTICLE_HOT_PREFIX = "inkstage:article:hot:";
+    public static final String ARTICLE_DETAIL_PREFIX = "inkstage:article:detail:";
+    public static final String ARTICLE_COLLECT_PREFIX = "inkstage:article:collect:";
+    public static final String ARTICLE_LIKE_PREFIX = "inkstage:article:like:";
     public static final String ARTICLE_LATEST_PREFIX = "inkstage:article:latest:";
-
-    // 轮播文章前缀
     public static final String ARTICLE_BANNER_PREFIX = "inkstage:article:banner:";
-
-    // 文章搜索前缀
     public static final String ARTICLE_SEARCH_PREFIX = "inkstage:article:search:";
 
-    // 我的文章列表前缀
-    public static final String ARTICLE_MY_PREFIX = "inkstage:cache:article:my:";
+    // 其他业务相关
+    public static final String CATEGORY_PREFIX = "inkstage:category:";
+    public static final String TAG_PREFIX = "inkstage:tag:";
+    public static final String COMMENT_LIST_PREFIX = "inkstage:comment:list:";
+    public static final String COMMENT_REPLY_PREFIX = "inkstage:comment:reply:";
+    public static final String FOLLOW_PREFIX = "inkstage:follow:";
+    public static final String READING_HISTORY_PREFIX = "inkstage:reading:history:";
+    public static final String PERMISSION_PREFIX = "inkstage:permission:";
+    public static final String ROLE_PREFIX = "inkstage:role:";
+    public static final String RATE_LIMIT_PREFIX = "inkstage:rate:";
+    public static final String LOCK_PREFIX = "inkstage:lock:";
+    public static final String SYSTEM_CONFIG_PREFIX = "inkstage:sys_config:";
+    public static final String HOT_DATA_PREFIX = "inkstage:hot:";
+    public static final String NOTIFICATION_UNREAD_COUNT = "inkstage:notify:unread:count:";
+    public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "inkstage:notify:unread:category:";
+    public static final String NOTIFICATION_RECENT_LIST = "inkstage:notify:recent:list:";
 
-    // @Cache注解使用的缓存名称
-    public static final String CACHE_DASHBOARD = "dashboard";
-    public static final String CACHE_FOLLOW_STATUS = "follow:status";
-    public static final String CACHE_FOLLOW_LIST = "follow:list";
-    public static final String CACHE_ANNOUNCEMENT = "announcement";
-    public static final String CACHE_READING_HISTORY = "reading:history";
-    public static final String CACHE_COMMENT_LIST = "comment:list";
-    public static final String CACHE_COMMENT_REPLIES = "comment:replies";
-    public static final String CACHE_COMMENT_ADMIN = "comment:admin";
-    public static final String CACHE_USER_HOT = "user:hot";
-    public static final String CACHE_COLLECTION_STATUS = "collection:status";
-    public static final String CACHE_LIKE_STATUS = "like:status";
+    // ==================== 缓存名称（小写带冒号） ====================
+
+    // 文章相关
     public static final String CACHE_ARTICLE_DETAIL = "article:detail";
     public static final String CACHE_ARTICLE_HOT = "article:hot";
     public static final String CACHE_ARTICLE_LATEST = "article:latest";
@@ -139,21 +77,73 @@ public class RedisKeyConstants {
     public static final String CACHE_ARTICLE_USER_RELATED = "article:user:related";
     public static final String CACHE_ARTICLE_SEARCH = "article:search";
     public static final String CACHE_ARTICLE_MY = "article:my";
-    public static final String CACHE_CATEGORIES = "categories";
+
+    // 用户相关
+    public static final String CACHE_USER_HOT = "user:hot";
     public static final String CACHE_USER_ROLES = "user:roles";
-    public static final String CACHE_ROLES = "roles";
+
+    // 其他业务
+    public static final String CACHE_DASHBOARD = "dashboard";
+    public static final String CACHE_FOLLOW_STATUS = "follow:status";
+    public static final String CACHE_FOLLOW_LIST = "follow:list";
+    public static final String CACHE_ANNOUNCEMENT = "announcement";
+    public static final String CACHE_READING_HISTORY = "reading:history";
+    public static final String CACHE_COMMENT_LIST = "comment:list";
+    public static final String CACHE_COMMENT_REPLIES = "comment:replies";
+    public static final String CACHE_COLLECTION_STATUS = "collection:status";
+    public static final String CACHE_LIKE_STATUS = "like:status";
+    public static final String CACHE_CATEGORIES = "categories";
     public static final String CACHE_TAGS = "tags";
+    public static final String CACHE_ROLES = "roles";
 
-    // RedisUtil使用的缓存名称
-    public static final String CACHE_ARTICLE_COUNT = "inkstage:article:count";
-    public static final String CACHE_NOTIFICATION_UNREAD = "inkstage:notification:unread";
-    public static final String CACHE_NOTIFICATION_RECENT = "inkstage:notification:recent";
-    public static final String CACHE_VERIFY_CODE = "inkstage:verify:code";
-    public static final String CACHE_LOGIN_ATTEMPT = "inkstage:login:attempt";
-    public static final String CACHE_LOGIN_LOCK = "inkstage:login:lock";
+    // RedisUtil使用的缓存
+    public static final String CACHE_ARTICLE_COUNT = "article:count";
+    public static final String CACHE_NOTIFICATION_UNREAD = "notification:unread";
+    public static final String CACHE_NOTIFICATION_RECENT = "notification:recent";
+    public static final String CACHE_VERIFY_CODE = "verify:code";
+    public static final String CACHE_LOGIN_ATTEMPT = "login:attempt";
+    public static final String CACHE_LOGIN_LOCK = "login:lock";
 
-    // 版本号前缀
-    public static final String VERSION_PREFIX = "v:";
+    // ==================== 过期时间常量 ====================
+
+    // 基础过期时间
+    public static final Duration DEFAULT_TTL = Duration.ofMinutes(30);
+    public static final Duration SHORT_TTL = Duration.ofMinutes(5);
+    public static final Duration MEDIUM_TTL = Duration.ofMinutes(15);
+    public static final Duration LONG_TTL = Duration.ofHours(1);
+    public static final Duration VERY_LONG_TTL = Duration.ofHours(2);
+    public static final Duration EXTREME_TTL = Duration.ofDays(7);
+
+    // 具体缓存过期时间
+    public static final Duration CACHE_ARTICLE_DETAIL_TTL = VERY_LONG_TTL;
+    public static final Duration CACHE_ARTICLE_HOT_TTL = MEDIUM_TTL;
+    public static final Duration CACHE_ARTICLE_LATEST_TTL = SHORT_TTL;
+    public static final Duration CACHE_ARTICLE_BANNER_TTL = LONG_TTL;
+    public static final Duration CACHE_ARTICLE_USER_TTL = VERY_LONG_TTL;
+    public static final Duration CACHE_ARTICLE_USER_RELATED_TTL = LONG_TTL;
+    public static final Duration CACHE_ARTICLE_SEARCH_TTL = LONG_TTL;
+    public static final Duration CACHE_ARTICLE_MY_TTL = LONG_TTL;
+    public static final Duration CACHE_COMMENT_LIST_TTL = DEFAULT_TTL;
+    public static final Duration CACHE_LIKE_STATUS_TTL = LONG_TTL;
+    public static final Duration CACHE_COLLECTION_STATUS_TTL = LONG_TTL;
+    public static final Duration CACHE_USER_HOT_TTL = LONG_TTL;
+    public static final Duration CACHE_FOLLOW_STATUS_TTL = DEFAULT_TTL;
+    public static final Duration CACHE_FOLLOW_LIST_TTL = DEFAULT_TTL;
+    public static final Duration CACHE_DASHBOARD_TTL = SHORT_TTL;
+    public static final Duration CACHE_ANNOUNCEMENT_TTL = LONG_TTL;
+    public static final Duration CACHE_READING_HISTORY_TTL = DEFAULT_TTL;
+    public static final Duration CACHE_CATEGORIES_TTL = LONG_TTL;
+    public static final Duration CACHE_TAGS_TTL = LONG_TTL;
+    public static final Duration CACHE_ROLES_TTL = EXTREME_TTL;
+    public static final Duration CACHE_USER_ROLES_TTL = Duration.ofDays(1);
+    public static final Duration CACHE_ARTICLE_COUNT_TTL = LONG_TTL;
+    public static final Duration CACHE_NOTIFICATION_UNREAD_TTL = DEFAULT_TTL;
+    public static final Duration CACHE_NOTIFICATION_RECENT_TTL = SHORT_TTL;
+    public static final Duration CACHE_VERIFY_CODE_TTL = SHORT_TTL;
+    public static final Duration CACHE_LOGIN_ATTEMPT_TTL = MEDIUM_TTL;
+    public static final Duration CACHE_LOGIN_LOCK_TTL = MEDIUM_TTL;
+
+    // ==================== 构建方法（动词+名词） ====================
 
     /**
      * 构建缓存键
@@ -173,7 +163,7 @@ public class RedisKeyConstants {
      * @return 完整的缓存键
      */
     public static String buildFullCacheKey(String key) {
-        return "inkstage:" + key;
+        return MODULE_PREFIX + key;
     }
 
     /**
@@ -213,6 +203,8 @@ public class RedisKeyConstants {
         return prefix + key + ":v_a" + articleVersion + "_u" + userVersion;
     }
 
+    // ==================== 用户相关 ====================
+
     /**
      * 构建用户键
      *
@@ -233,6 +225,8 @@ public class RedisKeyConstants {
         return VERSION_PREFIX + "user:" + userId;
     }
 
+    // ==================== 文章相关 ====================
+
     /**
      * 构建文章版本号键
      *
@@ -241,36 +235,6 @@ public class RedisKeyConstants {
      */
     public static String buildArticleVersionKey(Long articleId) {
         return VERSION_PREFIX + "article:" + articleId;
-    }
-
-    /**
-     * 构建分类版本号键
-     *
-     * @param categoryId 分类ID
-     * @return 分类版本号键
-     */
-    public static String buildCategoryVersionKey(Long categoryId) {
-        return VERSION_PREFIX + "category:" + categoryId;
-    }
-
-    /**
-     * 构建标签版本号键
-     *
-     * @param tagId 标签ID
-     * @return 标签版本号键
-     */
-    public static String buildTagVersionKey(Long tagId) {
-        return VERSION_PREFIX + "tag:" + tagId;
-    }
-
-    /**
-     * 构建评论版本号键
-     *
-     * @param commentId 评论ID
-     * @return 评论版本号键
-     */
-    public static String buildCommentVersionKey(Long commentId) {
-        return VERSION_PREFIX + "comment:" + commentId;
     }
 
     /**
@@ -313,7 +277,7 @@ public class RedisKeyConstants {
      * @return 文章计数缓存键
      */
     public static String buildArticleCountCacheKey(Long articleId, String countType) {
-        return buildCacheKey(ARTICLE_COUNT_PREFIX, articleId + ":" + countType);
+        return buildCacheKey(ARTICLE_PREFIX, articleId + ":" + countType);
     }
 
     /**
@@ -361,16 +325,6 @@ public class RedisKeyConstants {
     }
 
     /**
-     * 构建热门用户缓存键
-     *
-     * @param limit 数量限制
-     * @return 热门用户缓存键
-     */
-    public static String buildHotUserCacheKey(Integer limit) {
-        return buildCacheKey(USER_HOT_PREFIX, limit.toString());
-    }
-
-    /**
      * 构建最新文章缓存键
      *
      * @param limit 数量限制
@@ -388,6 +342,38 @@ public class RedisKeyConstants {
      */
     public static String buildBannerArticleCacheKey(Integer limit) {
         return buildCacheKey(ARTICLE_BANNER_PREFIX, limit.toString());
+    }
+
+    // ==================== 其他业务相关 ====================
+
+    /**
+     * 构建分类版本号键
+     *
+     * @param categoryId 分类ID
+     * @return 分类版本号键
+     */
+    public static String buildCategoryVersionKey(Long categoryId) {
+        return VERSION_PREFIX + "category:" + categoryId;
+    }
+
+    /**
+     * 构建标签版本号键
+     *
+     * @param tagId 标签ID
+     * @return 标签版本号键
+     */
+    public static String buildTagVersionKey(Long tagId) {
+        return VERSION_PREFIX + "tag:" + tagId;
+    }
+
+    /**
+     * 构建评论版本号键
+     *
+     * @param commentId 评论ID
+     * @return 评论版本号键
+     */
+    public static String buildCommentVersionKey(Long commentId) {
+        return VERSION_PREFIX + "comment:" + commentId;
     }
 
     /**

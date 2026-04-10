@@ -61,7 +61,7 @@
     <select id="findActiveCategories" resultMap="ResultMap">
         SELECT <include refid="baseColumns" /> FROM category
         WHERE status = 1
-        ORDER BY sort_order ASC, id ASC
+        ORDER BY article_count DESC, sort_order ASC, id ASC
     </select>
 
     <!-- 添加分类 -->

@@ -1,5 +1,6 @@
 package com.inkstage.config;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import io.lettuce.core.resource.ClientResources;
 import io.lettuce.core.resource.DefaultClientResources;
 import org.jetbrains.annotations.NotNull;
@@ -82,7 +83,7 @@ public class RedisConfig {
                 // 默认缓存过期时间：30分钟
                 .entryTtl(Duration.ofMinutes(30))
                 // 缓存键前缀：inkstage:, 避免与其他项目的缓存键冲突
-                .computePrefixWith(cacheName -> "inkstage:" + cacheName + ":")
+                .computePrefixWith(cacheName -> RedisKeyConstants.MODULE_PREFIX + cacheName + ":")
                 // 配置缓存键序列化方式
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(stringSerializer))
                 // 配置缓存值序列化方式
@@ -90,89 +91,92 @@ public class RedisConfig {
 
         // 为不同的缓存名称设置不同的过期时间
         // 策略：更新频率越高的缓存, 过期时间越短
-        // 添加随机偏移量(±5分钟)防止缓存雪崩
+        // 添加随机偏移量防止缓存雪崩
         return RedisCacheManager.builder(factory)
                 // 文章列表缓存：20分钟(实时性要求较高)
-                .withCacheConfiguration("article:list", defaultConfig.entryTtl(
+                .withCacheConfiguration(RedisKeyConstants.ARTICLES_PREFIX, defaultConfig.entryTtl(
                         Duration.ofMinutes(20).plusSeconds((long) (Math.random() * 600))))
-                // 文章详情缓存：2小时(更新频率低, 但访问量大)
-                .withCacheConfiguration("article:detail", defaultConfig.entryTtl(
-                        Duration.ofHours(2).plusSeconds((long) (Math.random() * 600))))
-                // 热门文章缓存：15分钟(更新频率较高)
-                .withCacheConfiguration("article:hot", defaultConfig.entryTtl(
-                        Duration.ofMinutes(15).plusSeconds((long) (Math.random() * 600))))
-                // 最新文章缓存：10分钟(更新频率最高)
-                .withCacheConfiguration("article:latest", defaultConfig.entryTtl(
-                        Duration.ofMinutes(10).plusSeconds((long) (Math.random() * 600))))
-                // 轮播图文章缓存：1小时(更新频率较低)
-                .withCacheConfiguration("article:banner", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 用户文章缓存：2小时(更新频率低)
-                .withCacheConfiguration("article:user", defaultConfig.entryTtl(
-                        Duration.ofHours(2).plusSeconds((long) (Math.random() * 600))))
-                // 作者相关文章缓存：1小时
-                .withCacheConfiguration("article:user:related", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 当前用户文章缓存：1小时(用户自己的文章更新频率较低)
-                .withCacheConfiguration("article:my", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 搜索文章缓存：1小时
-                .withCacheConfiguration("article:search", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 分类缓存：1小时
-                .withCacheConfiguration("category:active", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 标签缓存：1小时
-                .withCacheConfiguration("tag:active", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 用户热门缓存：1小时
-                .withCacheConfiguration("user:hot", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 关注相关缓存：30分钟
-                .withCacheConfiguration("follow:status", defaultConfig.entryTtl(
-                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
-                .withCacheConfiguration("follow:list", defaultConfig.entryTtl(
-                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
-                // 仪表盘统计缓存：5分钟
-                .withCacheConfiguration("dashboard", defaultConfig.entryTtl(
-                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
-                // 系统公告缓存：1小时
-                .withCacheConfiguration("announcement", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 阅读历史缓存：30分钟
-                .withCacheConfiguration("reading:history", defaultConfig.entryTtl(
-                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
-                // 分类缓存：1小时
-                .withCacheConfiguration("categories", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 标签缓存：1小时
-                .withCacheConfiguration("tags", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 角色缓存：7天(角色表基本不会变动)
-                .withCacheConfiguration("roles", defaultConfig.entryTtl(
-                        Duration.ofDays(7).plusSeconds((long) (Math.random() * 600))))
-                // 用户角色缓存：1天(依赖于角色数据, 变动也较少)
-                .withCacheConfiguration("user:roles", defaultConfig.entryTtl(
-                        Duration.ofDays(1).plusSeconds((long) (Math.random() * 600))))
+                // 文章详情缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_DETAIL, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_DETAIL_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 热门文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_HOT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_HOT_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 最新文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_LATEST, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_LATEST_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 轮播图文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_BANNER, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_BANNER_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 用户文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_USER, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_USER_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 作者相关文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_USER_RELATED, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_USER_RELATED_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 当前用户文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_MY, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_MY_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 文章评论缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COMMENT_LIST, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COMMENT_LIST_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 文章点赞缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_LIKE_STATUS, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_LIKE_STATUS_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 文章收藏缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLLECTION_STATUS, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLLECTION_STATUS_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 搜索文章缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_SEARCH, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_SEARCH_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 用户热门缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_USER_HOT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_USER_HOT_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 关注相关缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_FOLLOW_STATUS, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_FOLLOW_STATUS_TTL.plusSeconds((long) (Math.random() * 300))))
+                .withCacheConfiguration(RedisKeyConstants.CACHE_FOLLOW_LIST, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_FOLLOW_LIST_TTL.plusSeconds((long) (Math.random() * 300))))
+                // 仪表盘统计缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_DASHBOARD, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_DASHBOARD_TTL.plusSeconds((long) (Math.random() * 60))))
+                // 系统公告缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ANNOUNCEMENT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ANNOUNCEMENT_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 阅读历史缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_READING_HISTORY, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_READING_HISTORY_TTL.plusSeconds((long) (Math.random() * 300))))
+                // 分类缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_CATEGORIES, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_CATEGORIES_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 标签缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_TAGS, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_TAGS_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 角色缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ROLES, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ROLES_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 用户角色缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_USER_ROLES, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_USER_ROLES_TTL.plusSeconds((long) (Math.random() * 600))))
                 // RedisUtil使用的缓存配置
-                // 文章计数缓存：1小时
-                .withCacheConfiguration("article:count", defaultConfig.entryTtl(
-                        Duration.ofHours(1).plusSeconds((long) (Math.random() * 600))))
-                // 通知未读数缓存：30分钟
-                .withCacheConfiguration("notification:unread", defaultConfig.entryTtl(
-                        Duration.ofMinutes(30).plusSeconds((long) (Math.random() * 300))))
-                // 通知最近列表缓存：5分钟
-                .withCacheConfiguration("notification:recent", defaultConfig.entryTtl(
-                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
-                // 验证码缓存：5分钟
-                .withCacheConfiguration("verify:code", defaultConfig.entryTtl(
-                        Duration.ofMinutes(5).plusSeconds((long) (Math.random() * 60))))
-                // 登录尝试缓存：15分钟
-                .withCacheConfiguration("login:attempt", defaultConfig.entryTtl(
-                        Duration.ofMinutes(15).plusSeconds((long) (Math.random() * 60))))
-                // 登录锁定缓存：15分钟
-                .withCacheConfiguration("login:lock", defaultConfig.entryTtl(
-                        Duration.ofMinutes(15).plusSeconds((long) (Math.random() * 60))))
+                // 文章计数缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_COUNT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_ARTICLE_COUNT_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 通知未读数缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_NOTIFICATION_UNREAD, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_NOTIFICATION_UNREAD_TTL.plusSeconds((long) (Math.random() * 300))))
+                // 通知最近列表缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_NOTIFICATION_RECENT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_NOTIFICATION_RECENT_TTL.plusSeconds((long) (Math.random() * 60))))
+                // 验证码缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_VERIFY_CODE, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_VERIFY_CODE_TTL.plusSeconds((long) (Math.random() * 60))))
+                // 登录尝试缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_LOGIN_ATTEMPT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_LOGIN_ATTEMPT_TTL.plusSeconds((long) (Math.random() * 60))))
+                // 登录锁定缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_LOGIN_LOCK, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_LOGIN_LOCK_TTL.plusSeconds((long) (Math.random() * 60))))
                 .build();
     }
 

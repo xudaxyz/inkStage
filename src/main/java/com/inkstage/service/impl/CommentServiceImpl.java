@@ -114,7 +114,7 @@ public class CommentServiceImpl implements CommentService {
 
             if (updated >= 1) {
                 // 增加文章评论数
-                countService.updateArticleCommentCount(comment.getArticleId(), updated);
+                countService.updateArticleCommentCount(comment.getArticleId(), 1);
                 sendCommentNotification(comment, article, currentUser);
             }
 
@@ -292,7 +292,7 @@ public class CommentServiceImpl implements CommentService {
 
             if (updated >= 1) {
                 // 减少文章评论数
-                countService.updateArticleCommentCount(articleId, -updated);
+                countService.updateArticleCommentCount(articleId, -1);
             }
 
             // 清理文章评论缓存、父评论回复缓存

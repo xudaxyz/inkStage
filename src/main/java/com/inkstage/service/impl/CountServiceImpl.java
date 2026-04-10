@@ -130,11 +130,11 @@ public class CountServiceImpl implements CountService {
      */
     private String buildCountCacheKey(Long articleId, CountType countType) {
         String countTypeSuffix = switch (countType) {
-            case ARTICLE_READ_COUNT -> "read";
-            case ARTICLE_LIKE_COUNT -> "like";
-            case ARTICLE_COMMENT_COUNT -> "comment";
-            case ARTICLE_COLLECTION_COUNT -> "collect";
-            case ARTICLE_SHARE_COUNT -> "share";
+            case ARTICLE_READ_COUNT -> "read-count";
+            case ARTICLE_LIKE_COUNT -> "like-count";
+            case ARTICLE_COMMENT_COUNT -> "comment-count";
+            case ARTICLE_COLLECTION_COUNT -> "collect-count";
+            case ARTICLE_SHARE_COUNT -> "share-count";
             default -> countType.getType();
         };
         return RedisKeyConstants.buildArticleCountCacheKey(articleId, countTypeSuffix);

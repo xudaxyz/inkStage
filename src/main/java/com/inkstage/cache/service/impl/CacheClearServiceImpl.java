@@ -143,7 +143,7 @@ public class CacheClearServiceImpl implements CacheClearService {
         if (articleId == null) return;
         try {
             // 清除所有计数类型缓存
-            redisUtil.deletePattern(ARTICLE_COUNT_PREFIX + articleId + ":*");
+            redisUtil.deletePattern(ARTICLE_PREFIX + articleId + ":*");
             log.debug("清除文章计数缓存, 文章ID: {}", articleId);
         } catch (Exception e) {
             log.error("清除文章计数缓存失败, 文章ID: {}", articleId, e);
@@ -203,7 +203,7 @@ public class CacheClearServiceImpl implements CacheClearService {
     public void clearArticleCommentCache(Long articleId) {
         if (articleId == null) return;
         try {
-            redisUtil.deletePattern(COMMENT_PREFIX + articleId + ":*");
+            redisUtil.deletePattern(COMMENT_LIST_PREFIX + articleId + ":*");
             log.debug("清除文章评论列表缓存, 文章ID: {}", articleId);
         } catch (Exception e) {
             log.error("清除文章评论列表缓存失败, 文章ID: {}", articleId, e);
@@ -335,7 +335,7 @@ public class CacheClearServiceImpl implements CacheClearService {
     }
 
     @Override
-    @CacheEvict(value = USER_ARTICLE_LIST_PREFIX,
+    @CacheEvict(value = RedisKeyConstants.USER_ARTICLE_LIST_PREFIX,
             key = "#userId + ':*'")
     public void clearUserArticleCache(Long userId) {
         log.debug("清理用户文章相关缓存, 用户ID: {}", userId);

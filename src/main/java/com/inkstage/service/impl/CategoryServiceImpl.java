@@ -100,7 +100,7 @@ public class CategoryServiceImpl implements CategoryService {
                 category.setParentId(0L);
             }
             if (category.getSortOrder() == null) {
-                category.setSortOrder(0);
+                category.setSortOrder(100);
             }
             if (category.getArticleCount() == null) {
                 category.setArticleCount(0);

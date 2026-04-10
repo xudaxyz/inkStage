@@ -88,7 +88,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
         if (result > 0) {
             // 增加收藏数
-            countService.updateArticleCollectionCount(collectArticleDTO.getArticleId(), result);
+            countService.updateArticleCollectionCount(collectArticleDTO.getArticleId(), 1);
             // 更新收藏文件夹文章数量
             if (folderId != null && folderId > 0) {
                 collectionFolderMapper.updateArticleCount(folderId, result);
