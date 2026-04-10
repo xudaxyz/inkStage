@@ -94,7 +94,7 @@ public class RedisConfig {
         // 添加随机偏移量防止缓存雪崩
         return RedisCacheManager.builder(factory)
                 // 文章列表缓存：20分钟(实时性要求较高)
-                .withCacheConfiguration(RedisKeyConstants.ARTICLES_PREFIX, defaultConfig.entryTtl(
+                .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLES, defaultConfig.entryTtl(
                         Duration.ofMinutes(20).plusSeconds((long) (Math.random() * 600))))
                 // 文章详情缓存
                 .withCacheConfiguration(RedisKeyConstants.CACHE_ARTICLE_DETAIL, defaultConfig.entryTtl(

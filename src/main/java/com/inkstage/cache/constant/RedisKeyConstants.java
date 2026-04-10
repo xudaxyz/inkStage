@@ -69,6 +69,7 @@ public class RedisKeyConstants {
     // ==================== 缓存名称（小写带冒号） ====================
 
     // 文章相关
+    public static final String CACHE_ARTICLES = "articles";
     public static final String CACHE_ARTICLE_DETAIL = "article:detail";
     public static final String CACHE_ARTICLE_HOT = "article:hot";
     public static final String CACHE_ARTICLE_LATEST = "article:latest";
