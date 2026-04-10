@@ -53,7 +53,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     // ==================== 文章列表缓存 ====================
 
     @Override
-    @Cacheable(value = RedisKeyConstants.ARTICLES_PREFIX,
+    @Cacheable(value = RedisKeyConstants.CACHE_ARTICLES,
             key = "#pageNum + ':' + #pageSize + ':' + (#categoryId ?: 0) + ':' + (#tagId ?: 0)",
             unless = "#result == null")
     public PageResult<ArticleListVO> getArticles(int pageNum, int pageSize, Long categoryId, Long tagId) {

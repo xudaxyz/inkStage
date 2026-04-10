@@ -1,5 +1,6 @@
 package com.inkstage.cache.service.impl;
 
+import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.service.ArticleQueryService;
 import com.inkstage.service.UserStatsService;
 import lombok.RequiredArgsConstructor;
@@ -29,18 +30,21 @@ public class CacheWarmupService {
     public void warmupCache() {
         log.info("开始执行缓存预热");
         try {
+            // 预热首页推荐文章
+            warmupRecommendArticles();
+
             // 预热热门文章缓存
             warmupHotArticles();
-            
+
             // 预热最新文章缓存
             warmupLatestArticles();
-            
+
             // 预热轮播图文章缓存
             warmupBannerArticles();
-            
+
             // 预热热门用户缓存
             warmupHotUsers();
-            
+
             log.info("缓存预热完成");
         } catch (Exception e) {
             log.error("缓存预热失败", e);
@@ -70,6 +74,23 @@ public class CacheWarmupService {
             articleQueryService.getLatestArticles(10);
         } catch (Exception e) {
             log.error("预热最新文章缓存失败", e);
+        }
+    }
+
+    /**
+     * 预热最新文章缓存
+     */
+    private void warmupRecommendArticles() {
+        try {
+            log.info("预热首页推荐文章缓存");
+            ArticleQueryDTO queryDTO = new ArticleQueryDTO();
+            queryDTO.setPageNum(1);
+            queryDTO.setPageSize(15);
+            queryDTO.setCategoryId(0L);
+            queryDTO.setTagId(0L);
+            articleQueryService.getArticles(queryDTO);
+        } catch (Exception e) {
+            log.error("预热首页推荐文章缓存失败", e);
         }
     }
 
