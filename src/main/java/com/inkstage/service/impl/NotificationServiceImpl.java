@@ -110,11 +110,16 @@ public class NotificationServiceImpl implements NotificationService {
         Map<String, Object> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
         log.info("生成通知内容结果：{}", notificationContent);
 
-        // 构建通知对象
-        Notification notification = buildNotification(userId, notificationType, notificationContent);
+        if (notificationContent != null) {
+            // 构建通知对象
+            Notification notification = buildNotification(userId, notificationType, notificationContent);
 
-        // 发送通知
-        return sendNotification(notification);
+            // 发送通知
+            return sendNotification(notification);
+        }
+        // 通知内容为空, 返回false
+        return false;
+
     }
 
     @Override

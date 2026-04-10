@@ -26,13 +26,6 @@ public class NotificationTemplateServiceImpl implements NotificationTemplateServ
     @Override
     public Map<String, Object> generateNotificationContent(NotificationType notificationType, Map<String, Object> params) {
         params = adminNotificationTemplateService.renderTemplateByType(notificationType, NotificationChannel.SITE, params);
-        if (params == null) {
-            params = new HashMap<>();
-            params.put("title", "");
-            params.put("content", "");
-            params.put("actionUrl", "");
-            return params;
-        }
         return params;
     }
 
