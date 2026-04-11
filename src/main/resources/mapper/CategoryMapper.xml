@@ -37,7 +37,7 @@
                 name LIKE CONCAT('%', #{keyword}, '%') OR slug LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%')
             </if>
         </where>
-        ORDER BY sort_order ASC, id ASC
+        ORDER BY article_count DESC, sort_order ASC, id ASC
         LIMIT #{offset}, #{pageSize}
     </select>
 

@@ -43,7 +43,7 @@
                 CONCAT('%', #{keyword}, '%')
             </if>
         </where>
-        ORDER BY id ASC
+        ORDER BY article_count DESC, id ASC
         LIMIT #{offset}, #{pageSize}
     </select>
 
