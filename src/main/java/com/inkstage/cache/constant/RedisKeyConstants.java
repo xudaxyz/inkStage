@@ -134,7 +134,7 @@ public class RedisKeyConstants {
     public static final Duration CACHE_ANNOUNCEMENT_TTL = LONG_TTL;
     public static final Duration CACHE_READING_HISTORY_TTL = DEFAULT_TTL;
     public static final Duration CACHE_CATEGORIES_TTL = LONG_TTL;
-    public static final Duration CACHE_TAGS_TTL = LONG_TTL;
+    public static final Duration CACHE_TAGS_TTL = MEDIUM_TTL;
     public static final Duration CACHE_ROLES_TTL = EXTREME_TTL;
     public static final Duration CACHE_USER_ROLES_TTL = Duration.ofDays(1);
     public static final Duration CACHE_ARTICLE_COUNT_TTL = LONG_TTL;

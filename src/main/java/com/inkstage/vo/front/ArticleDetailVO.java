@@ -2,6 +2,7 @@ package com.inkstage.vo.front;
 
 import com.inkstage.entity.model.Tag;
 import com.inkstage.enums.article.ArticleStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.AllowStatus;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.article.OriginalStatus;
@@ -76,6 +77,11 @@ public class ArticleDetailVO implements Serializable {
      * 是否原创
      */
     private OriginalStatus original;
+
+    /**
+     * 是否置顶
+     */
+    private TopStatus top;
 
     /**
      * 原创链接

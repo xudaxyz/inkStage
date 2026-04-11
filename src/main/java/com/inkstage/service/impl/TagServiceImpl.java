@@ -216,6 +216,7 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Long createTagIfNotExists(Tag tag) {
         log.info("创建标签（如果不存在）: {}", tag.getName());
         try {

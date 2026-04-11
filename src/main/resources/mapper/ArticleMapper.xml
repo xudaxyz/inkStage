@@ -70,6 +70,7 @@
         a.visible,
         a.allow_comment,
         a.allow_forward,
+        a.top,
         a.original,
         a.original_url,
         a.publish_time,
