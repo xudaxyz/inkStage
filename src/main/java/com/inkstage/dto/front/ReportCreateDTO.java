@@ -26,15 +26,20 @@ public class ReportCreateDTO {
     private Long reportedId;
 
     /**
+     * 被举报对象用户名
+     */
+    private String reportedName;
+
+    /**
      * 关联ID
      */
     @NotNull(message = "关联ID不能为空")
     private Long relatedId;
 
     /**
-     * 被举报对象用户名
+     * 被举报内容
      */
-    private String reportedName;
+    private String reportedContent;
 
     /**
      * 举报类型

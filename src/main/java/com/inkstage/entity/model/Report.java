@@ -50,6 +50,11 @@ public class Report extends BaseEntity {
     private String reportedName;
 
     /**
+     * 被举报的内容
+     */
+    private String reportedContent;
+
+    /**
      * 举报类型
      */
     private ReportTypeEnum reportType;

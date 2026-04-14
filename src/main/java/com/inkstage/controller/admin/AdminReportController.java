@@ -11,12 +11,14 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 
 /**
  * 后台举报Controller
  */
+@Slf4j
 @RestController
 @RequestMapping("/admin/report")
 @RequiredArgsConstructor
@@ -30,10 +32,12 @@ public class AdminReportController {
      * @param adminReportQueryDTO 后台举报查询DTO
      * @return 举报列表
      */
-    @GetMapping("/list")
+    @PostMapping("/list")
     @AdminAccess
-    public PageResult<ReportListVO> getReportList(AdminReportQueryDTO adminReportQueryDTO) {
-        return reportService.getAdminReportList(adminReportQueryDTO);
+    public Result<?> getReportList(@RequestBody AdminReportQueryDTO adminReportQueryDTO) {
+        log.info("管理员获取举报列表, 查询参数: {}", adminReportQueryDTO);
+        PageResult<ReportListVO> adminReportList = reportService.getAdminReportList(adminReportQueryDTO);
+        return Result.success(adminReportList);
     }
 
     /**
@@ -55,11 +59,13 @@ public class AdminReportController {
      * @param id              举报ID
      * @param reportHandleDTO 举报处理DTO
      */
-    @PutMapping("/{id}/handle")
+    @PutMapping("/handle/{id}")
     @AdminAccess
-    public void handleReport(@PathVariable Long id, @Valid @RequestBody ReportHandleDTO reportHandleDTO) {
+    public Result<?> handleReport(@PathVariable Long id, @Valid @RequestBody ReportHandleDTO reportHandleDTO) {
+        log.info("管理员处理举报, 举报ID: {}, 处理结果: {}", id, reportHandleDTO);
         Long adminId = UserContext.getCurrentUserId();
         reportService.handleReport(id, reportHandleDTO, adminId);
+        return Result.success("处理举报完成");
     }
 
 }

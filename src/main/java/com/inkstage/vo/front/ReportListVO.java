@@ -1,5 +1,6 @@
 package com.inkstage.vo.front;
 
+import com.inkstage.enums.HandleResultEnum;
 import com.inkstage.enums.ReportStatus;
 import com.inkstage.enums.ReportTargetType;
 import com.inkstage.enums.ReportTypeEnum;
@@ -19,6 +20,15 @@ public class ReportListVO {
     private Long id;
 
     /**
+     * 举报人ID
+     */
+    private Long reporterId;
+    /**
+     * 举报人名称
+     */
+    private String reporterName;
+
+    /**
      * 被举报对象类型
      */
     private ReportTargetType reportedType;
@@ -32,6 +42,16 @@ public class ReportListVO {
      * 被举报对象名称
      */
     private String reportedName;
+
+    /**
+     * 相关对象ID
+     */
+    private Long relatedId;
+
+    /**
+     * 被举报内容
+     */
+    private String reportedContent;
 
     /**
      * 举报类型
@@ -52,4 +72,9 @@ public class ReportListVO {
      * 处理时间
      */
     private LocalDateTime handleTime;
+
+    /**
+     * 处理结果
+     */
+    private HandleResultEnum handleResult;
 }

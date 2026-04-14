@@ -7,7 +7,6 @@ import com.inkstage.dto.front.ReportCreateDTO;
 import com.inkstage.entity.model.Report;
 import com.inkstage.enums.ReportStatus;
 import com.inkstage.service.ReportService;
-import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

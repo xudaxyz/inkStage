@@ -30,17 +30,8 @@ public class AdminReportQueryDTO extends PageRequest {
     private ReportTargetType reportedType;
 
     /**
-     * 举报人ID
+     * 被举报内容
      */
-    private Long reporterId;
+    private String reportedContent;
 
-    /**
-     * 被举报对象ID
-     */
-    private Long reportedId;
-
-    /**
-     * 处理人ID
-     */
-    private Long handlerId;
 }

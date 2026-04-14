@@ -14,8 +14,7 @@ import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ReportMapper;
-import com.inkstage.service.NotificationService;
-import com.inkstage.service.ReportService;
+import com.inkstage.service.*;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
 import lombok.RequiredArgsConstructor;
@@ -55,18 +54,23 @@ public class ReportServiceImpl implements ReportService {
         report.setReporterName(currentUser.getNickname());
         report.setReportedType(reportCreateDTO.getReportedType());
         report.setRelatedId(reportCreateDTO.getRelatedId());
-        report.setReportedId(reportCreateDTO.getReportedId());
         report.setReportedName(reportCreateDTO.getReportedName());
+        report.setReportedId(reportCreateDTO.getReportedId());
+        report.setReportedContent(reportCreateDTO.getReportedContent());
         report.setReportType(reportCreateDTO.getReportType());
         report.setReason(reportCreateDTO.getReason());
         report.setEvidence(reportCreateDTO.getEvidence());
-        report.setAnonymous(reportCreateDTO.getAnonymous() == null ? DefaultStatus.NO : reportCreateDTO.getAnonymous());
+        report.setAnonymous(reportCreateDTO.getAnonymous() == null ? DefaultStatus.NO : DefaultStatus.YES);
         report.setReportStatus(ReportStatus.PENDING);
         report.setCreateTime(LocalDateTime.now());
         report.setDeleted(DeleteStatus.NOT_DELETED);
 
         // 保存举报
         reportMapper.insert(report);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put(NotificationTemplateVariable.REPORTED_CONTENT.getKey(), report.getReportedContent());
+        notificationService.sendNotificationWithTemplate(report.getReporterId(), NotificationType.REPORT, params);
 
         log.info("用户 {} 举报了 {} {}，举报类型：{}",
                 currentUser.getId(), reportCreateDTO.getReportedType().getDesc(),
@@ -122,12 +126,14 @@ public class ReportServiceImpl implements ReportService {
         report.setHandlerId(handlerId);
         report.setHandleTime(LocalDateTime.now());
         report.setUpdateTime(LocalDateTime.now());
-
         reportMapper.update(report);
 
         Map<String, Object> params = new HashMap<>();
         params.put(NotificationTemplateVariable.RELATED_ID.getKey(), report.getRelatedId());
-        notificationService.sendNotificationWithTemplate(report.getReporterId(), NotificationType.REPORT, params);
+        params.put(NotificationTemplateVariable.REPORTED_CONTENT.getKey(), report.getReportedContent());
+        params.put(NotificationTemplateVariable.HANDLE_RESULT.getKey(), report.getHandleResult().getDesc());
+        params.put(NotificationTemplateVariable.REASON.getKey(), report.getHandleReason());
+        notificationService.sendNotificationWithTemplate(report.getReporterId(), NotificationType.REPORT_RESULT, params);
 
 
         log.info("管理员 {} 处理了举报 {}，处理结果：{}",

@@ -47,7 +47,15 @@ public enum NotificationTemplateVariable {
     NOTIFICATION_TYPE("notificationType", "通知类型"),
     NOTIFICATION_TIME("notificationTime", "通知时间"),
     SENDER_ID("senderId", "发送者ID"),
-    SENDER_NAME("senderName", "发送者名称");
+    SENDER_NAME("senderName", "发送者名称"),
+
+    // 举报相关变量
+    REPORTED_CONTENT("reportedContent", "举报内容"),
+    HANDLE_RESULT("handleResult", "处理结果"),
+    REASON("reason", "原因"),
+
+
+    ;
     
     private final String key;
     private final String description;
