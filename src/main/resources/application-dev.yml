@@ -12,7 +12,7 @@ spring:
   # 数据源配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://172.26.16.229:3306/inkstage?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/inkstage?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
 
@@ -20,7 +20,7 @@ spring:
   # Redis配置
   data:
     redis:
-      host: 172.26.16.229
+      host: localhost
       port: 6379
       password: # 生产环境应使用强密码
       database: 0
@@ -35,7 +35,7 @@ spring:
 
   # RabbitMQ配置
   rabbitmq:
-    host: 172.26.16.229
+    host: localhost
     port: 5672
     username: guest
     password: guest
@@ -157,7 +157,7 @@ cors:
 # Minio 配置
 minio:
   # Minio 服务端点
-  endpoint: http://172.26.16.229:9000  # 生产环境应使用内网IP
+  endpoint: http://localhost:9000  # 生产环境应使用内网IP
   # 访问密钥
   access-key: minioadmin
   # 秘密密钥
