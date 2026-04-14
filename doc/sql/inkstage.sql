@@ -527,27 +527,32 @@ CREATE TABLE `notification_template`
 DROP TABLE IF EXISTS `report`;
 CREATE TABLE `report`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
-    `user_id`        BIGINT   NOT NULL COMMENT '举报人ID',
-    `target_type`    TINYINT  NOT NULL COMMENT '举报对象类型（0:文章,1:评论,2:用户,3:私信）',
-    `target_id`      BIGINT   NOT NULL COMMENT '举报对象ID',
-    `report_type_id` BIGINT   NOT NULL COMMENT '举报类型ID',
-    `content`        TEXT     NOT NULL COMMENT '举报内容',
-    `evidence_urls`  JSON COMMENT '举报证据URL列表',
-    `status`         TINYINT           DEFAULT 0 COMMENT '举报状态（0:待处理,1:已处理,2:已驳回）',
-    `handle_user_id` BIGINT COMMENT '处理人ID',
-    `handle_time`    DATETIME COMMENT '处理时间',
-    `handle_result`  TEXT COMMENT '处理结果',
-    `create_time`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted`        TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
-    `deleted_time`   DATETIME COMMENT '删除时间',
-    KEY              `idx_user_id` (`user_id`),
-    KEY              `idx_target_type` (`target_type`),
-    KEY              `idx_target_id` (`target_id`),
-    KEY              `idx_report_type_id` (`report_type_id`),
-    KEY              `idx_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='举报表';
+    `id`            bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `reporter_id`   bigint       NOT NULL COMMENT '举报人ID',
+    `reporter_name` varchar(50)  NOT NULL COMMENT '举报人昵称',
+    `reported_type` tinyint      NOT NULL COMMENT '被举报对象类型',
+    `related_id`    bigint                DEFAULT NULL COMMENT '相关对象ID(文章ID、评论ID、用户ID等)',
+    `reported_id`   bigint       NOT NULL COMMENT '被举报对象ID',
+    `reported_name` varchar(50)  NOT NULL COMMENT '被举报对象用户名',
+    `report_type`   tinyint      NOT NULL COMMENT '举报类型(枚举存储字符串)',
+    `reason`        varchar(500) NOT NULL COMMENT '举报理由',
+    `evidence`      text COMMENT '举报证据(JSON格式,包含图片、视频等链接)',
+    `anonymous`     tinyint NULL DEFAULT 0 COMMENT '是否匿名举报(0:否,1:是)',
+    `report_status` tinyint      NOT NULL COMMENT '举报状态(枚举存储字符串)',
+    `handle_result` tinyint               DEFAULT NULL COMMENT '处理结果(枚举存储字符串)',
+    `handle_reason` varchar(500)          DEFAULT NULL COMMENT '处理理由',
+    `handler_id`    bigint                DEFAULT NULL COMMENT '处理人ID',
+    `handler_name`  varchar(50)           DEFAULT NULL COMMENT '处理人昵称',
+    `handle_time`   datetime              DEFAULT NULL COMMENT '处理时间',
+    `create_time`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`   datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`       tinyint      NOT NULL DEFAULT 0 COMMENT '删除标识(0:未删除,1:已删除)',
+    `deleted_time`  datetime NULL DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`),
+    KEY             `idx_reporter_id` (`reporter_id`),
+    KEY             `idx_reported_id` (`reported_id`),
+    KEY             `idx_report_status` (`report_status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='举报表';
 
 -- 举报类型表（report_type）
 DROP TABLE IF EXISTS `report_type`;

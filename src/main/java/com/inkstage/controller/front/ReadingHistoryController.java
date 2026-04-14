@@ -1,5 +1,6 @@
 package com.inkstage.controller.front;
 
+import com.inkstage.annotation.UserAccess;
 import com.inkstage.dto.front.ReadingHistoryDTO;
 import com.inkstage.service.ReadingHistoryService;
 import com.inkstage.vo.front.ReadingHistoryVO;
@@ -29,6 +30,7 @@ public class ReadingHistoryController {
      * @return 操作结果
      */
     @PostMapping("/save")
+    @UserAccess
     public Result<?> saveOrUpdateReadingHistory(@RequestBody ReadingHistoryDTO dto) {
         try {
             boolean result = readingHistoryService.saveOrUpdateReadingHistory(dto);
@@ -47,6 +49,7 @@ public class ReadingHistoryController {
      * @return 阅读历史列表
      */
     @GetMapping("/get")
+    @UserAccess
     public Result<PageResult<ReadingHistoryVO>> getReadingHistoryList(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -66,6 +69,7 @@ public class ReadingHistoryController {
      * @return 操作结果
      */
     @DeleteMapping("/delete/{articleId}")
+    @UserAccess
     public Result<?> deleteReadingHistory(@PathVariable Long articleId) {
         try {
             boolean result = readingHistoryService.deleteReadingHistory(articleId);
@@ -82,6 +86,7 @@ public class ReadingHistoryController {
      * @return 操作结果
      */
     @DeleteMapping("/delete/all")
+    @UserAccess
     public Result<?> clearReadingHistory() {
         try {
             boolean result = readingHistoryService.clearReadingHistory();
@@ -99,6 +104,7 @@ public class ReadingHistoryController {
      * @return 阅读历史
      */
     @GetMapping("/{articleId}")
+    @UserAccess
     public Result<ReadingHistoryVO> getReadingHistoryByArticleId(@PathVariable Long articleId) {
         try {
             ReadingHistoryVO result = readingHistoryService.getReadingHistoryByArticleId(articleId);
@@ -116,6 +122,7 @@ public class ReadingHistoryController {
      * @return 阅读历史列表
      */
     @PostMapping("/batch")
+    @UserAccess
     public Result<List<ReadingHistoryVO>> getReadingHistoriesByArticleIds(@RequestBody List<Long> articleIds) {
         try {
             List<ReadingHistoryVO> result = readingHistoryService.getReadingHistoriesByArticleIds(articleIds);

@@ -1,5 +1,6 @@
 package com.inkstage.controller.front;
 
+import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
 import com.inkstage.entity.model.Notification;
@@ -30,6 +31,7 @@ public class NotificationController {
      * 获取通知列表（支持分页）
      */
     @GetMapping("/list")
+    @UserAccess
     public Result<PageResult<Notification>> getNotificationList(
             @RequestParam(value = "notificationType", required = false) NotificationType notificationType,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
@@ -43,6 +45,7 @@ public class NotificationController {
      * 分页获取通知列表
      */
     @GetMapping("/list/page")
+    @UserAccess
     public Result<PageResult<Notification>> getNotificationListWithPage(
             @RequestParam(value = "notificationType", required = false) NotificationType notificationType,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
@@ -55,6 +58,7 @@ public class NotificationController {
      * 标记通知为已读
      */
     @PutMapping("/read/{id}")
+    @UserAccess
     public Result<Boolean> markAsRead(@PathVariable Long id) {
         boolean result = notificationService.markAsRead(id);
         return Result.success(result);
@@ -64,6 +68,7 @@ public class NotificationController {
      * 标记所有通知为已读
      */
     @PutMapping("/read/all")
+    @UserAccess
     public Result<Boolean> markAllAsRead() {
         Long userId = UserContext.getCurrentUserId();
         boolean result = notificationService.markAllAsRead(userId);
@@ -74,6 +79,7 @@ public class NotificationController {
      * 删除通知
      */
     @DeleteMapping("/delete/{id}")
+    @UserAccess
     public Result<Boolean> deleteNotification(@PathVariable Long id) {
         boolean result = notificationService.deleteNotification(id);
         return Result.success(result);
@@ -83,6 +89,7 @@ public class NotificationController {
      * 获取未读通知数量
      */
     @GetMapping("/unread/count")
+    @UserAccess
     public Result<Integer> getUnreadCount() {
         Long userId = UserContext.getCurrentUserId();
         int count = notificationService.getUnreadCount(userId);
@@ -93,6 +100,7 @@ public class NotificationController {
      * 同步未读通知数量
      */
     @PostMapping("/unread/sync")
+    @UserAccess
     public Result<Void> syncUnreadCount() {
         Long userId = UserContext.getCurrentUserId();
         notificationService.syncUnreadCount(userId);
@@ -103,6 +111,7 @@ public class NotificationController {
      * 按分类获取通知列表
      */
     @GetMapping("/category/{category}")
+    @UserAccess
     public Result<PageResult<Notification>> getNotificationsByCategory(
             @PathVariable NotificationCategory category,
             @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
@@ -116,6 +125,7 @@ public class NotificationController {
      * 按分类获取未读通知数量
      */
     @GetMapping("/unread/count/category")
+    @UserAccess
     public Result<Map<NotificationCategory, Integer>> getUnreadCountByCategory() {
         Long userId = UserContext.getCurrentUserId();
         Map<NotificationCategory, Integer> countMap = notificationService.getUnreadCountByCategory(userId);
@@ -126,6 +136,7 @@ public class NotificationController {
      * 按分类标记通知为已读
      */
     @PutMapping("/read/category/{category}")
+    @UserAccess
     public Result<Boolean> markAsReadByCategory(@PathVariable NotificationCategory category) {
         Long userId = UserContext.getCurrentUserId();
         boolean result = notificationService.markAsReadByCategory(userId, category);
@@ -136,6 +147,7 @@ public class NotificationController {
      * 清空通知
      */
     @DeleteMapping("/clear")
+    @UserAccess
     public Result<Boolean> clearNotifications() {
         Long userId = UserContext.getCurrentUserId();
         boolean result = notificationService.clearNotifications(userId);
@@ -146,6 +158,7 @@ public class NotificationController {
      * 获取聚合后的通知
      */
     @GetMapping("/aggregated")
+    @UserAccess
     public Result<List<Notification>> getAggregatedNotifications() {
         Long userId = UserContext.getCurrentUserId();
         List<Notification> notifications = notificationService.getAggregatedNotifications(userId);

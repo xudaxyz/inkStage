@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.ReportMapper">
+
+    <resultMap id="reportResultMap" type="com.inkstage.entity.model.Report">
+        <id column="id" property="id"/>
+        <result column="reporter_id" property="reporterId"/>
+        <result column="reporter_name" property="reporterName"/>
+        <result column="reported_type" property="reportedType" javaType="com.inkstage.enums.ReportTargetType"/>
+        <result column="related_id" property="relatedId"/>
+        <result column="reported_id" property="reportedId"/>
+        <result column="reported_name" property="reportedName"/>
+        <result column="report_type" property="reportType" javaType="com.inkstage.enums.ReportTypeEnum"/>
+        <result column="reason" property="reason"/>
+        <result column="evidence" property="evidence"/>
+        <result column="anonymous" property="anonymous" javaType="com.inkstage.enums.common.DefaultStatus"/>
+        <result column="report_status" property="reportStatus" javaType="com.inkstage.enums.ReportStatus"/>
+        <result column="handle_result" property="handleResult" javaType="com.inkstage.enums.HandleResultEnum"/>
+        <result column="handle_reason" property="handleReason"/>
+        <result column="handler_id" property="handlerId"/>
+        <result column="handler_name" property="handlerName"/>
+        <result column="handle_time" property="handleTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id
+        , reporter_id, reporter_name, reported_type, related_id, reported_id, reported_name, report_type, reason,
+          evidence, anonymous, report_status, handle_result, handle_reason, handler_id, handler_name, handle_time,
+          create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <insert id="insert" parameterType="com.inkstage.entity.model.Report">
+        INSERT INTO report (reporter_id, reporter_name, reported_type, related_id, reported_id, reported_name,
+                            report_type, reason,
+                            evidence, anonymous, report_status, handle_result, handle_reason, handler_id, handler_name,
+                            handle_time,
+                            create_time, update_time, deleted)
+        VALUES (#{reporterId}, #{reporterName}, #{reportedType.code}, #{relatedId}, #{reportedId}, #{reportedName},
+                #{reportType.code},
+                #{reason}, #{evidence}, #{anonymous.code}, #{reportStatus.code}, #{handleResult.code}, #{handleReason},
+                #{handlerId},
+                #{handlerName}, #{handleTime}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <select id="selectById" parameterType="java.lang.Long" resultMap="reportResultMap">
+        SELECT
+        <include refid="baseColumns"/>
+        FROM report
+        WHERE id = #{id} AND deleted = 0
+    </select>
+
+
+    <resultMap id="reportListVOMap" type="com.inkstage.vo.front.ReportListVO">
+        <id column="id" property="id"/>
+        <result column="reported_type" property="reportedType" javaType="com.inkstage.enums.ReportTargetType"/>
+        <result column="reported_id" property="reportedId"/>
+        <result column="reported_name" property="reportedName"/>
+        <result column="report_type" property="reportType" javaType="com.inkstage.enums.ReportTypeEnum"/>
+        <result column="report_status" property="reportStatus" javaType="com.inkstage.enums.ReportStatus"/>
+        <result column="handle_time" property="handleTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <select id="selectList" resultMap="reportListVOMap">
+        SELECT
+        id, reported_type, reported_id, reported_name, report_type, report_status, handle_time, create_time
+        FROM report
+        <where>
+            <if test="userId != null">
+                reporter_id = #{userId},
+            </if>
+            <if test="reportStatus != null">
+                AND report_status = #{reportStatus.code}
+            </if>
+        </where>
+        AND deleted = 0
+        ORDER BY create_time DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="count" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM report
+        <where>
+            <if test="reporterId != null">
+                reporter_id = #{reporterId}
+            </if>
+            <if test="reportedId != null">
+                AND reported_id = #{reportedId}
+            </if>
+            <if test="relatedId != null">
+                AND related_id = #{relatedId}
+            </if>
+            <if test="reportedType != null">
+                AND reported_type = #{reportedType.code}
+            </if>
+            <if test="reportType != null">
+                AND report_type = #{reportType.code}
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="com.inkstage.entity.model.Report">
+        UPDATE report
+        SET
+        <if test="relatedId != null">related_id = #{relatedId},</if>
+        <if test="reportType != null">report_type = #{reportType.code},</if>
+        <if test="reportStatus != null">report_status = #{reportStatus.code},</if>
+        <if test="handleResult != null">handle_result = #{handleResult.code},</if>
+        <if test="handleReason != null">handle_reason = #{handleReason},</if>
+        <if test="handlerId != null">handler_id = #{handlerId},</if>
+        <if test="handlerName != null">handler_name = #{handlerName},</if>
+        <if test="handleTime != null">handle_time = #{handleTime},</if>
+        update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <select id="countByStatus" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM report
+        <where>
+            <if test="userId != null">
+                reporter_id = #{userId}
+            </if>
+            <if test="reportStatus != null">
+                AND report_status = #{reportStatus.code}
+            </if>
+        </where>
+        AND deleted = 0
+    </select>
+
+    <select id="countByAdminQuery" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM report
+        <where>
+            <if test="adminQueryDTO.reportStatus != null">
+                report_status = #{adminQueryDTO.reportStatus.code}
+            </if>
+            <if test="adminQueryDTO.reportType != null">
+                AND report_type = #{adminQueryDTO.reportType.code}
+            </if>
+            <if test="adminQueryDTO.reportedType != null">
+                AND reported_type = #{adminQueryDTO.reportedType.code}
+            </if>
+            <if test="adminQueryDTO.reporterId != null">
+                AND reporter_id = #{adminQueryDTO.reporterId}
+            </if>
+            <if test="adminQueryDTO.reportedId != null">
+                ANDreported_id = #{adminQueryDTO.reportedId}
+            </if>
+            <if test="adminQueryDTO.handlerId != null">
+                AND handler_id = #{adminQueryDTO.handlerId}
+            </if>
+        </where>
+        AND deleted = 0
+    </select>
+
+    <select id="selectAdminReportList" parameterType="com.inkstage.dto.admin.AdminReportQueryDTO"
+            resultMap="reportListVOMap">
+        SELECT
+        id, reported_type, reported_id, report_type, report_status, handle_time, create_time
+        FROM report
+        <where>
+            <if test="adminQueryDTO.reportStatus != null">
+                report_status = #{adminQueryDTO.reportStatus.code}
+            </if>
+            <if test="adminQueryDTO.reportType != null">
+                AND report_type = #{adminQueryDTO.reportType.code}
+            </if>
+            <if test="adminQueryDTO.reportedType != null">
+                AND reported_type = #{adminQueryDTO.reportedType.code}
+            </if>
+            <if test="adminQueryDTO.reporterId != null">
+                AND reporter_id = #{adminQueryDTO.reporterId}
+            </if>
+            <if test="adminQueryDTO.reportedId != null">
+                AND reported_id = #{adminQueryDTO.reportedId}
+            </if>
+            <if test="adminQueryDTO.handlerId != null">
+                AND handler_id = #{adminQueryDTO.handlerId}
+            </if>
+        </where>
+        AND deleted = 0
+        ORDER BY create_time DESC
+        LIMIT #{adminQueryDTO.pageSize} OFFSET #{adminQueryDTO.offset}
+    </select>
+
+</mapper>

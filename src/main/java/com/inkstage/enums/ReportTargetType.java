@@ -8,7 +8,7 @@ public enum ReportTargetType implements EnumCode {
     COMMENT(2, "评论"),
     USER(3, "用户"),
     SYSTEM(4, "系统"),
-    OTHER(5, "其他");
+    OTHER(100, "其他");
 
     private final Integer code;
     private final String desc;

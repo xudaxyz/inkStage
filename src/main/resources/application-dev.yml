@@ -20,7 +20,7 @@ spring:
   # Redis配置
   data:
     redis:
-      host: localhost
+      host: 172.26.16.229
       port: 6379
       password: # 生产环境应使用强密码
       database: 0
@@ -35,7 +35,7 @@ spring:
 
   # RabbitMQ配置
   rabbitmq:
-    host: localhost
+    host: 172.26.16.229
     port: 5672
     username: guest
     password: guest

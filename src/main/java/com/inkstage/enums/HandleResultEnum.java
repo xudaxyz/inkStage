@@ -7,7 +7,7 @@ public enum HandleResultEnum implements EnumCode {
     WARNING(0, "警告"),
     DELETE_CONTENT(1, "删除内容"),
     BAN_USER(2, "封禁账号"),
-    OTHER(3, "其他");
+    OTHER(100, "其他");
 
     private final Integer code;
     private final String desc;

@@ -25,14 +25,29 @@ public class Report extends BaseEntity {
     private Long reporterId;
 
     /**
+     * 举报人昵称
+     */
+    private String reporterName;
+
+    /**
      * 被举报对象类型
      */
     private ReportTargetType reportedType;
 
     /**
+     * 相关对象ID(文章ID、评论ID、用户ID等)
+     */
+    private Long relatedId;
+
+    /**
      * 被举报对象ID
      */
     private Long reportedId;
+
+    /**
+     * 被举报对象用户名
+     */
+    private String reportedName;
 
     /**
      * 举报类型
@@ -57,7 +72,7 @@ public class Report extends BaseEntity {
     /**
      * 举报状态
      */
-    private ReportStatus status;
+    private ReportStatus reportStatus;
 
     /**
      * 处理结果
@@ -73,6 +88,11 @@ public class Report extends BaseEntity {
      * 处理人ID
      */
     private Long handlerId;
+
+    /**
+     * 处理人昵称
+     */
+    private String handlerName;
 
     /**
      * 处理时间

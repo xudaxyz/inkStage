@@ -106,6 +106,8 @@ public enum ResponseMessage {
     RESOURCE_EXISTS("资源已存在"),
     COLLECTION_DEFAULT_FOLDER_EXIST("默认收藏夹已存在"),
     COLLECTION_FOLDER_EXIST("收藏夹{}已存在"),
+
+    ALREADY_REPORTED("您已举报过相关内容"),
     
     // 文章相关成功消息
     ARTICLE_LIST_SUCCESS("获取文章列表成功"),
@@ -179,7 +181,7 @@ public enum ResponseMessage {
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID"),  // 刷新令牌无效，缺少用户ID
     REFRESH_TOKEN_NOT_FOUND("REFRESH_TOKEN_NOT_FOUND"), // 新令牌已过期或被撤销
     INVALID_AUDIENCE("INVALID_AUDIENCE"), // 刷新令牌缺少客户端信息
-    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"); // 刷新令牌失败，请重新登录
+    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"), ; // 刷新令牌失败，请重新登录
 
     private final String message;
 

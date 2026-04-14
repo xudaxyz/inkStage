@@ -91,6 +91,7 @@ public class CommentController {
      * @return 是否删除成功
      */
     @DeleteMapping("/delete/{id}")
+    @UserAccess
     public Result<?> deleteComment(@PathVariable Long id) {
         log.info("删除用户: {}评论", id);
         // 调用服务方法删除评论

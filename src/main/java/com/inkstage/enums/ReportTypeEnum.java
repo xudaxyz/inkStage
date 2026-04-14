@@ -8,11 +8,12 @@ public enum ReportTypeEnum implements EnumCode {
     VIOLENCE(2, "暴力恐怖"),
     POLITICAL(3, "政治敏感"),
     ADVERTISING(4, "广告营销"),
-    COPYRIGHT(5, "抄袭侵权"),
-    SPAM(6, "垃圾信息"),
+    PLAGIARISM(5, "抄袭侵权"),
+    SPAM(6, "垃圾内容"),
     ABUSE(7, "骚扰辱骂"),
     FRAUD(8, "欺诈虚假"),
-    OTHER(9, "其他");
+    ILLEGAL(9, "违法内容"),
+    OTHER(100, "其他");
 
     private final Integer code;
     private final String desc;

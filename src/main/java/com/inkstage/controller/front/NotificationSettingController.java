@@ -1,5 +1,6 @@
 package com.inkstage.controller.front;
 
+import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.NotificationSettingDTO;
 import com.inkstage.entity.model.NotificationSetting;
@@ -22,6 +23,7 @@ public class NotificationSettingController {
      * 获取用户的通知设置
      */
     @GetMapping("/get")
+    @UserAccess
     public Result<NotificationSetting> getNotificationSetting() {
         Long userId = UserContext.getCurrentUserId();
         NotificationSetting setting = notificationSettingService.getNotificationSetting(userId);
@@ -32,6 +34,7 @@ public class NotificationSettingController {
      * 保存用户的通知设置
      */
     @PutMapping("/save")
+    @UserAccess
     public Result<Boolean> saveNotificationSetting(@RequestBody NotificationSetting setting) {
         Long userId = UserContext.getCurrentUserId();
         setting.setUserId(userId);
@@ -43,6 +46,7 @@ public class NotificationSettingController {
      * 恢复默认通知设置
      */
     @PutMapping("/reset")
+    @UserAccess
     public Result<Boolean> resetNotificationSetting() {
         Long userId = UserContext.getCurrentUserId();
         NotificationSetting defaultSetting = notificationSettingService.getDefaultNotificationSetting(userId);
@@ -54,6 +58,7 @@ public class NotificationSettingController {
      * 更新单个通知设置
      */
     @PutMapping("/update")
+    @UserAccess
     public Result<Boolean> updateNotificationSetting(@RequestBody NotificationSettingDTO notificationSettingDTO) {
         Long userId = UserContext.getCurrentUserId();
         boolean result = notificationSettingService.updateNotificationSetting(userId, notificationSettingDTO);
