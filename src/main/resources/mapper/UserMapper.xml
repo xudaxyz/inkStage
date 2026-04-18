@@ -176,7 +176,7 @@
     <!-- 查询热门用户 -->
     <select id="findHotUsers" resultMap="HotUserResultMap">
         SELECT
-        id, nickname, avatar, signature, follower_count, article_count
+        id, nickname, avatar, signature, follower_count, article_count, like_count
         FROM user
         WHERE deleted = 0
         AND status = 1 <!-- 正常状态 -->
