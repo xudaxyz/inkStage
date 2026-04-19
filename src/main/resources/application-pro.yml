@@ -1,0 +1,186 @@
+# 服务器配置
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+# 应用基本配置
+spring:
+  application:
+    name: inkstage
+
+  # 数据源配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 生产环境的ip和端口
+    url: jdbc:mysql://localhost:3306/inkstage?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root # 生产环境username
+    password: 123456 # 生产环境password
+
+
+  # Redis配置
+  data:
+    redis:
+      host: localhost # 生产环境host
+      port: 6379 # 生产环境port
+      password: # 生产环境密码
+      database: 0
+      timeout: 3000
+      lettuce:
+        pool:
+          max-active: 8
+          max-wait: -1
+          max-idle: 8
+          min-idle: 0
+
+
+  # RabbitMQ配置
+  rabbitmq:
+    host: localhost # 生产环境host
+    port: 5672 # 生产环境host
+    username: rabbitmq # 生产环境username
+    password: rabbitmq # 生产环境password
+    virtual-host: /
+    # 连接工厂配置
+    connection-timeout: 30000
+    # 消息确认配置
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    # 消费者配置
+    listener:
+      direct:
+        acknowledge-mode: auto
+      simple:
+        acknowledge-mode: auto
+        # 并发消费配置
+        concurrency: 5
+        max-concurrency: 10
+        # 批量消费配置
+        prefetch: 10
+        auto-startup: true
+
+  # Jackson 配置
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: Asia/Shanghai
+
+  # 配置最大文件上传大小
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+
+
+  # Mail配置 - 需配置邮箱后才可使用邮箱服务
+  mail:
+    host: smtp.gmail.com # 需手动设置mail配置并授权密码
+    port: 465
+    username: inkstage # 需手动设置mail配置并授权密码
+    password: inkstage # 需手动设置mail配置并授权密码
+    default-encoding: UTF-8
+    properties:
+      mail:
+        smtp:
+          auth: true
+          ssl:
+            enable: true
+          timeout: 10000
+          connectiontimeout: 10000
+          writetimeout: 10000
+
+
+  # 权限规则配置
+  security:
+    permission-rules:
+      - name: front-read
+        pattern: /front/**
+        methods: GET
+        required-scopes: read
+      - name: front-write
+        pattern: /front/**
+        methods: POST,PUT,DELETE,PATCH
+        required-scopes: write
+      - name: admin-read
+        pattern: /admin/**
+        methods: GET
+        required-scopes: admin
+      - name: admin-write
+        pattern: /admin/**
+        methods: POST,PUT,DELETE,PATCH
+        required-scopes: admin
+      - name: public
+        pattern: /front/public/**
+        methods: GET,POST,PUT,DELETE,PATCH
+        required-scopes: ""
+      - name: auth
+        pattern: /front/auth/**
+        methods: GET,POST,PUT,DELETE,PATCH
+        required-scopes: ""
+
+# 日志配置
+logging:
+  config: classpath:logback-spring.xml
+  level:
+    com.inkstage: debug
+    org.springframework.security: debug
+
+# MyBatis配置
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
+  type-aliases-package: com.inkstage.entity
+  # 注册自定义类型处理器
+  type-handlers-package: com.inkstage.handler
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+    # 配置默认的枚举类型处理器，处理大部分整数类型枚举
+    default-enum-type-handler: com.inkstage.handler.EnumCodeTypeHandler
+
+# PageHelper配置
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
+
+# 跨域配置
+cors:
+  allowed-origins: 'http://localhost:3000,http://localhost:8080' # 生产环境域名
+  allowed-methods: GET,POST,PUT,DELETE,OPTIONS
+  allowed-headers: '*'
+  allow-credentials: true
+  max-age: 3600
+
+# Minio 配置
+minio:
+  # Minio 服务端点
+  endpoint: localhost:9000  # 生产环境IP
+  # 访问密钥
+  access-key: minio # 生产环境访问密钥
+  # 秘密密钥
+  secret-key: minio # 生产环境秘密密钥
+  # 默认桶名称
+  bucket-name: inkstage-bucket # 默认桶名称（创建桶时记得将桶设置为public）
+  # 是否使用 SSL
+  secure: false
+  # 预签名URL过期时间(秒) 1天
+  pre-signed-url-expiry: 86400
+  # 区域(可选, 默认us-east-1)
+  region: us-east-1
+
+# JWT 密钥配置
+jwt:
+  # 密钥文件路径配置(优先使用)
+  private-key-file: classpath:jwt-keys/private.pem
+  public-key-file: classpath:jwt-keys/public.pem
+  # 密钥算法
+  algorithm: RSA
+  # Token过期时间配置
+  expiration: 3600 # Access Token过期时间(秒), 默认1小时
+  refresh-expiration: 2592000 # Refresh Token过期时间(秒), 默认30天
+
+
