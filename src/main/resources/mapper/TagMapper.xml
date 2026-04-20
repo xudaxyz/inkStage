@@ -73,6 +73,7 @@
         FROM tag
         WHERE status = 1 AND deleted = 0
         ORDER BY usage_count DESC
+        LIMIT 50 <!--最多展示50个热门标签-->
     </select>
 
     <!-- 根据文章ID获取标签 -->
