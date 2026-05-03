@@ -119,4 +119,9 @@ public class ArticleCreateDTO {
      * 审核状态
      */
     private ReviewStatus reviewStatus;
+
+    /**
+     * 专栏ID（可选）
+     */
+    private Long columnId;
 }

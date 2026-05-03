@@ -13,10 +13,7 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
-import com.inkstage.service.ArticleCommandService;
-import com.inkstage.service.ArticleTagService;
-import com.inkstage.service.CategoryService;
-import com.inkstage.service.NotificationService;
+import com.inkstage.service.*;
 import com.inkstage.utils.MarkdownUtils;
 import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
@@ -44,6 +41,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CategoryService categoryService;
+    private final ColumnService columnService;
     private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
     private final CacheClearService cacheClearService;
 
@@ -103,6 +101,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             // 清理相关缓存
             cacheClearService.cleanCacheAfterArticleCreate(article.getId(), currentUser.getId());
+
+            // 处理专栏关联
+            if (articleCreateDTO.getColumnId() != null) {
+                columnService.addArticleToColumn(articleCreateDTO.getColumnId(), article.getId(), null);
+            }
 
             return article.getId();
         } catch (Exception e) {
@@ -169,6 +172,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             // 处理文章标签关联
             articleTagService.handleArticleTags(articleId, articleCreateDTO.getTags());
+
+            // 处理专栏关联变更
+            Long newColumnId = articleCreateDTO.getColumnId();
+            columnService.moveArticleToColumn(articleId, newColumnId, null);
 
             // 更新分类文章数量
             if (!existingArticle.getCategoryId().equals(oldCategoryId)) {
@@ -237,6 +244,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                         userMapper.updateByPrimaryKeySelective(user);
                     }
                 }
+
+                // 解除文章与专栏的关联
+                columnService.removeArticleColumnRelation(articleId);
 
                 // 清理所有相关缓存
                 cacheClearService.clearArticleDetailCache(articleId);

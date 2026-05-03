@@ -89,10 +89,12 @@
         u.follow_count,
         u.follower_count,
         a.category_id,
-        c.name as category_name
+        c.name as category_name,
+        ac.column_id
         FROM article a
         LEFT JOIN user u ON a.user_id = u.id
         LEFT JOIN category c ON a.category_id = c.id
+        LEFT JOIN article_column ac ON a.id = ac.article_id AND ac.deleted = 0
         WHERE a.id = #{id} AND a.deleted = 0
     </select>
 

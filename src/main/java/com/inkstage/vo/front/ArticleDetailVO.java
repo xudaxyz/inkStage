@@ -179,6 +179,11 @@ public class ArticleDetailVO implements Serializable {
     private String categoryName;
 
     /**
+     * 专栏ID（可选）
+     */
+    private Long columnId;
+
+    /**
      * 标签列表
      */
     private List<Tag> tags;

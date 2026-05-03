@@ -124,4 +124,20 @@ public interface ColumnService {
      * @param columnId 专栏ID
      */
     void incrementColumnReadCount(Long columnId);
+
+    /**
+     * 将文章移动到另一个专栏（同时处理旧专栏的移除和新专栏的添加）
+     *
+     * @param articleId   文章ID
+     * @param newColumnId 新专栏ID（如果为null，则只是从旧专栏移除）
+     * @param sortOrder   文章在专栏内的排序位置（可选，不传则追加到末尾）
+     */
+    void moveArticleToColumn(Long articleId, Long newColumnId, Integer sortOrder);
+
+    /**
+     * 根据文章ID解除文章与专栏的关联（用于删除文章时调用）
+     *
+     * @param articleId 文章ID
+     */
+    void removeArticleColumnRelation(Long articleId);
 }

@@ -144,8 +144,8 @@ public class ColumnServiceImpl implements ColumnService {
             throw new BusinessException("专栏不存在");
         }
 
-        if (!column.getUserId().equals(user.getId()) || UserRoleEnum.fromCode(user.getRoleId()) != UserRoleEnum.ADMIN) {
-            throw new BusinessException("无权操作此专栏");
+        if (!column.getUserId().equals(user.getId()) && UserRoleEnum.ADMIN != UserRoleEnum.fromCode(user.getRoleId())) {
+            throw new BusinessException("您无权操作此专栏");
         }
     }
 
@@ -335,6 +335,74 @@ public class ColumnServiceImpl implements ColumnService {
         } catch (Exception e) {
             log.error("增加专栏阅读量失败", e);
             throw new BusinessException("增加专栏阅读量失败", e);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void moveArticleToColumn(Long articleId, Long newColumnId, Integer sortOrder) {
+        log.info("移动文章到专栏: articleId={}, newColumnId={}", articleId, newColumnId);
+        try {
+            User user = UserContext.getCurrentUser();
+
+            ArticleColumn existingRelation = articleColumnMapper.findByArticleId(articleId);
+            Long oldColumnId = existingRelation != null ? existingRelation.getColumnId() : null;
+
+            if (oldColumnId != null && oldColumnId.equals(newColumnId)) {
+                log.info("文章已在目标专栏中，无需移动: articleId={}, columnId={}", articleId, newColumnId);
+                return;
+            }
+
+            if (newColumnId != null) {
+                checkColumnIsMine(newColumnId, user);
+            }
+
+            if (oldColumnId != null) {
+                articleColumnMapper.deleteByArticleId(articleId);
+                columnMapper.updateArticleCount(oldColumnId, -1);
+                log.info("从旧专栏移除文章: articleId={}, oldColumnId={}", articleId, oldColumnId);
+            }
+
+            if (newColumnId != null) {
+                if (sortOrder == null) {
+                    int count = articleColumnMapper.countByColumnId(newColumnId);
+                    sortOrder = count + 1;
+                }
+
+                ArticleColumn articleColumn = new ArticleColumn();
+                articleColumn.setArticleId(articleId);
+                articleColumn.setSortOrder(sortOrder);
+                articleColumn.setColumnId(newColumnId);
+                articleColumn.setCreateTime(LocalDateTime.now());
+                articleColumn.setUpdateTime(LocalDateTime.now());
+                articleColumn.setDeleted(DeleteStatus.NOT_DELETED);
+
+                boolean result = articleColumnMapper.insert(articleColumn) > 0;
+                if (result) {
+                    columnMapper.updateArticleCount(newColumnId, 1);
+                    log.info("文章移动到新专栏成功: articleId={}, newColumnId={}", articleId, newColumnId);
+                }
+            }
+        } catch (Exception e) {
+            log.error("移动文章到专栏失败", e);
+            throw new BusinessException("移动文章到专栏失败", e);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void removeArticleColumnRelation(Long articleId) {
+        log.info("解除文章与专栏的关联: articleId={}", articleId);
+        try {
+            ArticleColumn existingRelation = articleColumnMapper.findByArticleId(articleId);
+            if (existingRelation != null) {
+                articleColumnMapper.deleteByArticleId(articleId);
+                columnMapper.updateArticleCount(existingRelation.getColumnId(), -1);
+                log.info("文章与专栏关联已解除: articleId={}, columnId={}", articleId, existingRelation.getColumnId());
+            }
+        } catch (Exception e) {
+            log.error("解除文章与专栏关联失败", e);
+            throw new BusinessException("解除文章与专栏关联失败", e);
         }
     }
 }
