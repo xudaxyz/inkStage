@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ColumnMapper">
+    <!-- 基础结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.Column">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="name" property="name"/>
+        <result column="slug" property="slug"/>
+        <result column="description" property="description"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="read_count" property="readCount"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, user_id, name, slug, description, cover_image, article_count, read_count, sort_order, status,
+        create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 根据ID查询专栏 -->
+    <select id="findById" resultMap="ResultMap">
+        select
+        <include refid="baseColumns"/>
+        from `column` where id = #{id} and deleted = 0
+    </select>
+
+    <!-- 根据ID查询专栏详情VO -->
+    <select id="findDetailById" resultType="com.inkstage.vo.front.ColumnDetailVO">
+        SELECT
+        c.id,
+        c.name,
+        c.slug,
+        c.description,
+        c.cover_image,
+        c.article_count,
+        c.read_count,
+        c.sort_order,
+        c.status,
+        c.create_time,
+        c.update_time,
+        c.user_id,
+        u.nickname,
+        u.avatar,
+        u.signature
+        FROM `column` c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.id = #{id} AND c.deleted = 0
+    </select>
+
+    <!-- 专栏列表结果映射 -->
+    <resultMap id="ColumnListResultMap" type="com.inkstage.vo.front.ColumnListVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="slug" property="slug"/>
+        <result column="description" property="description"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="article_count" property="articleCount"/>
+        <result column="read_count" property="readCount"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="user_id" property="userId"/>
+        <result column="nickname" property="nickname"/>
+        <result column="avatar" property="avatar"/>
+    </resultMap>
+
+    <!-- 专栏列表查询 -->
+    <select id="findColumnList" resultMap="ColumnListResultMap">
+        SELECT
+        c.id,
+        c.name,
+        c.slug,
+        c.description,
+        c.cover_image,
+        c.article_count,
+        c.read_count,
+        c.sort_order,
+        c.status,
+        c.create_time,
+        c.update_time,
+        c.user_id,
+        u.nickname,
+        u.avatar
+        FROM `column` c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.deleted = 0 AND c.status = 1
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (c.name LIKE CONCAT('%', #{query.keyword}, '%')
+            OR c.description LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.userId != null">
+            AND c.user_id = #{query.userId}
+        </if>
+        ORDER BY c.sort_order ASC, c.create_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 热门专栏查询 -->
+    <select id="findHotColumns" resultMap="ColumnListResultMap">
+        SELECT
+        c.id,
+        c.name,
+        c.slug,
+        c.description,
+        c.cover_image,
+        c.article_count,
+        c.read_count,
+        c.sort_order,
+        c.status,
+        c.create_time,
+        c.update_time,
+        c.user_id,
+        u.nickname,
+        u.avatar
+        FROM `column` c
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE c.deleted = 0 AND c.status = 1
+        ORDER BY c.read_count DESC, c.article_count DESC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 我的专栏查询 -->
+    <select id="findMyColumns" resultType="com.inkstage.vo.front.MyColumnVO">
+        SELECT
+        id,
+        name,
+        slug,
+        description,
+        cover_image,
+        article_count,
+        read_count,
+        sort_order,
+        status,
+        create_time,
+        update_time
+        FROM `column`
+        WHERE user_id = #{userId} AND deleted = 0
+        ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+    <!-- 根据slug查询专栏 -->
+    <select id="findBySlug" resultMap="ResultMap">
+        select
+        <include refid="baseColumns"/>
+        from `column` where slug = #{slug} and deleted = 0
+    </select>
+
+    <!-- 根据名称和用户ID查询专栏 -->
+    <select id="findByNameAndUserId" resultMap="ResultMap">
+        select
+        <include refid="baseColumns"/>
+        from `column` where name = #{name} and user_id = #{userId} and deleted = 0
+    </select>
+
+    <!-- 插入专栏 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `column`
+        (user_id, name, slug, description, cover_image, article_count, read_count, sort_order, status, create_time, update_time)
+        VALUES
+        (#{userId}, #{name}, #{slug}, #{description}, #{coverImage}, #{articleCount}, #{readCount}, #{sortOrder}, #{status},
+        #{createTime}, #{updateTime})
+    </insert>
+
+    <!-- 更新专栏 -->
+    <update id="update">
+        UPDATE `column`
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="slug != null">slug = #{slug},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="coverImage != null">cover_image = #{coverImage},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新文章数量 -->
+    <update id="updateArticleCount">
+        UPDATE `column` SET article_count = article_count + #{offset}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 更新阅读量 -->
+    <update id="updateReadCount">
+        UPDATE `column` SET read_count = read_count + #{offset}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 用户删除专栏（软删除） -->
+    <update id="deleteById">
+        UPDATE `column` SET deleted = 1, deleted_time = NOW() WHERE id = #{id} AND user_id = #{userId}
+    </update>
+
+    <!-- 统计专栏列表数量 -->
+    <select id="countColumnList" resultType="long">
+        SELECT COUNT(*)
+        FROM `column`
+        WHERE deleted = 0 AND status = 1
+        <if test="query.keyword != null and query.keyword != ''">
+            AND (name LIKE CONCAT('%', #{query.keyword}, '%')
+            OR description LIKE CONCAT('%', #{query.keyword}, '%'))
+        </if>
+        <if test="query.userId != null">
+            AND user_id = #{query.userId}
+        </if>
+    </select>
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.ArticleColumnMapper">
+    <!-- 基础结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.ArticleColumn">
+        <id column="id" property="id"/>
+        <result column="article_id" property="articleId"/>
+        <result column="column_id" property="columnId"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, article_id, column_id, sort_order, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 根据ID查询 -->
+    <select id="findById" resultMap="ResultMap">
+        select <include refid="baseColumns"/> from article_column where id = #{id} and deleted = 0
+    </select>
+
+    <!-- 根据专栏ID获取文章列表 -->
+    <select id="findArticlesByColumnId" resultType="com.inkstage.vo.front.ArticleListVO">
+        SELECT
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.article_status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.category_id,
+        u.avatar,
+        u.nickname,
+        c.name as category_name,
+        ac.sort_order
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        LEFT JOIN user u ON a.user_id = u.id
+        LEFT JOIN category c ON a.category_id = c.id
+        WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
+        ORDER BY ac.sort_order ASC, ac.create_time ASC
+    </select>
+
+    <!-- 根据文章ID查询 -->
+    <select id="findByArticleId" resultMap="ResultMap">
+        select <include refid="baseColumns"/> from article_column where article_id = #{articleId} and deleted = 0
+    </select>
+
+    <!-- 根据文章ID和专栏ID查询 -->
+    <select id="findByArticleAndColumn" resultMap="ResultMap">
+        select <include refid="baseColumns"/>
+        from article_column
+        where article_id = #{articleId} and column_id = #{columnId} and deleted = 0
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO article_column
+        (article_id, column_id, sort_order, create_time, update_time)
+        VALUES
+        (#{articleId}, #{columnId}, #{sortOrder}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        UPDATE article_column
+        <set>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新排序 -->
+    <update id="updateSortOrder">
+        UPDATE article_column SET sort_order = #{sortOrder}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除 -->
+    <update id="deleteById">
+        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 根据文章ID删除 -->
+    <update id="deleteByArticleId">
+        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE article_id = #{articleId}
+    </update>
+
+    <!-- 根据专栏ID删除所有关联 -->
+    <update id="deleteByColumnId">
+        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE column_id = #{columnId}
+    </update>
+
+    <!-- 统计专栏文章数量 -->
+    <select id="countByColumnId" resultType="int">
+        SELECT COUNT(*) FROM article_column WHERE column_id = #{columnId} AND deleted = 0
+    </select>
+</mapper>

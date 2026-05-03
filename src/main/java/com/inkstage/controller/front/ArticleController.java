@@ -65,7 +65,7 @@ public class ArticleController {
      */
     @PutMapping("/update/{id}")
     @UserAccess
-    public Result<Boolean> updateArticle(@PathVariable("id") Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
+    public Result<Boolean> updateArticle(@PathVariable Long id, @Valid @RequestBody ArticleCreateDTO articleCreateDTO) {
         log.info("更新文章DTO: {}, 文章ID: {}", articleCreateDTO, id);
         boolean success = articleService.updateArticle(id, articleCreateDTO);
         if (success) {

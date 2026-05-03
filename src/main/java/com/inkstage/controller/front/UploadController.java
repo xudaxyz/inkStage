@@ -98,6 +98,25 @@ public class UploadController {
     }
 
     /**
+     * 上传专栏封面图
+     *
+     * @param file 上传的文件
+     * @return 上传结果, 包含文件URL
+     */
+    @PostMapping("/column/cover-image")
+    @UserAccess
+    public Result<String> uploadColumnCoverImage(@RequestParam("file") MultipartFile file, @RequestParam(required = false) Long expiry) {
+        log.info("上传专栏封面图片:{}", file.getOriginalFilename());
+        Long userId = UserContext.getCurrentUserId();
+
+        // 上传专栏封面图
+        long expiryTime = expiry != null ? expiry : 2592000; // 默认30天
+        String coverUrl = fileService.uploadColumnCoverImage(file, userId, expiryTime);
+        log.info("专栏封面图片上传成功:{}", coverUrl);
+        return Result.success(coverUrl, ResponseMessage.UPLOAD_SUCCESS);
+    }
+
+    /**
      * 即时上传图片
      *
      * @param file 上传的文件

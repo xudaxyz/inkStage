@@ -63,6 +63,7 @@ public class SecurityConfig {
                         // 允许公开API请求
                         .requestMatchers("/index/**").permitAll()
                         .requestMatchers("/front/ranking/**").permitAll()
+                        .requestMatchers("/front/column/**").permitAll()
                         .requestMatchers("/front/user/**").permitAll()
                         .requestMatchers("/front/article/**", "/front/comment/**").permitAll()
                         .requestMatchers("/front/tag/**", "/front/category/**").permitAll()

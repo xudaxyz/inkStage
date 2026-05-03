@@ -75,6 +75,16 @@ public interface FileService {
     String uploadArticleCoverImage(MultipartFile file, Long userId, long expiry);
 
     /**
+     * 上传专栏封面图
+     *
+     * @param file   上传的文件
+     * @param userId 用户ID
+     * @param expiry URL有效期(秒)
+     * @return 文件访问URL
+     */
+    String uploadColumnCoverImage(MultipartFile file, Long userId, long expiry);
+
+    /**
      * 上传文章图片
      * @param file 上传的文件
      * @param userId 用户ID
@@ -150,4 +160,22 @@ public interface FileService {
      * @param userDetail 管理员用户详情VO
      */
     void ensureAdminUserDetailIsFullUrl(AdminUserDetailVO userDetail);
+
+    /**
+     * 确保专栏列表对象中的图片字段是完整的预签名URL
+     * @param columnListVOList 专栏列表VO
+     */
+    void ensureColumnImagesAreFullUrl(List<ColumnListVO> columnListVOList);
+
+    /**
+     * 确保专栏详情相关图片字段是完整的预签名URL
+     * @param columnDetailVO 专栏详情VO
+     */
+    void ensureColumnDetailImageIsFullUrl(ColumnDetailVO columnDetailVO);
+
+    /**
+     * 确保我的专栏页面相关图片字段是完整的预签名URL
+     * @param myColumns 我的专栏VO
+     */
+    void ensureMyColumnsImageAreFullUrl(List<MyColumnVO> myColumns);
 }

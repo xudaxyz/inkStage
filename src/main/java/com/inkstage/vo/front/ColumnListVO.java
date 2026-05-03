@@ -1,27 +1,26 @@
-package com.inkstage.entity.model;
+package com.inkstage.vo.front;
 
-import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.common.StatusEnum;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
- * 专栏实体类
+ * 专栏列表VO
+ * 用于前台专栏列表展示
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
-public class Column extends BaseEntity {
+public class ColumnListVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     /**
-     * 专栏创建者ID
+     * 专栏ID
      */
-    private Long userId;
+    private Long id;
 
     /**
      * 专栏名称
@@ -29,7 +28,7 @@ public class Column extends BaseEntity {
     private String name;
 
     /**
-     * 专栏别名(URL友好)
+     * 专栏别名（URL友好）
      */
     private String slug;
 
@@ -59,12 +58,32 @@ public class Column extends BaseEntity {
     private Integer sortOrder;
 
     /**
-     * 是否可见
-     */
-    private VisibleStatus visible;
-
-    /**
-     * 状态(0:禁用,1:正常)
+     * 状态（0:禁用, 1:正常）
      */
     private StatusEnum status;
+
+    /**
+     * 专栏创建者ID
+     */
+    private Long userId;
+
+    /**
+     * 专栏创建者昵称
+     */
+    private String nickname;
+
+    /**
+     * 专栏创建者头像URL
+     */
+    private String avatar;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
 }

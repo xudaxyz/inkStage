@@ -173,6 +173,43 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public void ensureColumnImagesAreFullUrl(List<ColumnListVO> columnListVOList) {
+        if (columnListVOList == null || columnListVOList.isEmpty()) {
+            return;
+        }
+        // 确保封面图和用户头像的URL是完整的
+        for (ColumnListVO columnListVO : columnListVOList) {
+            String fullCoverImageUrl = convertToFullUrl(columnListVO.getCoverImage());
+            columnListVO.setCoverImage(fullCoverImageUrl);
+            String fullAvatarUrl = convertToFullUrl(columnListVO.getAvatar());
+            columnListVO.setAvatar(fullAvatarUrl);
+        }
+    }
+
+    @Override
+    public void ensureColumnDetailImageIsFullUrl(ColumnDetailVO columnDetail) {
+        if (columnDetail == null) {
+            return;
+        }
+        String fullAvatarUrl = convertToFullUrl(columnDetail.getAvatar());
+        columnDetail.setAvatar(fullAvatarUrl);
+        String fullCoverImageUrl = convertToFullUrl(columnDetail.getCoverImage());
+        columnDetail.setCoverImage(fullCoverImageUrl);
+    }
+
+    @Override
+    public void ensureMyColumnsImageAreFullUrl(List<MyColumnVO> myColumns) {
+        if (myColumns == null || myColumns.isEmpty()) {
+            return;
+        }
+        // 确保封面图和用户头像的URL是完整的
+        for (MyColumnVO myColumn : myColumns) {
+            String fullCoverImageUrl = convertToFullUrl(myColumn.getCoverImage());
+            myColumn.setCoverImage(fullCoverImageUrl);
+        }
+    }
+
+    @Override
     public String uploadFile(MultipartFile file, String bucketName, String objectName, long expiry) {
         // 验证文件类型
         validateFileType(file);
@@ -209,6 +246,13 @@ public class FileServiceImpl implements FileService {
     public String uploadArticleCoverImage(MultipartFile file, Long userId, long expiry) {
         String bucketName = minioProperties.getBucketName();
         String objectName = generateObjectName("article-covers", userId, file.getOriginalFilename());
+        return uploadFile(file, bucketName, objectName, expiry);
+    }
+
+    @Override
+    public String uploadColumnCoverImage(MultipartFile file, Long userId, long expiry) {
+        String bucketName = minioProperties.getBucketName();
+        String objectName = generateObjectName("column-covers", userId, file.getOriginalFilename());
         return uploadFile(file, bucketName, objectName, expiry);
     }
 
