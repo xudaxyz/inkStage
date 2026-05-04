@@ -8,8 +8,10 @@ import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.dto.front.UpdateColumnArticleDTO;
 import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.service.ColumnService;
+import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
+import com.inkstage.vo.front.MyColumnSubscriptionVO;
 import com.inkstage.vo.front.MyColumnVO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,7 @@ import java.util.List;
 public class ColumnController {
 
     private final ColumnService columnService;
+    private final ColumnSubscriptionService columnSubscriptionService;
 
     /**
      * 创建专栏
@@ -195,5 +198,76 @@ public class ColumnController {
     public Result<ArticleColumn> getArticleColumn(@RequestParam Long articleId) {
         ArticleColumn articleColumn = columnService.getArticleColumn(articleId);
         return Result.success(articleColumn);
+    }
+
+    /**
+     * 订阅专栏
+     *
+     * @param id 专栏ID
+     * @return 订阅成功返回true
+     */
+    @PostMapping("/subscribe/{id}")
+    @UserAccess
+    public Result<Boolean> subscribeColumn(@PathVariable Long id) {
+        log.info("订阅专栏: id={}", id);
+        boolean success = columnSubscriptionService.subscribeColumn(id);
+        return success ? Result.success(true, "订阅成功") : Result.error("订阅失败");
+    }
+
+    /**
+     * 取消订阅专栏
+     *
+     * @param id 专栏ID
+     * @return 取消订阅成功返回true
+     */
+    @DeleteMapping("/unsubscribe/{id}")
+    @UserAccess
+    public Result<Boolean> unsubscribeColumn(@PathVariable Long id) {
+        log.info("取消订阅专栏: id={}", id);
+        boolean success = columnSubscriptionService.unsubscribeColumn(id);
+        return success ? Result.success(true, "已取消订阅") : Result.error("取消订阅失败");
+    }
+
+    /**
+     * 检查当前用户是否已订阅指定专栏
+     *
+     * @param id 专栏ID
+     * @return 已订阅返回true，未订阅返回false
+     */
+    @GetMapping("/subscribe/status/{id}")
+    @UserAccess
+    public Result<Boolean> checkSubscribeStatus(@PathVariable Long id) {
+        boolean subscribed = columnSubscriptionService.isSubscribed(id);
+        return Result.success(subscribed);
+    }
+
+    /**
+     * 获取当前用户的订阅专栏列表
+     *
+     * @param offset 偏移量（默认为0）
+     * @param limit 限制数量（默认为20）
+     * @return 订阅专栏列表
+     */
+    @GetMapping("/subscribe/list")
+    @UserAccess
+    public Result<List<MyColumnSubscriptionVO>> getMySubscriptions(
+            @RequestParam(defaultValue = "0") Integer offset,
+            @RequestParam(defaultValue = "20") Integer limit) {
+        log.info("获取我的订阅专栏: offset={}, limit={}", offset, limit);
+        List<MyColumnSubscriptionVO> list = columnSubscriptionService.getMySubscriptions(offset, limit);
+        return Result.success(list);
+    }
+
+    /**
+     * 获取专栏的订阅数
+     *
+     * @param id 专栏ID
+     * @return 订阅数
+     */
+    @GetMapping("/subscribe/count/{id}")
+    public Result<Long> getSubscriberCount(@PathVariable Long id) {
+        log.info("获取专栏订阅数: id={}", id);
+        long count = columnSubscriptionService.countSubscribers(id);
+        return Result.success(count);
     }
 }

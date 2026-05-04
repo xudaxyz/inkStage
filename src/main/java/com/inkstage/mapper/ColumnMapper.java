@@ -112,6 +112,15 @@ public interface ColumnMapper {
     int updateReadCount(@Param("id") Long id, @Param("offset") int offset);
 
     /**
+     * 更新专栏订阅数
+     *
+     * @param id     专栏ID
+     * @param offset 增量（正数增加，负数减少）
+     * @return 影响的行数
+     */
+    int updateSubscriptionCount(@Param("id") Long id, @Param("offset") int offset);
+
+    /**
      * 软删除专栏（仅限用户删除自己的专栏）
      *
      * @param id     专栏ID

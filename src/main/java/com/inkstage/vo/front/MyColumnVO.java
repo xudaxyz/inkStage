@@ -48,6 +48,11 @@ public class MyColumnVO implements Serializable {
     private Integer articleCount;
 
     /**
+     * 专栏订阅数
+     */
+    private Integer subscriptionCount;
+
+    /**
      * 专栏总阅读量
      */
     private Integer readCount;

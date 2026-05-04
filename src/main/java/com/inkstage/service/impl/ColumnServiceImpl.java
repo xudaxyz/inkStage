@@ -8,11 +8,13 @@ import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleColumnMapper;
 import com.inkstage.mapper.ColumnMapper;
 import com.inkstage.service.ColumnService;
+import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleListVO;
@@ -25,7 +27,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -35,6 +39,7 @@ public class ColumnServiceImpl implements ColumnService {
     private final ColumnMapper columnMapper;
     private final ArticleColumnMapper articleColumnMapper;
     private final FileService fileService;
+    private final ColumnSubscriptionService columnSubscriptionService;
 
     @Override
     @Transactional
@@ -55,6 +60,7 @@ public class ColumnServiceImpl implements ColumnService {
             column.setDescription(dto.getDescription());
             column.setCoverImage(dto.getCoverImage());
             column.setArticleCount(0);
+            column.setSubscriptionCount(0);
             column.setReadCount(0);
             column.setSortOrder(dto.getSortOrder() != null ? dto.getSortOrder() : 0);
             column.setStatus(StatusEnum.ENABLED);
@@ -246,6 +252,15 @@ public class ColumnServiceImpl implements ColumnService {
             boolean result = articleColumnMapper.insert(articleColumn) > 0;
             if (result) {
                 columnMapper.updateArticleCount(columnId, 1);
+                // 异步发送通知给订阅者
+                try {
+                    Column column = columnMapper.findById(columnId);
+                    if (column != null) {
+                        sendColumnArticleUpdateNotification(columnId, articleId, null);
+                    }
+                } catch (Exception e) {
+                    log.error("发送专栏文章更新通知失败", e);
+                }
             }
             return result;
         } catch (BusinessException e) {
@@ -404,5 +419,40 @@ public class ColumnServiceImpl implements ColumnService {
             log.error("解除文章与专栏关联失败", e);
             throw new BusinessException("解除文章与专栏关联失败", e);
         }
+    }
+
+    @Override
+    public void sendColumnArticleUpdateNotification(Long columnId, Long articleId, String articleTitle) {
+        log.info("发送专栏文章更新通知: columnId={}, articleId={}", columnId, articleId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("articleId", articleId);
+        params.put("articleTitle", articleTitle != null ? articleTitle : "新文章");
+        params.put("relatedId", articleId);
+        params.put("actionUrl", "/article/" + articleId);
+
+        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_ARTICLE_PUBLISH, params);
+    }
+
+    @Override
+    public void sendColumnDisabledNotification(Long columnId) {
+        log.info("发送专栏下线通知: columnId={}", columnId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("actionUrl", "/");
+        params.put("columnStatus", "已下线");
+
+        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_DISABLED, params);
+    }
+
+    @Override
+    public void sendColumnRestoredNotification(Long columnId) {
+        log.info("发送专栏恢复通知: columnId={}", columnId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("actionUrl", "/column/" + columnId);
+        params.put("columnStatus", "已恢复");
+
+        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_RESTORED, params);
     }
 }

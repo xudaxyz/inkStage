@@ -11,6 +11,7 @@
         <result column="description" property="description"/>
         <result column="cover_image" property="coverImage"/>
         <result column="article_count" property="articleCount"/>
+        <result column="subscription_count" property="subscriptionCount"/>
         <result column="read_count" property="readCount"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
@@ -21,7 +22,7 @@
     </resultMap>
 
     <sql id="baseColumns">
-        id, user_id, name, slug, description, cover_image, article_count, read_count, sort_order, status,
+        id, user_id, name, slug, description, cover_image, article_count, subscription_count, read_count, sort_order, status,
         create_time, update_time, deleted, deleted_time
     </sql>
 
@@ -63,6 +64,7 @@
         <result column="description" property="description"/>
         <result column="cover_image" property="coverImage"/>
         <result column="article_count" property="articleCount"/>
+        <result column="subscription_count" property="subscriptionCount"/>
         <result column="read_count" property="readCount"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="status" property="status" javaType="com.inkstage.enums.common.StatusEnum"/>
@@ -137,6 +139,7 @@
         description,
         cover_image,
         article_count,
+        subscription_count,
         read_count,
         sort_order,
         status,
@@ -164,9 +167,9 @@
     <!-- 插入专栏 -->
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `column`
-        (user_id, name, slug, description, cover_image, article_count, read_count, sort_order, status, create_time, update_time)
+        (user_id, name, slug, description, cover_image, article_count, subscription_count, read_count, sort_order, status, create_time, update_time)
         VALUES
-        (#{userId}, #{name}, #{slug}, #{description}, #{coverImage}, #{articleCount}, #{readCount}, #{sortOrder}, #{status},
+        (#{userId}, #{name}, #{slug}, #{description}, #{coverImage}, #{articleCount}, #{subscriptionCount}, #{readCount}, #{sortOrder}, #{status},
         #{createTime}, #{updateTime})
     </insert>
 
@@ -192,6 +195,11 @@
     <!-- 更新阅读量 -->
     <update id="updateReadCount">
         UPDATE `column` SET read_count = read_count + #{offset}, update_time = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 更新订阅数 -->
+    <update id="updateSubscriptionCount">
+        UPDATE `column` SET subscription_count = subscription_count + #{offset}, update_time = NOW() WHERE id = #{id}
     </update>
 
     <!-- 用户删除专栏（软删除） -->

@@ -296,7 +296,7 @@ public class CacheClearServiceImpl implements CacheClearService {
         }
     }
 
-    // ==================== 系统相关缓存清除 ====================
+    /** ==================== 系统相关缓存清除 ==================== */
 
     @Override
     public void clearSystemConfigCache() {
@@ -353,6 +353,29 @@ public class CacheClearServiceImpl implements CacheClearService {
         } catch (Exception e) {
             log.error("文章创建后清理缓存失败, 文章ID: {}", articleId, e);
         }
+    }
+
+    // ==================== 专栏订阅相关缓存清除 ====================
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS,
+            key = "#userId + ':' + #columnId")
+    public void clearColumnSubscriptionStatusCache(Long columnId, Long userId) {
+        log.debug("清理专栏订阅状态缓存, 专栏ID: {}, 用户ID: {}", columnId, userId);
+    }
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
+            key = "#userId + ':*'")
+    public void clearUserSubscriptionListCache(Long userId) {
+        log.debug("清理用户订阅列表缓存, 用户ID: {}", userId);
+    }
+
+    @Override
+    public void clearColumnSubscriptionCache(Long columnId, Long userId) {
+        clearColumnSubscriptionStatusCache(columnId, userId);
+        clearUserSubscriptionListCache(userId);
+        log.debug("清理专栏订阅相关的所有缓存, 专栏ID: {}, 用户ID: {}", columnId, userId);
     }
 
 }

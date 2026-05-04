@@ -7,6 +7,9 @@ import lombok.Getter;
 public enum NotificationType implements EnumCode {
     SYSTEM(100,  "SYSTEM","系统通知"),
     ARTICLE_PUBLISH(200, "ARTICLE_PUBLISH","文章发布通知"),
+    COLUMN_ARTICLE_PUBLISH(210, "COLUMN_ARTICLE_PUBLISH", "专栏文章发布通知"),
+    COLUMN_DISABLED(211, "COLUMN_DISABLED", "专栏下线通知"),
+    COLUMN_RESTORED(212, "COLUMN_RESTORED", "专栏恢复通知"),
     ARTICLE_LIKE(201, "ARTICLE_LIKE","文章点赞通知"),
     ARTICLE_COLLECTION(202, "ARTICLE_COLLECTION","文章收藏通知"),
     ARTICLE_COMMENT(203, "ARTICLE_COMMENT","文章评论通知"),

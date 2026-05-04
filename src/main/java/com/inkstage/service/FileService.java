@@ -178,4 +178,10 @@ public interface FileService {
      * @param myColumns 我的专栏VO
      */
     void ensureMyColumnsImageAreFullUrl(List<MyColumnVO> myColumns);
+
+    /**
+     * 确保我的订阅页面相关图片字段是完整的预签名URL
+     * @param mySubscriptions 我的订阅VO
+     */
+    void ensureMySubscribeColumnAreFullUrl(List<MyColumnSubscriptionVO> mySubscriptions);
 }

@@ -199,4 +199,29 @@ public interface CacheClearService {
     void clearUserArticleCache(Long userId);
 
     void cleanCacheAfterArticleCreate(Long articleId, Long userId);
+
+    // ==================== 专栏订阅相关缓存清除 ====================
+
+    /**
+     * 清理专栏订阅状态缓存
+     *
+     * @param columnId 专栏ID
+     * @param userId 用户ID
+     */
+    void clearColumnSubscriptionStatusCache(Long columnId, Long userId);
+
+    /**
+     * 清理用户的订阅列表缓存
+     *
+     * @param userId 用户ID
+     */
+    void clearUserSubscriptionListCache(Long userId);
+
+    /**
+     * 清理专栏订阅相关的所有缓存
+     *
+     * @param columnId 专栏ID
+     * @param userId 用户ID
+     */
+    void clearColumnSubscriptionCache(Long columnId, Long userId);
 }

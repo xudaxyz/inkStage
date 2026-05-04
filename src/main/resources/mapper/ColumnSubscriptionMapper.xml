@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.ColumnSubscriptionMapper">
+
+    <!-- 结果映射 -->
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.ColumnSubscription">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="column_id" property="columnId"/>
+        <result column="subscription_time" property="subscriptionTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="columns">
+        id, user_id, column_id, subscription_time, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <!-- 检查订阅状态 -->
+    <select id="checkSubscriptionStatus" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM column_subscription WHERE user_id = #{userId} AND column_id = #{columnId} AND deleted = 0
+    </select>
+
+    <!-- 查询用户的订阅专栏列表（包含专栏详情） -->
+    <select id="findMySubscriptions" resultType="com.inkstage.vo.front.MyColumnSubscriptionVO">
+        SELECT
+            c.id,
+            c.name,
+            c.slug,
+            c.description,
+            c.cover_image,
+            c.article_count,
+            c.read_count,
+            c.sort_order,
+            c.status,
+            u.nickname,
+            u.avatar,
+            cs.subscription_time AS subscriptionTime
+        FROM column_subscription cs
+        LEFT JOIN `column` c ON cs.column_id = c.id
+        LEFT JOIN user u ON c.user_id = u.id
+        WHERE cs.user_id = #{userId} AND cs.deleted = 0 AND c.deleted = 0
+        ORDER BY cs.subscription_time DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 查询专栏的订阅用户ID列表 -->
+    <select id="findSubscriberIds" resultType="java.lang.Long">
+        SELECT user_id
+        FROM column_subscription
+        WHERE column_id = #{columnId} AND deleted = 0
+    </select>
+
+    <!-- 插入订阅关系 -->
+    <insert id="insert" parameterType="com.inkstage.entity.model.ColumnSubscription" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO column_subscription (user_id, column_id, subscription_time, create_time, update_time, deleted)
+        VALUES (#{userId}, #{columnId}, #{subscriptionTime}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <!-- 删除订阅关系（软删除） -->
+    <update id="delete">
+        UPDATE column_subscription SET deleted = 1, deleted_time = NOW()
+        WHERE user_id = #{userId} AND column_id = #{columnId} AND deleted = 0
+    </update>
+
+    <!-- 统计用户的订阅专栏数 -->
+    <select id="countSubscriptions" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM column_subscription
+        WHERE user_id = #{userId} AND deleted = 0
+    </select>
+
+    <!-- 统计专栏的订阅数 -->
+    <select id="countSubscribers" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM column_subscription
+        WHERE column_id = #{columnId} AND deleted = 0
+    </select>
+
+</mapper>

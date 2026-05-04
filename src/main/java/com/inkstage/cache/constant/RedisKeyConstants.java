@@ -55,6 +55,7 @@ public class RedisKeyConstants {
     public static final String COMMENT_LIST_PREFIX = "inkstage:comment:list:";
     public static final String COMMENT_REPLY_PREFIX = "inkstage:comment:reply:";
     public static final String FOLLOW_PREFIX = "inkstage:follow:";
+    public static final String COLUMN_SUBSCRIPTION_PREFIX = "inkstage:column:subscription:";
     public static final String READING_HISTORY_PREFIX = "inkstage:reading:history:";
     public static final String PERMISSION_PREFIX = "inkstage:permission:";
     public static final String ROLE_PREFIX = "inkstage:role:";
@@ -93,6 +94,8 @@ public class RedisKeyConstants {
     public static final String CACHE_COMMENT_REPLIES = "comment:replies";
     public static final String CACHE_COLLECTION_STATUS = "collection:status";
     public static final String CACHE_LIKE_STATUS = "like:status";
+    public static final String CACHE_COLUMN_SUBSCRIPTION_STATUS = "column:subscription:status";
+    public static final String CACHE_COLUMN_SUBSCRIPTION_LIST = "column:subscription:list";
     public static final String CACHE_CATEGORIES = "categories";
     public static final String CACHE_TAGS = "tags";
     public static final String CACHE_ROLES = "roles";
@@ -127,6 +130,8 @@ public class RedisKeyConstants {
     public static final Duration CACHE_COMMENT_LIST_TTL = DEFAULT_TTL;
     public static final Duration CACHE_LIKE_STATUS_TTL = LONG_TTL;
     public static final Duration CACHE_COLLECTION_STATUS_TTL = LONG_TTL;
+    public static final Duration CACHE_COLUMN_SUBSCRIPTION_STATUS_TTL = LONG_TTL;
+    public static final Duration CACHE_COLUMN_SUBSCRIPTION_LIST_TTL = DEFAULT_TTL;
     public static final Duration CACHE_USER_HOT_TTL = LONG_TTL;
     public static final Duration CACHE_FOLLOW_STATUS_TTL = DEFAULT_TTL;
     public static final Duration CACHE_FOLLOW_LIST_TTL = DEFAULT_TTL;

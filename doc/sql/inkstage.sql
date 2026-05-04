@@ -223,7 +223,7 @@ CREATE TABLE `article_tag`
     `article_id`   bigint   NOT NULL COMMENT '文章ID',
     `tag_id`       bigint   NOT NULL COMMENT '标签ID',
     `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      tinyint NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`) USING BTREE,
@@ -299,9 +299,10 @@ CREATE TABLE `column`
     `slug`          VARCHAR(100) NOT NULL UNIQUE COMMENT '专栏别名（URL友好）',
     `description`   TEXT COMMENT '专栏描述',
     `cover_image`   VARCHAR(255) COMMENT '专栏封面图URL',
-    `article_count` INT                   DEFAULT 0 COMMENT '专栏内文章数量',
-    `read_count`    INT                   DEFAULT 0 COMMENT '专栏总阅读量',
-    `sort_order`    INT                   DEFAULT 0 COMMENT '排序顺序',
+    `article_count`      INT                   DEFAULT 0 COMMENT '专栏内文章数量',
+    `subscription_count` INT                   DEFAULT 0 COMMENT '专栏订阅数',
+    `read_count`         INT                   DEFAULT 0 COMMENT '专栏总阅读量',
+    `sort_order`         INT                   DEFAULT 0 COMMENT '排序顺序',
     `status`        TINYINT               DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
     `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -320,7 +321,7 @@ CREATE TABLE `article_column`
     `column_id`    BIGINT   NOT NULL COMMENT '专栏ID',
     `sort_order`   INT               DEFAULT 0 COMMENT '文章在专栏内的排序顺序',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
     UNIQUE KEY `uk_article_column` (`article_id`, `column_id`),
@@ -328,6 +329,23 @@ CREATE TABLE `article_column`
     KEY            `idx_column_id` (`column_id`),
     KEY            `idx_sort_order` (`sort_order`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='文章专栏关联表';
+
+-- 专栏订阅表（column_subscription）
+DROP TABLE IF EXISTS `column_subscription`;
+CREATE TABLE `column_subscription`
+(
+    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `user_id`          BIGINT   NOT NULL COMMENT '订阅者用户ID',
+    `column_id`        BIGINT   NOT NULL COMMENT '专栏ID',
+    `subscription_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '订阅时间',
+    `create_time`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`      DATETIME DEFAULT NULL COMMENT '更新时间',
+    `deleted`          TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
+    `deleted_time`     DATETIME COMMENT '删除时间',
+    UNIQUE KEY `uk_user_column` (`user_id`, `column_id`),
+    KEY                `idx_user_id` (`user_id`),
+    KEY                `idx_column_id` (`column_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专栏订阅表';
 
 -- 文章阅读统计表（article_read_stat）
 DROP TABLE IF EXISTS `article_read_stat`;
@@ -399,7 +417,7 @@ CREATE TABLE `comment_like`
     `comment_id`   BIGINT   NOT NULL COMMENT '评论ID',
     `user_id`      BIGINT   NOT NULL COMMENT '用户ID',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
     UNIQUE KEY `uk_comment_user` (`comment_id`, `user_id`),
@@ -624,7 +642,7 @@ CREATE TABLE `feedback_reply`
     `user_id`      BIGINT   NOT NULL COMMENT '回复人ID',
     `content`      TEXT     NOT NULL COMMENT '回复内容',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
     KEY            `idx_feedback_id` (`feedback_id`),
@@ -839,7 +857,7 @@ CREATE TABLE `tag_stat`
     `stat_date`    DATE     NOT NULL COMMENT '统计日期',
     `use_count`    INT               DEFAULT 0 COMMENT '使用次数',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `update_time`  DATETIME NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`      TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` DATETIME COMMENT '删除时间',
     UNIQUE KEY `uk_tag_date` (`tag_id`, `stat_date`),

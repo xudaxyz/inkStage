@@ -8,11 +8,11 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 专栏列表VO
- * 用于前台专栏列表展示
+ * 我的订阅专栏VO
+ * 用于用户个人中心展示自己订阅的专栏
  */
 @Data
-public class ColumnListVO implements Serializable {
+public class MyColumnSubscriptionVO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -48,11 +48,6 @@ public class ColumnListVO implements Serializable {
     private Integer articleCount;
 
     /**
-     * 专栏订阅数
-     */
-    private Integer subscriptionCount;
-
-    /**
      * 专栏总阅读量
      */
     private Integer readCount;
@@ -68,27 +63,17 @@ public class ColumnListVO implements Serializable {
     private StatusEnum status;
 
     /**
-     * 专栏创建者ID
-     */
-    private Long userId;
-
-    /**
-     * 专栏创建者昵称
+     * 创建者昵称
      */
     private String nickname;
 
     /**
-     * 专栏创建者头像URL
+     * 创建者头像
      */
     private String avatar;
 
     /**
-     * 创建时间
+     * 订阅时间
      */
-    private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
+    private LocalDateTime subscriptionTime;
 }

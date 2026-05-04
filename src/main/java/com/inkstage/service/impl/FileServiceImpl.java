@@ -210,6 +210,20 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
+    public void ensureMySubscribeColumnAreFullUrl(List<MyColumnSubscriptionVO> mySubscriptions) {
+        if (mySubscriptions == null || mySubscriptions.isEmpty()) {
+            return;
+        }
+        // 确保封面图和用户头像的URL是完整的
+        for (MyColumnSubscriptionVO myColumnSubscription : mySubscriptions) {
+            String fullCoverImageUrl = convertToFullUrl(myColumnSubscription.getCoverImage());
+            myColumnSubscription.setCoverImage(fullCoverImageUrl);
+            String avatar = convertToFullUrl(myColumnSubscription.getAvatar());
+            myColumnSubscription.setAvatar(avatar);
+        }
+    }
+
+    @Override
     public String uploadFile(MultipartFile file, String bucketName, String objectName, long expiry) {
         // 验证文件类型
         validateFileType(file);

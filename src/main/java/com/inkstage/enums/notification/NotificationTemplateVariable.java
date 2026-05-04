@@ -24,6 +24,14 @@ public enum NotificationTemplateVariable {
     COLLECTOR_ID("collectorId", "收藏者ID"),
     COLLECTOR_NAME("collectorName", "收藏者名称"),
 
+    // 专栏相关变量
+    COLUMN_ID("columnId", "专栏ID"),
+    COLUMN_NAME("columnName", "专栏名称"),
+    COLUMN_DESCRIPTION("columnDescription", "专栏描述"),
+    COLUMN_URL("columnUrl", "专栏链接"),
+    COLUMN_CREATOR_NAME("columnCreatorName", "专栏创建者名称"),
+    COLUMN_STATUS("columnStatus", "专栏状态"),
+
     // 评论相关变量
     COMMENT_ID("commentId", "评论ID"),
     COMMENT_CONTENT("commentContent", "评论内容"),

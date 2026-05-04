@@ -140,4 +140,27 @@ public interface ColumnService {
      * @param articleId 文章ID
      */
     void removeArticleColumnRelation(Long articleId);
+
+    /**
+     * 向专栏的所有订阅者发送文章更新通知
+     *
+     * @param columnId  专栏ID
+     * @param articleId 文章ID
+     * @param articleTitle 文章标题
+     */
+    void sendColumnArticleUpdateNotification(Long columnId, Long articleId, String articleTitle);
+
+    /**
+     * 向专栏的所有订阅者发送专栏下线通知
+     *
+     * @param columnId 专栏ID
+     */
+    void sendColumnDisabledNotification(Long columnId);
+
+    /**
+     * 向专栏的所有订阅者发送专栏恢复通知
+     *
+     * @param columnId 专栏ID
+     */
+    void sendColumnRestoredNotification(Long columnId);
 }
