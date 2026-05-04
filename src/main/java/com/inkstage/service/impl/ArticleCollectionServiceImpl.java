@@ -178,11 +178,11 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         // 查询文章列表
         List<CollectionArticleVO> collectionArticlesVO = articleCollectionMapper.findCollectionArticles(
                 userId, folderId, keyword, sortBy, sortOrder, offset, size);
-
-        // 确保图片URL完整
-        fileService.ensureCollectionArticleImgAreFullUrl(collectionArticlesVO);
         // 查询总数
         long total = articleCollectionMapper.countCollectionArticles(userId, folderId, keyword);
+
+        // 处理图片URL
+        fileService.ensureImageFullUrl(collectionArticlesVO);
 
         // 构建分页结果
         PageResult<CollectionArticleVO> pageResult = new PageResult<>();

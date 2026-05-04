@@ -45,7 +45,7 @@ public class UploadController {
         user.setId(userId);
         user.setCoverImage(coverUrl);
         userService.updateUser(user);
-        String fullCoverUrl = fileService.getFullUrl(coverUrl);
+        String fullCoverUrl = fileService.convertToFullUrl(coverUrl);
 
         return Result.success(fullCoverUrl, ResponseMessage.UPLOAD_SUCCESS);
     }
@@ -73,7 +73,7 @@ public class UploadController {
         user.setAvatar(avatarUrl);
         userService.updateUser(user);
         // 返回头像的完整URL
-        String fullAvatarUrl = fileService.getFullUrl(avatarUrl);
+        String fullAvatarUrl = fileService.convertToFullUrl(avatarUrl);
         return Result.success(fullAvatarUrl, ResponseMessage.UPLOAD_SUCCESS);
     }
 
@@ -132,7 +132,7 @@ public class UploadController {
         // 调用文件服务上传文章封面图
         long expiryTime = expiry != null ? expiry : 604800; // 默认7天
         String coverUrl = fileService.uploadArticleImage(file, userId, expiryTime);
-        String fullUrl = fileService.getFullUrl(coverUrl);
+        String fullUrl = fileService.convertToFullUrl(coverUrl);
         log.info("文章图片上传成功:{}", fullUrl);
         return Result.success(fullUrl, ResponseMessage.UPLOAD_SUCCESS);
     }

@@ -64,7 +64,7 @@ public class CommentServiceImpl implements CommentService {
 
         // 确保评论图片的URL完整
         if (result != null && result.getRecord() != null) {
-            fileService.ensureCommentImageAreFullUrl(result.getRecord());
+            fileService.ensureImageFullUrl(result.getRecord());
         }
 
         return result;
@@ -331,7 +331,7 @@ public class CommentServiceImpl implements CommentService {
 
             // 确保评论图片的URL完整
             if (pageResult != null && pageResult.getRecord() != null) {
-                fileService.ensureCommentImageAreFullUrl(pageResult.getRecord());
+                fileService.ensureImageFullUrl(pageResult.getRecord());
             }
 
             log.info("管理员分页获取评论列表成功, 总数: {}, 页码: {}, 每页大小: {}",
@@ -474,7 +474,7 @@ public class CommentServiceImpl implements CommentService {
 
         // 确保评论图片的URL完整
         if (result != null && result.getRecord() != null) {
-            fileService.ensureCommentImageAreFullUrl(result.getRecord());
+            fileService.ensureImageFullUrl(result.getRecord());
         }
 
         return result;

@@ -64,7 +64,7 @@ public class UserProfileServiceImpl implements UserProfileService {
             }
             // 重新查询更新后的用户
             User updatedUser = userMapper.findById(user.getId());
-            fileService.ensureUserImgIsFullUrl(updatedUser);
+            fileService.ensureImageFullUrl(updatedUser);
             // 更新缓存
             userCacheService.updateUserCache(updatedUser);
             // 清除文章列表相关缓存，因为文章列表包含用户信息
@@ -131,7 +131,7 @@ public class UserProfileServiceImpl implements UserProfileService {
                 throw new BusinessException("用户不存在");
             }
             // 确保用户头像和封面图的URL是完整的
-            fileService.ensureUserImgIsFullUrl(user);
+            fileService.ensureImageFullUrl(user);
             log.info("获取用户资料成功, 用户ID: {}", id);
             return user;
         } catch (Exception e) {

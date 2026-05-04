@@ -162,8 +162,8 @@ public class ColumnServiceImpl implements ColumnService {
             int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
             long total = columnMapper.countColumnList(queryDTO);
             List<ColumnListVO> columnListVOList = columnMapper.findColumnList(queryDTO, offset, queryDTO.getPageSize());
-            // 确保封面图和用户头像是完整url
-            fileService.ensureColumnImagesAreFullUrl(columnListVOList);
+
+            fileService.ensureImageFullUrl(columnListVOList);
 
             return PageResult.build(columnListVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
         } catch (Exception e) {
@@ -177,10 +177,10 @@ public class ColumnServiceImpl implements ColumnService {
         log.info("获取专栏详情: id={}", columnId);
         try {
             ColumnDetailVO columnDetail = columnMapper.findDetailById(columnId);
-            fileService.ensureColumnDetailImageIsFullUrl(columnDetail);
+            fileService.ensureImageFullUrl(columnDetail);
             if (columnDetail != null) {
                 List<ArticleListVO> articles = articleColumnMapper.findArticlesByColumnId(columnId);
-                fileService.ensureArticleImageAreFullUrl(articles);
+                fileService.ensureImageFullUrl(articles);
                 columnDetail.setArticles(articles);
             }
             return columnDetail;
@@ -195,8 +195,9 @@ public class ColumnServiceImpl implements ColumnService {
         log.info("获取热门专栏, limit={}", limit);
         try {
             List<ColumnListVO> hotColumns = columnMapper.findHotColumns(limit);
-            // 确保封面图等图片正常显示
-            fileService.ensureColumnImagesAreFullUrl(hotColumns);
+
+            fileService.ensureImageFullUrl(hotColumns);
+
             return hotColumns;
         } catch (Exception e) {
             log.error("获取热门专栏失败", e);
@@ -210,8 +211,9 @@ public class ColumnServiceImpl implements ColumnService {
         try {
             Long userId = UserContext.getCurrentUserId();
             List<MyColumnVO> myColumns = columnMapper.findMyColumns(userId);
-            // 确保专栏封面图加载正确
-            fileService.ensureMyColumnsImageAreFullUrl(myColumns);
+
+            fileService.ensureImageFullUrl(myColumns);
+
             return myColumns;
         } catch (Exception e) {
             log.error("获取我的专栏失败", e);

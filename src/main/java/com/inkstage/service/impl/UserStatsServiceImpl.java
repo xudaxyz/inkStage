@@ -33,8 +33,8 @@ public class UserStatsServiceImpl implements UserStatsService {
 
             // 查询热门用户
             List<HotUserVO> hotUsers = userMapper.findHotUsers(limit);
-            // 确保用户头像 URL 完整
-            fileService.ensureHotUserImgAreFullUrl(hotUsers);
+
+            fileService.ensureImageFullUrl(hotUsers);
 
             log.info("获取热门用户成功, 数量: {}", hotUsers.size());
             return hotUsers;

@@ -124,7 +124,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
         }
 
         List<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionMapper.findMySubscriptions(userId, offset, limit);
-        fileService.ensureMySubscribeColumnAreFullUrl(mySubscriptions);
+        fileService.ensureImageFullUrl(mySubscriptions);
         return mySubscriptions;
     }
 

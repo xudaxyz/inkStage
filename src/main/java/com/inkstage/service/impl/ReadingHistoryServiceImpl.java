@@ -56,7 +56,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
             readingHistory.setArticleId(dto.getArticleId());
             // 确保进度值在0-100之间
             int progress = dto.getProgress();
-            readingHistory.setProgress(Math.max(0, Math.min(100, progress)));
+            readingHistory.setProgress(Math.clamp(progress, 0, 100));
             // 确保持续时间不为负
             readingHistory.setDuration(Math.max(0, dto.getDuration()));
             readingHistory.setLastReadTime(LocalDateTime.now());
@@ -97,16 +97,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
             int total = readingHistoryMapper.countByUserId(userId);
 
             // 处理头像和封面图
-            for (ReadingHistoryVO vo : voList) {
-                // 处理头像
-                if (vo.getAvatar() != null) {
-                    vo.setAvatar(fileService.convertToFullUrl(vo.getAvatar()));
-                }
-                // 处理封面图
-                if (vo.getCoverImage() != null) {
-                    vo.setCoverImage(fileService.convertToFullUrl(vo.getCoverImage()));
-                }
-            }
+            fileService.ensureImageFullUrl(voList);
 
             return PageResult.build(voList, (long) total, page, size);
         } catch (Exception e) {
@@ -165,14 +156,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
 
             ReadingHistoryVO vo = readingHistoryMapper.findByUserIdAndArticleIdWithDetails(userId, articleId);
             if (vo != null) {
-                // 处理头像
-                if (vo.getAvatar() != null) {
-                    vo.setAvatar(fileService.convertToFullUrl(vo.getAvatar()));
-                }
-                // 处理封面图
-                if (vo.getCoverImage() != null) {
-                    vo.setCoverImage(fileService.convertToFullUrl(vo.getCoverImage()));
-                }
+                fileService.ensureImageFullUrl(vo);
             }
             return vo;
         } catch (Exception e) {

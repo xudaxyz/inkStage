@@ -44,7 +44,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         // 查询文章标签
         articleDetailVO.setTags(articleTagService.getTagsByArticleId(id));
-        fileService.ensureArticleDetailIsFullUrl(articleDetailVO);
+        fileService.ensureImageFullUrl(articleDetailVO);
 
         log.debug("从数据库获取文章详情, id: {}", id);
         return articleDetailVO;
@@ -65,8 +65,9 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         queryDTO.setOffset((pageNum - 1) * pageSize);
 
         List<ArticleListVO> articleList = articleMapper.findArticleList(queryDTO);
-        fileService.ensureArticleImageAreFullUrl(articleList);
         long total = articleMapper.countArticleList(queryDTO);
+
+        fileService.ensureImageFullUrl(articleList);
 
         log.info("获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}",
                 total, pageNum, pageSize);
@@ -82,7 +83,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
             unless = "#result == null")
     public List<ArticleListVO> getHotArticles(Integer limit, String timeRange) {
         List<ArticleListVO> hotArticles = articleMapper.findHotArticles(limit);
-        fileService.ensureArticleImageAreFullUrl(hotArticles);
+
+        fileService.ensureImageFullUrl(hotArticles);
 
         log.info("获取热门文章成功, limit: {}, timeRange: {}", limit, timeRange);
         return hotArticles;
@@ -94,7 +96,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_LATEST, key = "#limit", unless = "#result == null")
     public List<ArticleListVO> getLatestArticles(Integer limit) {
         List<ArticleListVO> latestArticles = articleMapper.findLatestArticles(limit);
-        fileService.ensureArticleImageAreFullUrl(latestArticles);
+
+        fileService.ensureImageFullUrl(latestArticles);
 
         log.info("获取最新文章成功, limit: {}", limit);
         return latestArticles;
@@ -106,7 +109,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
     @Cacheable(value = RedisKeyConstants.CACHE_ARTICLE_BANNER, key = "#limit", unless = "#result == null")
     public List<ArticleListVO> getBannerArticles(Integer limit) {
         List<ArticleListVO> bannerArticles = articleMapper.findBannerArticles(limit);
-        fileService.ensureArticleImageAreFullUrl(bannerArticles);
+
+        fileService.ensureImageFullUrl(bannerArticles);
 
         log.info("获取轮播图文章成功, limit: {}", limit);
         return bannerArticles;
@@ -122,8 +126,9 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         int offset = (pageNum - 1) * pageSize;
 
         List<ArticleListVO> articleList = articleMapper.findUserArticles(userId, offset, pageSize);
-        fileService.ensureArticleImageAreFullUrl(articleList);
         long total = articleMapper.countUserArticles(userId);
+
+        fileService.ensureImageFullUrl(articleList);
 
         log.debug("从数据库获取用户文章列表, userId: {}, pageNum: {}", userId, pageNum);
         return PageResult.build(articleList, total, pageNum, pageSize);
@@ -137,7 +142,8 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
             unless = "#result == null")
     public List<ArticleListVO> getUserRelatedArticles(Long userId, Long excludeArticleId, Integer limit) {
         List<ArticleListVO> relatedArticles = articleMapper.findUserRelatedArticles(userId, excludeArticleId, limit);
-        fileService.ensureArticleImageAreFullUrl(relatedArticles);
+
+        fileService.ensureImageFullUrl(relatedArticles);
 
         log.debug("从数据库获取作者相关文章, userId: {}, limit: {}", userId, limit);
         return relatedArticles;
@@ -153,8 +159,9 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         int offset = (pageNum - 1) * pageSize;
 
         List<ArticleListVO> articleList = articleMapper.searchArticles(keyword, sortBy, offset, pageSize);
-        fileService.ensureArticleImageAreFullUrl(articleList);
         long total = articleMapper.countSearchArticles(keyword);
+
+        fileService.ensureImageFullUrl(articleList);
 
         log.info("搜索文章成功, 关键词: {}, 总数: {}", keyword, total);
         return PageResult.build(articleList, total, pageNum, pageSize);

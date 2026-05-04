@@ -2,21 +2,18 @@ package com.inkstage.service.impl;
 
 import com.inkstage.config.MinioProperties;
 import com.inkstage.constant.InkConstant;
-import com.inkstage.entity.model.User;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.service.FileService;
 import com.inkstage.service.strategy.StorageStrategy;
 import com.inkstage.service.strategy.StorageStrategyFactory;
-import com.inkstage.vo.admin.AdminArticleDetailVO;
-import com.inkstage.vo.admin.AdminUserDetailVO;
-import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 文件服务实现类
@@ -45,6 +42,20 @@ public class FileServiceImpl implements FileService {
      */
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+    /**
+     * 支持的图片字段名
+     */
+    private static final Set<String> IMAGE_FIELDS = Set.of(
+            "coverImage",
+            "avatar",
+            "repliedUserAvatar"
+    );
+
+    /**
+     * 字段缓存：Class -> 该类中需要处理的图片字段列表
+     */
+    private final Map<Class<?>, List<Field>> fieldCache = new ConcurrentHashMap<>();
+
     @Override
     public String convertToFullUrl(String fileUrl) {
         if (fileUrl == null || fileUrl.isEmpty()) {
@@ -61,167 +72,7 @@ public class FileServiceImpl implements FileService {
         return storageStrategy.generateFullUrl(fileUrl);
     }
 
-    @Override
-    public void ensureUserImgIsFullUrl(User user) {
-        if (user == null) {
-            return;
-        }
 
-        String fullAvatarUrl = convertToFullUrl(user.getAvatar());
-        String fullCoverImageUrl = convertToFullUrl(user.getCoverImage());
-        user.setAvatar(fullAvatarUrl);
-        user.setCoverImage(fullCoverImageUrl);
-    }
-
-    @Override
-    public void ensureArticleImageAreFullUrl(List<ArticleListVO> articleList) {
-        if (articleList == null || articleList.isEmpty()) {
-            return;
-        }
-        for (ArticleListVO articleListVO : articleList) {
-            String fullCoverImageUrl = convertToFullUrl(articleListVO.getCoverImage());
-            articleListVO.setCoverImage(fullCoverImageUrl);
-            String fullAvatarUrl = convertToFullUrl(articleListVO.getAvatar());
-            articleListVO.setAvatar(fullAvatarUrl);
-        }
-    }
-
-    @Override
-    public void ensureCommentImageAreFullUrl(List<ArticleCommentVO> commentVOs) {
-        if (commentVOs == null || commentVOs.isEmpty()) {
-            return;
-        }
-        for (ArticleCommentVO commentVO : commentVOs) {
-            // 顶层评论头像
-            String topAvatarUrl = convertToFullUrl(commentVO.getAvatar());
-            commentVO.setAvatar(topAvatarUrl);
-            // 子评论头像
-            List<ArticleCommentVO> replies = commentVO.getReplies();
-            if (replies != null && !replies.isEmpty()) {
-                for (ArticleCommentVO reply : replies) {
-                    String fullAvatarUrl = convertToFullUrl(reply.getAvatar());
-                    reply.setAvatar(fullAvatarUrl);
-                }
-            }
-
-        }
-    }
-
-    @Override
-    public void ensureArticleDetailIsFullUrl(ArticleDetailVO articleDetailVO) {
-        if (articleDetailVO == null) {
-            return;
-        }
-        String fullCoverImageUrl = convertToFullUrl(articleDetailVO.getCoverImage());
-        articleDetailVO.setCoverImage(fullCoverImageUrl);
-        String fullAvatarUrl = convertToFullUrl(articleDetailVO.getAvatar());
-        articleDetailVO.setAvatar(fullAvatarUrl);
-    }
-
-    @Override
-    public void ensureHotUserImgAreFullUrl(List<HotUserVO> hotUsers) {
-        if (hotUsers == null || hotUsers.isEmpty()) {
-            return;
-        }
-        for (HotUserVO hotUser : hotUsers) {
-            String fullAvatarUrl = convertToFullUrl(hotUser.getAvatar());
-            hotUser.setAvatar(fullAvatarUrl);
-        }
-    }
-
-    @Override
-    public void ensureCollectionArticleImgAreFullUrl(List<CollectionArticleVO> collectionArticlesVO) {
-        if (collectionArticlesVO == null || collectionArticlesVO.isEmpty()) {
-            return;
-        }
-        // 确保封面图和用户头像的URL是完整的
-        for (CollectionArticleVO collectionArticleVO : collectionArticlesVO) {
-            String fullCoverImageUrl = convertToFullUrl(collectionArticleVO.getCoverImage());
-            collectionArticleVO.setCoverImage(fullCoverImageUrl);
-            String fullAvatarUrl = convertToFullUrl(collectionArticleVO.getAvatar());
-            collectionArticleVO.setAvatar(fullAvatarUrl);
-        }
-    }
-
-    @Override
-    public void ensureAdminArticleDetailIsFullUrl(AdminArticleDetailVO adminArticleDetailVO) {
-        if (adminArticleDetailVO == null) {
-            return;
-        }
-        String fullCoverImageUrl = convertToFullUrl(adminArticleDetailVO.getCoverImage());
-        adminArticleDetailVO.setCoverImage(fullCoverImageUrl);
-    }
-
-    @Override
-    public String getFullUrl(String image) {
-        if (image == null) {
-            log.info("图片信息不存在，无法生成完整URL");
-            return null;
-        }
-        return convertToFullUrl(image);
-    }
-
-    @Override
-    public void ensureAdminUserDetailIsFullUrl(AdminUserDetailVO userDetail) {
-        if (userDetail == null) {
-            return;
-        }
-        String fullAvatarUrl = convertToFullUrl(userDetail.getAvatar());
-        userDetail.setAvatar(fullAvatarUrl);
-        String fullCoverImageUrl = convertToFullUrl(userDetail.getCoverImage());
-        userDetail.setCoverImage(fullCoverImageUrl);
-    }
-
-    @Override
-    public void ensureColumnImagesAreFullUrl(List<ColumnListVO> columnListVOList) {
-        if (columnListVOList == null || columnListVOList.isEmpty()) {
-            return;
-        }
-        // 确保封面图和用户头像的URL是完整的
-        for (ColumnListVO columnListVO : columnListVOList) {
-            String fullCoverImageUrl = convertToFullUrl(columnListVO.getCoverImage());
-            columnListVO.setCoverImage(fullCoverImageUrl);
-            String fullAvatarUrl = convertToFullUrl(columnListVO.getAvatar());
-            columnListVO.setAvatar(fullAvatarUrl);
-        }
-    }
-
-    @Override
-    public void ensureColumnDetailImageIsFullUrl(ColumnDetailVO columnDetail) {
-        if (columnDetail == null) {
-            return;
-        }
-        String fullAvatarUrl = convertToFullUrl(columnDetail.getAvatar());
-        columnDetail.setAvatar(fullAvatarUrl);
-        String fullCoverImageUrl = convertToFullUrl(columnDetail.getCoverImage());
-        columnDetail.setCoverImage(fullCoverImageUrl);
-    }
-
-    @Override
-    public void ensureMyColumnsImageAreFullUrl(List<MyColumnVO> myColumns) {
-        if (myColumns == null || myColumns.isEmpty()) {
-            return;
-        }
-        // 确保封面图和用户头像的URL是完整的
-        for (MyColumnVO myColumn : myColumns) {
-            String fullCoverImageUrl = convertToFullUrl(myColumn.getCoverImage());
-            myColumn.setCoverImage(fullCoverImageUrl);
-        }
-    }
-
-    @Override
-    public void ensureMySubscribeColumnAreFullUrl(List<MyColumnSubscriptionVO> mySubscriptions) {
-        if (mySubscriptions == null || mySubscriptions.isEmpty()) {
-            return;
-        }
-        // 确保封面图和用户头像的URL是完整的
-        for (MyColumnSubscriptionVO myColumnSubscription : mySubscriptions) {
-            String fullCoverImageUrl = convertToFullUrl(myColumnSubscription.getCoverImage());
-            myColumnSubscription.setCoverImage(fullCoverImageUrl);
-            String avatar = convertToFullUrl(myColumnSubscription.getAvatar());
-            myColumnSubscription.setAvatar(avatar);
-        }
-    }
 
     @Override
     public String uploadFile(MultipartFile file, String bucketName, String objectName, long expiry) {
@@ -235,12 +86,6 @@ public class FileServiceImpl implements FileService {
         StorageStrategy storageStrategy = storageStrategyFactory.getDefaultStorageStrategy();
         return storageStrategy.uploadFile(file, bucketName, objectName);
     }
-
-    @Override
-    public String uploadFile(MultipartFile file, String objectName, long expiry) {
-        return uploadFile(file, minioProperties.getBucketName(), objectName, expiry);
-    }
-
 
     @Override
     public String uploadCoverImage(MultipartFile file, Long userId, long expiry) {
@@ -346,6 +191,44 @@ public class FileServiceImpl implements FileService {
         // 使用存储策略删除文件
         StorageStrategy storageStrategy = storageStrategyFactory.getDefaultStorageStrategy();
         storageStrategy.deleteFile(objectName);
+    }
+
+    @Override
+    public void ensureImageFullUrl(Object obj) {
+        if (obj == null) {
+            return;
+        }
+
+        if (obj instanceof Collection<?> collection) {
+            for (Object item : collection) {
+                ensureImageFullUrl(item);
+            }
+            return;
+        }
+
+        Class<?> clazz = obj.getClass();
+        List<Field> imageFields = getImageFields(clazz);
+
+        for (Field field : imageFields) {
+            try {
+                field.setAccessible(true);
+                Object value = field.get(obj);
+
+                if (value instanceof String url && !url.isEmpty()) {
+                    field.set(obj, convertToFullUrl(url));
+                }
+            } catch (IllegalAccessException e) {
+                log.warn("处理字段 {} 时出错", field.getName(), e);
+            }
+        }
+    }
+
+    private List<Field> getImageFields(Class<?> clazz) {
+        return fieldCache.computeIfAbsent(clazz, cls ->
+                Arrays.stream(cls.getDeclaredFields())
+                        .filter(f -> IMAGE_FIELDS.contains(f.getName()))
+                        .toList()
+        );
     }
 
 }

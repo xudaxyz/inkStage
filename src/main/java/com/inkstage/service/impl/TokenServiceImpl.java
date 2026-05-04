@@ -125,7 +125,7 @@ public class TokenServiceImpl implements TokenService {
         tokenResponse.setScope(String.join(" ", scopes));
 
         // 确保用户相关图片URL完整
-        fileService.ensureUserImgIsFullUrl(user);
+        fileService.ensureImageFullUrl(user);
         // 设置用户信息
         UserInfo userInfo = assembleUserInfo(user, userRoles);
         tokenResponse.setUserInfo(userInfo);

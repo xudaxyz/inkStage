@@ -186,7 +186,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             if (adminArticleDetailVO == null) {
                 throw new BusinessException("文章不存在");
             }
-            fileService.ensureAdminArticleDetailIsFullUrl(adminArticleDetailVO);
+            fileService.ensureImageFullUrl(adminArticleDetailVO);
 
             // 获取标签列表
             List<Tag> tags = articleTagService.getTagsByArticleId(id);

@@ -55,12 +55,11 @@ public class CommentCacheServiceImpl implements CommentCacheService {
             if (articleCommentVOList.isEmpty()) {
                 return null;
             }
+            // 确保评论相关图片的URL完整
+            fileService.ensureImageFullUrl(articleCommentVOList);
 
             // 查询总记录数
             Long total = commentMapper.countCommentsByArticleId(queryDTO);
-
-            // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
 
             return PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
         } catch (Exception e) {
@@ -89,11 +88,12 @@ public class CommentCacheServiceImpl implements CommentCacheService {
                 return null;
             }
 
-            // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(replies);
+
 
             // 查询子评论总数
             Long total = commentMapper.countRepliesByParentId(parentId);
+
+            fileService.ensureImageFullUrl(replies);
 
             // 构建分页结果
             return PageResult.build(replies, total, pageNum, pageSize);
@@ -112,10 +112,10 @@ public class CommentCacheServiceImpl implements CommentCacheService {
 
             // 查询评论列表
             List<ArticleCommentVO> articleCommentVOList = commentMapper.findCommentsByPage(queryDTO);
-            // 确保评论图片的URL完整
-            fileService.ensureCommentImageAreFullUrl(articleCommentVOList);
             // 查询总记录数
             Long total = commentMapper.countCommentsByPage(queryDTO);
+
+            fileService.ensureImageFullUrl(articleCommentVOList);
 
             // 构建分页结果
             PageResult<ArticleCommentVO> pageResult = PageResult.build(

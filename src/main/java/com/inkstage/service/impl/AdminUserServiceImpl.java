@@ -38,7 +38,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 throw new BusinessException("用户不存在");
             }
             log.info("管理员根据ID获取用户详情成功, 用户ID: {}", id);
-            fileService.ensureAdminUserDetailIsFullUrl(userDetail);
+            fileService.ensureImageFullUrl(userDetail);
             // 获取用户最近发表的文章
             List<AdminUserArticleVO> recentArticles = userMapper.findRecentArticles(id, 5);
             userDetail.setRecentArticles(recentArticles);
