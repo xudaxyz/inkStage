@@ -51,15 +51,6 @@ public interface NotificationSettingMapper {
     int deleteByUserId(@Param("userId") Long userId);
 
     /**
-     * 检查通知是否启用
-     *
-     * @param userId               用户ID
-     * @param notificationTypeCode 通知类型代码
-     * @return 通知是否启用 1表示启用, 0表示不启用
-     */
-    Integer checkNotificationEnabled(@Param("userId") Long userId, @Param("notificationTypeCode") Integer notificationTypeCode);
-
-    /**
      * 更新单个通知设置
      *
      * @param userId               用户ID

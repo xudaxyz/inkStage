@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ColumnCreateDTO;
@@ -21,6 +22,7 @@ import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.UserContext;
+import com.inkstage.vo.front.ArticleDetailVO;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
@@ -42,6 +44,7 @@ public class ColumnServiceImpl implements ColumnService {
     private final ArticleColumnMapper articleColumnMapper;
     private final FileService fileService;
     private final ColumnSubscriptionService columnSubscriptionService;
+    private final ArticleCacheService articleCacheService;
 
     @Override
     @Transactional
@@ -128,7 +131,6 @@ public class ColumnServiceImpl implements ColumnService {
         log.info("删除专栏: id={}", columnId);
         try {
             User user = UserContext.getCurrentUser();
-            // 检查是否有权限删除该专栏
             checkColumnIsMine(columnId, user);
 
             articleColumnMapper.deleteByColumnId(columnId);
@@ -258,10 +260,9 @@ public class ColumnServiceImpl implements ColumnService {
                 columnMapper.updateArticleCount(columnId, 1);
                 // 异步发送通知给订阅者
                 try {
-                    Column column = columnMapper.findById(columnId);
-                    if (column != null) {
-                        sendColumnArticleUpdateNotification(columnId, articleId, null);
-                    }
+                    // 使用缓存获取文章详情
+                    ArticleDetailVO article = articleCacheService.getArticleDetail(articleId);
+                    sendColumnArticleUpdateNotification(columnId, articleId, article.getTitle());
                 } catch (Exception e) {
                     log.error("发送专栏文章更新通知失败", e);
                 }
@@ -427,7 +428,7 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     public void sendColumnArticleUpdateNotification(Long columnId, Long articleId, String articleTitle) {
-        log.info("发送专栏文章更新通知: columnId={}, articleId={}", columnId, articleId);
+        log.info("发送专栏文章更新通知: columnId={}, articleId={}, articleTitle={}", columnId, articleId, articleTitle);
 
         Column column = columnMapper.findById(columnId);
         if (column == null) {

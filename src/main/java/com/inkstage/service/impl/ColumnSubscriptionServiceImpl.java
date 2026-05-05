@@ -2,7 +2,6 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.CacheClearService;
-import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
 import com.inkstage.enums.common.DeleteStatus;
@@ -194,7 +193,8 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
                 col.setColumnId(p.getColumnId());
                 col.setColumnName(p.getColumnName());
                 col.setArticleId(p.getArticleId());
-                col.setArticleUrl(InkConstant.ARTICLE_URL + p.getArticleUrl());
+                col.setArticleTitle(p.getArticleTitle());
+                col.setArticleUrl(p.getArticleUrl());
                 col.setUserId(p.getUserId());
                 col.setNotificationType(p.getNotificationType());
                 col.setSenderId(p.getSenderId());

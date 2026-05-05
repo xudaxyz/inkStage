@@ -177,7 +177,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             // 处理专栏关联变更
             Long newColumnId = articleCreateDTO.getColumnId();
-            columnService.moveArticleToColumn(articleId, newColumnId, null);
+            if (newColumnId != null) {
+                columnService.moveArticleToColumn(articleId, newColumnId, null);
+            }
 
             // 更新分类文章数量
             if (!existingArticle.getCategoryId().equals(oldCategoryId)) {

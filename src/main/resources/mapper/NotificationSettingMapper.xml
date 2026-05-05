@@ -119,27 +119,6 @@
         UPDATE notification_setting SET deleted = 1, deleted_time = NOW(), update_time = NOW() WHERE user_id = #{userId}
     </delete>
 
-    <select id="checkNotificationEnabled" resultType="java.lang.Integer">
-        SELECT
-            CASE
-                WHEN #{notificationTypeCode} = 100 THEN system_notification
-                WHEN #{notificationTypeCode} = 200 THEN article_publish_notification
-                WHEN #{notificationTypeCode} = 201 THEN article_like_notification
-                WHEN #{notificationTypeCode} = 202 THEN article_collection_notification
-                WHEN #{notificationTypeCode} = 203 THEN article_comment_notification
-                WHEN #{notificationTypeCode} = 300 THEN comment_reply_notification
-                WHEN #{notificationTypeCode} = 301 THEN comment_like_notification
-                WHEN #{notificationTypeCode} = 400 THEN follow_notification
-                WHEN #{notificationTypeCode} = 500 THEN message_notification
-                WHEN #{notificationTypeCode} = 600 THEN report_notification
-                WHEN #{notificationTypeCode} = 601 THEN report_result_notification
-                WHEN #{notificationTypeCode} = 700 THEN feedback_notification
-                ELSE true
-                END
-        FROM notification_setting
-        WHERE user_id = #{userId} AND deleted = 0
-    </select>
-
     <update id="updateNotificationSetting" parameterType="map">
         UPDATE notification_setting 
         SET 
