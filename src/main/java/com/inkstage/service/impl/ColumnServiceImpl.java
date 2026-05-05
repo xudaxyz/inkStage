@@ -15,18 +15,14 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleColumnMapper;
 import com.inkstage.mapper.ColumnMapper;
+import com.inkstage.notification.param.ColumnArticlePublishParam;
 import com.inkstage.notification.param.ColumnDisabledParam;
 import com.inkstage.notification.param.ColumnRestoredParam;
-import com.inkstage.notification.param.ColumnSubscriptionParam;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.UserContext;
-import com.inkstage.vo.front.ArticleDetailVO;
-import com.inkstage.vo.front.ArticleListVO;
-import com.inkstage.vo.front.ColumnDetailVO;
-import com.inkstage.vo.front.ColumnListVO;
-import com.inkstage.vo.front.MyColumnVO;
+import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -435,14 +431,14 @@ public class ColumnServiceImpl implements ColumnService {
             return;
         }
 
-        ColumnSubscriptionParam param = new ColumnSubscriptionParam();
+        ColumnArticlePublishParam param = new ColumnArticlePublishParam();
         param.setColumnId(columnId);
         param.setColumnName(column.getName());
         param.setArticleId(articleId);
         param.setArticleTitle(articleTitle);
         param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
         param.setSenderId(column.getUserId());
-        param.setNotificationType(NotificationType.COLUMN_SUBSCRIPTION);
+        param.setNotificationType(NotificationType.COLUMN_ARTICLE_PUBLISH);
         columnSubscriptionService.notifySubscribers(columnId, param);
     }
 

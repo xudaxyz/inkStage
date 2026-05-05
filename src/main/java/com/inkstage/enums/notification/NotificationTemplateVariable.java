@@ -30,6 +30,7 @@ public enum NotificationTemplateVariable {
     COLUMN_DESCRIPTION("columnDescription", "专栏描述"),
     COLUMN_URL("columnUrl", "专栏链接"),
     COLUMN_CREATOR_NAME("columnCreatorName", "专栏创建者名称"),
+    SUBSCRIBER_NAME("subscriberName", "订阅者名称"),
     COLUMN_STATUS("columnStatus", "专栏状态"),
 
     // 评论相关变量

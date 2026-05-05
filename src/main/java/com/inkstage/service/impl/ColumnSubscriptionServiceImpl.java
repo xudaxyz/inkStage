@@ -4,11 +4,14 @@ import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ColumnMapper;
 import com.inkstage.mapper.ColumnSubscriptionMapper;
 import com.inkstage.notification.NotificationParam;
+import com.inkstage.notification.param.ColumnArticlePublishParam;
 import com.inkstage.notification.param.ColumnDisabledParam;
 import com.inkstage.notification.param.ColumnRestoredParam;
 import com.inkstage.notification.param.ColumnSubscriptionParam;
@@ -43,7 +46,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean subscribeColumn(Long columnId) {
-        Long userId = UserContext.getCurrentUserId();
+        User user = UserContext.getCurrentUser();
 
         // 检查专栏是否存在
         Column column = columnMapper.findById(columnId);
@@ -52,20 +55,20 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
         }
 
         // 不能订阅自己的专栏
-        if (column.getUserId().equals(userId)) {
+        if (column.getUserId().equals(user.getId())) {
             throw new BusinessException("不能订阅自己的专栏");
         }
 
         // 检查是否已经订阅
-        int subscribed = columnSubscriptionMapper.checkSubscriptionStatus(userId, columnId);
+        int subscribed = columnSubscriptionMapper.checkSubscriptionStatus(user.getId(), columnId);
         if (subscribed != 0) {
-            log.info("用户 {} 已经订阅了专栏 {}", userId, columnId);
+            log.info("用户 {} 已经订阅了专栏 {}", user.getId(), columnId);
             return true;
         }
 
         // 创建订阅关系
         ColumnSubscription subscription = new ColumnSubscription();
-        subscription.setUserId(userId);
+        subscription.setUserId(user.getId());
         subscription.setColumnId(columnId);
         LocalDateTime now = LocalDateTime.now();
         subscription.setSubscriptionTime(now);
@@ -75,11 +78,20 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
         int result = columnSubscriptionMapper.insert(subscription);
         if (result > 0) {
-            cacheClearService.clearColumnSubscriptionCache(columnId, userId);
+            cacheClearService.clearColumnSubscriptionCache(columnId, user.getId());
             columnMapper.updateSubscriptionCount(columnId, 1);
+
+            ColumnSubscriptionParam param = new ColumnSubscriptionParam();
+            param.setUserId(column.getUserId());
+            param.setSenderId(user.getId());
+            param.setColumnId(columnId);
+            param.setColumnName(column.getName());
+            param.setSubscriberName(user.getNickname());
+            param.setNotificationType(NotificationType.COLUMN_SUBSCRIPTION);
+            notificationService.send(param);
         }
 
-        log.info("用户 {} 订阅专栏 {} 结果: {}", userId, columnId, result > 0);
+        log.info("用户 {} 订阅专栏 {} 结果: {}", user.getId(), columnId, result > 0);
         return result > 0;
     }
 
@@ -188,8 +200,8 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
     private NotificationParam copyParam(NotificationParam param) {
         switch (param) {
-            case ColumnSubscriptionParam p -> {
-                ColumnSubscriptionParam col = new ColumnSubscriptionParam();
+            case ColumnArticlePublishParam p -> {
+                ColumnArticlePublishParam col = new ColumnArticlePublishParam();
                 col.setColumnId(p.getColumnId());
                 col.setColumnName(p.getColumnName());
                 col.setArticleId(p.getArticleId());

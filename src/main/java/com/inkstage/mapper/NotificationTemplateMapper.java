@@ -57,7 +57,7 @@ public interface NotificationTemplateMapper {
     int update(NotificationTemplate template);
 
     /**
-     * 根据ID删除模板(逻辑删除)
+     * 根据ID删除模板
      */
     int deleteById(@Param("id") Long id);
 

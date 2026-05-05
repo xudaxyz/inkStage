@@ -60,11 +60,10 @@
         VALUES (#{userId}, #{columnId}, #{subscriptionTime}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
-    <!-- 删除订阅关系（软删除） -->
-    <update id="delete">
-        UPDATE column_subscription SET deleted = 1, deleted_time = NOW()
-        WHERE user_id = #{userId} AND column_id = #{columnId} AND deleted = 0
-    </update>
+    <!-- 删除订阅关系（物理删除） -->
+    <delete id="delete">
+        DELETE FROM column_subscription WHERE user_id = #{userId} AND column_id = #{columnId}
+    </delete>
 
     <!-- 统计用户的订阅专栏数 -->
     <select id="countSubscriptions" resultType="java.lang.Long">

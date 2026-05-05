@@ -53,8 +53,9 @@ public enum NotificationType implements EnumCode {
 
     // [专栏管理]专栏状态变更
     COLUMN_SUBSCRIPTION(5001, "COLUMN_SUBSCRIPTION", "专栏订阅通知", ColumnSubscriptionParam.class, null),
-    COLUMN_DISABLED(5002, "COLUMN_DISABLED", "专栏下线通知", ColumnDisabledParam.class, null),
-    COLUMN_RESTORED(5003, "COLUMN_RESTORED", "专栏恢复通知", ColumnRestoredParam.class, null),
+    COLUMN_ARTICLE_PUBLISH(5002, "COLUMN_ARTICLE_PUBLISH", "专栏文章发布通知", ColumnArticlePublishParam.class, null),
+    COLUMN_DISABLED(5003, "COLUMN_DISABLED", "专栏下线通知", ColumnDisabledParam.class, null),
+    COLUMN_RESTORED(5004, "COLUMN_RESTORED", "专栏恢复通知", ColumnRestoredParam.class, null),
 
     // [系统管理]系统操作通知
     TAG_DELETE(1001, "TAG_DELETE", "标签删除通知", TagDeleteParam.class, null);

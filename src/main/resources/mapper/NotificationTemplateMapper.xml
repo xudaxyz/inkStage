@@ -163,12 +163,9 @@
         WHERE id = #{id} AND deleted = 0
     </update>
 
-    <update id="deleteById">
-        UPDATE notification_template
-        SET deleted      = 1,
-            deleted_time = NOW()
-        WHERE id = #{id}
-          AND deleted = 0
-    </update>
+    <delete id="deleteById">
+        DELETE FROM notification_template
+        WHERE id = #{id} AND deleted = 0
+    </delete>
 
 </mapper>

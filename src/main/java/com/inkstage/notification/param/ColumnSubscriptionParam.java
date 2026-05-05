@@ -9,19 +9,19 @@ import lombok.NoArgsConstructor;
 /**
  * 专栏订阅通知参数
  * <br/>
- * 
+ * <p>
  * --- 通知展示格式 ---
  * ======================================================================
- * ==        标题：专栏更新通知                                             ==
- * ==        内容：你订阅的专栏《${columnName}》发布了新文章《${articleTitle}》 ==
+ * ==        标题：专栏订阅通知                                            ==
+ * ==        内容：${subscriberName}订阅了您的专栏《${columnName}》         ==
  * ==        跳转链接：${articleUrl}                                      ==
  * ======================================================================
  * <br/>
- * 
+ * <p>
  * --- 参考示例 ---
  * ======================================================================
- * ==        标题：专栏更新通知                                            ==
- * ==        内容：你订阅的专栏《架构师成长之路》发布了新文章《分布式系统设计》     ==
+ * ==        标题：专栏订阅通知                                            ==
+ * ==        内容：张三 订阅了您的专栏《架构师成长之路》                       ==
  * ==        点击查看                                                    ==
  * ======================================================================
  */
@@ -35,20 +35,24 @@ public class ColumnSubscriptionParam extends NotificationParam {
      * 专栏ID
      */
     private Long columnId;
+
     /**
      * 专栏名称
      */
     private String columnName;
+
     /**
-     * 文章标题
+     * 订阅者ID
      */
-    private String articleTitle;
+    private Long subscriberId;
+
     /**
-     * 文章ID
+     * 订阅者昵称
      */
-    private Long articleId;
+    private String subscriberName;
+
     /**
-     * 文章链接
+     * 专栏跳转链接
      */
-    private String articleUrl;
+    private String actionUrl;
 }
