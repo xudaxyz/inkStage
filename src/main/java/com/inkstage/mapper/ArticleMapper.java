@@ -352,6 +352,13 @@ public interface ArticleMapper {
     int deleteByAdmin(@Param("id") Long articleId);
 
     /**
+     * 管理员彻底删除文章
+     * @param articleId 文章ID
+     * @return 影响行数
+     */
+    int permanentDeleteByAdmin(@Param("id") Long articleId);
+
+    /**
      * 根据文章ID永久删除文章
      *
      * @param id     文章ID

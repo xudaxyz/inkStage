@@ -393,7 +393,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
 
     @Override
     public boolean deleteArticleByAdmin(Long id) {
-        if (UserContext.isAdmin()) {
+        if (!UserContext.isAdmin()) {
             return false;
         }
 
@@ -419,6 +419,36 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         } catch (Exception e) {
             log.error("管理员删除文章失败, 文章ID: {}", id, e);
             throw new BusinessException("删除文章失败");
+        }
+    }
+
+    @Override
+    public boolean deleteArticlePermanentlyByAdmin(Long id) {
+        if (!UserContext.isAdmin()) {
+            return false;
+        }
+        try {
+            log.debug("管理员彻底删除文章, 文章ID: {}", id);
+            // 检查文章是否存在
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
+            int i = articleMapper.permanentDeleteByAdmin(id);
+            ArticleUtils.checkOperationResult(i, id, "管理员彻底删除文章");
+            ArticleDeleteParam param = new ArticleDeleteParam();
+            param.setUserId(article.getUserId());
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setReason("文章不符合平台内容规范,已被永久删除");
+            param.setNotificationType(NotificationType.ARTICLE_DELETE);
+            notificationService.send(param);
+            // 清理相关缓存
+            clearCacheAfterAdminOperation(id);
+
+            log.info("管理员彻底删除文章并发送通知成功, 文章ID: {}", id);
+            return i > 0;
+        } catch (Exception e) {
+            log.error("管理员彻底删除文章失败, 文章ID: {}", id, e);
+            throw new BusinessException("彻底删除文章失败");
         }
     }
 

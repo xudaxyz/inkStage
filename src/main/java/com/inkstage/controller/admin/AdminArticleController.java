@@ -72,6 +72,24 @@ public class AdminArticleController {
     }
 
     /**
+     * 彻底删除文章
+     *
+     * @param id 文章ID
+     * @return 删除结果
+     */
+    @DeleteMapping("/permanent-delete/{id}")
+    @AdminAccess
+    public Result<?> permanentDeleteArticle(@PathVariable Long id) {
+        log.info("管理员彻底删除文章, 文章ID: {}", id);
+        boolean deleted = adminArticleService.deleteArticlePermanentlyByAdmin(id);
+        if (deleted) {
+            return Result.success(ResponseMessage.ARTICLE_DELETE_SUCCESS);
+        } else {
+            return Result.error(ResponseMessage.ARTICLE_DELETE_ERROR);
+        }
+    }
+
+    /**
      * 审核通过文章
      *
      * @param id 文章ID

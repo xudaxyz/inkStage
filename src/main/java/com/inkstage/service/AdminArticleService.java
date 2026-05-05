@@ -111,4 +111,12 @@ public interface AdminArticleService {
      * @return 是否成功
      */
     boolean deleteArticleByAdmin(Long id);
+
+    /**
+     * 彻底删除文章(管理员)
+     *
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean deleteArticlePermanentlyByAdmin(Long id);
 }

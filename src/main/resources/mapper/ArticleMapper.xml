@@ -852,6 +852,10 @@
         update article set article_status = 5 where id = #{id}
     </update>
 
+    <!-- 管理员根据文章ID彻底删除文章 -->
+    <update id="permanentDeleteByAdmin">
+        update article set deleted = 1 where id = #{id}
+    </update>
 
     <!-- 根据文章ID永久删除文章 -->
     <update id="permanentDeleteById">
