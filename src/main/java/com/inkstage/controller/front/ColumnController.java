@@ -7,6 +7,7 @@ import com.inkstage.dto.front.ColumnCreateDTO;
 import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.dto.front.UpdateColumnArticleDTO;
 import com.inkstage.entity.model.ArticleColumn;
+import com.inkstage.enums.VisibleStatus;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.vo.front.ColumnDetailVO;
@@ -74,6 +75,21 @@ public class ColumnController {
         log.info("删除专栏: id={}", id);
         boolean success = columnService.deleteColumn(id);
         return success ? Result.success(true, "专栏删除成功") : Result.error("专栏删除失败");
+    }
+
+    /**
+     * 更新专栏可见性
+     *
+     * @param id      专栏ID
+     * @param visible 可见性状态（0:私有, 1:公开, 2:仅粉丝可见）
+     * @return 更新成功返回true，失败返回false
+     */
+    @PutMapping("/update/visible/{id}")
+    @UserAccess
+    public Result<Boolean> updateColumnVisible(@PathVariable Long id, @RequestParam VisibleStatus visible) {
+        log.info("更新专栏可见性: id={}, visible={}", id, visible);
+        boolean success = columnService.updateColumnVisible(id, visible);
+        return success ? Result.success(true, "可见性更新成功") : Result.error("可见性更新失败");
     }
 
     /**
@@ -185,6 +201,25 @@ public class ColumnController {
     public Result<Boolean> checkArticleInColumn(@RequestParam Long columnId, @RequestParam Long articleId) {
         boolean inColumn = columnService.isArticleInColumn(columnId, articleId);
         return Result.success(inColumn);
+    }
+
+    /**
+     * 将文章移动到另一个专栏
+     *
+     * @param articleId   文章ID
+     * @param newColumnId 新专栏ID
+     * @param sortOrder   排序位置（可选）
+     * @return 移动成功返回true，失败返回false
+     */
+    @PutMapping("/article/move")
+    @UserAccess
+    public Result<Boolean> moveArticleToColumn(
+            @RequestParam Long articleId,
+            @RequestParam Long newColumnId,
+            @RequestParam(required = false) Integer sortOrder) {
+        log.info("移动文章到另一个专栏: articleId={}, newColumnId={}, sortOrder={}", articleId, newColumnId, sortOrder);
+        columnService.moveArticleToColumn(articleId, newColumnId, sortOrder);
+        return Result.success(true, "文章移动成功");
     }
 
     /**

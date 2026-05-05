@@ -99,9 +99,6 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     @Transactional(rollbackFor = Exception.class)
     public boolean unsubscribeColumn(Long columnId) {
         Long userId = UserContext.getCurrentUserId();
-        if (userId == null) {
-            throw new BusinessException("请先登录");
-        }
 
         int result = columnSubscriptionMapper.delete(userId, columnId);
         if (result > 0) {
@@ -133,9 +130,6 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
             unless = "#result == null or #result.isEmpty()")
     public List<MyColumnSubscriptionVO> getMySubscriptions(Integer offset, Integer limit) {
         Long userId = UserContext.getCurrentUserId();
-        if (userId == null) {
-            throw new BusinessException("请先登录");
-        }
 
         List<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionMapper.findMySubscriptions(userId, offset, limit);
         fileService.ensureImageFullUrl(mySubscriptions);

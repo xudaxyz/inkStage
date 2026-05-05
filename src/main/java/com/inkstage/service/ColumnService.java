@@ -4,6 +4,7 @@ import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ColumnCreateDTO;
 import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.entity.model.ArticleColumn;
+import com.inkstage.enums.VisibleStatus;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
 import com.inkstage.vo.front.MyColumnVO;
@@ -40,6 +41,15 @@ public interface ColumnService {
      * @return 删除成功返回true，失败返回false
      */
     boolean deleteColumn(Long columnId);
+
+    /**
+     * 更新专栏可见性
+     *
+     * @param columnId 专栏ID
+     * @param visible 可见性状态
+     * @return 更新成功返回true，失败返回false
+     */
+    boolean updateColumnVisible(Long columnId, VisibleStatus visible);
 
     /**
      * 获取专栏列表（分页）

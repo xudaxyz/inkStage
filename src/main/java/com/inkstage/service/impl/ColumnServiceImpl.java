@@ -10,6 +10,7 @@ import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
+import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
@@ -137,13 +138,31 @@ public class ColumnServiceImpl implements ColumnService {
         }
     }
 
+    @Override
+    @Transactional
+    public boolean updateColumnVisible(Long columnId, VisibleStatus visible) {
+        log.info("更新专栏可见性: id={}, visible={}", columnId, visible);
+        try {
+            User user = UserContext.getCurrentUser();
+            Column column = checkColumnIsMine(columnId, user);
+
+            column.setVisible(visible);
+            column.setUpdateTime(LocalDateTime.now());
+
+            return columnMapper.update(column) > 0;
+        } catch (Exception e) {
+            log.error("更新专栏可见性失败", e);
+            throw new BusinessException("更新专栏可见性失败", e);
+        }
+    }
+
     /**
      * 检查专栏是否存在，以及是否有权限删除该专栏
      *
      * @param columnId 专栏ID
      * @param user     用户
      */
-    private void checkColumnIsMine(Long columnId, User user) {
+    private Column checkColumnIsMine(Long columnId, User user) {
         Column column = columnMapper.findById(columnId);
 
         if (column == null) {
@@ -153,6 +172,7 @@ public class ColumnServiceImpl implements ColumnService {
         if (!column.getUserId().equals(user.getId()) && UserRoleEnum.ADMIN != UserRoleEnum.fromCode(user.getRoleId())) {
             throw new BusinessException("您无权操作此专栏");
         }
+        return column;
     }
 
     @Override
@@ -264,8 +284,6 @@ public class ColumnServiceImpl implements ColumnService {
                 }
             }
             return result;
-        } catch (BusinessException e) {
-            throw e;
         } catch (Exception e) {
             log.error("添加文章到专栏失败", e);
             throw new BusinessException("添加文章到专栏失败", e);
