@@ -136,6 +136,13 @@ public interface CacheClearService {
      */
     void clearNotificationListCache(Long userId);
 
+    /**
+     * 清除通知设置缓存
+     *
+     * @param userId 用户ID
+     */
+    void clearNotificationSettingCache(Long userId);
+
     // ==================== 分类和标签相关缓存清除 ====================
 
     /**

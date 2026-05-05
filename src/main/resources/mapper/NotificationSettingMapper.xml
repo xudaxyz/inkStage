@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.inkstage.mapper.NotificationSettingMapper">
 
     <resultMap id="BaseResultMap" type="com.inkstage.entity.model.NotificationSetting">
@@ -28,7 +28,29 @@
     </resultMap>
 
     <select id="selectByUserId" resultMap="BaseResultMap">
-        SELECT * FROM notification_setting WHERE user_id = #{userId} AND deleted = 0
+        SELECT 
+            id,
+            user_id,
+            system_notification,
+            article_publish_notification,
+            article_like_notification,
+            article_collection_notification,
+            article_comment_notification,
+            comment_reply_notification,
+            comment_like_notification,
+            follow_notification,
+            message_notification,
+            report_notification,
+            report_result_notification,
+            feedback_notification,
+            email_notification,
+            site_notification,
+            create_time,
+            update_time,
+            deleted,
+            deleted_time
+        FROM notification_setting 
+        WHERE user_id = #{userId} AND deleted = 0
     </select>
 
     <insert id="insert" parameterType="com.inkstage.entity.model.NotificationSetting">

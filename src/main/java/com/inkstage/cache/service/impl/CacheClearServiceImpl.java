@@ -250,6 +250,18 @@ public class CacheClearServiceImpl implements CacheClearService {
         }
     }
 
+    @Override
+    public void clearNotificationSettingCache(Long userId) {
+        if (userId == null) return;
+        try {
+            String cacheKey = NOTIFICATION_CACHE_SETTING + userId;
+            redisUtil.delete(cacheKey);
+            log.debug("清除通知设置缓存, 用户ID: {}", userId);
+        } catch (Exception e) {
+            log.error("清除通知设置缓存失败, 用户ID: {}", userId, e);
+        }
+    }
+
     // ==================== 分类和标签相关缓存清除 ====================
 
     @Override

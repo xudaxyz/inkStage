@@ -66,6 +66,7 @@ public class RedisKeyConstants {
     public static final String NOTIFICATION_UNREAD_COUNT = "inkstage:notify:unread:count:";
     public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = "inkstage:notify:unread:category:";
     public static final String NOTIFICATION_RECENT_LIST = "inkstage:notify:recent:list:";
+    public static final String NOTIFICATION_CACHE_SETTING = "inkstage:notify:setting:";
 
     // ==================== 缓存名称（小写带冒号） ====================
 
@@ -99,6 +100,7 @@ public class RedisKeyConstants {
     public static final String CACHE_CATEGORIES = "categories";
     public static final String CACHE_TAGS = "tags";
     public static final String CACHE_ROLES = "roles";
+    public static final String CACHE_NOTIFICATION_SETTING = "notification:setting";
 
     // RedisUtil使用的缓存
     public static final String CACHE_ARTICLE_COUNT = "article:count";
@@ -143,6 +145,7 @@ public class RedisKeyConstants {
     public static final Duration CACHE_ROLES_TTL = EXTREME_TTL;
     public static final Duration CACHE_USER_ROLES_TTL = Duration.ofDays(1);
     public static final Duration CACHE_ARTICLE_COUNT_TTL = LONG_TTL;
+    public static final Duration CACHE_NOTIFICATION_SETTING_TTL = DEFAULT_TTL;
     public static final Duration CACHE_NOTIFICATION_UNREAD_TTL = DEFAULT_TTL;
     public static final Duration CACHE_NOTIFICATION_RECENT_TTL = SHORT_TTL;
     public static final Duration CACHE_VERIFY_CODE_TTL = SHORT_TTL;
