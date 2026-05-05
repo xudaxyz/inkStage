@@ -3,6 +3,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.PageResult;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.admin.AdminArticleUpdateDTO;
 import com.inkstage.entity.model.Article;
@@ -12,6 +13,7 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.notification.param.*;
 import com.inkstage.service.AdminArticleService;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.FileService;
@@ -96,11 +98,23 @@ public class AdminArticleServiceImpl implements AdminArticleService {
 
             // 发送通知
             if (status == ArticleStatus.OFFLINE) {
-                // 文章下架通知
-                notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_OFFLINE, article);
+                ArticleOfflineParam param = new ArticleOfflineParam();
+                param.setSenderId(UserContext.getCurrentUserId());
+                param.setUserId(article.getUserId());
+                param.setArticleTitle(article.getTitle());
+                param.setArticleId(article.getId());
+                param.setReason("文章已下架");
+                param.setNotificationType(NotificationType.ARTICLE_OFFLINE);
+                notificationService.send(param);
             } else if (status == ArticleStatus.PUBLISHED) {
-                // 文章上架通知
-                notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_ONLINE, article);
+                ArticleOnlineParam param = new ArticleOnlineParam();
+                param.setSenderId(UserContext.getCurrentUserId());
+                param.setUserId(article.getUserId());
+                param.setArticleTitle(article.getTitle());
+                param.setArticleId(article.getId());
+                param.setArticleUrl(InkConstant.ARTICLE_URL + article.getId());
+                param.setNotificationType(NotificationType.ARTICLE_ONLINE);
+                notificationService.send(param);
             }
 
             // 清理相关缓存
@@ -127,7 +141,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
 
             // 发送文章审核通过通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_REVIEW_APPROVE, article);
+            ArticleReviewApproveParam param = new ArticleReviewApproveParam();
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setUserId(article.getUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_REVIEW_APPROVE);
+            notificationService.send(param);
             // 清理相关缓存
             clearCacheAfterAdminOperation(id);
 
@@ -149,7 +170,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             int result = articleMapper.updateReviewStatus(id, ReviewStatus.REJECTED);
             ArticleUtils.checkOperationResult(result, id, "审核拒绝文章");
             // 发送通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_REVIEW_REJECT, article);
+            ArticleReviewRejectParam param = new ArticleReviewRejectParam();
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setUserId(article.getUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setReason(reason);
+            param.setArticleId(article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_REVIEW_REJECT);
+            notificationService.send(param);
             log.info("审核拒绝文章并发送通知成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -167,8 +195,15 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 更新审核状态为待审核
             int result = articleMapper.updateReviewStatus(id, com.inkstage.enums.ReviewStatus.PENDING);
             ArticleUtils.checkOperationResult(result, id, "重新审核文章");
-            // 发送通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_REVIEW_REPROCESS, article);
+            // 发送文章重新审核通知
+            ArticleReviewReprocessParam param = new ArticleReviewReprocessParam();
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setUserId(article.getUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_REVIEW_REPROCESS);
+            notificationService.send(param);
+
             log.info("重新审核文章并发送通知成功, 文章ID: {}", id);
             return true;
         } catch (Exception e) {
@@ -212,8 +247,15 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 更新置顶状态
             int result = articleMapper.updateTopStatus(id, com.inkstage.enums.article.TopStatus.TOP);
             ArticleUtils.checkOperationResult(result, id, "置顶文章");
-            // 发送通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_TOP, article);
+            // 发送文章置顶通知
+            ArticleTopParam param = new ArticleTopParam();
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setUserId(article.getUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_TOP);
+            notificationService.send(param);
             // 清理相关缓存
             clearCacheAfterAdminOperation(id);
 
@@ -256,8 +298,15 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 更新推荐状态
             int result = articleMapper.updateRecommendStatus(id, com.inkstage.enums.article.RecommendStatus.RECOMMENDED);
             ArticleUtils.checkOperationResult(result, id, "推荐文章");
-            // 发送通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_RECOMMEND, article);
+            // 发送推荐文章通知
+            ArticleRecommendParam param = new ArticleRecommendParam();
+            param.setUserId(article.getUserId());
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_RECOMMEND);
+            notificationService.send(param);
             // 清理相关缓存
             clearCacheAfterAdminOperation(id);
 
@@ -354,8 +403,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.deleteByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
-            // 发送通知
-            notificationService.sendArticleNotification(article.getUserId(), NotificationType.ARTICLE_DELETE, article);
+            ArticleDeleteParam param = new ArticleDeleteParam();
+            param.setUserId(article.getUserId());
+            param.setSenderId(UserContext.getCurrentUserId());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setReason("不符合平台内容规范");
+            param.setNotificationType(NotificationType.ARTICLE_DELETE);
+            notificationService.send(param);
             // 清理相关缓存
             clearCacheAfterAdminOperation(id);
 

@@ -1,6 +1,7 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ColumnCreateDTO;
 import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.entity.model.ArticleColumn;
@@ -13,6 +14,9 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleColumnMapper;
 import com.inkstage.mapper.ColumnMapper;
+import com.inkstage.notification.param.ColumnDisabledParam;
+import com.inkstage.notification.param.ColumnRestoredParam;
+import com.inkstage.notification.param.ColumnSubscriptionParam;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
@@ -27,9 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 @Service
@@ -427,34 +429,56 @@ public class ColumnServiceImpl implements ColumnService {
     public void sendColumnArticleUpdateNotification(Long columnId, Long articleId, String articleTitle) {
         log.info("发送专栏文章更新通知: columnId={}, articleId={}", columnId, articleId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("articleId", articleId);
-        params.put("articleTitle", articleTitle != null ? articleTitle : "新文章");
-        params.put("relatedId", articleId);
-        params.put("actionUrl", "/article/" + articleId);
+        Column column = columnMapper.findById(columnId);
+        if (column == null) {
+            return;
+        }
 
-        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_ARTICLE_PUBLISH, params);
+        ColumnSubscriptionParam param = new ColumnSubscriptionParam();
+        param.setColumnId(columnId);
+        param.setColumnName(column.getName());
+        param.setArticleId(articleId);
+        param.setArticleTitle(articleTitle);
+        param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
+        param.setSenderId(column.getUserId());
+        param.setNotificationType(NotificationType.COLUMN_SUBSCRIPTION);
+        columnSubscriptionService.notifySubscribers(columnId, param);
     }
 
     @Override
     public void sendColumnDisabledNotification(Long columnId) {
         log.info("发送专栏下线通知: columnId={}", columnId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("actionUrl", "/");
-        params.put("columnStatus", "已下线");
+        Column column = columnMapper.findById(columnId);
+        if (column == null) {
+            return;
+        }
 
-        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_DISABLED, params);
+        ColumnDisabledParam param = new ColumnDisabledParam();
+        param.setColumnId(columnId);
+        param.setColumnName(column.getName());
+        param.setReason("专栏已下线");
+        param.setSenderId(column.getUserId());
+        param.setNotificationType(NotificationType.COLUMN_DISABLED);
+        columnSubscriptionService.notifySubscribers(columnId, param);
     }
 
     @Override
     public void sendColumnRestoredNotification(Long columnId) {
         log.info("发送专栏恢复通知: columnId={}", columnId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("actionUrl", "/column/" + columnId);
-        params.put("columnStatus", "已恢复");
+        Column column = columnMapper.findById(columnId);
+        if (column == null) {
+            return;
+        }
 
-        columnSubscriptionService.notifySubscribers(columnId, NotificationType.COLUMN_RESTORED, params);
+        ColumnRestoredParam param = new ColumnRestoredParam();
+        param.setColumnId(columnId);
+        param.setColumnName(column.getName());
+        param.setActionUrl(InkConstant.COLUMN_URL + columnId);
+        param.setSenderId(column.getUserId());
+        param.setNotificationType(NotificationType.COLUMN_RESTORED);
+
+        columnSubscriptionService.notifySubscribers(columnId, param);
     }
 }

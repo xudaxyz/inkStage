@@ -1,10 +1,10 @@
 package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Notification;
 import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.notification.NotificationParam;
 
 import java.util.List;
 import java.util.Map;
@@ -13,6 +13,22 @@ import java.util.Map;
  * 通知服务接口
  */
 public interface NotificationService {
+
+    /**
+     * 发送通知(对外开放)
+     *
+     * @param param 通知参数对象
+     * @return 是否发送成功
+     */
+    boolean send(NotificationParam param);
+
+    /**
+     * 批量发送通知(对外开放)
+     *
+     * @param params 通知参数对象列表
+     * @return 是否发送成功
+     */
+    boolean sendBatch(List<? extends NotificationParam> params);
 
     /**
      * 标记通知为已读
@@ -30,31 +46,12 @@ public interface NotificationService {
     boolean deleteNotification(Long notificationId);
 
     /**
-     * 手动发送通知
+     * 发送通知到rabbitmq(一般不对外开放)
      */
     boolean sendNotification(Notification notification);
 
     /**
-     * 发送带模板的通知
-     *
-     * @param userId           用户ID
-     * @param notificationType 通知类型
-     * @param params           模板参数
-     * @return 是否发送成功
-     */
-    boolean sendNotificationWithTemplate(Long userId, NotificationType notificationType, Map<String, Object> params);
-
-    /**
-     * 发送文章通知
-     *
-     * @param userId           用户ID
-     * @param notificationType 通知类型
-     * @param article          文章内容
-     */
-    void sendArticleNotification(Long userId, NotificationType notificationType, Article article);
-
-    /**
-     * 批量发送通知
+     * 批量发送通知到rabbitmq(一般不对外开放)
      *
      * @param notifications 通知列表
      * @return 是否发送成功
@@ -74,7 +71,7 @@ public interface NotificationService {
     /**
      * 分页获取用户的通知列表
      */
-    PageResult<Notification> getNotificationListWithPage(NotificationType type, Integer pageNum, Integer pageSize);
+    PageResult<Notification> getNotificationListWithPage(NotificationType notificationType, Integer pageNum, Integer pageSize);
 
     /**
      * 按分类获取用户的通知列表

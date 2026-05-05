@@ -7,13 +7,13 @@ import com.inkstage.entity.model.Tag;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
+import com.inkstage.notification.param.TagDeleteParam;
 import com.inkstage.service.TagService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.UserContext;
-import com.inkstage.enums.notification.NotificationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,9 +23,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 标签服务实现类
@@ -179,12 +177,13 @@ public class TagServiceImpl implements TagService {
 
             // 发送通知
             for (Long userId : userIds) {
-                Map<String, Object> params = new HashMap<>();
-                params.put(NotificationTemplateVariable.TAG_ID.getKey(), tag.getId());
-                params.put(NotificationTemplateVariable.TAG_NAME.getKey(), tag.getName());
-                params.put(NotificationTemplateVariable.USER_ID.getKey(), tag.getUserId());
-
-                notificationService.sendNotificationWithTemplate(userId, NotificationType.TAG_DELETE, params);
+                TagDeleteParam param = new TagDeleteParam();
+                param.setUserId(userId);
+                param.setTagName(tag.getName());
+                param.setTagId(tag.getId());
+                param.setSenderId(tag.getUserId());
+                param.setNotificationType(NotificationType.TAG_DELETE);
+                notificationService.send(param);
             }
 
             // 执行删除操作

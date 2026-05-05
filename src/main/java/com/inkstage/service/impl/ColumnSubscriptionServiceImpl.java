@@ -2,13 +2,17 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ColumnMapper;
 import com.inkstage.mapper.ColumnSubscriptionMapper;
+import com.inkstage.notification.NotificationParam;
+import com.inkstage.notification.param.ColumnDisabledParam;
+import com.inkstage.notification.param.ColumnRestoredParam;
+import com.inkstage.notification.param.ColumnSubscriptionParam;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
@@ -22,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 专栏订阅服务实现类
@@ -155,8 +158,8 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     }
 
     @Override
-    public void notifySubscribers(Long columnId, NotificationType notificationType, Map<String, Object> params) {
-        log.info("向专栏订阅者发送通知: columnId={}, type={}", columnId, notificationType);
+    public void notifySubscribers(Long columnId, NotificationParam param) {
+        log.info("向专栏订阅者发送通知: columnId={}, type={}", columnId, param.getNotificationType());
 
         Column column = columnMapper.findById(columnId);
         if (column == null) {
@@ -170,18 +173,56 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
             return;
         }
 
-        params.put("columnId", columnId);
-        params.put("columnName", column.getName());
-        params.put("columnDescription", column.getDescription());
-        params.put("columnCreatorName", column.getUserId());
+        List<NotificationParam> params = subscriberIds.stream()
+                .filter(subscriberId -> !subscriberId.equals(column.getUserId()))
+                .map(subscriberId -> {
+                    NotificationParam p = copyParam(param);
+                    p.setUserId(subscriberId);
+                    p.setNotificationType(param.getNotificationType());
+                    return p;
+                })
+                .toList();
 
-        for (Long subscriberId : subscriberIds) {
-            if (subscriberId.equals(column.getUserId())) {
-                continue;
+        boolean result = notificationService.sendBatch(params);
+        log.info("已向 {} 个订阅者发送专栏通知: type={}, 结果: {}", params.size(), param.getNotificationType(), result);
+    }
+
+    private NotificationParam copyParam(NotificationParam param) {
+        switch (param) {
+            case ColumnSubscriptionParam p -> {
+                ColumnSubscriptionParam col = new ColumnSubscriptionParam();
+                col.setColumnId(p.getColumnId());
+                col.setColumnName(p.getColumnName());
+                col.setArticleId(p.getArticleId());
+                col.setArticleUrl(InkConstant.ARTICLE_URL + p.getArticleUrl());
+                col.setUserId(p.getUserId());
+                col.setNotificationType(p.getNotificationType());
+                col.setSenderId(p.getSenderId());
+                return col;
             }
-            notificationService.sendNotificationWithTemplate(subscriberId, notificationType, params);
+            case ColumnDisabledParam p -> {
+                ColumnDisabledParam col = new ColumnDisabledParam();
+                col.setColumnId(p.getColumnId());
+                col.setColumnName(p.getColumnName());
+                col.setReason(p.getReason());
+                col.setUserId(p.getUserId());
+                col.setNotificationType(p.getNotificationType());
+                col.setSenderId(p.getSenderId());
+                return col;
+            }
+            case ColumnRestoredParam p -> {
+                ColumnRestoredParam col = new ColumnRestoredParam();
+                col.setColumnId(p.getColumnId());
+                col.setColumnName(p.getColumnName());
+                col.setActionUrl(p.getActionUrl());
+                col.setUserId(p.getUserId());
+                col.setNotificationType(p.getNotificationType());
+                col.setSenderId(p.getSenderId());
+                return col;
+            }
+            case null, default -> {
+                return param;
+            }
         }
-
-        log.info("已向 {} 个订阅者发送专栏通知: type={}", subscriberIds.size(), notificationType);
     }
 }

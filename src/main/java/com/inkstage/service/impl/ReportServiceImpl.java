@@ -10,10 +10,11 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.*;
 import com.inkstage.enums.common.DefaultStatus;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ReportMapper;
+import com.inkstage.notification.param.ReportParam;
+import com.inkstage.notification.param.ReportResultParam;
 import com.inkstage.service.*;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
@@ -23,9 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 举报服务实现类
@@ -68,9 +67,13 @@ public class ReportServiceImpl implements ReportService {
         // 保存举报
         reportMapper.insert(report);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put(NotificationTemplateVariable.REPORTED_CONTENT.getKey(), report.getReportedContent());
-        notificationService.sendNotificationWithTemplate(report.getReporterId(), NotificationType.REPORT, params);
+        ReportParam param = new ReportParam();
+        param.setUserId(report.getReporterId());
+        param.setReportedContent(report.getReportedContent());
+        param.setRelatedId(report.getRelatedId());
+        param.setSenderId(currentUser.getId());
+        param.setNotificationType(NotificationType.REPORT);
+        notificationService.send(param);
 
         log.info("用户 {} 举报了 {} {}，举报类型：{}",
                 currentUser.getId(), reportCreateDTO.getReportedType().getDesc(),
@@ -128,12 +131,13 @@ public class ReportServiceImpl implements ReportService {
         report.setUpdateTime(LocalDateTime.now());
         reportMapper.update(report);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put(NotificationTemplateVariable.RELATED_ID.getKey(), report.getRelatedId());
-        params.put(NotificationTemplateVariable.REPORTED_CONTENT.getKey(), report.getReportedContent());
-        params.put(NotificationTemplateVariable.HANDLE_RESULT.getKey(), report.getHandleResult().getDesc());
-        params.put(NotificationTemplateVariable.REASON.getKey(), report.getHandleReason());
-        notificationService.sendNotificationWithTemplate(report.getReporterId(), NotificationType.REPORT_RESULT, params);
+        ReportResultParam param = new ReportResultParam();
+        param.setUserId(report.getReporterId());
+        param.setHandleResult(report.getHandleResult().getDesc());
+        param.setRelatedId(report.getRelatedId());
+        param.setSenderId(handlerId);
+        param.setNotificationType(NotificationType.REPORT_RESULT);
+        notificationService.send(param);
 
 
         log.info("管理员 {} 处理了举报 {}，处理结果：{}",

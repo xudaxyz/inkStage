@@ -70,6 +70,7 @@ public class NotificationSettingServiceImpl implements NotificationSettingServic
         setting.setFollowNotification(true);
         setting.setMessageNotification(true);
         setting.setReportNotification(true);
+        setting.setReportResultNotification(true);
         setting.setFeedbackNotification(true);
         setting.setSystemNotification(true);
         // 默认开启站内信通知

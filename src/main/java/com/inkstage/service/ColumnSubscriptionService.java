@@ -1,10 +1,9 @@
 package com.inkstage.service;
 
-import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.notification.NotificationParam;
 import com.inkstage.vo.front.MyColumnSubscriptionVO;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * 专栏订阅服务接口
@@ -40,7 +39,7 @@ public interface ColumnSubscriptionService {
      * 获取当前用户的订阅专栏列表
      *
      * @param offset 偏移量
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 订阅专栏列表
      */
     List<MyColumnSubscriptionVO> getMySubscriptions(Integer offset, Integer limit);
@@ -72,8 +71,7 @@ public interface ColumnSubscriptionService {
      * 向专栏的所有订阅者发送通知
      *
      * @param columnId 专栏ID
-     * @param notificationType 通知类型
-     * @param params 模板参数
+     * @param param    通知参数对象
      */
-    void notifySubscribers(Long columnId, NotificationType notificationType, Map<String, Object> params);
+    void notifySubscribers(Long columnId, NotificationParam param);
 }

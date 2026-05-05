@@ -727,6 +727,7 @@ CREATE TABLE `notification_setting`
     `follow_notification`             tinyint NULL DEFAULT 1 COMMENT '是否接收关注通知',
     `message_notification`            tinyint NULL DEFAULT 1 COMMENT '是否接收私信通知',
     `report_notification`             tinyint NULL DEFAULT 1 COMMENT '是否接收举报处理通知',
+    `report_result_notification`      tinyint NULL DEFAULT 1 COMMENT '是否接收举报结果处理通知',
     `feedback_notification`           tinyint NULL DEFAULT 1 COMMENT '是否接收反馈处理通知',
     `system_notification`             tinyint NULL DEFAULT 1 COMMENT '是否接收系统通知',
     `email_notification`              tinyint NULL DEFAULT 1 COMMENT '是否通过邮件接收通知',

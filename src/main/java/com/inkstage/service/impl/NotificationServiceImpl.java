@@ -1,7 +1,6 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Notification;
 import com.inkstage.enums.PushedStatus;
 import com.inkstage.enums.ReadStatus;
@@ -11,6 +10,7 @@ import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.NotificationMapper;
+import com.inkstage.notification.NotificationParam;
 import com.inkstage.service.*;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +36,42 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationSettingService notificationSettingService;
     private final WebSocketService webSocketService;
 
+    @Override
+    public boolean send(NotificationParam param) {
+        Long userId = param.getUserId();
+        NotificationType notificationType = param.getNotificationType();
+
+        // 检查用户是否开启了该类型的通知
+        if (isNotificationDisabled(userId, notificationType)) {
+            return false;
+        }
+        Notification notification = buildNotificationFromParam(param);
+
+        if (notification != null) {
+            // 发送通知
+            return sendNotification(notification);
+        }
+        // 通知内容为空, 返回false
+        return false;
+    }
+
+    @Override
+    public boolean sendBatch(List<? extends NotificationParam> params) {
+        if (params == null || params.isEmpty()) {
+            return true;
+        }
+
+        List<Notification> notifications = params.stream()
+                .map(this::buildNotificationFromParam)
+                .filter(notification -> notification != null && !isNotificationDisabled(notification.getUserId(), notification.getNotificationType()))
+                .toList();
+
+        if (notifications.isEmpty()) {
+            return true;
+        }
+
+        return sendBatchNotifications(notifications);
+    }
 
     @Override
     public boolean markAsRead(Long notificationId) {
@@ -96,49 +131,9 @@ public class NotificationServiceImpl implements NotificationService {
         return !enabled;
     }
 
-
-    @Override
-    public boolean sendNotificationWithTemplate(Long userId, NotificationType notificationType, Map<String, Object> params) {
-        // 检查用户是否开启了该类型的通知
-        if (isNotificationDisabled(userId, notificationType)) {
-            return false;
-        }
-        params.put(NotificationTemplateVariable.NOTIFICATION_TIME.getKey(), LocalDateTime.now().toString());
-        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
-
-        // 使用模板生成通知内容
-        Map<String, Object> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
-        log.info("生成通知内容结果：{}", notificationContent);
-
-        if (notificationContent != null) {
-            // 构建通知对象
-            Notification notification = buildNotification(userId, notificationType, notificationContent);
-
-            // 发送通知
-            return sendNotification(notification);
-        }
-        // 通知内容为空, 返回false
-        return false;
-
-    }
-
-    @Override
-    public void sendArticleNotification(Long userId, NotificationType notificationType, Article article) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
-        params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
-        params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), article.getId());
-        params.put(NotificationTemplateVariable.RELATED_ID.getKey(), article.getId());
-        log.info("发送文章通知，相关变量：{}", params);
-        boolean result = sendNotificationWithTemplate(userId, notificationType, params);
-        log.info("文章发送通知结果：{}", result);
-    }
-
     @Override
     public boolean sendBatchNotifications(List<Notification> notifications) {
         try {
-            // 过滤掉已关闭通知类型的用户消息
-            notifications = notifications.stream().filter(notification -> !isNotificationDisabled(notification.getUserId(), notification.getNotificationType())).toList();
             // 批量发送到RabbitMQ
             if (!notifications.isEmpty()) {
                 notificationProducer.sendBatchNotifications(notifications);
@@ -157,7 +152,7 @@ public class NotificationServiceImpl implements NotificationService {
         if (cachedCount != null) {
             return cachedCount;
         }
-        // 从数据库查询（处理缓存穿透）
+        // 从数据库查询
         int unreadCount = notificationMapper.countUnreadByUserId(userId);
         // 更新缓存
         notificationCacheService.cacheUnreadCount(userId, unreadCount);
@@ -285,5 +280,33 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setUpdateTime(LocalDateTime.now());
         notification.setDeleted(DeleteStatus.NOT_DELETED);
         return notification;
+    }
+
+    /**
+     * 从通知参数中获取对应的值, 并转换成对应的通知
+     *
+     * @param notificationParam 通知参数
+     * @return Notification
+     */
+    private Notification buildNotificationFromParam(NotificationParam notificationParam) {
+        Long userId = notificationParam.getUserId();
+        NotificationType notificationType = notificationParam.getNotificationType();
+
+        // 将参数转换为 Map
+        Map<String, Object> params = notificationParam.toMap();
+        params.put(NotificationTemplateVariable.NOTIFICATION_TIME.getKey(), LocalDateTime.now().toString());
+        if (notificationParam.getSenderId() != null) {
+            params.put(NotificationTemplateVariable.SENDER_ID.getKey(), notificationParam.getSenderId());
+        } else {
+            params.put(NotificationTemplateVariable.SENDER_ID.getKey(), 0L);
+        }
+
+        // 使用模板生成通知内容
+        Map<String, Object> notificationContent = notificationTemplateService.generateNotificationContent(notificationType, params);
+
+        if (notificationContent != null) {
+            return buildNotification(userId, notificationType, notificationContent);
+        }
+        return null;
     }
 }

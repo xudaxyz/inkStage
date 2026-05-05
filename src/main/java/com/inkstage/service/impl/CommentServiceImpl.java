@@ -4,6 +4,7 @@ import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.cache.service.CommentCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
 import com.inkstage.dto.front.CommentDTO;
 import com.inkstage.dto.front.CommentQueryDTO;
@@ -13,11 +14,13 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CommentMapper;
+import com.inkstage.notification.param.ArticleCommentParam;
+import com.inkstage.notification.param.CommentReplyParam;
+import com.inkstage.notification.param.CommentReviewRejectParam;
 import com.inkstage.service.CommentService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
@@ -31,8 +34,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 评论服务实现类
@@ -115,7 +116,13 @@ public class CommentServiceImpl implements CommentService {
             if (updated >= 1) {
                 // 增加文章评论数
                 countService.updateArticleCommentCount(comment.getArticleId(), 1);
-                sendCommentNotification(comment, article, currentUser);
+                // 发送评论回复通知
+                if (comment.getParentId() != null && comment.getParentId() > 0) {
+                    sendReplyCommentNotification(comment, currentUser);
+                } else {
+                    // 发送文章评论通知
+                    sendArticleCommentNotification(article, comment, currentUser);
+                }
             }
 
             // 清理文章评论缓存、父评论回复缓存
@@ -166,31 +173,52 @@ public class CommentServiceImpl implements CommentService {
     }
 
     /**
-     * 发送评论通知
+     * 发送文章评论通知
+     *
+     * @param article     文章内容
+     * @param comment     评论内容
+     * @param currentUser 当前用户
      */
-    private void sendCommentNotification(Comment comment, Article article, User currentUser) {
-        Map<String, Object> params = new HashMap<>();
-        params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
-        params.put(NotificationTemplateVariable.RELATED_ID.getKey(), comment.getArticleId());
-        params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), comment.getArticleId());
-        params.put(NotificationTemplateVariable.USERNAME.getKey(), currentUser.getNickname());
-        if (comment.getParentId() != null && comment.getParentId() > 0) {
-            // 回复评论
-            Comment parentComment = commentMapper.findById(comment.getParentId());
-
-            if (parentComment != null && !parentComment.getUserId().equals(currentUser.getId())) {
-                // 发送评论通知给父评论作者
-                notificationService.sendNotificationWithTemplate(parentComment.getUserId(), NotificationType.COMMENT_REPLY, params);
-            }
-        } else {
-            // 文章评论
-            Long articleUserId = article.getUserId();
-            // 只有当评论者不是文章作者时才发送通知给文章作者
-            if (!currentUser.getId().equals(articleUserId)) {
-                notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_COMMENT, params);
-            }
+    private void sendArticleCommentNotification(Article article, Comment comment, User currentUser) {
+        Long articleUserId = article.getUserId();
+        // 只有当评论者不是文章作者时才发送通知给文章作者
+        if (!currentUser.getId().equals(articleUserId)) {
+            ArticleCommentParam param = new ArticleCommentParam();
+            param.setUserId(articleUserId);
+            param.setUsername(currentUser.getNickname());
+            param.setArticleTitle(article.getTitle());
+            param.setCommentContent(comment.getContent());
+            param.setArticleId(comment.getArticleId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + comment.getArticleId());
+            param.setSenderId(currentUser.getId());
+            param.setNotificationType(NotificationType.ARTICLE_COMMENT);
+            notificationService.send(param);
         }
     }
+
+    /**
+     * 发送回复评论通知
+     *
+     * @param comment     回复的评论
+     * @param currentUser 当前用户
+     */
+    private void sendReplyCommentNotification(Comment comment, User currentUser) {
+        Comment parentComment = commentMapper.findById(comment.getParentId());
+        // 发送回复评论通知给父评论作者
+        if (parentComment != null && !parentComment.getUserId().equals(currentUser.getId())) {
+            CommentReplyParam param = new CommentReplyParam();
+            param.setUserId(parentComment.getUserId());
+            param.setUsername(currentUser.getNickname());
+            param.setCommentContent(comment.getContent());
+
+            param.setArticleId(comment.getArticleId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + comment.getArticleId());
+            param.setSenderId(currentUser.getId());
+            param.setNotificationType(NotificationType.COMMENT_REPLY);
+            notificationService.send(param);
+        }
+    }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -372,15 +400,15 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ResponseMessage.COMMENT_UPDATE_FAILED);
             }
 
-            // 发送通知
+            // 评论审核拒绝通知
             if (status == ReviewStatus.REJECTED) {
-                // 评论审核拒绝通知
-                Map<String, Object> params = new HashMap<>();
-                params.put(NotificationTemplateVariable.COMMENT_CONTENT.getKey(), comment.getContent());
-                params.put(NotificationTemplateVariable.RELATED_ID.getKey(), comment.getArticleId());
-                params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), comment.getArticleId());
-                params.put(NotificationTemplateVariable.USERNAME.getKey(), UserContext.getCurrentUser().getNickname());
-                notificationService.sendNotificationWithTemplate(comment.getUserId(), NotificationType.COMMENT_REVIEW_REJECT, params);
+                CommentReviewRejectParam param = new CommentReviewRejectParam();
+                param.setUserId(comment.getUserId());
+                param.setReason(reviewReason);
+                param.setArticleId(comment.getArticleId());
+                param.setSenderId(UserContext.getCurrentUserId());
+                param.setNotificationType(NotificationType.COMMENT_REVIEW_REJECT);
+                notificationService.send(param);
             }
 
             // 清理文章评论缓存

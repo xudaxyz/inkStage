@@ -2,17 +2,18 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.ResponseMessage;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.UserMapper;
+import com.inkstage.notification.param.ArticlePublishParam;
 import com.inkstage.service.*;
 import com.inkstage.utils.MarkdownUtils;
 import com.inkstage.utils.SummaryGenerator;
@@ -23,8 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 文章命令服务实现类
@@ -91,11 +90,14 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             }
 
             // 发送文章发布通知
-            Map<String, Object> params = new HashMap<>();
-            params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), article.getTitle());
-            params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), article.getId());
-            params.put(NotificationTemplateVariable.RELATED_ID.getKey(), article.getId());
-            notificationService.sendNotificationWithTemplate(currentUser.getId(), NotificationType.ARTICLE_PUBLISH, params);
+            ArticlePublishParam param = new ArticlePublishParam();
+            param.setUserId(currentUser.getId());
+            param.setUsername(currentUser.getNickname());
+            param.setArticleTitle(article.getTitle());
+            param.setArticleId(article.getId());
+            param.setArticleUrl(InkConstant.ARTICLE_URL + article.getId());
+            param.setNotificationType(NotificationType.ARTICLE_PUBLISH);
+            notificationService.send(param);
 
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
 

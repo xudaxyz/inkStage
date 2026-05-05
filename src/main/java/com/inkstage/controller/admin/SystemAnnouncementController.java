@@ -42,7 +42,6 @@ public class SystemAnnouncementController {
     public Result<Void> updateAnnouncement(@PathVariable Long id,
                                           @Valid @RequestBody SystemAnnouncementDTO dto) {
         SystemAnnouncement announcement = new SystemAnnouncement();
-        //TODO
         boolean success = announcementService.updateAnnouncement(announcement);
         return success ? Result.success() : Result.error("更新失败");
     }

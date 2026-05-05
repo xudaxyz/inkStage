@@ -2,6 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.PageResult;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.CollectArticleDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleCollection;
@@ -9,7 +10,6 @@ import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
@@ -22,15 +22,14 @@ import com.inkstage.service.NotificationService;
 import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
+import com.inkstage.notification.param.ArticleCollectionParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 文章收藏服务实现类
@@ -97,7 +96,6 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
             // 发送收藏通知
             String currentUserNickname = currentUser.getNickname();
-            // 从文章服务获取文章信息
             Article article = articleMapper.findById(collectArticleDTO.getArticleId());
             if (article != null) {
                 Long articleUserId = article.getUserId();
@@ -105,12 +103,15 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
                 // 只有当收藏者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), articleTitle);
-                    params.put(NotificationTemplateVariable.RELATED_ID.getKey(), collectArticleDTO.getArticleId());
-                    params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), collectArticleDTO.getArticleId());
-                    params.put(NotificationTemplateVariable.USERNAME.getKey(), currentUserNickname);
-                    notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_COLLECTION, params);
+                    ArticleCollectionParam param = new ArticleCollectionParam();
+                    param.setUserId(articleUserId);
+                    param.setCollectorName(currentUserNickname);
+                    param.setArticleTitle(articleTitle);
+                    param.setArticleId(collectArticleDTO.getArticleId());
+                    param.setArticleUrl(InkConstant.ARTICLE_URL + collectArticleDTO.getArticleId());
+                    param.setSenderId(userId);
+                    param.setNotificationType(NotificationType.ARTICLE_COLLECTION);
+                    notificationService.send(param);
                 }
             }
 

@@ -4,9 +4,12 @@ import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.FollowMapper;
 import com.inkstage.mapper.UserMapper;
+import com.inkstage.notification.param.FollowParam;
 import com.inkstage.service.FollowService;
+import com.inkstage.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -27,6 +30,7 @@ public class FollowServiceImpl implements FollowService {
 
     private final FollowMapper followMapper;
     private final UserMapper userMapper;
+    private final NotificationService notificationService;
 
     /**
      * 关注用户
@@ -71,6 +75,15 @@ public class FollowServiceImpl implements FollowService {
                 int followerCount = following.getFollowerCount() != null ? following.getFollowerCount() : 0;
                 following.setFollowerCount(followerCount + 1);
                 userMapper.updateByPrimaryKeySelective(following);
+
+                // 发送关注通知给被关注者
+                FollowParam param = new FollowParam();
+                param.setUserId(followingId);
+                param.setFollowerId(followerId);
+                param.setUsername(follower != null ? follower.getNickname() : "未知用户");
+                param.setSenderId(followerId);
+                param.setNotificationType(NotificationType.FOLLOW);
+                notificationService.send(param);
             }
         }
 

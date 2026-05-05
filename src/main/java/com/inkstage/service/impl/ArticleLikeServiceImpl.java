@@ -1,13 +1,14 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.cache.service.InteractionCacheService;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
 import com.inkstage.enums.common.DeleteStatus;
-import com.inkstage.enums.notification.NotificationTemplateVariable;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
+import com.inkstage.notification.param.ArticleLikeParam;
 import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.CountService;
@@ -19,8 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 文章点赞服务实现类
@@ -71,12 +70,15 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 
                 // 只有当点赞者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    Map<String, Object> params = new HashMap<>();
-                    params.put(NotificationTemplateVariable.ARTICLE_TITLE.getKey(), articleTitle);
-                    params.put(NotificationTemplateVariable.RELATED_ID.getKey(), articleId);
-                    params.put(NotificationTemplateVariable.ARTICLE_ID.getKey(), articleId);
-                    params.put(NotificationTemplateVariable.USERNAME.getKey(), currentUserNickname);
-                    notificationService.sendNotificationWithTemplate(articleUserId, NotificationType.ARTICLE_LIKE, params);
+                    ArticleLikeParam param = new ArticleLikeParam();
+                    param.setUserId(articleUserId);
+                    param.setUsername(currentUserNickname);
+                    param.setArticleTitle(articleTitle);
+                    param.setArticleId(articleId);
+                    param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
+                    param.setSenderId(userId);
+                    param.setNotificationType(NotificationType.ARTICLE_LIKE);
+                    notificationService.send(param);
                 }
             }
 

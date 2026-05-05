@@ -16,6 +16,7 @@
         <result column="follow_notification" property="followNotification"/>
         <result column="message_notification" property="messageNotification"/>
         <result column="report_notification" property="reportNotification"/>
+        <result column="report_result_notification" property="reportResultNotification"/>
         <result column="feedback_notification" property="feedbackNotification"/>
         <result column="system_notification" property="systemNotification"/>
         <result column="email_notification" property="emailNotification"/>
@@ -42,6 +43,7 @@
             follow_notification,
             message_notification,
             report_notification,
+            report_result_notification,
             feedback_notification,
             system_notification,
             email_notification,
@@ -60,6 +62,7 @@
             #{followNotification},
             #{messageNotification},
             #{reportNotification},
+            #{reportResultNotification},
             #{feedbackNotification},
             #{systemNotification},
             #{emailNotification},
@@ -81,6 +84,7 @@
             follow_notification = #{followNotification},
             message_notification = #{messageNotification},
             report_notification = #{reportNotification},
+            report_result_notification = #{reportResultNotification},
             feedback_notification = #{feedbackNotification},
             system_notification = #{systemNotification},
             email_notification = #{emailNotification},
@@ -106,6 +110,7 @@
                 WHEN #{notificationTypeCode} = 400 THEN follow_notification
                 WHEN #{notificationTypeCode} = 500 THEN message_notification
                 WHEN #{notificationTypeCode} = 600 THEN report_notification
+                WHEN #{notificationTypeCode} = 601 THEN report_result_notification
                 WHEN #{notificationTypeCode} = 700 THEN feedback_notification
                 ELSE true
                 END
@@ -143,6 +148,9 @@
                 </when>
                 <when test="notificationTypeName == 'REPORT'">
                     report_notification = #{notificationValue}
+                </when>
+                <when test="notificationTypeName == 'REPORT_RESULT'">
+                    report_result_notification = #{notificationValue}
                 </when>
                 <when test="notificationTypeName == 'FEEDBACK'">
                     feedback_notification = #{notificationValue}
