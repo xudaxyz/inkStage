@@ -10,10 +10,7 @@ import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
-import com.inkstage.vo.front.ColumnDetailVO;
-import com.inkstage.vo.front.ColumnListVO;
-import com.inkstage.vo.front.MyColumnSubscriptionVO;
-import com.inkstage.vo.front.MyColumnVO;
+import com.inkstage.vo.front.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,7 +105,7 @@ public class ColumnController {
      * 获取专栏详情
      *
      * @param id 专栏ID
-     * @return 专栏详情（包含作者信息和文章列表）
+     * @return 专栏详情（包含作者信息，不含文章列表）
      */
     @GetMapping("/{id}")
     public Result<ColumnDetailVO> getColumnDetail(@PathVariable Long id) {
@@ -117,9 +114,26 @@ public class ColumnController {
         if (detail == null) {
             return Result.error("专栏不存在");
         }
-        // 增加阅读量
         columnService.incrementColumnReadCount(id);
         return Result.success(detail);
+    }
+
+    /**
+     * 获取专栏文章分页列表
+     *
+     * @param id       专栏ID
+     * @param pageNum  页码（默认1）
+     * @param pageSize 每页大小（默认10）
+     * @return 专栏文章分页列表
+     */
+    @GetMapping("/{id}/articles")
+    public Result<PageResult<ArticleListVO>> getColumnArticles(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}", id, pageNum, pageSize);
+        PageResult<ArticleListVO> result = columnService.getColumnArticles(id, pageNum, pageSize);
+        return Result.success(result);
     }
 
     /**

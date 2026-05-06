@@ -198,15 +198,26 @@ public class ColumnServiceImpl implements ColumnService {
         try {
             ColumnDetailVO columnDetail = columnMapper.findDetailById(columnId);
             fileService.ensureImageFullUrl(columnDetail);
-            if (columnDetail != null) {
-                List<ArticleListVO> articles = articleColumnMapper.findArticlesByColumnId(columnId);
-                fileService.ensureImageFullUrl(articles);
-                columnDetail.setArticles(articles);
-            }
             return columnDetail;
         } catch (Exception e) {
             log.error("获取专栏详情失败", e);
             throw new BusinessException("获取专栏详情失败", e);
+        }
+    }
+
+    @Override
+    public PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize) {
+        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}", columnId, pageNum, pageSize);
+        try {
+            int offset = (pageNum - 1) * pageSize;
+            List<ArticleListVO> articleList = articleColumnMapper.findArticlesByColumnId(columnId, offset, pageSize);
+            long total = articleColumnMapper.countArticlesByColumnId(columnId);
+            fileService.ensureImageFullUrl(articleList);
+
+            return PageResult.build(articleList, total, pageNum, pageSize);
+        } catch (Exception e) {
+            log.error("获取专栏文章分页列表失败", e);
+            throw new BusinessException("获取专栏文章分页列表失败", e);
         }
     }
 

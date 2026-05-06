@@ -23,12 +23,22 @@ public interface ArticleColumnMapper {
     ArticleColumn findById(Long id);
 
     /**
-     * 根据专栏ID查询文章列表
+     * 根据专栏ID分页查询文章列表
      *
      * @param columnId 专栏ID
+     * @param offset   偏移量
+     * @param pageSize 每页大小
      * @return 专栏内的文章列表（按排序顺序排列）
      */
-    List<ArticleListVO> findArticlesByColumnId(@Param("columnId") Long columnId);
+    List<ArticleListVO> findArticlesByColumnId(@Param("columnId") Long columnId, @Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * 统计专栏内文章数量
+     *
+     * @param columnId 专栏ID
+     * @return 专栏内文章总数
+     */
+    long countArticlesByColumnId(@Param("columnId") Long columnId);
 
     /**
      * 根据文章ID查询关联的专栏信息
@@ -82,13 +92,11 @@ public interface ArticleColumnMapper {
     int deleteById(Long id);
 
     /**
-     * 根据文章ID软删除所有关联记录
-     * 用于文章删除时清理关联关系
+     * 根据文章ID软删除所有关联记录 - 用于文章删除时清理关联关系
      *
      * @param articleId 文章ID
-     * @return 影响的行数
      */
-    int deleteByArticleId(@Param("articleId") Long articleId);
+    void deleteByArticleId(@Param("articleId") Long articleId);
 
     /**
      * 根据专栏ID软删除所有关联记录

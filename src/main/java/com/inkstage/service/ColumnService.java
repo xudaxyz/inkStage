@@ -5,6 +5,7 @@ import com.inkstage.dto.front.ColumnCreateDTO;
 import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
 import com.inkstage.vo.front.MyColumnVO;
@@ -63,9 +64,19 @@ public interface ColumnService {
      * 获取专栏详情
      *
      * @param columnId 专栏ID
-     * @return 专栏详情（包含作者信息和文章列表），如果专栏不存在返回null
+     * @return 专栏详情（包含作者信息，不含文章列表），如果专栏不存在返回null
      */
     ColumnDetailVO getColumnDetail(Long columnId);
+
+    /**
+     * 获取专栏文章分页列表
+     *
+     * @param columnId 专栏ID
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 专栏文章分页列表
+     */
+    PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize);
 
     /**
      * 获取热门专栏列表

@@ -23,7 +23,7 @@
         select <include refid="baseColumns"/> from article_column where id = #{id} and deleted = 0
     </select>
 
-    <!-- 根据专栏ID获取文章列表 -->
+    <!-- 根据专栏ID分页获取文章列表 -->
     <select id="findArticlesByColumnId" resultType="com.inkstage.vo.front.ArticleListVO">
         SELECT
         a.id,
@@ -49,6 +49,15 @@
         LEFT JOIN category c ON a.category_id = c.id
         WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
         ORDER BY ac.sort_order ASC, ac.create_time ASC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计专栏内文章数量 -->
+    <select id="countArticlesByColumnId" resultType="long">
+        SELECT COUNT(*)
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
     </select>
 
     <!-- 根据文章ID查询 -->
