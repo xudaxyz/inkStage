@@ -8,6 +8,7 @@ import com.inkstage.enums.VisibleStatus;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
+import com.inkstage.vo.front.ColumnOptionVO;
 import com.inkstage.vo.front.MyColumnVO;
 
 import java.util.List;
@@ -74,9 +75,10 @@ public interface ColumnService {
      * @param columnId 专栏ID
      * @param pageNum  页码
      * @param pageSize 每页大小
+     * @param sortBy   排序方式：latest（最新）、earliest（最早）、readCount（阅读量）、commentCount（评论数）
      * @return 专栏文章分页列表
      */
-    PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize);
+    PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize, String sortBy);
 
     /**
      * 获取热门专栏列表
@@ -87,11 +89,30 @@ public interface ColumnService {
     List<ColumnListVO> getHotColumns(Integer limit);
 
     /**
+     * 搜索专栏内的文章
+     *
+     * @param columnId 专栏ID
+     * @param keyword  搜索关键词
+     * @param pageNum  页码
+     * @param pageSize 每页大小
+     * @return 专栏文章搜索结果
+     */
+    PageResult<ArticleListVO> searchColumnArticles(Long columnId, String keyword, Integer pageNum, Integer pageSize);
+
+    /**
      * 获取当前用户的专栏列表
      *
      * @return 当前用户创建的所有专栏
      */
-    List<MyColumnVO> getMyColumns();
+    PageResult<MyColumnVO> getMyColumns(String keyword, Integer pageNum, Integer pageSize);
+
+    /**
+     * 获取当前用户的专栏选项（仅ID和名称）
+     * 用于创建文章时选择专栏
+     *
+     * @return 当前用户创建的所有专栏选项
+     */
+    List<ColumnOptionVO> getMyColumnOptions();
 
     /**
      * 添加文章到专栏

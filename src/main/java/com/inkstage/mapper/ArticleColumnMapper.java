@@ -28,9 +28,10 @@ public interface ArticleColumnMapper {
      * @param columnId 专栏ID
      * @param offset   偏移量
      * @param pageSize 每页大小
+     * @param sortBy   排序方式
      * @return 专栏内的文章列表（按排序顺序排列）
      */
-    List<ArticleListVO> findArticlesByColumnId(@Param("columnId") Long columnId, @Param("offset") int offset, @Param("pageSize") int pageSize);
+    List<ArticleListVO> findArticlesByColumnId(@Param("columnId") Long columnId, @Param("offset") int offset, @Param("pageSize") int pageSize, @Param("sortBy") String sortBy);
 
     /**
      * 统计专栏内文章数量
@@ -39,6 +40,26 @@ public interface ArticleColumnMapper {
      * @return 专栏内文章总数
      */
     long countArticlesByColumnId(@Param("columnId") Long columnId);
+
+    /**
+     * 根据专栏ID和关键词搜索文章列表
+     *
+     * @param columnId 专栏ID
+     * @param keyword  搜索关键词
+     * @param offset   偏移量
+     * @param pageSize 每页大小
+     * @return 专栏内匹配的文章列表
+     */
+    List<ArticleListVO> searchArticlesByColumnId(@Param("columnId") Long columnId, @Param("keyword") String keyword, @Param("offset") int offset, @Param("pageSize") int pageSize);
+
+    /**
+     * 统计专栏内匹配关键词的文章数量
+     *
+     * @param columnId 专栏ID
+     * @param keyword  搜索关键词
+     * @return 匹配的文章数量
+     */
+    long countSearchArticlesByColumnId(@Param("columnId") Long columnId, @Param("keyword") String keyword);
 
     /**
      * 根据文章ID查询关联的专栏信息

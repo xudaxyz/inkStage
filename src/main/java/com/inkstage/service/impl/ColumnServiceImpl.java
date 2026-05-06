@@ -206,11 +206,11 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize) {
-        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}", columnId, pageNum, pageSize);
+    public PageResult<ArticleListVO> getColumnArticles(Long columnId, Integer pageNum, Integer pageSize, String sortBy) {
+        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}, sortBy={}", columnId, pageNum, pageSize, sortBy);
         try {
             int offset = (pageNum - 1) * pageSize;
-            List<ArticleListVO> articleList = articleColumnMapper.findArticlesByColumnId(columnId, offset, pageSize);
+            List<ArticleListVO> articleList = articleColumnMapper.findArticlesByColumnId(columnId, offset, pageSize, sortBy);
             long total = articleColumnMapper.countArticlesByColumnId(columnId);
             fileService.ensureImageFullUrl(articleList);
 
@@ -237,18 +237,48 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
-    public List<MyColumnVO> getMyColumns() {
+    public PageResult<ArticleListVO> searchColumnArticles(Long columnId, String keyword, Integer pageNum, Integer pageSize) {
+        log.info("搜索专栏文章: columnId={}, keyword={}", columnId, keyword);
+        try {
+            int offset = (pageNum - 1) * pageSize;
+            List<ArticleListVO> articleList = articleColumnMapper.searchArticlesByColumnId(columnId, keyword, offset, pageSize);
+            long total = articleColumnMapper.countSearchArticlesByColumnId(columnId, keyword);
+            fileService.ensureImageFullUrl(articleList);
+
+            return PageResult.build(articleList, total, pageNum, pageSize);
+        } catch (Exception e) {
+            log.error("搜索专栏文章失败", e);
+            throw new BusinessException("搜索专栏文章失败", e);
+        }
+    }
+
+    @Override
+    public PageResult<MyColumnVO> getMyColumns(String keyword, Integer pageNum, Integer pageSize) {
         log.info("获取我的专栏");
         try {
             Long userId = UserContext.getCurrentUserId();
-            List<MyColumnVO> myColumns = columnMapper.findMyColumns(userId);
-
+            int offset = (pageNum - 1) * pageSize;
+            List<MyColumnVO> myColumns = columnMapper.findMyColumns(userId, keyword, offset, pageSize);
             fileService.ensureImageFullUrl(myColumns);
 
-            return myColumns;
+            Long count = columnMapper.countMyColumns(userId, keyword, offset, pageSize);
+
+            return PageResult.build(myColumns, count, pageNum, pageSize);
         } catch (Exception e) {
             log.error("获取我的专栏失败", e);
             throw new BusinessException("获取我的专栏失败", e);
+        }
+    }
+
+    @Override
+    public List<ColumnOptionVO> getMyColumnOptions() {
+        log.info("获取我的专栏选项");
+        try {
+            Long userId = UserContext.getCurrentUserId();
+            return columnMapper.findMyColumnOptions(userId);
+        } catch (Exception e) {
+            log.error("获取我的专栏选项失败", e);
+            throw new BusinessException("获取我的专栏选项失败", e);
         }
     }
 

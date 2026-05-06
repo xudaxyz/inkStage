@@ -48,7 +48,14 @@
         LEFT JOIN user u ON a.user_id = u.id
         LEFT JOIN category c ON a.category_id = c.id
         WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
-        ORDER BY ac.sort_order ASC, ac.create_time ASC
+        <choose>
+            <when test="sortBy == 'earliest'">
+                ORDER BY a.publish_time ASC
+            </when>
+            <otherwise>
+                ORDER BY a.publish_time DESC
+            </otherwise>
+        </choose>
         LIMIT #{offset}, #{pageSize}
     </select>
 
@@ -58,6 +65,45 @@
         FROM article_column ac
         LEFT JOIN article a ON ac.article_id = a.id
         WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
+    </select>
+
+    <!-- 根据专栏ID和关键词搜索文章列表 -->
+    <select id="searchArticlesByColumnId" resultType="com.inkstage.vo.front.ArticleListVO">
+        SELECT
+        a.id,
+        a.title,
+        a.summary,
+        a.cover_image,
+        a.article_status,
+        a.visible,
+        a.publish_time,
+        a.last_edit_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        a.user_id,
+        a.category_id,
+        u.avatar,
+        u.nickname,
+        c.name as category_name,
+        ac.sort_order
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        LEFT JOIN user u ON a.user_id = u.id
+        LEFT JOIN category c ON a.category_id = c.id
+        WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
+        AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
+        ORDER BY a.publish_time DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计专栏内匹配关键词的文章数量 -->
+    <select id="countSearchArticlesByColumnId" resultType="long">
+        SELECT COUNT(*)
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
+        AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
     </select>
 
     <!-- 根据文章ID查询 -->

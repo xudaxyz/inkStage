@@ -149,8 +149,15 @@
         create_time,
         update_time
         FROM `column`
-        WHERE user_id = #{userId} AND deleted = 0
+        <where>
+            user_id = #{userId} AND deleted = 0 AND status = 1
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE CONCAT('%', #{keyword}, '%')
+                OR description LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+        </where>
         ORDER BY sort_order ASC, create_time DESC
+        LIMIT #{offset}, #{pageSize}
     </select>
 
     <!-- 根据slug查询专栏 -->
@@ -222,5 +229,24 @@
         <if test="query.userId != null">
             AND user_id = #{query.userId}
         </if>
+    </select>
+
+    <!-- 统计当前用户(我的)专栏列表数量 -->
+    <select id="countMyColumns" resultType="long">
+        SELECT COUNT(*)
+        FROM `column`
+        WHERE deleted = 0 AND status = 1 and user_id = #{userId}
+        <if test="keyword != null and keyword != ''">
+            AND (name LIKE CONCAT('%', #{keyword}, '%')
+            OR description LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+    </select>
+
+    <!-- 查询当前用户的专栏选项（仅ID和名称） -->
+    <select id="findMyColumnOptions" resultType="com.inkstage.vo.front.ColumnOptionVO">
+        SELECT id, name
+        FROM `column`
+        WHERE user_id = #{userId} AND deleted = 0 AND status = 1
+        ORDER BY sort_order ASC, create_time DESC
     </select>
 </mapper>

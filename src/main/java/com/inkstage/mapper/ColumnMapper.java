@@ -4,6 +4,7 @@ import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.entity.model.Column;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
+import com.inkstage.vo.front.ColumnOptionVO;
 import com.inkstage.vo.front.MyColumnVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -57,7 +58,10 @@ public interface ColumnMapper {
      * @param userId 用户ID
      * @return 用户创建的所有专栏列表
      */
-    List<MyColumnVO> findMyColumns(@Param("userId") Long userId);
+    List<MyColumnVO> findMyColumns(@Param("userId") Long userId,
+                                   @Param("keyword") String keyword,
+                                   @Param("offset") int offset,
+                                   @Param("pageSize") int pageSize);
 
     /**
      * 根据slug查询专栏
@@ -136,4 +140,26 @@ public interface ColumnMapper {
      * @return 符合条件的专栏数量
      */
     long countColumnList(@Param("query") ColumnQueryDTO queryDTO);
+
+    /**
+     * 统计当前用户的专栏列表数量
+     * @param userId 用户id
+     * @param keyword 关键词
+     * @param offset 偏移量
+     * @param pageSize 每页数量
+     * @return 当前用户的专栏列表数量
+     */
+    Long countMyColumns(@Param("userId") Long userId,
+                        @Param("keyword") String keyword,
+                        @Param("offset") int offset,
+                        @Param("pageSize") int pageSize);
+
+    /**
+     * 查询当前用户的专栏选项（仅ID和名称）
+     * 用于创建文章时选择专栏
+     *
+     * @param userId 用户ID
+     * @return 专栏选项列表
+     */
+    List<ColumnOptionVO> findMyColumnOptions(@Param("userId") Long userId);
 }

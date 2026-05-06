@@ -124,15 +124,17 @@ public class ColumnController {
      * @param id       专栏ID
      * @param pageNum  页码（默认1）
      * @param pageSize 每页大小（默认10）
+     * @param sortBy   排序方式：latest（最新，默认）、earliest（最早）
      * @return 专栏文章分页列表
      */
     @GetMapping("/{id}/articles")
     public Result<PageResult<ArticleListVO>> getColumnArticles(
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") Integer pageNum,
-            @RequestParam(defaultValue = "10") Integer pageSize) {
-        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}", id, pageNum, pageSize);
-        PageResult<ArticleListVO> result = columnService.getColumnArticles(id, pageNum, pageSize);
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(defaultValue = "latest") String sortBy) {
+        log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}, sortBy={}", id, pageNum, pageSize, sortBy);
+        PageResult<ArticleListVO> result = columnService.getColumnArticles(id, pageNum, pageSize, sortBy);
         return Result.success(result);
     }
 
@@ -149,15 +151,54 @@ public class ColumnController {
     }
 
     /**
-     * 获取当前用户的专栏列表
+     * 搜索专栏内的文章
      *
-     * @return 当前用户创建的所有专栏
+     * @param id       专栏ID
+     * @param keyword  搜索关键词
+     * @param pageNum  页码（默认1）
+     * @param pageSize 每页大小（默认10）
+     * @return 专栏文章搜索结果
+     */
+    @GetMapping("/{id}/articles/search")
+    public Result<PageResult<ArticleListVO>> searchColumnArticles(
+            @PathVariable Long id,
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("搜索专栏文章: columnId={}, keyword={}, pageNum={}, pageSize={}", id, keyword, pageNum, pageSize);
+        PageResult<ArticleListVO> result = columnService.searchColumnArticles(id, keyword, pageNum, pageSize);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取当前用户的专栏列表
+     * @param keyword 查询关键词
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @return 当前用户创建的专栏
      */
     @GetMapping("/my")
     @UserAccess
-    public Result<List<MyColumnVO>> getMyColumns() {
-        List<MyColumnVO> list = columnService.getMyColumns();
-        return Result.success(list);
+    public Result<PageResult<MyColumnVO>> getMyColumns(@RequestParam(defaultValue = "") String keyword,
+                                                 @RequestParam(defaultValue = "1") Integer pageNum,
+                                                 @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("获取我的专栏: keyword:{}", keyword);
+        PageResult<MyColumnVO> result = columnService.getMyColumns(keyword, pageNum, pageSize);
+        return Result.success(result);
+    }
+
+    /**
+     * 获取当前用户的专栏选项（仅ID和名称）
+     * 用于创建文章时选择专栏
+     *
+     * @return 当前用户创建的所有专栏选项
+     */
+    @GetMapping("/my/options")
+    @UserAccess
+    public Result<List<ColumnOptionVO>> getMyColumnOptions() {
+        log.info("获取我的专栏选项");
+        List<ColumnOptionVO> options = columnService.getMyColumnOptions();
+        return Result.success(options);
     }
 
     /**
