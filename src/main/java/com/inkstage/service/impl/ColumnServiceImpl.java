@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -283,6 +284,39 @@ public class ColumnServiceImpl implements ColumnService {
     }
 
     @Override
+    public ColumnNeighborVO getColumnNeighborArticles(Long articleId) {
+        log.info("获取文章在专栏中的上下篇文章: articleId={}", articleId);
+        try {
+            ArticleColumn articleColumn = articleColumnMapper.findByArticleId(articleId);
+            if (articleColumn == null) {
+                return null;
+            }
+
+            Long columnId = articleColumn.getColumnId();
+            Column column = columnMapper.findById(columnId);
+            if (column == null) {
+                return null;
+            }
+
+            NeighborArticleVO prev = articleColumnMapper.findPrevArticleInColumn(
+                    columnId, articleId, articleColumn.getSortOrder());
+            NeighborArticleVO next = articleColumnMapper.findNextArticleInColumn(
+                    columnId, articleId, articleColumn.getSortOrder());
+
+            ColumnNeighborVO columnNeighborVO = new ColumnNeighborVO();
+            columnNeighborVO.setColumnId(columnId);
+            columnNeighborVO.setColumnName(column.getName());
+            columnNeighborVO.setPrev(prev);
+            columnNeighborVO.setNext(next);
+
+            return columnNeighborVO;
+        } catch (Exception e) {
+            log.error("获取文章在专栏中的上下篇文章失败", e);
+            throw new BusinessException("获取文章在专栏中的上下篇文章失败", e);
+        }
+    }
+
+    @Override
     @Transactional
     public boolean addArticleToColumn(Long columnId, Long articleId, Integer sortOrder) {
         log.info("添加文章到专栏: columnId={}, articleId={}", columnId, articleId);
@@ -299,9 +333,14 @@ public class ColumnServiceImpl implements ColumnService {
                 }
             }
 
+            // 默认排序：使用跳跃间隔，避免频繁重排
             if (sortOrder == null) {
-                int count = articleColumnMapper.countByColumnId(columnId);
-                sortOrder = count + 1;
+                Integer maxSortOrder = articleColumnMapper.getMaxSortOrder(columnId);
+                if (maxSortOrder == null || maxSortOrder == 0) {
+                    sortOrder = 100;
+                } else {
+                    sortOrder = maxSortOrder + 100;
+                }
             }
 
             ArticleColumn articleColumn = new ArticleColumn();
@@ -375,6 +414,33 @@ public class ColumnServiceImpl implements ColumnService {
         } catch (Exception e) {
             log.error("更新专栏文章排序失败", e);
             throw new BusinessException("更新专栏文章排序失败", e);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean batchUpdateColumnArticleSort(Long columnId, List<Long> articleIds) {
+        log.info("批量更新专栏文章排序: columnId={}, articleCount={}", columnId, articleIds.size());
+        try {
+            User user = UserContext.getCurrentUser();
+            checkColumnIsMine(columnId, user);
+
+            // 使用跳跃间隔排序，避免频繁重排
+            List<ArticleColumn> list = new ArrayList<>();
+            for (int i = 0; i < articleIds.size(); i++) {
+                ArticleColumn ac = new ArticleColumn();
+                ac.setArticleId(articleIds.get(i));
+                ac.setSortOrder((i + 1) * 100); // 100, 200, 300, ...
+                list.add(ac);
+            }
+
+            // 使用 INNER JOIN + UNION ALL 批量更新，一次性执行
+            int updatedCount = articleColumnMapper.batchUpdateSortOrder(columnId, list);
+            log.info("批量更新专栏文章排序完成: 更新了{}条记录", updatedCount);
+            return updatedCount > 0;
+        } catch (Exception e) {
+            log.error("批量更新专栏文章排序失败", e);
+            throw new BusinessException("批量更新专栏文章排序失败", e);
         }
     }
 

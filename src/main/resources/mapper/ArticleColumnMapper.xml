@@ -48,14 +48,7 @@
         LEFT JOIN user u ON a.user_id = u.id
         LEFT JOIN category c ON a.category_id = c.id
         WHERE ac.column_id = #{columnId} AND ac.deleted = 0 AND a.deleted = 0
-        <choose>
-            <when test="sortBy == 'earliest'">
-                ORDER BY a.publish_time ASC
-            </when>
-            <otherwise>
-                ORDER BY a.publish_time DESC
-            </otherwise>
-        </choose>
+        ORDER BY ac.sort_order ${sortBy}
         LIMIT #{offset}, #{pageSize}
     </select>
 
@@ -136,9 +129,23 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 更新排序 -->
-    <update id="updateSortOrder">
-        UPDATE article_column SET sort_order = #{sortOrder}, update_time = NOW() WHERE id = #{id}
+    <!-- 获取专栏内最大排序值 -->
+    <select id="getMaxSortOrder" resultType="java.lang.Integer">
+        SELECT COALESCE(MAX(sort_order), 0) FROM article_column WHERE column_id = #{columnId} AND deleted = 0
+    </select>
+
+    <!-- 批量更新专栏文章排序 -->
+    <update id="batchUpdateSortOrder">
+        UPDATE article_column ac
+        INNER JOIN (
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT #{item.articleId} AS article_id, #{item.sortOrder} AS sort_order
+            </foreach>
+        ) temp ON ac.article_id = temp.article_id
+        SET ac.sort_order = temp.sort_order,
+            ac.update_time = NOW()
+        WHERE ac.column_id = #{columnId}
+          AND ac.deleted = 0
     </update>
 
     <!-- 根据ID删除 -->
@@ -159,5 +166,33 @@
     <!-- 统计专栏文章数量 -->
     <select id="countByColumnId" resultType="int">
         SELECT COUNT(*) FROM article_column WHERE column_id = #{columnId} AND deleted = 0
+    </select>
+
+    <!-- 查询专栏内当前文章的上一篇文章 -->
+    <select id="findPrevArticleInColumn" resultType="com.inkstage.vo.front.NeighborArticleVO">
+        SELECT a.id, a.title
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        WHERE ac.column_id = #{columnId}
+          AND ac.deleted = 0
+          AND a.deleted = 0
+          AND ac.article_id != #{articleId}
+          AND ac.sort_order <![CDATA[ < ]]> #{sortOrder}
+        ORDER BY ac.sort_order DESC
+        LIMIT 1
+    </select>
+
+    <!-- 查询专栏内当前文章的下一篇文章 -->
+    <select id="findNextArticleInColumn" resultType="com.inkstage.vo.front.NeighborArticleVO">
+        SELECT a.id, a.title
+        FROM article_column ac
+        LEFT JOIN article a ON ac.article_id = a.id
+        WHERE ac.column_id = #{columnId}
+          AND ac.deleted = 0
+          AND a.deleted = 0
+          AND ac.article_id != #{articleId}
+          AND ac.sort_order <![CDATA[ > ]]> #{sortOrder}
+        ORDER BY ac.sort_order ASC
+        LIMIT 1
     </select>
 </mapper>

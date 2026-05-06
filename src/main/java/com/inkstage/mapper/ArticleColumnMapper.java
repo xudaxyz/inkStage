@@ -2,6 +2,7 @@ package com.inkstage.mapper;
 
 import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.vo.front.ArticleListVO;
+import com.inkstage.vo.front.NeighborArticleVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -96,13 +97,22 @@ public interface ArticleColumnMapper {
     int update(ArticleColumn articleColumn);
 
     /**
-     * 更新文章在专栏内的排序位置
+     * 获取专栏内的最大排序值
      *
-     * @param id        关联记录ID
-     * @param sortOrder 新的排序位置
+     * @param columnId 专栏ID
+     * @return 最大排序值，如果专栏无文章返回0
+     */
+    Integer getMaxSortOrder(@Param("columnId") Long columnId);
+
+    /**
+     * 批量更新专栏文章排序
+     * 使用 INNER JOIN + UNION ALL 方式一次性更新多条记录
+     *
+     * @param columnId 专栏ID
+     * @param list     包含 articleId 和 sortOrder 的对象列表
      * @return 影响的行数
      */
-    int updateSortOrder(@Param("id") Long id, @Param("sortOrder") Integer sortOrder);
+    int batchUpdateSortOrder(@Param("columnId") Long columnId, @Param("list") List<ArticleColumn> list);
 
     /**
      * 软删除文章专栏关联记录
@@ -134,4 +144,26 @@ public interface ArticleColumnMapper {
      * @return 专栏内的文章数量
      */
     int countByColumnId(@Param("columnId") Long columnId);
+
+    /**
+     * 查找专栏内当前文章的上一篇文章
+     * 按 sort_order ASC 排序，找到比当前文章排序靠前的文章
+     *
+     * @param columnId     专栏ID
+     * @param articleId  文章ID
+     * @param sortOrder  当前文章的排序值
+     * @return 上一篇文章信息，如果不存在返回null
+     */
+    NeighborArticleVO findPrevArticleInColumn(@Param("columnId") Long columnId, @Param("articleId") Long articleId, @Param("sortOrder") Integer sortOrder);
+
+    /**
+     * 查找专栏内当前文章的下一篇文章
+     * 按 sort_order ASC 排序，找到比当前文章排序靠后的文章
+     *
+     * @param columnId     专栏ID
+     * @param articleId  文章ID
+     * @param sortOrder  当前文章的排序值
+     * @return 下一篇文章信息，如果不存在返回null
+     */
+    NeighborArticleVO findNextArticleInColumn(@Param("columnId") Long columnId, @Param("articleId") Long articleId, @Param("sortOrder") Integer sortOrder);
 }

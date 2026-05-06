@@ -8,6 +8,7 @@ import com.inkstage.enums.VisibleStatus;
 import com.inkstage.vo.front.ArticleListVO;
 import com.inkstage.vo.front.ColumnDetailVO;
 import com.inkstage.vo.front.ColumnListVO;
+import com.inkstage.vo.front.ColumnNeighborVO;
 import com.inkstage.vo.front.ColumnOptionVO;
 import com.inkstage.vo.front.MyColumnVO;
 
@@ -115,6 +116,14 @@ public interface ColumnService {
     List<ColumnOptionVO> getMyColumnOptions();
 
     /**
+     * 获取文章在专栏中的上下篇文章信息
+     *
+     * @param articleId 文章ID
+     * @return 上下篇文章信息，包含专栏信息和上下篇文章详情
+     */
+    ColumnNeighborVO getColumnNeighborArticles(Long articleId);
+
+    /**
      * 添加文章到专栏
      *
      * @param columnId  专栏ID
@@ -142,6 +151,16 @@ public interface ColumnService {
      * @return 更新成功返回true，失败返回false
      */
     boolean updateArticleSort(Long columnId, Long articleId, Integer sortOrder);
+
+    /**
+     * 批量更新专栏文章排序（用户拖拽排序后调用）
+     * 传入按新顺序排列的文章ID列表，自动计算并更新排序值
+     *
+     * @param columnId  专栏ID
+     * @param articleIds 按新顺序排列的文章ID列表
+     * @return 更新成功返回true，失败返回false
+     */
+    boolean batchUpdateColumnArticleSort(Long columnId, List<Long> articleIds);
 
     /**
      * 检查文章是否已在指定专栏中

@@ -124,7 +124,7 @@ public class ColumnController {
      * @param id       专栏ID
      * @param pageNum  页码（默认1）
      * @param pageSize 每页大小（默认10）
-     * @param sortBy   排序方式：latest（最新，默认）、earliest（最早）
+     * @param sortBy   排序方式：ASC（升序/正序，默认）、DESC（降序/倒序）
      * @return 专栏文章分页列表
      */
     @GetMapping("/{id}/articles")
@@ -132,7 +132,7 @@ public class ColumnController {
             @PathVariable Long id,
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(defaultValue = "latest") String sortBy) {
+            @RequestParam(defaultValue = "ASC") String sortBy) {
         log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}, sortBy={}", id, pageNum, pageSize, sortBy);
         PageResult<ArticleListVO> result = columnService.getColumnArticles(id, pageNum, pageSize, sortBy);
         return Result.success(result);
@@ -202,6 +202,19 @@ public class ColumnController {
     }
 
     /**
+     * 获取文章在专栏中的上下篇文章信息
+     *
+     * @param articleId 文章ID
+     * @return 上下篇文章信息，包含专栏信息和上下篇文章详情
+     */
+    @GetMapping("/article/neighbor")
+    public Result<ColumnNeighborVO> getColumnNeighborArticles(@RequestParam Long articleId) {
+        log.info("获取文章在专栏中的上下篇文章: articleId={}", articleId);
+        ColumnNeighborVO result = columnService.getColumnNeighborArticles(articleId);
+        return Result.success(result);
+    }
+
+    /**
      * 添加文章到专栏
      *
      * @param dto 包含专栏ID、文章ID和排序位置
@@ -241,6 +254,21 @@ public class ColumnController {
     public Result<Boolean> updateArticleSort(@Valid @RequestBody UpdateColumnArticleDTO dto) {
         log.info("更新专栏文章排序: {}", dto);
         boolean success = columnService.updateArticleSort(dto.getColumnId(), dto.getArticleId(), dto.getSortOrder());
+        return success ? Result.success(true, "排序更新成功") : Result.error("排序更新失败");
+    }
+
+    /**
+     * 批量更新专栏文章排序（用户拖拽排序后调用）
+     *
+     * @param columnId  专栏ID
+     * @param articleIds 按新顺序排列的文章ID列表
+     * @return 更新成功返回true，失败返回false
+     */
+    @PutMapping("/article/sort/batch")
+    @UserAccess
+    public Result<Boolean> batchUpdateArticleSort(@RequestParam Long columnId, @RequestBody List<Long> articleIds) {
+        log.info("批量更新专栏文章排序: columnId={}, articleCount={}, articleIds: {}", columnId, articleIds.size(), articleIds);
+        boolean success = columnService.batchUpdateColumnArticleSort(columnId, articleIds);
         return success ? Result.success(true, "排序更新成功") : Result.error("排序更新失败");
     }
 
