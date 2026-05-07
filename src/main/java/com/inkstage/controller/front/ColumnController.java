@@ -1,6 +1,7 @@
 package com.inkstage.controller.front;
 
 import com.inkstage.annotation.UserAccess;
+import com.inkstage.cache.service.ColumnCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.Result;
 import com.inkstage.dto.front.ColumnCreateDTO;
@@ -30,6 +31,7 @@ public class ColumnController {
 
     private final ColumnService columnService;
     private final ColumnSubscriptionService columnSubscriptionService;
+    private final ColumnCacheService columnCacheService;
 
     /**
      * 创建专栏
@@ -97,7 +99,7 @@ public class ColumnController {
      */
     @GetMapping("/list")
     public Result<PageResult<ColumnListVO>> getColumns(ColumnQueryDTO queryDTO) {
-        PageResult<ColumnListVO> pageResult = columnService.getColumns(queryDTO);
+        PageResult<ColumnListVO> pageResult = columnCacheService.getColumns(queryDTO);
         return Result.success(pageResult);
     }
 
@@ -110,7 +112,7 @@ public class ColumnController {
     @GetMapping("/{id}")
     public Result<ColumnDetailVO> getColumnDetail(@PathVariable Long id) {
         log.info("获取专栏详情: id={}", id);
-        ColumnDetailVO detail = columnService.getColumnDetail(id);
+        ColumnDetailVO detail = columnCacheService.getColumnDetail(id);
         if (detail == null) {
             return Result.error("专栏不存在");
         }
@@ -134,7 +136,7 @@ public class ColumnController {
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(defaultValue = "ASC") String sortBy) {
         log.info("获取专栏文章分页列表: id={}, pageNum={}, pageSize={}, sortBy={}", id, pageNum, pageSize, sortBy);
-        PageResult<ArticleListVO> result = columnService.getColumnArticles(id, pageNum, pageSize, sortBy);
+        PageResult<ArticleListVO> result = columnCacheService.getColumnArticles(id, pageNum, pageSize, sortBy);
         return Result.success(result);
     }
 
@@ -146,7 +148,7 @@ public class ColumnController {
      */
     @GetMapping("/hot")
     public Result<List<ColumnListVO>> getHotColumns(@RequestParam(defaultValue = "10") Integer limit) {
-        List<ColumnListVO> list = columnService.getHotColumns(limit);
+        List<ColumnListVO> list = columnCacheService.getHotColumns(limit);
         return Result.success(list);
     }
 
@@ -166,7 +168,7 @@ public class ColumnController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize) {
         log.info("搜索专栏文章: columnId={}, keyword={}, pageNum={}, pageSize={}", id, keyword, pageNum, pageSize);
-        PageResult<ArticleListVO> result = columnService.searchColumnArticles(id, keyword, pageNum, pageSize);
+        PageResult<ArticleListVO> result = columnCacheService.searchColumnArticles(id, keyword, pageNum, pageSize);
         return Result.success(result);
     }
 

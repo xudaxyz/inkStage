@@ -231,4 +231,30 @@ public interface CacheClearService {
      * @param userId 用户ID
      */
     void clearColumnSubscriptionCache(Long columnId, Long userId);
+
+    // ==================== 专栏相关缓存清除 ====================
+
+    /**
+     * 清理专栏详情缓存
+     *
+     * @param columnId 专栏ID
+     */
+    void clearColumnDetailCache(Long columnId);
+
+    /**
+     * 清理专栏列表缓存
+     */
+    void clearColumnListCache();
+
+    /**
+     * 清理专栏文章列表缓存
+     *
+     * @param columnId 专栏ID
+     */
+    void clearColumnArticlesCache(Long columnId);
+
+    /**
+     * 清理热门专栏缓存
+     */
+    void clearHotColumnCache();
 }

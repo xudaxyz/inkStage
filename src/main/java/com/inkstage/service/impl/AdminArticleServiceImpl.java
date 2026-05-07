@@ -16,6 +16,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.*;
 import com.inkstage.service.AdminArticleService;
 import com.inkstage.service.ArticleTagService;
+import com.inkstage.service.ColumnService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.ArticleUtils;
@@ -42,6 +43,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
     private final CacheClearService cacheClearService;
+    private final ColumnService columnService;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -403,6 +405,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.deleteByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
+            // 解除文章与专栏的关联,更新专栏文章数
+            columnService.removeArticleColumnRelation(id);
             ArticleDeleteParam param = new ArticleDeleteParam();
             param.setUserId(article.getUserId());
             param.setSenderId(UserContext.getCurrentUserId());
@@ -433,6 +437,8 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.permanentDeleteByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员彻底删除文章");
+            // 解除文章与专栏的关联,更新专栏文章数
+            columnService.removeArticleColumnRelation(id);
             ArticleDeleteParam param = new ArticleDeleteParam();
             param.setUserId(article.getUserId());
             param.setSenderId(UserContext.getCurrentUserId());

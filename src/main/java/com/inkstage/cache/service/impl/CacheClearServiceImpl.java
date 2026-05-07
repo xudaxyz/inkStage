@@ -308,7 +308,9 @@ public class CacheClearServiceImpl implements CacheClearService {
         }
     }
 
-    /** ==================== 系统相关缓存清除 ==================== */
+    /**
+     * ==================== 系统相关缓存清除 ====================
+     */
 
     @Override
     public void clearSystemConfigCache() {
@@ -388,6 +390,46 @@ public class CacheClearServiceImpl implements CacheClearService {
         clearColumnSubscriptionStatusCache(columnId, userId);
         clearUserSubscriptionListCache(userId);
         log.debug("清理专栏订阅相关的所有缓存, 专栏ID: {}, 用户ID: {}", columnId, userId);
+    }
+
+    // ==================== 专栏相关缓存清除 ====================
+
+    @Override
+    @CacheEvict(value = RedisKeyConstants.COLUMN_DETAIL_PREFIX,
+            key = "#columnId")
+    public void clearColumnDetailCache(Long columnId) {
+        log.debug("清除专栏详情缓存, 专栏ID: {}", columnId);
+    }
+
+    @Override
+    public void clearColumnListCache() {
+        try {
+            redisUtil.deletePattern(COLUMN_PREFIX + "*");
+            log.info("清除专栏列表缓存完成");
+        } catch (Exception e) {
+            log.error("清除专栏列表缓存失败", e);
+        }
+    }
+
+    @Override
+    public void clearColumnArticlesCache(Long columnId) {
+        if (columnId == null) return;
+        try {
+            redisUtil.deletePattern(COLUMN_ARTICLES_PREFIX + columnId);
+            log.debug("清除专栏文章列表缓存, 专栏ID: {}", columnId);
+        } catch (Exception e) {
+            log.error("清除专栏文章列表缓存失败, 专栏ID: {}", columnId, e);
+        }
+    }
+
+    @Override
+    public void clearHotColumnCache() {
+        try {
+            redisUtil.deletePattern(COLUMN_HOT_PREFIX + "*");
+            log.info("清除热门专栏缓存完成");
+        } catch (Exception e) {
+            log.error("清除热门专栏缓存失败", e);
+        }
     }
 
 }

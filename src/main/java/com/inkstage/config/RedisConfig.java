@@ -165,6 +165,9 @@ public class RedisConfig {
                 // 通知未读数缓存
                 .withCacheConfiguration(RedisKeyConstants.CACHE_NOTIFICATION_UNREAD, defaultConfig.entryTtl(
                         RedisKeyConstants.CACHE_NOTIFICATION_UNREAD_TTL.plusSeconds((long) (Math.random() * 300))))
+                // 通知设置缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_NOTIFICATION_SETTING, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_NOTIFICATION_SETTING_TTL.plusSeconds((long) (Math.random() * 300))))
                 // 通知最近列表缓存
                 .withCacheConfiguration(RedisKeyConstants.CACHE_NOTIFICATION_RECENT, defaultConfig.entryTtl(
                         RedisKeyConstants.CACHE_NOTIFICATION_RECENT_TTL.plusSeconds((long) (Math.random() * 60))))
@@ -177,6 +180,24 @@ public class RedisConfig {
                 // 登录锁定缓存
                 .withCacheConfiguration(RedisKeyConstants.CACHE_LOGIN_LOCK, defaultConfig.entryTtl(
                         RedisKeyConstants.CACHE_LOGIN_LOCK_TTL.plusSeconds((long) (Math.random() * 60))))
+                // 专栏详情缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_DETAIL, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_DETAIL_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 专栏列表缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_LIST, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_LIST_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 专栏文章列表缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_ARTICLES, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_ARTICLES_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 热门专栏缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_HOT, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_HOT_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 专栏订阅缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS_TTL.plusSeconds((long) (Math.random() * 600))))
+                // 专栏订阅列表缓存
+                .withCacheConfiguration(RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST, defaultConfig.entryTtl(
+                        RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST_TTL.plusSeconds((long) (Math.random() * 600))))
                 .build();
     }
 

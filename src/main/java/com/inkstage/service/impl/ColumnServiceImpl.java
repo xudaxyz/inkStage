@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.ArticleCacheService;
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ColumnCreateDTO;
@@ -26,6 +28,7 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,9 +46,11 @@ public class ColumnServiceImpl implements ColumnService {
     private final FileService fileService;
     private final ColumnSubscriptionService columnSubscriptionService;
     private final ArticleCacheService articleCacheService;
+    private final CacheClearService cacheClearService;
 
     @Override
     @Transactional
+    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_LIST, allEntries = true)
     public Long createColumn(ColumnCreateDTO dto) {
         log.info("创建专栏: {}", dto.getName());
         try {
@@ -84,6 +89,7 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST}, key = "#columnId")
     public boolean updateColumn(Long columnId, ColumnCreateDTO dto) {
         log.info("更新专栏: id={}, name={}", columnId, dto.getName());
         try {
@@ -125,6 +131,7 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST, RedisKeyConstants.CACHE_COLUMN_HOT}, allEntries = true)
     public boolean deleteColumn(Long columnId) {
         log.info("删除专栏: id={}", columnId);
         try {
@@ -141,6 +148,7 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST, RedisKeyConstants.CACHE_COLUMN_HOT}, allEntries = true)
     public boolean updateColumnVisible(Long columnId, VisibleStatus visible) {
         log.info("更新专栏可见性: id={}, visible={}", columnId, visible);
         try {
@@ -318,6 +326,8 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
+            allEntries = true)
     public boolean addArticleToColumn(Long columnId, Long articleId, Integer sortOrder) {
         log.info("添加文章到专栏: columnId={}, articleId={}", columnId, articleId);
         try {
@@ -372,6 +382,8 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
+            allEntries = true)
     public boolean removeArticleFromColumn(Long columnId, Long articleId) {
         log.info("从专栏移除文章: columnId={}, articleId={}", columnId, articleId);
         try {
@@ -481,6 +493,8 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
+            allEntries = true)
     public void moveArticleToColumn(Long articleId, Long newColumnId, Integer sortOrder) {
         log.info("移动文章到专栏: articleId={}, newColumnId={}", articleId, newColumnId);
         try {
@@ -537,9 +551,12 @@ public class ColumnServiceImpl implements ColumnService {
         try {
             ArticleColumn existingRelation = articleColumnMapper.findByArticleId(articleId);
             if (existingRelation != null) {
+                Long columnId = existingRelation.getColumnId();
                 articleColumnMapper.deleteByArticleId(articleId);
-                columnMapper.updateArticleCount(existingRelation.getColumnId(), -1);
-                log.info("文章与专栏关联已解除: articleId={}, columnId={}", articleId, existingRelation.getColumnId());
+                columnMapper.updateArticleCount(columnId, -1);
+                cacheClearService.clearColumnDetailCache(columnId);
+                cacheClearService.clearColumnArticlesCache(columnId);
+                log.info("文章与专栏关联已解除: articleId={}, columnId={}", articleId, columnId);
             }
         } catch (Exception e) {
             log.error("解除文章与专栏关联失败", e);
