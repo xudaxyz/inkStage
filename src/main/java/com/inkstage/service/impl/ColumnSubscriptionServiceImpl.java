@@ -2,6 +2,7 @@ package com.inkstage.service.impl;
 
 import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
 import com.inkstage.entity.model.User;
@@ -112,10 +113,9 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
     @Override
     @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS,
-            key = "#columnId",
-            unless = "#result == null")
-    public boolean isSubscribed(Long columnId) {
-        Long userId = UserContext.getCurrentUserId();
+            key = "#userId + ':' + #columnId",
+            unless = "#result == false")
+    public boolean isSubscribed(Long userId, Long columnId) {
         if (userId == null) {
             return false;
         }
@@ -126,22 +126,22 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
     @Override
     @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "'my:' + #offset + ':' + #limit",
-            unless = "#result == null or #result.isEmpty()")
-    public List<MyColumnSubscriptionVO> getMySubscriptions(Integer offset, Integer limit) {
-        Long userId = UserContext.getCurrentUserId();
-
-        List<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionMapper.findMySubscriptions(userId, offset, limit);
+            key = "#userId + ':' + #pageNum + ':' + #pageSize + (#keyword ?:'')",
+            unless = "#result == null or #result.getRecord().isEmpty()")
+    public PageResult<MyColumnSubscriptionVO> getMySubscriptions(Long userId, Integer pageNum, Integer pageSize, String keyword) {
+        int offset = (pageNum - 1) * pageSize;
+        long total = columnSubscriptionMapper.countMySubscriptionsWithKeyword(userId, keyword);
+        List<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionMapper.findMySubscriptionsWithKeyword(userId, keyword, offset, pageSize);
         fileService.ensureImageFullUrl(mySubscriptions);
-        return mySubscriptions;
+
+        return PageResult.build(mySubscriptions, total, pageNum, pageSize);
     }
 
     @Override
     @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "'count:my'",
+            key = "#userId + ':count'",
             unless = "#result == null")
-    public long countMySubscriptions() {
-        Long userId = UserContext.getCurrentUserId();
+    public long countMySubscriptions(Long userId) {
         if (userId == null) {
             throw new BusinessException("请先登录");
         }

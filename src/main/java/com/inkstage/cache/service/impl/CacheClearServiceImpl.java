@@ -372,17 +372,27 @@ public class CacheClearServiceImpl implements CacheClearService {
     // ==================== 专栏订阅相关缓存清除 ====================
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS,
-            key = "#userId + ':' + #columnId")
     public void clearColumnSubscriptionStatusCache(Long columnId, Long userId) {
-        log.debug("清理专栏订阅状态缓存, 专栏ID: {}, 用户ID: {}", columnId, userId);
+        if (userId == null) return;
+        try {
+            redisUtil.deletePattern(COLUMN_SUBSCRIPTION_STATUS_PREFIX + userId + ":*");
+            log.debug("清理用户专栏订阅状态缓存, 专栏ID: {}, 用户ID: {}", columnId, userId);
+        } catch (Exception e) {
+            log.debug("清理用户专栏订阅状态失败, 专栏ID: {}, 用户ID: {}", columnId, userId);
+        }
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "#userId + ':*'")
     public void clearUserSubscriptionListCache(Long userId) {
-        log.debug("清理用户订阅列表缓存, 用户ID: {}", userId);
+        if (userId == null) return;
+        try {
+            String cacheKey = COLUMN_SUBSCRIPTION_LIST_PREFIX + userId + ":*";
+            log.info("清理用户订阅列表缓存key: {}", cacheKey);
+            redisUtil.deletePattern(cacheKey);
+            log.debug("清理用户订阅列表缓存, 用户ID: {}", userId);
+        } catch (Exception e) {
+            log.debug("清理用户订阅列表缓存失败, 用户ID: {}", userId);
+        }
     }
 
     @Override

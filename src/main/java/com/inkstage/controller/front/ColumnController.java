@@ -9,8 +9,10 @@ import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.dto.front.UpdateColumnArticleDTO;
 import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.enums.VisibleStatus;
+import com.inkstage.service.ArticleCommandService;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
+import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +34,7 @@ public class ColumnController {
     private final ColumnService columnService;
     private final ColumnSubscriptionService columnSubscriptionService;
     private final ColumnCacheService columnCacheService;
+    private final ArticleCommandService articleCommandService;
 
     /**
      * 创建专栏
@@ -174,16 +177,17 @@ public class ColumnController {
 
     /**
      * 获取当前用户的专栏列表
-     * @param keyword 查询关键词
-     * @param pageNum 页码
+     *
+     * @param keyword  查询关键词
+     * @param pageNum  页码
      * @param pageSize 每页数量
      * @return 当前用户创建的专栏
      */
     @GetMapping("/my")
     @UserAccess
     public Result<PageResult<MyColumnVO>> getMyColumns(@RequestParam(defaultValue = "") String keyword,
-                                                 @RequestParam(defaultValue = "1") Integer pageNum,
-                                                 @RequestParam(defaultValue = "10") Integer pageSize) {
+                                                       @RequestParam(defaultValue = "1") Integer pageNum,
+                                                       @RequestParam(defaultValue = "10") Integer pageSize) {
         log.info("获取我的专栏: keyword:{}", keyword);
         PageResult<MyColumnVO> result = columnService.getMyColumns(keyword, pageNum, pageSize);
         return Result.success(result);
@@ -233,7 +237,7 @@ public class ColumnController {
     /**
      * 从专栏移除文章
      *
-     * @param columnId 专栏ID
+     * @param columnId  专栏ID
      * @param articleId 文章ID
      * @return 移除成功返回true，失败返回false
      */
@@ -243,6 +247,24 @@ public class ColumnController {
         log.info("从专栏移除文章: columnId={}, articleId={}", columnId, articleId);
         boolean success = columnService.removeArticleFromColumn(columnId, articleId);
         return success ? Result.success(true, "文章移除成功") : Result.error("文章移除失败");
+    }
+
+    /**
+     * 从专栏删除文章(将文章移除专栏并移至回收站)
+     *
+     * @param columnId  专栏ID
+     * @param articleId 文章ID
+     * @return 移除成功返回true，失败返回false
+     */
+    @DeleteMapping("/article/delete")
+    @UserAccess
+    public Result<Boolean> deleteArticleFromColumn(@RequestParam Long columnId, @RequestParam Long articleId) {
+        log.info("从专栏删除文章: columnId={}, articleId={}", columnId, articleId);
+        boolean result = columnService.removeArticleFromColumn(columnId, articleId);
+        if (result) {
+            result = articleCommandService.deleteArticle(articleId);
+        }
+        return result ? Result.success(true, "文章删除成功") : Result.error("文章删除失败");
     }
 
     /**
@@ -262,7 +284,7 @@ public class ColumnController {
     /**
      * 批量更新专栏文章排序（用户拖拽排序后调用）
      *
-     * @param columnId  专栏ID
+     * @param columnId   专栏ID
      * @param articleIds 按新顺序排列的文章ID列表
      * @return 更新成功返回true，失败返回false
      */
@@ -277,7 +299,7 @@ public class ColumnController {
     /**
      * 检查文章是否已在指定专栏中
      *
-     * @param columnId 专栏ID
+     * @param columnId  专栏ID
      * @param articleId 文章ID
      * @return 文章在专栏中返回true，否则返回false
      */
@@ -357,25 +379,29 @@ public class ColumnController {
     @GetMapping("/subscribe/status/{id}")
     @UserAccess
     public Result<Boolean> checkSubscribeStatus(@PathVariable Long id) {
-        boolean subscribed = columnSubscriptionService.isSubscribed(id);
+        Long userId = UserContext.getCurrentUserId();
+        boolean subscribed = columnSubscriptionService.isSubscribed(userId, id);
         return Result.success(subscribed);
     }
 
     /**
      * 获取当前用户的订阅专栏列表
      *
-     * @param offset 偏移量（默认为0）
-     * @param limit 限制数量（默认为20）
+     * @param pageNum  每页数量
+     * @param pageSize 页码
+     * @param keyword  查询关键词
      * @return 订阅专栏列表
      */
     @GetMapping("/subscribe/list")
     @UserAccess
-    public Result<List<MyColumnSubscriptionVO>> getMySubscriptions(
-            @RequestParam(defaultValue = "0") Integer offset,
-            @RequestParam(defaultValue = "20") Integer limit) {
-        log.info("获取我的订阅专栏: offset={}, limit={}", offset, limit);
-        List<MyColumnSubscriptionVO> list = columnSubscriptionService.getMySubscriptions(offset, limit);
-        return Result.success(list);
+    public Result<PageResult<MyColumnSubscriptionVO>> getMySubscriptions(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "20") Integer pageSize,
+            @RequestParam(defaultValue = "") String keyword) {
+        log.info("获取我的订阅专栏: pageNum={}, pageSize={}", pageNum, pageSize);
+        Long userId = UserContext.getCurrentUserId();
+        PageResult<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionService.getMySubscriptions(userId, pageNum, pageSize, keyword);
+        return Result.success(mySubscriptions);
     }
 
     /**

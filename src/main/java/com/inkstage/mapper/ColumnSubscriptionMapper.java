@@ -24,13 +24,26 @@ public interface ColumnSubscriptionMapper {
     int checkSubscriptionStatus(@Param("userId") Long userId, @Param("columnId") Long columnId);
 
     /**
-     * 查询用户的订阅专栏列表（包含专栏详情）
+     * 查询用户的订阅专栏列表（支持关键词搜索）
      * @param userId 订阅者ID
+     * @param keyword 搜索关键词（可选）
      * @param offset 偏移量
      * @param limit 限制数量
      * @return 订阅专栏列表
      */
-    List<MyColumnSubscriptionVO> findMySubscriptions(@Param("userId") Long userId, @Param("offset") Integer offset, @Param("limit") Integer limit);
+    List<MyColumnSubscriptionVO> findMySubscriptionsWithKeyword(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            @Param("offset") Integer offset,
+            @Param("limit") Integer limit);
+
+    /**
+     * 查询用户的订阅专栏总数（支持关键词搜索）
+     * @param userId 订阅者ID
+     * @param keyword 搜索关键词（可选）
+     * @return 订阅专栏总数
+     */
+    long countMySubscriptionsWithKeyword(@Param("userId") Long userId, @Param("keyword") String keyword);
 
     /**
      * 查询专栏的订阅用户ID列表

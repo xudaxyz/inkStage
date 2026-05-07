@@ -60,6 +60,8 @@ public class RedisKeyConstants {
     public static final String COLUMN_DETAIL_PREFIX = "inkstage:column:detail:";
     public static final String COLUMN_ARTICLES_PREFIX = "inkstage:column:articles:";
     public static final String COLUMN_SUBSCRIPTION_PREFIX = "inkstage:column:subscribe:";
+    public static final String COLUMN_SUBSCRIPTION_LIST_PREFIX = "inkstage:column:subscribe:list:";
+    public static final String COLUMN_SUBSCRIPTION_STATUS_PREFIX = "inkstage:column:subscribe:status:";
     public static final String READING_HISTORY_PREFIX = "inkstage:reading:history:";
     public static final String PERMISSION_PREFIX = "inkstage:permission:";
     public static final String ROLE_PREFIX = "inkstage:role:";

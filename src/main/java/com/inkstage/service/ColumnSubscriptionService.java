@@ -1,5 +1,6 @@
 package com.inkstage.service;
 
+import com.inkstage.common.PageResult;
 import com.inkstage.notification.NotificationParam;
 import com.inkstage.vo.front.MyColumnSubscriptionVO;
 
@@ -30,26 +31,30 @@ public interface ColumnSubscriptionService {
     /**
      * 检查当前用户是否已订阅指定专栏
      *
+     * @param userId 用户ID
      * @param columnId 专栏ID
      * @return 已订阅返回true，未订阅返回false
      */
-    boolean isSubscribed(Long columnId);
+    boolean isSubscribed(Long userId, Long columnId);
 
     /**
-     * 获取当前用户的订阅专栏列表
+     * 获取当前用户的订阅专栏列表（分页+搜索）
      *
-     * @param offset 偏移量
-     * @param limit  限制数量
-     * @return 订阅专栏列表
+     * @param userId   用户ID
+     * @param pageNum  页码
+     * @param pageSize 每页数量
+     * @param keyword  搜索关键词（可选）
+     * @return 订阅专栏分页列表
      */
-    List<MyColumnSubscriptionVO> getMySubscriptions(Integer offset, Integer limit);
+    PageResult<MyColumnSubscriptionVO> getMySubscriptions(Long userId, Integer pageNum, Integer pageSize, String keyword);
 
     /**
      * 获取当前用户的订阅专栏总数
      *
+     * @param userId 用户ID
      * @return 订阅总数
      */
-    long countMySubscriptions();
+    long countMySubscriptions(Long userId);
 
     /**
      * 获取专栏的订阅用户ID列表
