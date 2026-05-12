@@ -44,7 +44,9 @@ public class RedisKeyConstants {
     public static final String ARTICLE_HOT_PREFIX = "inkstage:article:hot:";
     public static final String ARTICLE_DETAIL_PREFIX = "inkstage:article:detail:";
     public static final String ARTICLE_COLLECT_PREFIX = "inkstage:article:collect:";
+    public static final String ARTICLE_COLLECT_STATUS_PREFIX = "inkstage:article:collect:status:";
     public static final String ARTICLE_LIKE_PREFIX = "inkstage:article:like:";
+    public static final String ARTICLE_LIKE_STATUS_PREFIX = "inkstage:article:like:status:";
     public static final String ARTICLE_LATEST_PREFIX = "inkstage:article:latest:";
     public static final String ARTICLE_BANNER_PREFIX = "inkstage:article:banner:";
     public static final String ARTICLE_SEARCH_PREFIX = "inkstage:article:search:";
@@ -100,7 +102,8 @@ public class RedisKeyConstants {
     public static final String CACHE_COMMENT_LIST = "comment:list";
     public static final String CACHE_COMMENT_REPLIES = "comment:replies";
     public static final String CACHE_COLLECTION_STATUS = "collection:status";
-    public static final String CACHE_LIKE_STATUS = "like:status";
+    public static final String CACHE_COLLECT_STATUS = "article:collect:status";
+    public static final String CACHE_LIKE_STATUS = "article:like:status";
     public static final String CACHE_COLUMN_SUBSCRIPTION_STATUS = "column:subscribe:status";
     public static final String CACHE_COLUMN_SUBSCRIPTION_LIST = "column:subscribe:list";
     public static final String CACHE_COLUMN_DETAIL = "column:detail";
@@ -321,7 +324,7 @@ public class RedisKeyConstants {
      * @return 文章收藏缓存键
      */
     public static String buildArticleCollectCacheKey(Long articleId, Long userId) {
-        return buildCacheKey(ARTICLE_COLLECT_PREFIX, articleId + ":" + userId);
+        return buildCacheKey(ARTICLE_COLLECT_STATUS_PREFIX, articleId + ":" + userId);
     }
 
     /**
@@ -332,7 +335,7 @@ public class RedisKeyConstants {
      * @return 文章点赞缓存键
      */
     public static String buildArticleLikeCacheKey(Long articleId, Long userId) {
-        return buildCacheKey(ARTICLE_LIKE_PREFIX, articleId + ":" + userId);
+        return buildCacheKey(ARTICLE_LIKE_STATUS_PREFIX, articleId + ":" + userId);
     }
 
     /**

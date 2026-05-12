@@ -37,7 +37,7 @@
     <select id="findByArticleIdAndUserId" resultMap="ArticleCollectionMap">
         SELECT id, article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time
         FROM article_collection
-        WHERE article_id = #{articleId} AND user_id = #{userId}
+        WHERE article_id = #{articleId} AND user_id = #{userId} and deleted = 0
     </select>
     
     <!-- 更新收藏记录 -->
