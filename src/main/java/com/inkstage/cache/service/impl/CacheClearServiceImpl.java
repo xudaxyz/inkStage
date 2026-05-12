@@ -336,7 +336,7 @@ public class CacheClearServiceImpl implements CacheClearService {
 
     @Override
     @CacheEvict(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
-            key = "#userId + ':' + #articleId")
+            key = "#articleId + ':' + #userId")
     public void clearCollectionStatusCache(Long articleId, Long userId) {
         log.debug("清理收藏状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
     }

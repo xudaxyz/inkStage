@@ -24,7 +24,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
 
     @Override
     @Cacheable(value = RedisKeyConstants.CACHE_COLLECTION_STATUS,
-            key = "#userId + ':' + #articleId",
+            key = "#articleId + ':' + #userId",
             unless = "#result == null")
     public boolean isArticleCollected(Long articleId, Long userId) {
         log.debug("查询收藏状态, 文章ID: {}, 用户ID: {}", articleId, userId);
@@ -36,7 +36,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
 
     @Override
     @Cacheable(value = RedisKeyConstants.CACHE_LIKE_STATUS,
-            key = "#userId + ':' + #articleId",
+            key = "#articleId + ':' + #userId",
             unless = "#result == null")
     public boolean isArticleLiked(Long articleId, Long userId) {
         log.debug("查询点赞状态, 文章ID: {}, 用户ID: {}", articleId, userId);

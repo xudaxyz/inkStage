@@ -3,6 +3,9 @@ server:
   port: 8080
   servlet:
     context-path: /
+    session:
+      cookie:
+        same-site: none
 
 # 应用基本配置
 spring:

@@ -243,7 +243,7 @@ CREATE TABLE `article_like`
     `deleted`      tinyint NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `uk_article_user`(`id` ASC, `article_id` ASC, `user_id` ASC, `deleted` ASC) USING BTREE,
+    UNIQUE INDEX `uk_article_user`(`article_id` ASC, `user_id` ASC, `deleted` ASC) USING BTREE,
     INDEX          `idx_article_id`(`article_id` ASC) USING BTREE,
     INDEX          `idx_user_id`(`user_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '文章点赞表' ROW_FORMAT = Dynamic;
@@ -263,7 +263,7 @@ CREATE TABLE `article_collection`
     `deleted`      tinyint NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time` datetime NULL DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`) USING BTREE,
-    UNIQUE INDEX `uk_article_user`(`id` ASC, `article_id` ASC, `user_id` ASC, `deleted` ASC) USING BTREE,
+    UNIQUE INDEX `uk_article_user_folder`(`article_id` ASC, `user_id` ASC, `folder_id` ASC, `deleted` ASC) USING BTREE,
     INDEX          `idx_article_id`(`article_id` ASC) USING BTREE,
     INDEX          `idx_user_id`(`user_id` ASC) USING BTREE,
     INDEX          `idx_folder_id`(`folder_id` ASC) USING BTREE
