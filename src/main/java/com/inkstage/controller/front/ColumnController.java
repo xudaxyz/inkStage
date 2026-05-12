@@ -8,6 +8,7 @@ import com.inkstage.dto.front.ColumnCreateDTO;
 import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.dto.front.UpdateColumnArticleDTO;
 import com.inkstage.entity.model.ArticleColumn;
+import com.inkstage.entity.model.User;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.service.ArticleCommandService;
 import com.inkstage.service.ColumnService;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * 前台专栏控制器
@@ -377,9 +379,13 @@ public class ColumnController {
      * @return 已订阅返回true，未订阅返回false
      */
     @GetMapping("/subscribe/status/{id}")
-    @UserAccess
     public Result<Boolean> checkSubscribeStatus(@PathVariable Long id) {
-        Long userId = UserContext.getCurrentUserId();
+        Optional<User> currentUser = UserContext.getCurrentUserOptional();
+        if (currentUser.isEmpty()) {
+            log.info("用户未登录, 不检查订阅状态");
+            return Result.success(false);
+        }
+        Long userId = currentUser.get().getId();
         boolean subscribed = columnSubscriptionService.isSubscribed(userId, id);
         return Result.success(subscribed);
     }
