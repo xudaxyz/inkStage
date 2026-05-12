@@ -6,7 +6,6 @@ import lombok.Data;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 专栏详情VO
@@ -87,11 +86,6 @@ public class ColumnDetailVO implements Serializable {
      * 专栏创建者个人签名
      */
     private String signature;
-
-    /**
-     * 专栏文章列表
-     */
-    private List<ArticleListVO> articles;
 
     /**
      * 创建时间
