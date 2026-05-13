@@ -49,7 +49,7 @@ public class NotificationSettingCacheServiceImpl implements NotificationSettingC
         }
 
         log.info("从数据库获取通知设置, 用户ID: {}", userId);
-        cacheManager.set(cacheKey, setting, CacheTTL.NOTIFICATION_SETTING);
+        cacheManager.setWithRandomOffset(cacheKey, setting, CacheTTL.NOTIFICATION_SETTING);
         return setting;
     }
 

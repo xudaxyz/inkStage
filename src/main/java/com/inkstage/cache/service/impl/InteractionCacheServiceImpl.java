@@ -44,7 +44,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
 
         boolean collected = articleCollectionMapper.findByArticleIdAndUserId(articleId, userId) != null;
         log.debug("从数据库查询收藏状态, 文章ID: {}, 用户ID: {}, 状态: {}", articleId, userId, collected);
-        cacheManager.set(cacheKey, collected, CacheTTL.ARTICLE_COLLECT_STATUS);
+        cacheManager.setWithRandomOffset(cacheKey, collected, CacheTTL.ARTICLE_COLLECT_STATUS);
         return collected;
     }
 
@@ -68,7 +68,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
 
         boolean liked = articleLikeMapper.findByArticleIdAndUserId(articleId, userId) != null;
         log.debug("从数据库查询点赞状态, 文章ID: {}, 用户ID: {}, 状态: {}", articleId, userId, liked);
-        cacheManager.set(cacheKey, liked, CacheTTL.ARTICLE_LIKE_STATUS);
+        cacheManager.setWithRandomOffset(cacheKey, liked, CacheTTL.ARTICLE_LIKE_STATUS);
         return liked;
     }
 }

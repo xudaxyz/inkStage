@@ -4,8 +4,10 @@ import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -250,14 +252,27 @@ public class RedisUtil {
 
     /**
      * 删除匹配模式的键
+     * 使用 SCAN 命令替代 KEYS 命令，避免阻塞 Redis
      *
      * @param pattern 键模式
      */
     public void deletePattern(String pattern) {
+        Set<String> keys = new HashSet<>();
         try {
-            Set<String> keys = redisTemplate.keys(pattern);
-            if (keys != null && !keys.isEmpty()) {
+            ScanOptions options = ScanOptions.scanOptions()
+                    .match(pattern)
+                    .count(1000)
+                    .build();
+
+            try (Cursor<String> cursor = redisTemplate.scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(cursor.next());
+                }
+            }
+
+            if (!keys.isEmpty()) {
                 redisTemplate.delete(keys);
+                log.debug("Deleted {} keys with pattern: {}", keys.size(), pattern);
             }
         } catch (Exception e) {
             log.error("Error deleting Redis keys with pattern: {}", pattern, e);
@@ -266,21 +281,69 @@ public class RedisUtil {
 
     /**
      * 清空所有缓存
+     * 使用 SCAN 命令替代 KEYS 命令，避免阻塞 Redis
      *
      * @return 是否成功
      */
     public boolean clearAll() {
+        Set<String> keys = new HashSet<>();
         try {
-            // 获取所有键并删除
-            Set<String> keys = redisTemplate.keys("*");
-            if (keys != null && !keys.isEmpty()) {
+            ScanOptions options = ScanOptions.scanOptions()
+                    .match("*")
+                    .count(1000)
+                    .build();
+
+            try (Cursor<String> cursor = redisTemplate.scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(cursor.next());
+                }
+            }
+
+            if (!keys.isEmpty()) {
                 redisTemplate.delete(keys);
+                log.info("Cleared {} keys from Redis", keys.size());
             }
             return true;
         } catch (Exception e) {
             log.error("Error clearing all Redis keys", e);
             return false;
         }
+    }
+
+    /**
+     * 批量删除匹配模式的键
+     * 使用 SCAN 命令替代 KEYS 命令，避免阻塞 Redis
+     *
+     * @param patterns 键模式集合
+     * @return 删除的键数量
+     */
+    public long batchDeletePattern(Collection<String> patterns) {
+        long totalDeleted = 0;
+        Set<String> allKeys = new HashSet<>();
+
+        try {
+            for (String pattern : patterns) {
+                ScanOptions options = ScanOptions.scanOptions()
+                        .match(pattern)
+                        .count(1000)
+                        .build();
+
+                try (Cursor<String> cursor = redisTemplate.scan(options)) {
+                    while (cursor.hasNext()) {
+                        allKeys.add(cursor.next());
+                    }
+                }
+            }
+
+            if (!allKeys.isEmpty()) {
+                totalDeleted = redisTemplate.delete(allKeys);
+                log.info("Batch deleted {} keys with {} patterns", totalDeleted, patterns.size());
+            }
+        } catch (Exception e) {
+            log.error("Error batch deleting Redis keys with patterns", e);
+        }
+
+        return totalDeleted;
     }
 
     /**
@@ -1066,7 +1129,7 @@ public class RedisUtil {
      * @param ttl         过期时间(Duration)
      * @return 是否成功
      */
-    public boolean batchSet(Map<String,Object> keyValueMap, Long ttl) {
+    public boolean batchSet(Map<String, Object> keyValueMap, Long ttl) {
         return batchSet(keyValueMap, ttl, TimeUnit.SECONDS);
     }
 
@@ -1167,26 +1230,5 @@ public class RedisUtil {
      */
     public long batchDelete(Collection<String> keys) {
         return delete(keys);
-    }
-
-    /**
-     * 批量删除匹配模式的键
-     *
-     * @param patterns 键模式集合
-     * @return 删除的键数量
-     */
-    public long batchDeletePattern(Collection<String> patterns) {
-        long deleteCount = 0;
-        try {
-            for (String pattern : patterns) {
-                Set<String> keys = redisTemplate.keys(pattern);
-                if (keys != null && !keys.isEmpty()) {
-                    deleteCount += redisTemplate.delete(keys);
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error batch deleting Redis keys with patterns", e);
-        }
-        return deleteCount;
     }
 }

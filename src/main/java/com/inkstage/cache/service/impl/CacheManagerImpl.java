@@ -30,7 +30,27 @@ public class CacheManagerImpl implements CacheManager {
     public <T> void set(String key, T value, Duration ttl) {
         try {
             redisUtil.set(key, value, ttl.getSeconds());
-            log.debug("缓存设置成功, key: {}, ttl: {}", key, ttl);
+            log.debug("缓存设置成功(无随机偏移), key: {}, ttl: {}s", key, ttl.getSeconds());
+
+        } catch (Exception e) {
+            log.error("缓存设置失败, key: {}", key, e);
+        }
+    }
+
+    /**
+     * 设置缓存，添加随机偏移
+     *
+     * @param key   缓存键
+     * @param value 缓存值
+     * @param ttl   过期时间
+     * @param <T>   值类型
+     */
+    public <T> void setWithRandomOffset(String key, T value, Duration ttl) {
+        try {
+            // 为TTL添加随机偏移，防止缓存雪崩
+            Duration ttlWithOffset = CacheTTL.withRandomOffset(ttl);
+            redisUtil.set(key, value, ttlWithOffset.getSeconds());
+            log.debug("缓存设置成功, key: {}, baseTTL: {}s, actualTTL: {}s", key, ttl.getSeconds(), ttlWithOffset.getSeconds());
         } catch (Exception e) {
             log.error("缓存设置失败, key: {}", key, e);
         }
@@ -134,10 +154,9 @@ public class CacheManagerImpl implements CacheManager {
     @Override
     public <T> boolean setIfAbsent(String key, T value, Duration ttl) {
         try {
-            boolean success = redisUtil.setIfAbsent(key, value);
+            boolean success = redisUtil.setIfAbsent(key, value, ttl.getSeconds());
             if (success) {
-                redisUtil.expire(key, ttl.getSeconds());
-                log.debug("缓存设置成功(仅当不存在), key: {}", key);
+                log.debug("缓存设置成功(仅当不存在), key: {}, ttl: {}", key, ttl);
             }
             return success;
         } catch (Exception e) {
@@ -209,7 +228,7 @@ public class CacheManagerImpl implements CacheManager {
             @SuppressWarnings("unchecked")
             Map<String, Object> objectMap = (Map<String, Object>) data;
             boolean result = redisUtil.batchSet(objectMap, ttl.getSeconds());
-            log.debug("批量缓存设置结果: {}, 数量: {}", result, data.size());
+            log.debug("批量缓存设置结果: {}, 数量: {}, ttl: {}", result, data.size(), ttl);
         } catch (Exception e) {
             log.error("批量缓存设置失败", e);
         }

@@ -36,7 +36,7 @@ public class UserCacheServiceImpl implements UserCacheService {
 
         try {
             String cacheKey = CacheKey.keyForUserInfo(user.getId());
-            cacheManager.set(cacheKey, user, CacheTTL.USER_INFO);
+            cacheManager.setWithRandomOffset(cacheKey, user, CacheTTL.USER_INFO);
             log.debug("缓存用户信息, 用户ID: {}", user.getId());
         } catch (Exception e) {
             log.error("缓存用户信息失败", e);

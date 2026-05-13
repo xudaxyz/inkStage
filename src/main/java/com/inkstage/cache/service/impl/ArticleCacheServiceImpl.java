@@ -56,7 +56,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         fileService.ensureImageFullUrl(articleDetailVO);
 
         log.debug("从数据库获取文章详情, id: {}", id);
-        cacheManager.set(cacheKey, articleDetailVO, CacheTTL.ARTICLE_DETAIL);
+        cacheManager.setWithRandomOffset(cacheKey, articleDetailVO, CacheTTL.ARTICLE_DETAIL);
         return articleDetailVO;
     }
 
@@ -86,7 +86,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         result = PageResult.build(articleList, total, pageNum, pageSize);
         log.info("从数据库获取文章列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, pageNum, pageSize);
-        cacheManager.set(cacheKey, result, CacheTTL.ARTICLE_LIST);
+        cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.ARTICLE_LIST);
         return result;
     }
 
@@ -106,7 +106,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         fileService.ensureImageFullUrl(hotArticles);
 
         log.info("从数据库获取热门文章成功, limit: {}, timeRange: {}", limit, timeRange);
-        cacheManager.set(cacheKey, hotArticles, CacheTTL.ARTICLE_HOT);
+        cacheManager.setWithRandomOffset(cacheKey, hotArticles, CacheTTL.ARTICLE_HOT);
         return hotArticles;
     }
 
@@ -126,7 +126,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         fileService.ensureImageFullUrl(latestArticles);
 
         log.info("从数据库获取最新文章成功, limit: {}", limit);
-        cacheManager.set(cacheKey, latestArticles, CacheTTL.ARTICLE_LATEST);
+        cacheManager.setWithRandomOffset(cacheKey, latestArticles, CacheTTL.ARTICLE_LATEST);
         return latestArticles;
     }
 
@@ -146,7 +146,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         fileService.ensureImageFullUrl(bannerArticles);
 
         log.info("从数据库获取轮播图文章成功, limit: {}", limit);
-        cacheManager.set(cacheKey, bannerArticles, CacheTTL.ARTICLE_BANNER);
+        cacheManager.setWithRandomOffset(cacheKey, bannerArticles, CacheTTL.ARTICLE_BANNER);
         return bannerArticles;
     }
 
@@ -170,7 +170,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
 
         result = PageResult.build(articleList, total, pageNum, pageSize);
         log.debug("从数据库获取用户文章列表, userId: {}, pageNum: {}", userId, pageNum);
-        cacheManager.set(cacheKey, result, CacheTTL.USER_ARTICLES);
+        cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.USER_ARTICLES);
         return result;
     }
 
@@ -190,7 +190,7 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         fileService.ensureImageFullUrl(relatedArticles);
 
         log.debug("从数据库获取作者相关文章, userId: {}, limit: {}", userId, limit);
-        cacheManager.set(cacheKey, relatedArticles, CacheTTL.USER_HOT);
+        cacheManager.setWithRandomOffset(cacheKey, relatedArticles, CacheTTL.USER_HOT);
         return relatedArticles;
     }
 
@@ -215,9 +215,9 @@ public class ArticleCacheServiceImpl implements ArticleCacheService {
         result = PageResult.build(articleList, total, pageNum, pageSize);
         log.info("从数据库搜索文章成功, 关键词: {}, 总数: {}", keyword, total);
         if (total > 0) {
-            cacheManager.set(cacheKey, result, CacheTTL.ARTICLE_SEARCH);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.ARTICLE_SEARCH);
         } else {
-            cacheManager.set(cacheKey, result, CacheTTL.FIVE_MINUTES);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.FIVE_MINUTES);
         }
         return result;
     }

@@ -40,6 +40,7 @@ public final class CacheKey {
     public static final String COLUMN_HOT = PREFIX + "column:hot:";
     public static final String COLUMN_DETAIL = PREFIX + "column:detail:";
     public static final String COLUMN_ARTICLES = PREFIX + "column:articles:";
+    public static final String COLUMN_ARTICLES_SEARCH = PREFIX + "column:articles:search:";
     public static final String COLUMN_SUBSCRIPTION_LIST = PREFIX + "column:subscription:list:";
     public static final String COLUMN_SUBSCRIPTION_USER_COUNT = PREFIX + "column:subscription:user:count:";
     public static final String COLUMN_SUBSCRIPTION_COLUMN_COUNT = PREFIX + "column:subscription:column:count:";
@@ -47,9 +48,9 @@ public final class CacheKey {
 
     // ==================== 其他业务相关 ====================
     public static final String CATEGORY = PREFIX + "category:";
-    public static final String ACTIVE_CATEGORY = PREFIX + "category:active:";
+    public static final String ACTIVE_CATEGORY = PREFIX + "category:active";
     public static final String TAG = PREFIX + "tag:";
-    public static final String ACTIVE_TAG = PREFIX + "tag:active:";
+    public static final String ACTIVE_TAG = PREFIX + "tag:active";
     public static final String COMMENT_LIST = PREFIX + "comment:list:";
     public static final String COMMENT_REPLY = PREFIX + "comment:reply:";
     public static final String FOLLOW = PREFIX + "follow:";
@@ -84,10 +85,10 @@ public final class CacheKey {
         StringBuilder key = new StringBuilder(ARTICLES);
         key.append(pageNum).append(":").append(pageSize);
         if (categoryId != null) {
-            key.append(":c").append(categoryId);
+            key.append(":c:").append(categoryId);
         }
         if (tagId != null) {
-            key.append(":t").append(tagId);
+            key.append(":t:").append(tagId);
         }
         return key.toString();
     }
@@ -125,7 +126,7 @@ public final class CacheKey {
     }
 
     public static String keyForColumnList(Integer pageNum, Integer pageSize, String keyword) {
-        return COLUMN + pageNum + ":" + pageSize + ":" + (keyword != null ? keyword : "");
+        return COLUMN + pageNum + ":" + pageSize + (keyword != null && !keyword.isEmpty() ? (":" + keyword) : "");
     }
 
     public static String keyForColumnArticles(Long columnId, Integer pageNum, Integer pageSize, String sortBy) {
@@ -133,7 +134,7 @@ public final class CacheKey {
     }
 
     public static String keyForColumnArticleSearch(Long columnId, String keyword, Integer pageNum, Integer pageSize) {
-        return COLUMN_ARTICLES + "search:" + columnId + ":" + keyword + ":" + pageNum + ":" + pageSize;
+        return COLUMN_ARTICLES_SEARCH + columnId + ":" + keyword + ":" + pageNum + ":" + pageSize;
     }
 
     public static String keyForColumnHot(Integer limit) {
@@ -235,7 +236,7 @@ public final class CacheKey {
 
     // ==================== 文章计数相关 ====================
     public static String keyForArticleCount(Long articleId, String countType) {
-        return ARTICLE + articleId + ":" + countType;
+        return ARTICLE + countType + ":" + articleId;
     }
 
     // ==================== 公告相关 ====================

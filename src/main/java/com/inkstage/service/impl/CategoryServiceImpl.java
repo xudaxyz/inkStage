@@ -123,7 +123,9 @@ public class CategoryServiceImpl implements CategoryService {
             category.setCategoryVersion(1); // 设置初始版本号为1
             categoryMapper.insert(category);
 
+            // 清除分类数据缓存
             cacheManager.deletePattern(CacheKey.CATEGORY);
+            cacheManager.delete(CacheKey.ACTIVE_CATEGORY);
 
             return category;
         } catch (Exception e) {

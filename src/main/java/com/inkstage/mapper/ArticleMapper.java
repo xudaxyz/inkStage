@@ -284,36 +284,32 @@ public interface ArticleMapper {
      *
      * @param id 文章ID
      * @param offset 增加/减少的点赞数
-     * @return 影响行数
      */
-    int updateLikeCount(@Param("id") Long id, @Param("offset") int offset);
+    void updateLikeCount(@Param("id") Long id, @Param("offset") int offset);
 
     /**
      * 更新文章评论数
      *
      * @param id 文章ID
      * @param offset 增加/减少的评论数
-     * @return 影响行数
      */
-    int updateCommentCount(@Param("id") Long id, @Param("offset") int offset);
+    void updateCommentCount(@Param("id") Long id, @Param("offset") int offset);
 
     /**
      * 更新文章收藏数
      *
      * @param id 文章ID
      * @param offset 增加/减少的收藏数
-     * @return 影响行数
      */
-    int updateCollectionCount(@Param("id") Long id, @Param("offset") int offset);
+    void updateCollectionCount(@Param("id") Long id, @Param("offset") int offset);
 
     /**
      * 更新文章分享数
      *
      * @param id 文章ID
      * @param offset 增加/减少的分享数
-     * @return 影响行数
      */
-    int updateShareCount(@Param("id") Long id, @Param("offset") int offset);
+    void updateShareCount(@Param("id") Long id, @Param("offset") int offset);
 
     /**
      * 更新文章置顶状态

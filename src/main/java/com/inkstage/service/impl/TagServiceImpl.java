@@ -130,9 +130,11 @@ public class TagServiceImpl implements TagService {
             tag.setTagVersion(1); // 新标签版本号设为1
             tag.setCreateTime(LocalDateTime.now());
             tagMapper.insert(tag);
-            
+
+            // 清除tag缓存
             cacheManager.deletePattern(CacheKey.TAG);
-            
+            cacheManager.delete(CacheKey.ACTIVE_TAG);
+
             return tag;
         } catch (Exception e) {
             log.error("添加标签失败", e);

@@ -37,6 +37,17 @@ public interface CacheManager {
     <T> void set(String key, T value, Duration ttl);
 
     /**
+     * 设置缓存（添加随机偏移，防止缓存雪崩）
+     * <p>为TTL添加随机偏移，使缓存不会同时过期，防止大量缓存集中失效导致数据库压力过大</p>
+     *
+     * @param key   缓存键
+     * @param value 缓存值，可以是任意可序列化对象
+     * @param ttl   基础过期时间
+     * @param <T>   值的类型泛型
+     */
+    <T> void setWithRandomOffset(String key, T value, Duration ttl);
+
+    /**
      * 获取缓存（类型安全）
      * <p>自动进行类型转换，支持对象和基本类型</p>
      *

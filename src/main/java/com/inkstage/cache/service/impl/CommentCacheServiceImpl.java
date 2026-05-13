@@ -75,7 +75,7 @@ public class CommentCacheServiceImpl implements CommentCacheService {
             Long total = commentMapper.countCommentsByArticleId(queryDTO);
 
             result = PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
-            cacheManager.set(cacheKey, result, CacheTTL.COMMENT_LIST);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.COMMENT_LIST);
             return result;
         } catch (Exception e) {
             log.error("获取评论列表失败, 文章ID: {}", queryDTO.getArticleId(), e);
@@ -111,7 +111,7 @@ public class CommentCacheServiceImpl implements CommentCacheService {
             fileService.ensureImageFullUrl(replies);
 
             result = PageResult.build(replies, total, pageNum, pageSize);
-            cacheManager.set(cacheKey, result, CacheTTL.COMMENT_REPLIES);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.COMMENT_REPLIES);
             return result;
         } catch (Exception e) {
             log.error("获取子评论列表失败, 父评论ID: {}", parentId, e);

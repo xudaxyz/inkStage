@@ -53,7 +53,7 @@ public class ColumnCacheServiceImpl implements ColumnCacheService {
         fileService.ensureImageFullUrl(columnDetailVO);
 
         log.debug("从数据库获取专栏详情, id: {}", columnId);
-        cacheManager.set(cacheKey, columnDetailVO, CacheTTL.COLUMN_DETAIL);
+        cacheManager.setWithRandomOffset(cacheKey, columnDetailVO, CacheTTL.COLUMN_DETAIL);
         return columnDetailVO;
     }
 
@@ -75,7 +75,7 @@ public class ColumnCacheServiceImpl implements ColumnCacheService {
 
         result = PageResult.build(columnListVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
         log.info("从数据库获取专栏列表成功, 总数: {}, 页码: {}, 每页大小: {}", total, queryDTO.getPageNum(), queryDTO.getPageSize());
-        cacheManager.set(cacheKey, result, CacheTTL.COLUMN_LIST);
+        cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.COLUMN_LIST);
         return result;
     }
 
@@ -97,7 +97,7 @@ public class ColumnCacheServiceImpl implements ColumnCacheService {
 
         result = PageResult.build(articleList, total, pageNum, pageSize);
         log.info("从数据库获取专栏文章分页列表成功, 专栏ID: {}, 总数: {}, 页码: {}, 每页大小: {}", columnId, total, pageNum, pageSize);
-        cacheManager.set(cacheKey, result, CacheTTL.COLUMN_ARTICLES);
+        cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.COLUMN_ARTICLES);
         return result;
     }
 
@@ -116,7 +116,7 @@ public class ColumnCacheServiceImpl implements ColumnCacheService {
         fileService.ensureImageFullUrl(hotColumns);
 
         log.info("从数据库获取热门专栏成功, limit: {}", limit);
-        cacheManager.set(cacheKey, hotColumns, CacheTTL.COLUMN_HOT);
+        cacheManager.setWithRandomOffset(cacheKey, hotColumns, CacheTTL.COLUMN_HOT);
         return hotColumns;
     }
 
@@ -139,9 +139,9 @@ public class ColumnCacheServiceImpl implements ColumnCacheService {
         result = PageResult.build(articleList, total, pageNum, pageSize);
         log.info("从数据库搜索专栏文章成功, 专栏ID: {}, 关键词: {}, 总数: {}", columnId, keyword, total);
         if (total > 0) {
-            cacheManager.set(cacheKey, result, CacheTTL.COLUMN_ARTICLES);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.COLUMN_ARTICLES);
         } else {
-            cacheManager.set(cacheKey, result, CacheTTL.FIVE_MINUTES);
+            cacheManager.setWithRandomOffset(cacheKey, result, CacheTTL.FIVE_MINUTES);
         }
         return result;
     }
