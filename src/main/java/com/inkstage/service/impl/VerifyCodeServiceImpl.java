@@ -1,9 +1,9 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.CacheKey;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.constant.AuthTypeConstant;
-import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.dto.SendCodeDTO;
 import com.inkstage.service.VerifyCodeService;
 import com.inkstage.utils.EmailTemplateUtils;
@@ -61,7 +61,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         }
 
         // 检查发送频率限制
-        String limitKey = RedisKeyConstants.buildSendLimitKey(sendCodeDTO.getAccount(), sendCodeDTO.getPurpose());
+        String limitKey = CacheKey.keyForRateLimit(sendCodeDTO.getPurpose(), sendCodeDTO.getAccount());
         if (redisUtil.hasKey(limitKey)) {
             throw new BusinessException(ResponseMessage.VERIFY_CODE_SEND_TOO_FREQUENTLY);
         }
@@ -70,7 +70,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
         String code = generateCode(CODE_LENGTH);
 
         // 存储验证码到Redis
-        String codeKey = RedisKeyConstants.buildVerifyCodeKey(sendCodeDTO.getAccount(), sendCodeDTO.getPurpose());
+        String codeKey = CacheKey.keyForVerifyCode(sendCodeDTO.getAccount(), sendCodeDTO.getPurpose());
         redisUtil.set(codeKey, code, CODE_EXPIRY_MINUTES, TimeUnit.MINUTES);
 
         // 设置发送频率限制
@@ -92,7 +92,7 @@ public class VerifyCodeServiceImpl implements VerifyCodeService {
             return false;
         }
 
-        String codeKey = RedisKeyConstants.buildVerifyCodeKey(target, purpose);
+        String codeKey = CacheKey.keyForVerifyCode(target, purpose);
         String storedCode = redisUtil.get(codeKey, String.class);
 
         if (code.equals(storedCode)) {

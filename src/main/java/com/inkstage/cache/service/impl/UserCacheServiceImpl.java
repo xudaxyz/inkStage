@@ -1,33 +1,27 @@
 package com.inkstage.cache.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
-import com.inkstage.entity.model.User;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.cache.service.UserCacheService;
+import com.inkstage.entity.model.User;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.Optional;
 
 /**
  * 用户缓存服务实现类
  * 用于缓存用户信息，减少数据库查询
+ * 使用 CacheManager 实现缓存管理
  */
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class UserCacheServiceImpl implements UserCacheService {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    /**
-     * 用户信息缓存过期时间：30分钟
-     */
-    private static final Duration USER_CACHE_EXPIRY = Duration.ofMinutes(30);
-
-    public UserCacheServiceImpl(RedisTemplate<String, Object> redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+    private final CacheManager cacheManager;
 
     /**
      * 缓存用户信息
@@ -41,8 +35,8 @@ public class UserCacheServiceImpl implements UserCacheService {
         }
 
         try {
-            String key = RedisKeyConstants.USER_PREFIX + user.getId();
-            redisTemplate.opsForValue().set(key, user, USER_CACHE_EXPIRY);
+            String cacheKey = CacheKey.keyForUserInfo(user.getId());
+            cacheManager.set(cacheKey, user, CacheTTL.USER_INFO);
             log.debug("缓存用户信息, 用户ID: {}", user.getId());
         } catch (Exception e) {
             log.error("缓存用户信息失败", e);
@@ -56,17 +50,17 @@ public class UserCacheServiceImpl implements UserCacheService {
      * @return 可选的用户对象
      */
     @Override
-    public Optional<User> getUserFromCache(String userId) {
+    public Optional<User> getUserFromCache(Long userId) {
         if (userId == null) {
             return Optional.empty();
         }
 
         try {
-            String key = RedisKeyConstants.USER_PREFIX + userId;
-            Object value = redisTemplate.opsForValue().get(key);
-            if (value instanceof User) {
+            String cacheKey = CacheKey.keyForUserInfo(userId);
+            User user = cacheManager.get(cacheKey, User.class);
+            if (user != null) {
                 log.debug("从缓存中获取用户信息, 用户ID: {}", userId);
-                return Optional.of((User) value);
+                return Optional.of(user);
             }
         } catch (Exception e) {
             log.error("从缓存中获取用户信息失败", e);
@@ -81,14 +75,14 @@ public class UserCacheServiceImpl implements UserCacheService {
      * @param userId 用户ID
      */
     @Override
-    public void removeUserCache(String userId) {
+    public void removeUserCache(Long userId) {
         if (userId == null) {
             return;
         }
 
         try {
-            String key = RedisKeyConstants.USER_PREFIX + userId;
-            redisTemplate.delete(key);
+            String cacheKey = CacheKey.keyForUserInfo(userId);
+            cacheManager.delete(cacheKey);
             log.debug("删除用户缓存, 用户ID: {}", userId);
         } catch (Exception e) {
             log.error("删除用户缓存失败", e);

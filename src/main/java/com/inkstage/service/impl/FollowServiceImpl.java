@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
@@ -12,10 +14,9 @@ import com.inkstage.service.FollowService;
 import com.inkstage.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -31,6 +32,7 @@ public class FollowServiceImpl implements FollowService {
     private final FollowMapper followMapper;
     private final UserMapper userMapper;
     private final NotificationService notificationService;
+    private final CacheManager cacheManager;
 
     /**
      * 关注用户
@@ -41,9 +43,6 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {RedisKeyConstants.CACHE_FOLLOW_STATUS, RedisKeyConstants.CACHE_FOLLOW_LIST},
-            key = "#followerId + ':' + #followingId",
-            allEntries = true)
     public boolean followUser(Long followerId, Long followingId) {
         // 检查是否已经关注
         int followed = followMapper.checkFollowStatus(followerId, followingId);
@@ -87,6 +86,7 @@ public class FollowServiceImpl implements FollowService {
             }
         }
 
+        cacheManager.deletePattern(CacheKey.FOLLOW);
         log.info("用户 {} 关注用户 {} 结果: {}", followerId, followingId, result > 0);
         return result > 0;
     }
@@ -100,9 +100,6 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {RedisKeyConstants.CACHE_FOLLOW_STATUS, RedisKeyConstants.CACHE_FOLLOW_LIST},
-            key = "#followerId + ':' + #followingId",
-            allEntries = true)
     public boolean unfollowUser(Long followerId, Long followingId) {
         int result = followMapper.delete(followerId, followingId);
         if (result > 0) {
@@ -127,6 +124,8 @@ public class FollowServiceImpl implements FollowService {
             }
         }
 
+        cacheManager.deletePattern(CacheKey.FOLLOW);
+
         log.info("用户 {} 取消关注用户 {} 结果: {}", followerId, followingId, result > 0);
         return result > 0;
     }
@@ -139,12 +138,16 @@ public class FollowServiceImpl implements FollowService {
      * @return 是否已关注
      */
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_STATUS,
-            key = "#followerId + ':' + #followingId",
-            unless = "#result == null")
     public boolean checkFollowStatus(Long followerId, Long followingId) {
-        int result = followMapper.checkFollowStatus(followerId, followingId);
-        return result > 0;
+        String cacheKey = CacheKey.keyForFollowStatus(followerId, followingId);
+        Boolean result = cacheManager.get(cacheKey, Boolean.class);
+        if (result != null) {
+            return result;
+        }
+        int count = followMapper.checkFollowStatus(followerId, followingId);
+        result = count > 0;
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 
     /**
@@ -156,11 +159,17 @@ public class FollowServiceImpl implements FollowService {
      * @return 关注的用户ID列表
      */
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
-            key = "'following:' + #followerId + ':' + #offset + ':' + #limit",
-            unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowingList(Long followerId, Integer offset, Integer limit) {
-        return followMapper.findFollowingIds(followerId, offset, limit);
+        String cacheKey = CacheKey.keyForFollowList(followerId, offset, limit, "following");
+        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        if (result != null && !result.isEmpty()) {
+            return result;
+        }
+        result = followMapper.findFollowingIds(followerId, offset, limit);
+        if (result != null && !result.isEmpty()) {
+            cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        }
+        return result;
     }
 
     /**
@@ -172,11 +181,17 @@ public class FollowServiceImpl implements FollowService {
      * @return 粉丝ID列表
      */
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
-            key = "'follower:' + #followingId + ':' + #offset + ':' + #limit",
-            unless = "#result == null or #result.isEmpty()")
     public List<Long> getFollowerList(Long followingId, Integer offset, Integer limit) {
-        return followMapper.findFollowerIds(followingId, offset, limit);
+        String cacheKey = CacheKey.keyForFollowList(followingId, offset, limit, "follower");
+        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        if (result != null && !result.isEmpty()) {
+            return result;
+        }
+        result = followMapper.findFollowerIds(followingId, offset, limit);
+        if (result != null && !result.isEmpty()) {
+            cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        }
+        return result;
     }
 
     /**
@@ -186,11 +201,15 @@ public class FollowServiceImpl implements FollowService {
      * @return 关注数
      */
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
-            key = "'following:count:' + #followerId",
-            unless = "#result == null")
     public long getFollowingCount(Long followerId) {
-        return followMapper.countFollowing(followerId);
+        String cacheKey = CacheKey.FOLLOW + "count:following:" + followerId;
+        Long result = cacheManager.get(cacheKey, Long.class);
+        if (result != null) {
+            return result;
+        }
+        result = followMapper.countFollowing(followerId);
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 
     /**
@@ -200,10 +219,14 @@ public class FollowServiceImpl implements FollowService {
      * @return 粉丝数
      */
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_FOLLOW_LIST,
-            key = "'follower:count:' + #followingId",
-            unless = "#result == null")
     public long getFollowerCount(Long followingId) {
-        return followMapper.countFollowers(followingId);
+        String cacheKey = CacheKey.FOLLOW + "count:follower:" + followingId;
+        Long result = cacheManager.get(cacheKey, Long.class);
+        if (result != null) {
+            return result;
+        }
+        result = followMapper.countFollowers(followingId);
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 }

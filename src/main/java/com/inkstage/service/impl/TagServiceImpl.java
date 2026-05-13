@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Tag;
@@ -16,11 +18,10 @@ import com.inkstage.service.NotificationService;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,7 @@ public class TagServiceImpl implements TagService {
 
     private final TagMapper tagMapper;
     private final NotificationService notificationService;
+    private final CacheManager cacheManager;
 
     @Override
     public List<Tag> getAllTags() {
@@ -88,11 +90,17 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_TAGS, key = "'active'")
     public List<Tag> getActiveTags() {
         log.info("获取激活状态标签列表");
         try {
-            return tagMapper.findActiveTags();
+            String cacheKey = CacheKey.keyForTagsActive();
+            List<Tag> tags = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+            if (tags != null) {
+                return tags;
+            }
+            tags = tagMapper.findActiveTags();
+            cacheManager.set(cacheKey, tags, CacheTTL.TAGS);
+            return tags;
         } catch (Exception e) {
             log.error("获取激活状态标签失败", e);
             throw new BusinessException("获取激活标签列表失败", e);
@@ -101,7 +109,6 @@ public class TagServiceImpl implements TagService {
 
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag addTag(Tag tag) {
         log.info("添加标签: {}", tag.getName());
         try {
@@ -123,6 +130,9 @@ public class TagServiceImpl implements TagService {
             tag.setTagVersion(1); // 新标签版本号设为1
             tag.setCreateTime(LocalDateTime.now());
             tagMapper.insert(tag);
+            
+            cacheManager.deletePattern(CacheKey.TAG);
+            
             return tag;
         } catch (Exception e) {
             log.error("添加标签失败", e);
@@ -131,7 +141,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag updateTag(Tag tag) {
         log.info("更新标签: {}", tag.getId());
         try {
@@ -150,6 +159,9 @@ public class TagServiceImpl implements TagService {
                 tag.setSlug(tag.getSlug().toLowerCase());
             }
             tagMapper.update(tag);
+            
+            cacheManager.deletePattern(CacheKey.TAG);
+            
             return tag;
         } catch (Exception e) {
             log.error("更新标签失败", e);
@@ -158,7 +170,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public void deleteTag(Long id) {
         log.info("删除标签: {}", id);
         try {
@@ -189,6 +200,8 @@ public class TagServiceImpl implements TagService {
             // 执行删除操作
             tagMapper.deleteById(id);
             log.info("删除标签并发送通知成功, 标签ID: {}", id);
+            
+            cacheManager.deletePattern(CacheKey.TAG);
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
@@ -198,7 +211,6 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Tag updateTagStatus(Long id, StatusEnum status) {
         log.info("更新标签状态: {}, {}", id, status);
         try {
@@ -206,6 +218,9 @@ public class TagServiceImpl implements TagService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             tagMapper.updateStatus(id, status);
+            
+            cacheManager.deletePattern(CacheKey.TAG);
+            
             return tagMapper.findById(id);
         } catch (Exception e) {
             log.error("更新标签状态失败", e);
@@ -215,7 +230,6 @@ public class TagServiceImpl implements TagService {
 
     @Override
     @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
-    @CacheEvict(value = RedisKeyConstants.CACHE_TAGS, allEntries = true)
     public Long createTagIfNotExists(Tag tag) {
         log.info("创建标签（如果不存在）: {}", tag.getName());
         try {
@@ -228,6 +242,9 @@ public class TagServiceImpl implements TagService {
                 existingTag.setUsageCount(existingTag.getUsageCount() + 1);
                 existingTag.setUpdateTime(LocalDateTime.now());
                 tagMapper.update(existingTag);
+                
+                cacheManager.deletePattern(CacheKey.TAG);
+                
                 return existingTag.getId();
             }
 
@@ -246,6 +263,9 @@ public class TagServiceImpl implements TagService {
 
             tagMapper.insert(tag);
             log.info("创建新标签成功: {}", tag.getName());
+            
+            cacheManager.deletePattern(CacheKey.TAG);
+            
             return tag.getId();
         } catch (Exception e) {
             log.error("创建标签失败", e);

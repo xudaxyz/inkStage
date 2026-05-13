@@ -1,5 +1,8 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.ReadingHistoryDTO;
 import com.inkstage.entity.model.Article;
@@ -7,15 +10,13 @@ import com.inkstage.entity.model.ReadingHistory;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.ReadingHistoryMapper;
 import com.inkstage.service.FileService;
-import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.service.ReadingHistoryService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReadingHistoryVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -32,9 +33,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     private final ReadingHistoryMapper readingHistoryMapper;
     private final ArticleMapper articleMapper;
     private final FileService fileService;
+    private final CacheManager cacheManager;
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean saveOrUpdateReadingHistory(ReadingHistoryDTO dto) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -65,6 +66,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
 
             // 保存或更新阅读历史
             int result = readingHistoryMapper.saveOrUpdate(readingHistory);
+            
+            cacheManager.deletePattern(CacheKey.READING_HISTORY + userId);
+            
             return result > 0;
         } catch (Exception e) {
             log.error("保存阅读历史失败", e);
@@ -73,11 +77,23 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_READING_HISTORY,
-            key = "#page + ':' + #size",
-            unless = "#result == null")
     public PageResult<ReadingHistoryVO> getReadingHistoryList(Integer page, Integer size) {
-        return getReadingHistoryListWithDetails(page, size);
+        Long userId = UserContext.getCurrentUserId();
+        if (userId == null) {
+            return getReadingHistoryListWithDetails(page, size);
+        }
+        
+        String cacheKey = CacheKey.keyForReadingHistory(userId, page, size);
+        PageResult<ReadingHistoryVO> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        if (result != null) {
+            return result;
+        }
+        
+        result = getReadingHistoryListWithDetails(page, size);
+        if (result != null && result.getTotal() > 0) {
+            cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        }
+        return result;
     }
 
     @Override
@@ -107,7 +123,6 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean deleteReadingHistory(Long articleId) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -117,6 +132,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
             }
 
             int result = readingHistoryMapper.deleteByUserIdAndArticleId(userId, articleId);
+            
+            cacheManager.deletePattern(CacheKey.READING_HISTORY + userId);
+            
             return result > 0;
         } catch (Exception e) {
             log.error("删除阅读历史失败", e);
@@ -125,7 +143,6 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_READING_HISTORY, allEntries = true)
     public boolean clearReadingHistory() {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -135,6 +152,9 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
             }
 
             int result = readingHistoryMapper.deleteByUserId(userId);
+            
+            cacheManager.deletePattern(CacheKey.READING_HISTORY + userId);
+            
             return result > 0;
         } catch (Exception e) {
             log.error("清空阅读历史失败", e);
@@ -143,9 +163,6 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_READING_HISTORY,
-            key = "'article:' + #articleId",
-            unless = "#result == null")
     public ReadingHistoryVO getReadingHistoryByArticleId(Long articleId) {
         try {
             Long userId = UserContext.getCurrentUserId();
@@ -154,9 +171,16 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
                 return null;
             }
 
-            ReadingHistoryVO vo = readingHistoryMapper.findByUserIdAndArticleIdWithDetails(userId, articleId);
+            String cacheKey = CacheKey.READING_HISTORY + userId + ":article:" + articleId;
+            ReadingHistoryVO vo = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+            if (vo != null) {
+                return vo;
+            }
+
+            vo = readingHistoryMapper.findByUserIdAndArticleIdWithDetails(userId, articleId);
             if (vo != null) {
                 fileService.ensureImageFullUrl(vo);
+                cacheManager.set(cacheKey, vo, CacheTTL.DEFAULT);
             }
             return vo;
         } catch (Exception e) {

@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
 import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.enums.CountType;
 import com.inkstage.mapper.ArticleMapper;
@@ -137,7 +137,7 @@ public class CountServiceImpl implements CountService {
             case ARTICLE_SHARE_COUNT -> "share-count";
             default -> countType.getType();
         };
-        return RedisKeyConstants.buildArticleCountCacheKey(articleId, countTypeSuffix);
+        return CacheKey.keyForArticleCount(articleId, countTypeSuffix);
     }
 
 }

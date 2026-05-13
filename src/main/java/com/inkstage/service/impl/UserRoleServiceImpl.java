@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.entity.model.User;
 import com.inkstage.entity.model.UserRole;
 import com.inkstage.enums.common.DeleteStatus;
@@ -9,9 +11,8 @@ import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.service.UserRoleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,9 +25,9 @@ import java.util.List;
 public class UserRoleServiceImpl implements UserRoleService {
 
     private final UserRoleMapper userRoleMapper;
+    private final CacheManager cacheManager;
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#user.id")
     public void createUserRole(User user) {
         // 为新注册用户分配默认角色(普通用户)
         UserRole userRole = new UserRole();
@@ -39,18 +40,31 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRole.setDeleted(DeleteStatus.NOT_DELETED);
 
         userRoleMapper.insert(userRole);
+
+        cacheManager.delete(CacheKey.keyForUserRoles(user.getId()));
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#userId")
     public List<UserRole> getUserRoles(Long userId) {
-        return userRoleMapper.selectByUserId(userId);
+        String cacheKey = CacheKey.keyForUserRoles(userId);
+        List<UserRole> roles = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+        });
+        if (roles != null) {
+            return roles;
+        }
+        roles = userRoleMapper.selectByUserId(userId);
+        if (roles != null && !roles.isEmpty()) {
+            cacheManager.set(cacheKey, roles, CacheTTL.USER_ROLES);
+        }
+        return roles;
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_USER_ROLES, key = "#userId")
     public Boolean updateUserRole(Long userId, UserRoleEnum userRole) {
         int result = userRoleMapper.updateUserRole(userId, userRole);
+
+        cacheManager.delete(CacheKey.keyForUserRoles(userId));
+
         return result > 0;
     }
 }

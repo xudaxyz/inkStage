@@ -1,11 +1,12 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.entity.model.Role;
 import com.inkstage.mapper.RoleMapper;
 import com.inkstage.service.RoleService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 /**
@@ -16,11 +17,20 @@ import org.springframework.stereotype.Service;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleMapper roleMapper;
+    private final CacheManager cacheManager;
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_ROLES, key = "#id")
     public Role getRoleById(Long id) {
-        return roleMapper.selectByPrimaryKey(id.intValue());
+        String cacheKey = CacheKey.keyForRole(id);
+        Role role = cacheManager.get(cacheKey, Role.class);
+        if (role != null) {
+            return role;
+        }
+        role = roleMapper.selectByPrimaryKey(id.intValue());
+        if (role != null) {
+            cacheManager.set(cacheKey, role, CacheTTL.ROLES);
+        }
+        return role;
     }
 
 }

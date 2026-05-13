@@ -65,7 +65,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
      * @return UserDetails对象
      * @throws UsernameNotFoundException 如果用户不存在
      */
-    public UserDetails loadUserById(String userId) throws UsernameNotFoundException {
+    public UserDetails loadUserById(Long userId) throws UsernameNotFoundException {
         // 先尝试从缓存中获取
         Optional<User> cachedUser = userCacheService.getUserFromCache(userId);
         if (cachedUser.isPresent()) {
@@ -75,7 +75,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
         // 从数据库中获取
         try {
-            User user = userService.getUserById(Long.parseLong(userId));
+            User user = userService.getUserById(userId);
             if (user == null) {
                 log.error("用户ID: {}不存在", userId);
                 throw new UsernameNotFoundException(ResponseMessage.USER_NOT_FOUND.getMessage() + ": " + userId);

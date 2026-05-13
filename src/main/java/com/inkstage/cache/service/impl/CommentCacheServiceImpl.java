@@ -1,5 +1,8 @@
 package com.inkstage.cache.service.impl;
 
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.cache.service.CommentCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.admin.AdminCommentQueryDTO;
@@ -7,19 +10,18 @@ import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.mapper.CommentMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.utils.CommentUtils;
-import com.inkstage.cache.constant.RedisKeyConstants;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.util.List;
 
 /**
  * 评论缓存服务实现类
  * 专门负责评论相关的缓存操作
- * 使用Spring Cache注解实现声明式缓存
+ * 使用 CacheManager 实现缓存管理
  */
 @Slf4j
 @Service
@@ -28,13 +30,11 @@ public class CommentCacheServiceImpl implements CommentCacheService {
 
     private final CommentMapper commentMapper;
     private final FileService fileService;
+    private final CacheManager cacheManager;
 
     // ==================== 前台评论查询缓存 ====================
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_LIST,
-            key = "#queryDTO.articleId + ':' + #queryDTO.pageNum + ':' + #queryDTO.pageSize + ':' + (#queryDTO.sortBy ?: 'default') + ':' + (#queryDTO.maxReplies ?: 0) + ':' + #root.target.getCommentVersion(#queryDTO.articleId)",
-            unless = "#result == null")
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
         if (queryDTO == null || queryDTO.getArticleId() == null || queryDTO.getPageNum() == null || queryDTO.getPageSize() == null) {
             log.warn("获取评论参数不完整, queryDTO: {}", queryDTO);
@@ -42,26 +42,41 @@ public class CommentCacheServiceImpl implements CommentCacheService {
         }
 
         try {
+            int commentVersion = getCommentVersion(queryDTO.getArticleId());
+            String cacheKey = CacheKey.keyForCommentList(
+                    queryDTO.getArticleId(),
+                    queryDTO.getPageNum(),
+                    queryDTO.getPageSize(),
+                    queryDTO.getSortBy(),
+                    queryDTO.getMaxReplies(),
+                    commentVersion
+            );
+
+            PageResult<ArticleCommentVO> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (result != null) {
+                log.debug("从缓存获取评论列表, 文章ID: {}", queryDTO.getArticleId());
+                return result;
+            }
+
             int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
             queryDTO.setOffset(offset);
-            // 查询评论列表
             List<ArticleCommentVO> articleCommentVOList = commentMapper.findCommentsByArticleId(queryDTO);
             if (articleCommentVOList == null || articleCommentVOList.isEmpty()) {
                 return null;
             }
 
-            // 将扁平评论列表转换为树形结构
             articleCommentVOList = CommentUtils.buildCommentTree(articleCommentVOList, queryDTO.getMaxReplies(), queryDTO.getReplySortBy());
             if (articleCommentVOList.isEmpty()) {
                 return null;
             }
-            // 确保评论相关图片的URL完整
             fileService.ensureImageFullUrl(articleCommentVOList);
 
-            // 查询总记录数
             Long total = commentMapper.countCommentsByArticleId(queryDTO);
 
-            return PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
+            result = PageResult.build(articleCommentVOList, total, queryDTO.getPageNum(), queryDTO.getPageSize());
+            cacheManager.set(cacheKey, result, CacheTTL.COMMENT_LIST);
+            return result;
         } catch (Exception e) {
             log.error("获取评论列表失败, 文章ID: {}", queryDTO.getArticleId(), e);
             return null;
@@ -69,9 +84,6 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COMMENT_REPLIES,
-            key = "#parentId + ':' + #pageNum + ':' + #pageSize + ':' + (#sortBy ?: 'default')",
-            unless = "#result == null")
     public PageResult<ArticleCommentVO> getReplies(Long parentId, Integer pageNum, Integer pageSize, String sortBy) {
         if (parentId == null || pageNum == null || pageSize == null) {
             log.warn("获取子评论参数不完整, parentId: {}, pageNum: {}, pageSize: {}", parentId, pageNum, pageSize);
@@ -79,24 +91,28 @@ public class CommentCacheServiceImpl implements CommentCacheService {
         }
 
         try {
-            // 计算偏移量
+            String cacheKey = CacheKey.keyForCommentReply(parentId, pageNum, pageSize, sortBy);
+            PageResult<ArticleCommentVO> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (result != null) {
+                log.debug("从缓存获取子评论列表, 父评论ID: {}", parentId);
+                return result;
+            }
+
             int offset = (pageNum - 1) * pageSize;
 
-            // 查询子评论列表
             List<ArticleCommentVO> replies = commentMapper.findRepliesByParentId(parentId, offset, pageSize, sortBy);
             if (replies == null || replies.isEmpty()) {
                 return null;
             }
 
-
-
-            // 查询子评论总数
             Long total = commentMapper.countRepliesByParentId(parentId);
 
             fileService.ensureImageFullUrl(replies);
 
-            // 构建分页结果
-            return PageResult.build(replies, total, pageNum, pageSize);
+            result = PageResult.build(replies, total, pageNum, pageSize);
+            cacheManager.set(cacheKey, result, CacheTTL.COMMENT_REPLIES);
+            return result;
         } catch (Exception e) {
             log.error("获取子评论列表失败, 父评论ID: {}", parentId, e);
             return null;
@@ -106,18 +122,14 @@ public class CommentCacheServiceImpl implements CommentCacheService {
     @Override
     public PageResult<ArticleCommentVO> getCommentsByPage(AdminCommentQueryDTO queryDTO) {
         try {
-            // 计算偏移量
             int offset = (queryDTO.getPageNum() - 1) * queryDTO.getPageSize();
             queryDTO.setOffset(offset);
 
-            // 查询评论列表
             List<ArticleCommentVO> articleCommentVOList = commentMapper.findCommentsByPage(queryDTO);
-            // 查询总记录数
             Long total = commentMapper.countCommentsByPage(queryDTO);
 
             fileService.ensureImageFullUrl(articleCommentVOList);
 
-            // 构建分页结果
             PageResult<ArticleCommentVO> pageResult = PageResult.build(
                     articleCommentVOList,
                     total,

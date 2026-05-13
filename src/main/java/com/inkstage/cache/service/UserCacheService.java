@@ -23,14 +23,14 @@ public interface UserCacheService {
      * @param userId 用户ID
      * @return 可选的用户对象
      */
-    Optional<User> getUserFromCache(String userId);
+    Optional<User> getUserFromCache(Long userId);
 
     /**
      * 删除用户缓存
      *
      * @param userId 用户ID
      */
-    void removeUserCache(String userId);
+    void removeUserCache(Long userId);
 
     /**
      * 更新用户缓存

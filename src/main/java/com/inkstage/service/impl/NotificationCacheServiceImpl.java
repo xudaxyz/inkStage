@@ -11,7 +11,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
-import static com.inkstage.cache.constant.RedisKeyConstants.*;
+import static com.inkstage.cache.constant.CacheKey.*;
 
 /**
  * 通知缓存服务实现类

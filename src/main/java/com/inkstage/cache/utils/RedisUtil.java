@@ -78,6 +78,55 @@ public class RedisUtil {
     }
 
     /**
+     * 设置值(仅当键不存在时)
+     * <p>原子操作，适用于分布式锁等场景</p>
+     *
+     * @param key   键
+     * @param value 值
+     * @return 如果设置成功返回true，如果键已存在返回false
+     */
+    public boolean setIfAbsent(String key, Object value) {
+        try {
+            return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value));
+        } catch (Exception e) {
+            log.error("Error setting Redis key if absent: {}", key, e);
+            return false;
+        }
+    }
+
+    /**
+     * 设置值(仅当键不存在时，带过期时间)
+     * <p>原子操作，适用于分布式锁等场景</p>
+     *
+     * @param key    键
+     * @param value  值
+     * @param expire 过期时间(秒)
+     * @return 如果设置成功返回true，如果键已存在返回false
+     */
+    public boolean setIfAbsent(String key, Object value, long expire) {
+        return setIfAbsent(key, value, expire, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 设置值(仅当键不存在时，带过期时间)
+     * <p>原子操作，适用于分布式锁等场景</p>
+     *
+     * @param key    键
+     * @param value  值
+     * @param expire 过期时间
+     * @param unit   时间单位
+     * @return 如果设置成功返回true，如果键已存在返回false
+     */
+    public boolean setIfAbsent(String key, Object value, long expire, TimeUnit unit) {
+        try {
+            return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, value, expire, unit));
+        } catch (Exception e) {
+            log.error("Error setting Redis key if absent with expiration: {}", key, e);
+            return false;
+        }
+    }
+
+    /**
      * 获取指定类型的对象
      *
      * @param key   键
@@ -1008,6 +1057,17 @@ public class RedisUtil {
             log.error("Error batch setting Redis keys with expiration", e);
             return false;
         }
+    }
+
+    /**
+     * 批量设置值(带过期时间, 使用Duration)
+     *
+     * @param keyValueMap 键值对映射
+     * @param ttl         过期时间(Duration)
+     * @return 是否成功
+     */
+    public boolean batchSet(Map<String,Object> keyValueMap, Long ttl) {
+        return batchSet(keyValueMap, ttl, TimeUnit.SECONDS);
     }
 
     /**

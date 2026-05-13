@@ -1,8 +1,9 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
 import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ColumnCreateDTO;
@@ -28,7 +29,6 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,10 +47,10 @@ public class ColumnServiceImpl implements ColumnService {
     private final ColumnSubscriptionService columnSubscriptionService;
     private final ArticleCacheService articleCacheService;
     private final CacheClearService cacheClearService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional
-    @CacheEvict(value = RedisKeyConstants.CACHE_COLUMN_LIST, allEntries = true)
     public Long createColumn(ColumnCreateDTO dto) {
         log.info("创建专栏: {}", dto.getName());
         try {
@@ -78,6 +78,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             int result = columnMapper.insert(column);
             if (result > 0) {
+                cacheManager.deletePattern(CacheKey.COLUMN);
                 return column.getId();
             }
             return null;
@@ -89,7 +90,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST}, key = "#columnId")
     public boolean updateColumn(Long columnId, ColumnCreateDTO dto) {
         log.info("更新专栏: id={}, name={}", columnId, dto.getName());
         try {
@@ -122,7 +122,11 @@ public class ColumnServiceImpl implements ColumnService {
             }
             column.setUpdateTime(LocalDateTime.now());
 
-            return columnMapper.update(column) > 0;
+            boolean result = columnMapper.update(column) > 0;
+            if (result) {
+                cacheManager.deletePattern(CacheKey.COLUMN);
+            }
+            return result;
         } catch (Exception e) {
             log.error("更新专栏失败", e);
             throw new BusinessException("更新专栏失败", e);
@@ -131,7 +135,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST, RedisKeyConstants.CACHE_COLUMN_HOT}, allEntries = true)
     public boolean deleteColumn(Long columnId) {
         log.info("删除专栏: id={}", columnId);
         try {
@@ -139,7 +142,11 @@ public class ColumnServiceImpl implements ColumnService {
             checkColumnIsMine(columnId, user);
 
             articleColumnMapper.deleteByColumnId(columnId);
-            return columnMapper.deleteById(columnId, user.getId()) > 0;
+            boolean result = columnMapper.deleteById(columnId, user.getId()) > 0;
+            if (result) {
+                cacheManager.deletePattern(CacheKey.COLUMN);
+            }
+            return result;
         } catch (Exception e) {
             log.error("删除专栏失败", e);
             throw new BusinessException("删除专栏失败", e);
@@ -148,7 +155,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_LIST, RedisKeyConstants.CACHE_COLUMN_HOT}, allEntries = true)
     public boolean updateColumnVisible(Long columnId, VisibleStatus visible) {
         log.info("更新专栏可见性: id={}, visible={}", columnId, visible);
         try {
@@ -158,7 +164,11 @@ public class ColumnServiceImpl implements ColumnService {
             column.setVisible(visible);
             column.setUpdateTime(LocalDateTime.now());
 
-            return columnMapper.update(column) > 0;
+            boolean result = columnMapper.update(column) > 0;
+            if (result) {
+                cacheManager.deletePattern(CacheKey.COLUMN);
+            }
+            return result;
         } catch (Exception e) {
             log.error("更新专栏可见性失败", e);
             throw new BusinessException("更新专栏可见性失败", e);
@@ -326,8 +336,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
-            allEntries = true)
     public boolean addArticleToColumn(Long columnId, Long articleId, Integer sortOrder) {
         log.info("添加文章到专栏: columnId={}, articleId={}", columnId, articleId);
         try {
@@ -364,6 +372,8 @@ public class ColumnServiceImpl implements ColumnService {
             boolean result = articleColumnMapper.insert(articleColumn) > 0;
             if (result) {
                 columnMapper.updateArticleCount(columnId, 1);
+                cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
+                cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + columnId);
                 // 异步发送通知给订阅者
                 try {
                     // 使用缓存获取文章详情
@@ -382,8 +392,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
-            allEntries = true)
     public boolean removeArticleFromColumn(Long columnId, Long articleId) {
         log.info("从专栏移除文章: columnId={}, articleId={}", columnId, articleId);
         try {
@@ -398,6 +406,8 @@ public class ColumnServiceImpl implements ColumnService {
             int result = articleColumnMapper.deleteById(articleColumn.getId());
             if (result > 0) {
                 columnMapper.updateArticleCount(columnId, -1);
+                cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
+                cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + columnId);
             }
             return result > 0;
         } catch (Exception e) {
@@ -493,8 +503,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @CacheEvict(value = {RedisKeyConstants.CACHE_COLUMN_DETAIL, RedisKeyConstants.CACHE_COLUMN_ARTICLES},
-            allEntries = true)
     public void moveArticleToColumn(Long articleId, Long newColumnId, Integer sortOrder) {
         log.info("移动文章到专栏: articleId={}, newColumnId={}", articleId, newColumnId);
         try {
@@ -515,6 +523,8 @@ public class ColumnServiceImpl implements ColumnService {
             if (oldColumnId != null) {
                 articleColumnMapper.deleteByArticleId(articleId);
                 columnMapper.updateArticleCount(oldColumnId, -1);
+                cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + oldColumnId);
+                cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + oldColumnId);
                 log.info("从旧专栏移除文章: articleId={}, oldColumnId={}", articleId, oldColumnId);
             }
 
@@ -535,6 +545,8 @@ public class ColumnServiceImpl implements ColumnService {
                 boolean result = articleColumnMapper.insert(articleColumn) > 0;
                 if (result) {
                     columnMapper.updateArticleCount(newColumnId, 1);
+                    cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + newColumnId);
+                    cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + newColumnId);
                     log.info("文章移动到新专栏成功: articleId={}, newColumnId={}", articleId, newColumnId);
                 }
             }

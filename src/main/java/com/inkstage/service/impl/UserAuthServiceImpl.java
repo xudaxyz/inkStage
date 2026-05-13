@@ -28,8 +28,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.inkstage.cache.constant.RedisKeyConstants.LOGIN_ATTEMPT_PREFIX;
-import static com.inkstage.cache.constant.RedisKeyConstants.LOGIN_LOCK_PREFIX;
+import static com.inkstage.cache.constant.CacheKey.LOGIN_ATTEMPT;
+import static com.inkstage.cache.constant.CacheKey.LOGIN_LOCK;
 
 /**
  * 用户认证服务实现类
@@ -280,8 +280,8 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     private void checkLoginAttempts(String account) {
-        String lockKey = LOGIN_LOCK_PREFIX + account;
-        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+        String lockKey = LOGIN_LOCK + account;
+        String attemptKey = LOGIN_ATTEMPT + account;
 
         // 检查是否被锁定
         if (redisUtil.hasKey(lockKey)) {
@@ -299,13 +299,13 @@ public class UserAuthServiceImpl implements UserAuthService {
     }
 
     private void incrementLoginAttempts(String account) {
-        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+        String attemptKey = LOGIN_ATTEMPT + account;
         redisUtil.increment(attemptKey);
         redisUtil.expire(attemptKey, LOCKOUT_TIME_MINUTES, TimeUnit.MINUTES);
     }
 
     private void resetLoginAttempts(String account) {
-        String attemptKey = LOGIN_ATTEMPT_PREFIX + account;
+        String attemptKey = LOGIN_ATTEMPT + account;
         redisUtil.delete(attemptKey);
     }
 }

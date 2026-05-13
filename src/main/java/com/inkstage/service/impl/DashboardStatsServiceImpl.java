@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.entity.model.DashboardStats;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.mapper.*;
@@ -9,8 +11,6 @@ import com.inkstage.vo.admin.DashboardStatsVO;
 import com.inkstage.vo.admin.stat.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,13 +34,17 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
     private final TagMapper tagMapper;
     private final CommentMapper commentMapper;
     private final ArticleCollectionMapper articleCollectionMapper;
+    private final CacheManager cacheManager;
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_DASHBOARD,
-            key = "#limit",
-            unless = "#result == null")
     public DashboardStatsVO getDashboardStats(int limit) {
-        DashboardStatsVO dashboardStatsVO = new DashboardStatsVO();
+        String cacheKey = CacheKey.keyForDashboard("stats:" + limit);
+        DashboardStatsVO dashboardStatsVO = cacheManager.get(cacheKey, DashboardStatsVO.class);
+        if (dashboardStatsVO != null) {
+            return dashboardStatsVO;
+        }
+
+        dashboardStatsVO = new DashboardStatsVO();
 
         dashboardStatsVO.setCoreStats(getCoreStats());
         dashboardStatsVO.setPendingStats(getPendingStats());
@@ -49,18 +53,22 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
         dashboardStatsVO.setArticleCategoryDistribution(getArticleCategoryDistribution());
         dashboardStatsVO.setRecentActivities(getRecentActivities());
 
+        cacheManager.set(cacheKey, dashboardStatsVO, CacheTTL.DEFAULT);
+
         return dashboardStatsVO;
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = RedisKeyConstants.CACHE_DASHBOARD, allEntries = true)
     public boolean refreshDashboardStats() {
         try {
             calculateCoreStats();
             calculateTrendData();
             calculateDistributionData();
             log.info("仪表盘统计数据刷新成功");
+
+            cacheManager.deletePattern(CacheKey.HOT_DATA + "dashboard*");
+
             return true;
         } catch (Exception e) {
             log.error("仪表盘统计数据刷新失败", e);

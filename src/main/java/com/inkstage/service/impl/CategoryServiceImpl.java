@@ -1,6 +1,8 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.entity.model.Category;
@@ -10,9 +12,8 @@ import com.inkstage.mapper.CategoryMapper;
 import com.inkstage.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryMapper categoryMapper;
+    private final CacheManager cacheManager;
 
 
     @Override
@@ -79,11 +81,18 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_CATEGORIES, key = "'active'")
     public List<Category> getActiveCategories() {
         log.info("获取激活状态分类");
         try {
-            return categoryMapper.findActiveCategories();
+            String cacheKey = CacheKey.keyForCategoryActive();
+            List<Category> categories = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+            });
+            if (categories != null) {
+                return categories;
+            }
+            categories = categoryMapper.findActiveCategories();
+            cacheManager.set(cacheKey, categories, CacheTTL.CATEGORIES);
+            return categories;
         } catch (Exception e) {
             log.error("获取激活状态分类失败", e);
             throw new BusinessException("获取激活分类列表失败", e);
@@ -91,7 +100,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category addCategory(Category category) {
         log.info("添加分类: {}", category.getName());
         try {
@@ -114,6 +122,9 @@ public class CategoryServiceImpl implements CategoryService {
             }
             category.setCategoryVersion(1); // 设置初始版本号为1
             categoryMapper.insert(category);
+
+            cacheManager.deletePattern(CacheKey.CATEGORY);
+
             return category;
         } catch (Exception e) {
             log.error("添加分类失败", e);
@@ -122,7 +133,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category updateCategory(Category category) {
         log.info("更新分类: {}", category.getId());
         try {
@@ -143,6 +153,9 @@ public class CategoryServiceImpl implements CategoryService {
             }
             category.setUpdateTime(LocalDateTime.now());
             categoryMapper.update(category);
+
+            cacheManager.deletePattern(CacheKey.CATEGORY);
+
             return category;
         } catch (Exception e) {
             log.error("更新分类失败", e);
@@ -151,7 +164,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public void deleteCategory(Long id) {
         log.info("删除分类: {}", id);
         try {
@@ -159,6 +171,8 @@ public class CategoryServiceImpl implements CategoryService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             categoryMapper.deleteById(id);
+
+            cacheManager.deletePattern(CacheKey.CATEGORY);
         } catch (Exception e) {
             log.error("删除分类失败", e);
             throw new BusinessException("删除分类失败", e);
@@ -166,7 +180,6 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @CacheEvict(value = RedisKeyConstants.CACHE_CATEGORIES, allEntries = true)
     public Category updateCategoryStatus(Long id, StatusEnum status) {
         log.info("更新分类状态: {}, {}", id, status);
         try {
@@ -174,6 +187,9 @@ public class CategoryServiceImpl implements CategoryService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             categoryMapper.updateStatus(id, status);
+
+            cacheManager.deletePattern(CacheKey.CATEGORY);
+
             return categoryMapper.findById(id);
         } catch (Exception e) {
             log.error("更新分类状态失败", e);

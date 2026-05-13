@@ -49,12 +49,12 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
         Map<String, Object> claims = jwt.getClaims();
 
         // 获取用户ID
-        String userId;
+        Long userId;
         if (claims.containsKey("user_id")) {
-            userId = claims.get("user_id").toString();
+            userId = (Long) claims.get("user_id");
         } else {
             // 尝试从subject中获取
-            userId = jwt.getSubject();
+            userId = Long.valueOf(jwt.getSubject());
         }
 
         // 获取用户名
@@ -88,7 +88,7 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
      * @param username 用户名
      * @return 用户对象
      */
-    private User loadUser(String userId, String username) {
+    private User loadUser(Long userId, String username) {
         // 尝试从缓存中获取
         Optional<User> cachedUser = userCacheService.getUserFromCache(userId);
         if (cachedUser.isPresent()) {
@@ -102,8 +102,7 @@ public class CustomJwtAuthenticationConverter implements Converter<@NotNull Jwt,
             // 尝试根据ID获取
             if (userId != null) {
                 try {
-                    Long id = Long.parseLong(userId);
-                    user = userService.getUserById(id);
+                    user = userService.getUserById(userId);
                 } catch (NumberFormatException e) {
                     log.warn("无效的用户id: {}", userId);
                 }

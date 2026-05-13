@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
 import com.inkstage.service.TokenStoreService;
 import com.inkstage.cache.utils.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +30,18 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
         // 生成唯一的令牌ID
         String tokenId = UUID.randomUUID().toString();
         // 构建Redis键
-        String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + userId + ":" + tokenId;
+        String key = CacheKey.REFRESH_TOKEN + userId + ":" + tokenId;
 
         try {
             // 检查并限制用户的刷新令牌数量
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             long tokenCount = redisUtil.sSize(userTokenKey);
             if (tokenCount >= MAX_REFRESH_TOKENS_PER_USER) {
                 // 删除最早的令牌
                 Set<Object> tokenIdObjects = redisUtil.sMembers(userTokenKey);
                 if (tokenIdObjects != null && !tokenIdObjects.isEmpty()) {
                     String oldestTokenId = tokenIdObjects.iterator().next().toString();
-                    String oldestTokenKey = RedisKeyConstants.REFRESH_TOKEN_PREFIX + userId + ":" + oldestTokenId;
+                    String oldestTokenKey = CacheKey.REFRESH_TOKEN + userId + ":" + oldestTokenId;
                     redisUtil.delete(oldestTokenKey);
                     redisUtil.sRemove(userTokenKey, oldestTokenId);
                     log.info("删除用户最早的刷新令牌，用户ID: {}, 令牌ID: {}", userId, oldestTokenId);
@@ -65,14 +65,14 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
     public boolean validateRefreshToken(Long userId, String refreshToken) {
         try {
             // 检查令牌是否在黑名单中
-            String blacklistKey = RedisKeyConstants.REFRESH_TOKEN_BLACKLIST_PREFIX + refreshToken.hashCode();
+            String blacklistKey = CacheKey.REFRESH_TOKEN_BLACKLIST + refreshToken.hashCode();
             if (redisUtil.hasKey(blacklistKey)) {
                 log.warn("刷新令牌已在黑名单中，用户ID: {}", userId);
                 return false;
             }
 
             // 获取用户的所有刷新令牌ID
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             Set<Object> tokenIdObjects = redisUtil.sMembers(userTokenKey);
 
             if (tokenIdObjects == null || tokenIdObjects.isEmpty()) {
@@ -90,7 +90,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
 
             // 验证刷新令牌是否有效
             for (String tokenId : tokenIds) {
-                String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + userId + ":" + tokenId;
+                String key = CacheKey.REFRESH_TOKEN + userId + ":" + tokenId;
                 String storedToken = redisUtil.get(key, String.class);
 
                 if (refreshToken.equals(storedToken)) {
@@ -111,7 +111,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
     public void revokeRefreshToken(Long userId, String refreshToken) {
         try {
             // 获取用户的所有刷新令牌ID
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             Set<Object> tokenIdObjects = redisUtil.sMembers(userTokenKey);
 
             if (tokenIdObjects == null || tokenIdObjects.isEmpty()) {
@@ -129,7 +129,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
 
             // 查找并删除对应的刷新令牌
             for (String tokenId : tokenIds) {
-                String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + userId + ":" + tokenId;
+                String key = CacheKey.REFRESH_TOKEN + userId + ":" + tokenId;
                 String storedToken = redisUtil.get(key, String.class);
 
                 if (refreshToken.equals(storedToken)) {
@@ -149,7 +149,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
     public void revokeAllRefreshTokens(Long userId) {
         try {
             // 获取用户的所有刷新令牌ID
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             Set<Object> tokenIdObjects = redisUtil.sMembers(userTokenKey);
 
             if (tokenIdObjects == null || tokenIdObjects.isEmpty()) {
@@ -167,7 +167,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
 
             // 遍历所有令牌ID，调用私有方法处理单个令牌的撤销
             for (String tokenId : tokenIds) {
-                String key = RedisKeyConstants.REFRESH_TOKEN_PREFIX + userId + ":" + tokenId;
+                String key = CacheKey.REFRESH_TOKEN + userId + ":" + tokenId;
                 String storedToken = redisUtil.get(key, String.class);
                 if (storedToken != null) {
                     // 调用私有方法处理单个令牌的撤销
@@ -201,11 +201,11 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
 
             // 删除令牌
             redisUtil.delete(tokenKey);
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             redisUtil.sRemove(userTokenKey, tokenId);
 
             // 将令牌添加到黑名单，有效期为原令牌的剩余时间
-            String blacklistKey = RedisKeyConstants.REFRESH_TOKEN_BLACKLIST_PREFIX + token.hashCode();
+            String blacklistKey = CacheKey.REFRESH_TOKEN_BLACKLIST + token.hashCode();
             redisUtil.set(blacklistKey, "1", remainingTime);
 
             log.info("刷新令牌撤销成功并加入黑名单，用户ID: {}, 令牌ID: {}", userId, tokenId);
@@ -217,7 +217,7 @@ public class RedisTokenStoreServiceImpl implements TokenStoreService {
     @Override
     public long getRefreshTokenCount(Long userId) {
         try {
-            String userTokenKey = RedisKeyConstants.USER_REFRESH_TOKEN_PREFIX + userId;
+            String userTokenKey = CacheKey.USER_REFRESH_TOKENS + userId;
             Long size = redisUtil.sSize(userTokenKey);
             return size != null ? size : 0;
         } catch (Exception e) {

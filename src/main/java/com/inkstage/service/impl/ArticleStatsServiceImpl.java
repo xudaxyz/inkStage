@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.ArticleStatsService;
 import com.inkstage.cache.utils.RedisUtil;
@@ -26,7 +26,7 @@ public class ArticleStatsServiceImpl implements ArticleStatsService {
             log.info("增加文章阅读数, 文章ID: {}, 增量: {}", articleId, count);
 
             // 先更新Redis中的计数（使用Redis的原子操作）
-            String cacheKey = RedisKeyConstants.buildArticleCountCacheKey(articleId, "read");
+            String cacheKey = CacheKey.keyForArticleCount(articleId, "read");
             redisUtil.increment(cacheKey, count);
 
             // 异步更新数据库

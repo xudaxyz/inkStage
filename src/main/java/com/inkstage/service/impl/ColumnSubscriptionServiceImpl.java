@@ -1,7 +1,9 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.constant.RedisKeyConstants;
+import com.inkstage.cache.constant.CacheKey;
+import com.inkstage.cache.constant.CacheTTL;
 import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
@@ -23,9 +25,9 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.MyColumnSubscriptionVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tools.jackson.core.type.TypeReference;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,6 +45,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     private final CacheClearService cacheClearService;
     private final NotificationService notificationService;
     private final FileService fileService;
+    private final CacheManager cacheManager;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -112,41 +115,59 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_STATUS,
-            key = "#userId + ':' + #columnId",
-            unless = "#result == false")
     public boolean isSubscribed(Long userId, Long columnId) {
         if (userId == null) {
             return false;
         }
 
-        int result = columnSubscriptionMapper.checkSubscriptionStatus(userId, columnId);
-        return result > 0;
+        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_STATUS + userId + ":" + columnId;
+        Boolean result = cacheManager.get(cacheKey, Boolean.class);
+        if (result != null) {
+            return result;
+        }
+
+        int count = columnSubscriptionMapper.checkSubscriptionStatus(userId, columnId);
+        result = count > 0;
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "#userId + ':' + #pageNum + ':' + #pageSize + (#keyword ?:'')",
-            unless = "#result == null or #result.getRecord().isEmpty()")
     public PageResult<MyColumnSubscriptionVO> getMySubscriptions(Long userId, Integer pageNum, Integer pageSize, String keyword) {
+        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + userId + ":" + pageNum + ":" + pageSize + ":" + (keyword != null ? keyword : "");
+        PageResult<MyColumnSubscriptionVO> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+        });
+        if (result != null && result.getTotal() > 0) {
+            return result;
+        }
+
         int offset = (pageNum - 1) * pageSize;
         long total = columnSubscriptionMapper.countMySubscriptionsWithKeyword(userId, keyword);
         List<MyColumnSubscriptionVO> mySubscriptions = columnSubscriptionMapper.findMySubscriptionsWithKeyword(userId, keyword, offset, pageSize);
         fileService.ensureImageFullUrl(mySubscriptions);
 
-        return PageResult.build(mySubscriptions, total, pageNum, pageSize);
+        result = PageResult.build(mySubscriptions, total, pageNum, pageSize);
+        if (result.getTotal() > 0) {
+            cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        }
+        return result;
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "#userId + ':count'",
-            unless = "#result == null")
     public long countMySubscriptions(Long userId) {
         if (userId == null) {
             throw new BusinessException("请先登录");
         }
 
-        return columnSubscriptionMapper.countSubscriptions(userId);
+        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + userId + ":count";
+        Long result = cacheManager.get(cacheKey, Long.class);
+        if (result != null) {
+            return result;
+        }
+
+        result = columnSubscriptionMapper.countSubscriptions(userId);
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 
     @Override
@@ -155,11 +176,16 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     }
 
     @Override
-    @Cacheable(value = RedisKeyConstants.CACHE_COLUMN_SUBSCRIPTION_LIST,
-            key = "'count:column:' + #columnId",
-            unless = "#result == null")
     public long countSubscribers(Long columnId) {
-        return columnSubscriptionMapper.countSubscribers(columnId);
+        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + "count:column:" + columnId;
+        Long result = cacheManager.get(cacheKey, Long.class);
+        if (result != null) {
+            return result;
+        }
+
+        result = columnSubscriptionMapper.countSubscribers(columnId);
+        cacheManager.set(cacheKey, result, CacheTTL.DEFAULT);
+        return result;
     }
 
     @Override
