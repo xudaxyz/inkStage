@@ -9,8 +9,10 @@ import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -104,8 +106,8 @@ public class CacheManagerImpl implements CacheManager {
             if (pattern.isEmpty()) {
                 return;
             }
-            if (!pattern.contains("*")) {
-                pattern = pattern + "*";
+            if (!pattern.endsWith("*")) {
+                pattern += pattern.endsWith(":") ? "*" : ":*";
             }
             redisUtil.deletePattern(pattern);
             log.debug("模式匹配删除成功, pattern: {}", pattern);
@@ -234,6 +236,64 @@ public class CacheManagerImpl implements CacheManager {
         } catch (Exception e) {
             log.error("批量缓存获取失败", e);
             return List.of();
+        }
+    }
+
+    // ==================== Set 集合操作 ====================
+
+    @Override
+    public void sAdd(String key, Object... values) {
+        try {
+            redisUtil.sAdd(key, values);
+            log.debug("集合添加元素成功, key: {}, values: {}", key, values);
+        } catch (Exception e) {
+            log.error("集合添加元素失败, key: {}", key, e);
+        }
+    }
+
+    @Override
+    public Set<Object> sMembers(String key) {
+        try {
+            Set<Object> result = redisUtil.sMembers(key);
+            log.debug("从缓存获取集合成功, key: {}, size: {}", key, result != null ? result.size() : 0);
+            return result != null ? result : Collections.emptySet();
+        } catch (Exception e) {
+            log.error("从缓存获取集合失败, key: {}", key, e);
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
+    public void sRemove(String key, Object... values) {
+        try {
+            redisUtil.sRemove(key, values);
+            log.debug("从集合移除元素成功, key: {}, values: {}", key, values);
+        } catch (Exception e) {
+            log.error("从集合移除元素失败, key: {}", key, e);
+        }
+    }
+
+    @Override
+    public Long sSize(String key) {
+        try {
+            Long result = redisUtil.sSize(key);
+            log.debug("获取集合大小成功, key: {}, size: {}", key, result);
+            return result;
+        } catch (Exception e) {
+            log.error("获取集合大小失败, key: {}", key, e);
+            return null;
+        }
+    }
+
+    @Override
+    public <T> boolean sIsMember(String key, T value) {
+        try {
+            boolean result = redisUtil.sIsMember(key, value);
+            log.debug("判断元素是否在集合中, key: {}, value: {}, result: {}", key, value, result);
+            return result;
+        } catch (Exception e) {
+            log.error("判断元素是否在集合中失败, key: {}", key, e);
+            return false;
         }
     }
 }

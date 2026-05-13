@@ -35,7 +35,7 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
      */
     @Override
     public boolean isArticleCollected(Long articleId, Long userId) {
-        String cacheKey = CacheKey.keyForArticleCollectionStatus(articleId, userId);
+        String cacheKey = CacheKey.keyForArticleCollectStatus(articleId, userId);
         Boolean cached = cacheManager.get(cacheKey, Boolean.class);
         if (cached != null) {
             log.debug("从缓存获取收藏状态, 文章ID: {}, 用户ID: {}, 状态: {}", articleId, userId, cached);
@@ -70,29 +70,5 @@ public class InteractionCacheServiceImpl implements InteractionCacheService {
         log.debug("从数据库查询点赞状态, 文章ID: {}, 用户ID: {}, 状态: {}", articleId, userId, liked);
         cacheManager.set(cacheKey, liked, CacheTTL.ARTICLE_LIKE_STATUS);
         return liked;
-    }
-
-    /**
-     * 删除文章收藏状态缓存
-     *
-     * @param articleId 文章ID
-     * @param userId    用户ID
-     */
-    public void removeArticleCollectionCache(Long articleId, Long userId) {
-        String cacheKey = CacheKey.keyForArticleCollectionStatus(articleId, userId);
-        cacheManager.delete(cacheKey);
-        log.debug("删除收藏状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
-    }
-
-    /**
-     * 删除文章点赞状态缓存
-     *
-     * @param articleId 文章ID
-     * @param userId    用户ID
-     */
-    public void removeArticleLikeCache(Long articleId, Long userId) {
-        String cacheKey = CacheKey.keyForArticleLikeStatus(articleId, userId);
-        cacheManager.delete(cacheKey);
-        log.debug("删除点赞状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
     }
 }

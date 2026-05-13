@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.AuthDTO;
 import com.inkstage.entity.model.User;
@@ -16,7 +17,6 @@ import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.*;
 import com.inkstage.utils.IPUtil;
-import com.inkstage.cache.utils.RedisUtil;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static com.inkstage.cache.constant.CacheKey.LOGIN_ATTEMPT;
 import static com.inkstage.cache.constant.CacheKey.LOGIN_LOCK;
@@ -45,7 +45,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final TokenStoreService tokenStoreService;
     private final VerifyCodeService verifyCodeService;
     private final UserRoleService userRoleService;
-    private final RedisUtil redisUtil;
+    private final CacheManager cacheManager;
 
     private static final int MAX_LOGIN_ATTEMPTS = 5;
     private static final int LOCKOUT_TIME_MINUTES = 15;
@@ -284,28 +284,28 @@ public class UserAuthServiceImpl implements UserAuthService {
         String attemptKey = LOGIN_ATTEMPT + account;
 
         // 检查是否被锁定
-        if (redisUtil.hasKey(lockKey)) {
+        if (cacheManager.exists(lockKey)) {
             throw new BusinessException("账号已被锁定，请15分钟后再试");
         }
 
         // 检查登录尝试次数
-        Integer attempts = redisUtil.get(attemptKey, Integer.class);
+        Integer attempts = cacheManager.get(attemptKey, Integer.class);
         if (attempts != null && attempts >= MAX_LOGIN_ATTEMPTS) {
             // 锁定账号
-            redisUtil.set(lockKey, 1, LOCKOUT_TIME_MINUTES, TimeUnit.MINUTES);
-            redisUtil.delete(attemptKey);
+            cacheManager.set(lockKey, 1, Duration.ofMinutes(LOCKOUT_TIME_MINUTES));
+            cacheManager.delete(attemptKey);
             throw new BusinessException("账号已被锁定，请15分钟后再试");
         }
     }
 
     private void incrementLoginAttempts(String account) {
         String attemptKey = LOGIN_ATTEMPT + account;
-        redisUtil.increment(attemptKey);
-        redisUtil.expire(attemptKey, LOCKOUT_TIME_MINUTES, TimeUnit.MINUTES);
+        cacheManager.increment(attemptKey);
+        cacheManager.expire(attemptKey, Duration.ofMinutes(LOCKOUT_TIME_MINUTES));
     }
 
     private void resetLoginAttempts(String account) {
         String attemptKey = LOGIN_ATTEMPT + account;
-        redisUtil.delete(attemptKey);
+        cacheManager.delete(attemptKey);
     }
 }

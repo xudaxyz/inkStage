@@ -42,7 +42,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
         boolean result = announcementMapper.insert(announcement) > 0;
         
-        cacheManager.deletePattern(CacheKey.HOT_DATA + "announcement:*");
+        cacheManager.deletePattern(CacheKey.HOT_ANNOUNCEMENT);
         
         return result;
     }
@@ -60,7 +60,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
         boolean result = announcementMapper.update(announcement) > 0;
         
-        cacheManager.deletePattern(CacheKey.HOT_DATA + "announcement*");
+        cacheManager.deletePattern(CacheKey.HOT_ANNOUNCEMENT);
         
         return result;
     }
@@ -106,7 +106,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     public List<SystemAnnouncement> getPublishedAnnouncements() {
-        String cacheKey = CacheKey.HOT_DATA + "announcement:published";
+        String cacheKey = CacheKey.keyForHotAnnouncementPublished();
         List<SystemAnnouncement> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
         if (result != null && !result.isEmpty()) {
             return result;

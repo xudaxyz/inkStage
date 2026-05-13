@@ -1,7 +1,7 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.cache.constant.CacheKey;
-import com.inkstage.cache.utils.RedisUtil;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.enums.CountType;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.service.CountService;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CountServiceImpl implements CountService {
 
-    private final RedisUtil redisUtil;
+    private final CacheManager cacheManager;
     private final ArticleMapper articleMapper;
 
     @Override
@@ -96,7 +96,7 @@ public class CountServiceImpl implements CountService {
         log.info("更新文章: {} - {} 计数 [{}]", articleId, countType, count);
         String key = buildCountCacheKey(articleId, countType);
         // 由于count有正负之分, 此直接使用increment
-        redisUtil.increment(key, count);
+        cacheManager.increment(key, count);
 
         // 异步更新到数据库
         syncArticleCount(articleId, countType, count);
@@ -108,7 +108,7 @@ public class CountServiceImpl implements CountService {
     private Long getCount(Long articleId, CountType countType) {
         log.info("获取文章计数, 文章ID: {}, 计数类型: {}", articleId, countType);
         String key = buildCountCacheKey(articleId, countType);
-        Long count = redisUtil.get(key, Long.class);
+        Long count = cacheManager.get(key, Long.class);
         if (count == null) {
             // 从数据库获取初始值
             count = switch (countType) {
@@ -119,8 +119,8 @@ public class CountServiceImpl implements CountService {
                 case ARTICLE_SHARE_COUNT -> articleMapper.getShareCount(articleId);
                 default -> throw new IllegalArgumentException("未知的计数类型: " + countType);
             };
-            // 缓存到Redis（过期时间由RedisConfig统一配置）
-            redisUtil.set(key, count);
+            // 缓存到Redis（使用默认TTL）
+            cacheManager.set(key, count);
         }
         return count;
     }

@@ -120,7 +120,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
             return false;
         }
 
-        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_STATUS + userId + ":" + columnId;
+        String cacheKey = CacheKey.keyForColumnSubscriptionStatus(columnId, userId);
         Boolean result = cacheManager.get(cacheKey, Boolean.class);
         if (result != null) {
             return result;
@@ -134,7 +134,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
     @Override
     public PageResult<MyColumnSubscriptionVO> getMySubscriptions(Long userId, Integer pageNum, Integer pageSize, String keyword) {
-        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + userId + ":" + pageNum + ":" + pageSize + ":" + (keyword != null ? keyword : "");
+        String cacheKey = CacheKey.keyForColumnSubscriptionList(userId, pageNum, pageSize, keyword);
         PageResult<MyColumnSubscriptionVO> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
         });
         if (result != null && result.getTotal() > 0) {
@@ -159,7 +159,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
             throw new BusinessException("请先登录");
         }
 
-        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + userId + ":count";
+        String cacheKey = CacheKey.keyForColumnSubscriptionUserCount(userId);
         Long result = cacheManager.get(cacheKey, Long.class);
         if (result != null) {
             return result;
@@ -177,7 +177,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
 
     @Override
     public long countSubscribers(Long columnId) {
-        String cacheKey = CacheKey.COLUMN_SUBSCRIPTION_LIST + "count:column:" + columnId;
+        String cacheKey = CacheKey.keyForColumnSubscriptionColumnCount(columnId);
         Long result = cacheManager.get(cacheKey, Long.class);
         if (result != null) {
             return result;

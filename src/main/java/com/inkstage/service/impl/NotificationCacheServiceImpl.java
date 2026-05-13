@@ -1,6 +1,6 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.cache.utils.RedisUtil;
+import com.inkstage.cache.service.CacheManager;
 import com.inkstage.enums.notification.NotificationCategory;
 import com.inkstage.service.NotificationCacheService;
 import lombok.RequiredArgsConstructor;
@@ -21,13 +21,13 @@ import static com.inkstage.cache.constant.CacheKey.*;
 @Slf4j
 public class NotificationCacheServiceImpl implements NotificationCacheService {
 
-    private final RedisUtil redisUtil;
     private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
 
     @Override
     public void cacheUnreadCount(Long userId, int count) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        redisUtil.set(key, count);
+        cacheManager.set(key, count);
     }
 
     @Override
@@ -35,7 +35,7 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
         String key = NOTIFICATION_UNREAD_COUNT_BY_CATEGORY + userId;
         try {
             String json = objectMapper.writeValueAsString(countMap);
-            redisUtil.set(key, json);
+            cacheManager.set(key, json);
         } catch (Exception e) {
             log.error("缓存未读数量失败", e);
         }
@@ -44,13 +44,13 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
     @Override
     public Integer getCachedUnreadCount(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        return redisUtil.get(key, Integer.class);
+        return cacheManager.get(key, Integer.class);
     }
 
     @Override
     public Map<NotificationCategory, Integer> getCachedUnreadCountByCategory(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT_BY_CATEGORY + userId;
-        String json = redisUtil.get(key, String.class);
+        String json = cacheManager.get(key, String.class);
         if (json == null) {
             return null;
         }
@@ -65,46 +65,46 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
 
     @Override
     public void clearUnreadCountCache(Long userId) {
-        String key1 = NOTIFICATION_UNREAD_COUNT + userId;
-        String key2 = NOTIFICATION_UNREAD_COUNT_BY_CATEGORY + userId;
-        redisUtil.delete(key1);
-        redisUtil.delete(key2);
+        String unreadCountKey = NOTIFICATION_UNREAD_COUNT + userId;
+        String unreadCountByCateGoryKey = NOTIFICATION_UNREAD_COUNT_BY_CATEGORY + userId;
+        cacheManager.delete(unreadCountKey);
+        cacheManager.delete(unreadCountByCateGoryKey);
     }
 
     @Override
     public void cacheRecentNotifications(Long userId, String notifications) {
         String key = NOTIFICATION_RECENT_LIST + userId;
-        redisUtil.set(key, notifications);
+        cacheManager.set(key, notifications);
     }
 
     @Override
     public String getCachedRecentNotifications(Long userId) {
         String key = NOTIFICATION_RECENT_LIST + userId;
-        return redisUtil.get(key, String.class);
+        return cacheManager.get(key, String.class);
     }
 
     @Override
     public void clearNotificationsCache(Long userId) {
         String key = NOTIFICATION_RECENT_LIST + userId;
-        redisUtil.delete(key);
+        cacheManager.delete(key);
     }
 
     @Override
     public void decrementUnreadCount(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        redisUtil.decrement(key);
+        cacheManager.decrement(key);
     }
 
     @Override
     public void incrementUnreadCount(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        redisUtil.increment(key);
+        cacheManager.increment(key);
     }
 
     @Override
     public void resetUnreadCount(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        redisUtil.set(key, 0);
+        cacheManager.set(key, 0);
     }
 
     @Override

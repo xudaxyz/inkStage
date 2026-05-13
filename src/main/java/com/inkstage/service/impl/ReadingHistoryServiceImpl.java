@@ -171,7 +171,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
                 return null;
             }
 
-            String cacheKey = CacheKey.READING_HISTORY + userId + ":article:" + articleId;
+            String cacheKey = CacheKey.keyForUserArticleReadingHistory(userId, articleId);
             ReadingHistoryVO vo = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
             if (vo != null) {
                 return vo;

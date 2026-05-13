@@ -125,7 +125,7 @@ public class CacheClearServiceImpl implements CacheClearService {
     public void clearArticleCollectCache(Long articleId, Long userId) {
         if (articleId == null || userId == null) return;
         try {
-            String cacheKey = CacheKey.keyForArticleCollectionStatus(articleId, userId);
+            String cacheKey = CacheKey.keyForArticleCollectStatus(articleId, userId);
             cacheManager.delete(cacheKey);
             log.debug("清除文章收藏缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
         } catch (Exception e) {
@@ -313,7 +313,7 @@ public class CacheClearServiceImpl implements CacheClearService {
     public void clearCollectionStatusCache(Long articleId, Long userId) {
         if (articleId == null || userId == null) return;
         try {
-            String cacheKey = CacheKey.keyForArticleCollectionStatus(articleId, userId);
+            String cacheKey = CacheKey.keyForArticleCollectStatus(articleId, userId);
             cacheManager.delete(cacheKey);
             log.debug("清理收藏状态缓存, 文章ID: {}, 用户ID: {}", articleId, userId);
         } catch (Exception e) {

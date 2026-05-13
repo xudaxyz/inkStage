@@ -160,7 +160,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public List<Long> getFollowingList(Long followerId, Integer offset, Integer limit) {
-        String cacheKey = CacheKey.keyForFollowList(followerId, offset, limit, "following");
+        String cacheKey = CacheKey.keyForFollowingList(followerId, offset, limit);
         List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
         if (result != null && !result.isEmpty()) {
             return result;
@@ -182,7 +182,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public List<Long> getFollowerList(Long followingId, Integer offset, Integer limit) {
-        String cacheKey = CacheKey.keyForFollowList(followingId, offset, limit, "follower");
+        String cacheKey = CacheKey.keyForFollowerList(followingId, offset, limit);
         List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
         if (result != null && !result.isEmpty()) {
             return result;
@@ -202,7 +202,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public long getFollowingCount(Long followerId) {
-        String cacheKey = CacheKey.FOLLOW + "count:following:" + followerId;
+        String cacheKey = CacheKey.keyForUserFollowingCount(followerId);
         Long result = cacheManager.get(cacheKey, Long.class);
         if (result != null) {
             return result;
@@ -220,7 +220,7 @@ public class FollowServiceImpl implements FollowService {
      */
     @Override
     public long getFollowerCount(Long followingId) {
-        String cacheKey = CacheKey.FOLLOW + "count:follower:" + followingId;
+        String cacheKey = CacheKey.keyForUserFollowerCount(followingId);
         Long result = cacheManager.get(cacheKey, Long.class);
         if (result != null) {
             return result;

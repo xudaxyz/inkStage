@@ -38,7 +38,7 @@ public class DashboardStatsServiceImpl implements DashboardStatsService {
 
     @Override
     public DashboardStatsVO getDashboardStats(int limit) {
-        String cacheKey = CacheKey.keyForDashboard("stats:" + limit);
+        String cacheKey = CacheKey.keyForDashboardStatus(String.valueOf(limit));
         DashboardStatsVO dashboardStatsVO = cacheManager.get(cacheKey, DashboardStatsVO.class);
         if (dashboardStatsVO != null) {
             return dashboardStatsVO;

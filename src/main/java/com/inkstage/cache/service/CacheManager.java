@@ -5,6 +5,7 @@ import tools.jackson.core.type.TypeReference;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 缓存管理器接口
@@ -203,4 +204,48 @@ public interface CacheManager {
      * @return 值列表，顺序与键列表对应，不存在的键对应位置为null
      */
     List<Object> batchGet(List<String> keys);
+
+    // ==================== Set 集合操作 ====================
+
+    /**
+     * 向集合添加元素
+     *
+     * @param key    缓存键
+     * @param values 要添加的值
+     */
+    void sAdd(String key, Object... values);
+
+    /**
+     * 获取集合所有元素（不进行类型转换）
+     *
+     * @param key 缓存键
+     * @return 集合元素，如果不存在返回空集合
+     */
+    Set<Object> sMembers(String key);
+
+    /**
+     * 从集合移除元素
+     *
+     * @param key    缓存键
+     * @param values 要移除的值
+     */
+    void sRemove(String key, Object... values);
+
+    /**
+     * 获取集合大小
+     *
+     * @param key 缓存键
+     * @return 集合大小，如果不存在返回null
+     */
+    Long sSize(String key);
+
+    /**
+     * 判断元素是否在集合中
+     *
+     * @param key   缓存键
+     * @param value 要检查的值
+     * @param <T>   值的类型泛型
+     * @return 如果存在返回true，否则返回false
+     */
+    <T> boolean sIsMember(String key, T value);
 }
