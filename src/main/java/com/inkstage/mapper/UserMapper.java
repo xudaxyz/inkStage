@@ -192,6 +192,14 @@ public interface UserMapper {
     // ==================== 统计（Count） ====================
     
     /**
+     * 原子更新用户文章数
+     * @param id 用户ID
+     * @param increment 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int incrementArticleCount(@Param("id") Long id, @Param("increment") int increment);
+
+    /**
      * 统计用户总数
      * @param keyword 关键词
      * @param role 角色

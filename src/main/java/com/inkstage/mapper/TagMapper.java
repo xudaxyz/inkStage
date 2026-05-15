@@ -172,12 +172,23 @@ public interface TagMapper {
      * 更新标签统计数据
      *
      * @param tagId              标签ID
-     * @param articleCountChange 文章数量变化值
-     * @param usageCountChange   使用次数变化值
+     * @param articleCount 文章数量变化值
+     * @param usageCount   使用次数变化值
      * @return 影响行数
      */
     int updateTagStats(@Param("tagId") Long tagId,
-                       @Param("articleCountChange") int articleCountChange,
-                       @Param("usageCountChange") int usageCountChange);
+                       @Param("articleCount") int articleCount,
+                       @Param("usageCount") int usageCount);
+
+    /**
+     * 批量更新标签统计数据
+     *
+     * @param tagIds           标签ID列表
+     * @param articleCount 文章数量变化值
+     * @param usageCount   使用次数变化值
+     */
+    void batchUpdateTagStats(@Param("tagIds") List<Long> tagIds,
+                             @Param("articleCount") int articleCount,
+                             @Param("usageCount") int usageCount);
 
 }

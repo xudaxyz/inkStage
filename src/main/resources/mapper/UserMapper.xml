@@ -509,4 +509,12 @@
         AND DATE(create_time) = #{date}
     </select>
 
+    <!-- 原子更新用户文章数 -->
+    <update id="incrementArticleCount">
+        UPDATE user
+        SET article_count = COALESCE(article_count, 0) + #{increment},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
 </mapper>

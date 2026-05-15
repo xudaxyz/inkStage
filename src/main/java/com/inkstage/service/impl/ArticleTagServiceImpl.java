@@ -112,14 +112,11 @@ public class ArticleTagServiceImpl implements ArticleTagService {
      * @param tagsToAdd    需要增加统计数据的标签ID集合
      */
     private void updateTagStatistics(Set<Long> tagsToRemove, Set<Long> tagsToAdd) {
-        // 减少被移除标签的统计数据
-        for (Long tagId : tagsToRemove) {
-            tagMapper.updateTagStats(tagId, -1, -1);
+        if (!tagsToRemove.isEmpty()) {
+            tagMapper.batchUpdateTagStats(new ArrayList<>(tagsToRemove), -1, -1);
         }
-
-        // 增加新添加标签的统计数据
-        for (Long tagId : tagsToAdd) {
-            tagMapper.updateTagStats(tagId, 1, 1);
+        if (!tagsToAdd.isEmpty()) {
+            tagMapper.batchUpdateTagStats(new ArrayList<>(tagsToAdd), 1, 1);
         }
     }
 

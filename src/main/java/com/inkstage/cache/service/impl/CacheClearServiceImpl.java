@@ -5,6 +5,7 @@ import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.cache.service.CacheManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 /**
@@ -343,8 +344,9 @@ public class CacheClearServiceImpl implements CacheClearService {
         }
     }
 
+    @Async
     @Override
-    public void cleanCacheAfterArticleCreate(Long articleId, Long userId) {
+    public void cleanCacheAfterArticleCreateAsync(Long articleId, Long userId) {
         try {
             clearLatestArticleCache();
             clearUserArticleListCache(userId);
@@ -354,6 +356,14 @@ public class CacheClearServiceImpl implements CacheClearService {
         } catch (Exception e) {
             log.error("文章创建后清理缓存失败, 文章ID: {}", articleId, e);
         }
+    }
+
+    @Async
+    @Override
+    public void clearArticleCacheAfterUpdateAsync(Long articleId) {
+        clearArticleDetailCache(articleId);
+        clearArticleListCache();
+        clearArticleSearchCache();
     }
 
     // ==================== 专栏订阅相关缓存清除 ====================

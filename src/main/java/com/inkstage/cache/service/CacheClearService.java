@@ -198,7 +198,22 @@ public interface CacheClearService {
      */
     void clearUserArticleCache(Long userId);
 
-    void cleanCacheAfterArticleCreate(Long articleId, Long userId);
+    // ==================== 文章创建/更新后异步缓存清除 ====================
+
+    /**
+     * 创建文章后异步清除文章相关缓存
+     *
+     * @param articleId 文章ID
+     * @param userId    用户ID
+     */
+    void cleanCacheAfterArticleCreateAsync(Long articleId, Long userId);
+
+    /**
+     * 更新文章后异步清除文章相关缓存
+     *
+     * @param articleId 文章ID
+     */
+    void clearArticleCacheAfterUpdateAsync(Long articleId);
 
     // ==================== 专栏订阅相关缓存清除 ====================
 

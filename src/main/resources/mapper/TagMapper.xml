@@ -200,10 +200,23 @@
     <!-- 更新标签统计数据 -->
     <update id="updateTagStats">
         UPDATE tag SET
-        article_count = article_count + #{articleCountChange},
-        usage_count = usage_count + #{usageCountChange},
+        article_count = article_count + #{articleCount},
+        usage_count = usage_count + #{usageCount},
         update_time = now()
         WHERE id = #{tagId}
+        AND deleted = 0
+    </update>
+
+    <!-- 批量更新标签统计数据 -->
+    <update id="batchUpdateTagStats">
+        UPDATE tag SET
+        article_count = article_count + #{articleCount},
+        usage_count = usage_count + #{usageCount},
+        update_time = now()
+        WHERE id IN
+        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
+            #{tagId}
+        </foreach>
         AND deleted = 0
     </update>
 
