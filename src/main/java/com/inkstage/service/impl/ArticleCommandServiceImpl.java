@@ -16,6 +16,7 @@ import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.ArticlePublishParam;
 import com.inkstage.service.*;
 import com.inkstage.utils.MarkdownUtils;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private final ColumnService columnService;
     private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
     private final CacheClearService cacheClearService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -385,6 +387,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
      */
     private Article buildArticle(ArticleCreateDTO articleCreateDTO, User user) {
         Article article = new Article();
+        article.setId(snowflakeIdGenerator.nextId());
         article.setUserId(user.getId());
         article.setTitle(articleCreateDTO.getTitle());
         article.setContent(articleCreateDTO.getContent());

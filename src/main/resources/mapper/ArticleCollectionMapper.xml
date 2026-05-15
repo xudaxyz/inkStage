@@ -16,9 +16,9 @@
     </resultMap>
 
     <!-- 插入收藏记录 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleCollection" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO article_collection (article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time)
-        VALUES (#{articleId}, #{userId}, #{folderId}, #{status}, #{collectTime}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleCollection">
+        INSERT INTO article_collection (id, article_id, user_id, folder_id, status, collect_time, create_time, update_time, deleted, deleted_time)
+        VALUES (#{id}, #{articleId}, #{userId}, #{folderId}, #{status}, #{collectTime}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
     </insert>
     
     <!-- 根据文章ID和用户ID删除收藏记录 -->

@@ -16,6 +16,7 @@ import com.inkstage.mapper.ReportMapper;
 import com.inkstage.notification.param.ReportParam;
 import com.inkstage.notification.param.ReportResultParam;
 import com.inkstage.service.*;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class ReportServiceImpl implements ReportService {
 
     private final ReportMapper reportMapper;
     private final NotificationService notificationService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -63,6 +65,7 @@ public class ReportServiceImpl implements ReportService {
         report.setReportStatus(ReportStatus.PENDING);
         report.setCreateTime(LocalDateTime.now());
         report.setDeleted(DeleteStatus.NOT_DELETED);
+        report.setId(snowflakeIdGenerator.nextId());
 
         // 保存举报
         reportMapper.insert(report);

@@ -16,12 +16,12 @@
     </resultMap>
 
     <!-- 新增用户认证 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.UserAuth" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.inkstage.entity.model.UserAuth">
         INSERT INTO user_auth (
-        user_id, auth_type, auth_identifier, auth_credential,
+        id, user_id, auth_type, auth_identifier, auth_credential,
         create_time, update_time, deleted
         ) VALUES (
-        #{userId}, #{authType}, #{authIdentifier}, #{authCredential},
+        #{id}, #{userId}, #{authType}, #{authIdentifier}, #{authCredential},
         #{createTime}, #{updateTime}, #{deleted}
         )
     </insert>

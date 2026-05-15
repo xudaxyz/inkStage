@@ -4,7 +4,6 @@ import com.inkstage.entity.base.BaseEntity;
 import com.inkstage.enums.RecommendType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Serial;
 import java.math.BigDecimal;

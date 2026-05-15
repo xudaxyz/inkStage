@@ -38,9 +38,9 @@
     <!-- 保存或更新阅读历史 -->
     <insert id="saveOrUpdate" parameterType="com.inkstage.entity.model.ReadingHistory">
         INSERT INTO reading_history (
-            user_id, article_id, progress, duration, last_read_time, scroll_position, create_time, update_time, deleted
+            id, user_id, article_id, progress, duration, last_read_time, scroll_position, create_time, update_time, deleted
         ) VALUES (
-            #{userId}, #{articleId}, #{progress}, #{duration}, #{lastReadTime}, #{scrollPosition}, NOW(), NOW(), 0
+            #{id}, #{userId}, #{articleId}, #{progress}, #{duration}, #{lastReadTime}, #{scrollPosition}, NOW(), NOW(), 0
         ) ON DUPLICATE KEY UPDATE
             progress = #{progress},
             duration = #{duration},

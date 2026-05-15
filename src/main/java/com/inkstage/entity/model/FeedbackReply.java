@@ -3,7 +3,6 @@ package com.inkstage.entity.model;
 import com.inkstage.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.experimental.SuperBuilder;
 
 /**
  * 反馈回复表实体类

@@ -13,9 +13,9 @@
     </resultMap>
     
     <!-- 插入点赞记录 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleLike" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO article_like (article_id, user_id, create_time, update_time, deleted, deleted_time)
-        VALUES (#{articleId}, #{userId}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
+    <insert id="insert" parameterType="com.inkstage.entity.model.ArticleLike">
+        INSERT INTO article_like (id, article_id, user_id, create_time, update_time, deleted, deleted_time)
+        VALUES (#{id}, #{articleId}, #{userId}, #{createTime}, #{updateTime}, #{deleted}, #{deletedTime})
     </insert>
     
     <!-- 根据文章ID和用户ID删除点赞记录 -->

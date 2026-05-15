@@ -6,6 +6,7 @@ import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.entity.model.User;
 import com.inkstage.mapper.NotificationMapper;
 import com.inkstage.service.*;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -25,6 +26,7 @@ public class NotificationConsumer {
     private final NotificationSettingService notificationSettingService;
     private final EmailService emailService;
     private final UserService userService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     /**
      * 从RabbitMQ队列接收通知消息
@@ -35,6 +37,7 @@ public class NotificationConsumer {
 
         try {
             // 保存到数据库
+            notification.setId(snowflakeIdGenerator.nextId());
             int result = notificationMapper.insert(notification);
             if (result > 0) {
                 log.info("通知保存成功，用户ID: {}, 通知ID: {}", notification.getUserId(), notification.getId());

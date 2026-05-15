@@ -26,9 +26,9 @@
         WHERE user_id = #{userId} AND name = #{name}
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO collection_folder (user_id, name, description, article_count, sort_order, default_folder, create_time, update_time)
-        VALUES (#{userId}, #{name}, #{description}, #{articleCount}, #{sortOrder}, #{defaultFolder}, #{createTime}, #{updateTime})
+    <insert id="insert">
+        INSERT INTO collection_folder (id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time)
+        VALUES (#{id}, #{userId}, #{name}, #{description}, #{articleCount}, #{sortOrder}, #{defaultFolder}, #{createTime}, #{updateTime})
     </insert>
 
     <update id="update">

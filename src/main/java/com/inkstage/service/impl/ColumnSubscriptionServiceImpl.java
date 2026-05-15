@@ -21,6 +21,7 @@ import com.inkstage.notification.param.ColumnSubscriptionParam;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.MyColumnSubscriptionVO;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     private final NotificationService notificationService;
     private final FileService fileService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -79,6 +81,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
         subscription.setCreateTime(now);
         subscription.setUpdateTime(now);
         subscription.setDeleted(DeleteStatus.NOT_DELETED);
+        subscription.setId(snowflakeIdGenerator.nextId());
 
         int result = columnSubscriptionMapper.insert(subscription);
         if (result > 0) {

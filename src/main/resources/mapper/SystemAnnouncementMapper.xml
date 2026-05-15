@@ -81,12 +81,12 @@
         ORDER BY publish_time DESC
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert">
         INSERT INTO system_announcement (
-            title, content, type, status, publish_time, expire_time, read_count,
+            id, title, content, type, status, publish_time, expire_time, read_count,
             create_user_id, update_user_id, create_time, update_time, deleted
         ) VALUES (
-            #{title}, #{content},
+            #{id}, #{title}, #{content},
             #{type,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},
             #{status,typeHandler=com.inkstage.handler.EnumCodeTypeHandler},
             #{publishTime}, #{expireTime}, #{readCount},

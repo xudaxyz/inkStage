@@ -26,6 +26,7 @@ import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.ArticleUtils;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ public class CommentServiceImpl implements CommentService {
     private final ArticleMapper articleMapper;
     private final CommentCacheService commentCacheService;
     private final CacheClearService cacheClearService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public PageResult<ArticleCommentVO> getComments(CommentQueryDTO queryDTO) {
@@ -100,7 +102,7 @@ public class CommentServiceImpl implements CommentService {
             // 创建评论实体
             Comment comment = createCommentEntity(commentDTO, currentUser.getId(), floor);
 
-            // 插入评论
+            comment.setId(snowflakeIdGenerator.nextId());
             int result = commentMapper.insert(comment);
             if (result <= 0) {
                 log.warn("评论创建失败, 文章ID: {}", commentDTO.getArticleId());

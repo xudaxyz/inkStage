@@ -14,16 +14,16 @@
     </resultMap>
     <!-- 插入文章标签关联 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.ArticleTag">
-        INSERT INTO article_tag (article_id, tag_id, create_time, deleted)
-        VALUES (#{articleId}, #{tagId}, #{createTime}, #{deleted})
+        INSERT INTO article_tag (id, article_id, tag_id, create_time, deleted)
+        VALUES (#{id}, #{articleId}, #{tagId}, #{createTime}, #{deleted})
     </insert>
 
     <!-- 批量插入文章标签关联 -->
     <insert id="batchInsert" parameterType="java.util.List">
-        INSERT INTO article_tag (article_id, tag_id, create_time, deleted)
+        INSERT INTO article_tag (id, article_id, tag_id, create_time, deleted)
         VALUES
         <foreach collection="articleTags" item="articleTag" separator=",">
-            (#{articleTag.articleId}, #{articleTag.tagId}, #{articleTag.createTime}, #{articleTag.deleted})
+            (#{articleTag.id}, #{articleTag.articleId}, #{articleTag.tagId}, #{articleTag.createTime}, #{articleTag.deleted})
         </foreach>
     </insert>
 

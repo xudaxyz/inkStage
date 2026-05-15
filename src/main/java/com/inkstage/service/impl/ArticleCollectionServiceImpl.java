@@ -20,6 +20,7 @@ import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.cache.service.InteractionCacheService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
 import com.inkstage.notification.param.ArticleCollectionParam;
@@ -48,6 +49,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     private final ArticleMapper articleMapper;
     private final InteractionCacheService interactionCacheService;
     private final CacheClearService cacheClearService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional
@@ -76,6 +78,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
         // 创建收藏记录
         ArticleCollection collection = new ArticleCollection();
+        collection.setId(snowflakeIdGenerator.nextId());
         collection.setArticleId(collectArticleDTO.getArticleId());
         collection.setUserId(userId);
         collection.setFolderId(folderId);

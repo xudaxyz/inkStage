@@ -738,14 +738,14 @@
     </select>
 
     <!-- 插入文章 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.Article" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.inkstage.entity.model.Article">
         INSERT INTO article
-        (title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
+        (id, title, summary, content, content_html, cover_image, user_id, category_id, article_status, review_status, publish_time,
         read_count, like_count, comment_count, collection_count, share_count, top, recommended, visible, allow_comment,
         allow_forward, original, original_url, last_edit_time, create_time, update_time, deleted, deleted_time,
         scheduled_publish_time, share_token, meta_title, meta_description, meta_keywords)
         VALUES
-        (#{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{categoryId},
+        (#{id}, #{title}, #{summary}, #{content}, #{contentHtml}, #{coverImage}, #{userId}, #{categoryId},
         #{articleStatus}, #{reviewStatus}, #{publishTime},
         #{readCount}, #{likeCount}, #{commentCount}, #{collectionCount}, #{shareCount}, #{top}, #{recommended},
         #{visible}, #{allowComment},

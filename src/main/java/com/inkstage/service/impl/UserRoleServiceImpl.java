@@ -10,6 +10,7 @@ import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.mapper.UserRoleMapper;
 import com.inkstage.service.UserRoleService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import tools.jackson.core.type.TypeReference;
@@ -26,6 +27,7 @@ public class UserRoleServiceImpl implements UserRoleService {
 
     private final UserRoleMapper userRoleMapper;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public void createUserRole(User user) {
@@ -38,6 +40,7 @@ public class UserRoleServiceImpl implements UserRoleService {
         userRole.setStatus(StatusEnum.ENABLED); // 启用状态
         userRole.setCreateTime(LocalDateTime.now());
         userRole.setDeleted(DeleteStatus.NOT_DELETED);
+        userRole.setId(snowflakeIdGenerator.nextId());
 
         userRoleMapper.insert(userRole);
 

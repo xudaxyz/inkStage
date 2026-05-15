@@ -25,6 +25,7 @@ import com.inkstage.notification.param.ColumnRestoredParam;
 import com.inkstage.service.ColumnService;
 import com.inkstage.service.ColumnSubscriptionService;
 import com.inkstage.service.FileService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,7 @@ public class ColumnServiceImpl implements ColumnService {
     private final ArticleCacheService articleCacheService;
     private final CacheClearService cacheClearService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional
@@ -76,6 +78,7 @@ public class ColumnServiceImpl implements ColumnService {
             column.setUpdateTime(LocalDateTime.now());
             column.setDeleted(DeleteStatus.NOT_DELETED);
 
+            column.setId(snowflakeIdGenerator.nextId());
             int result = columnMapper.insert(column);
             if (result > 0) {
                 cacheManager.deletePattern(CacheKey.COLUMN);
@@ -369,6 +372,7 @@ public class ColumnServiceImpl implements ColumnService {
             articleColumn.setUpdateTime(LocalDateTime.now());
             articleColumn.setDeleted(DeleteStatus.NOT_DELETED);
 
+            articleColumn.setId(snowflakeIdGenerator.nextId());
             boolean result = articleColumnMapper.insert(articleColumn) > 0;
             if (result) {
                 columnMapper.updateArticleCount(columnId, 1);
@@ -542,6 +546,7 @@ public class ColumnServiceImpl implements ColumnService {
                 articleColumn.setUpdateTime(LocalDateTime.now());
                 articleColumn.setDeleted(DeleteStatus.NOT_DELETED);
 
+                articleColumn.setId(snowflakeIdGenerator.nextId());
                 boolean result = articleColumnMapper.insert(articleColumn) > 0;
                 if (result) {
                     columnMapper.updateArticleCount(newColumnId, 1);

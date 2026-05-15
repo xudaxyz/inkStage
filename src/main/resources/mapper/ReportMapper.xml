@@ -35,13 +35,13 @@
     </sql>
 
     <insert id="insert" parameterType="com.inkstage.entity.model.Report">
-        INSERT INTO report (reporter_id, reporter_name, reported_type, related_id, reported_id, reported_name,
+        INSERT INTO report (id, reporter_id, reporter_name, reported_type, related_id, reported_id, reported_name,
                             reported_content,
                             report_type, reason,
                             evidence, anonymous, report_status, handle_result, handle_reason, handler_id, handler_name,
                             handle_time,
                             create_time, update_time, deleted)
-        VALUES (#{reporterId}, #{reporterName}, #{reportedType.code}, #{relatedId}, #{reportedId}, #{reportedName},
+        VALUES (#{id}, #{reporterId}, #{reporterName}, #{reportedType.code}, #{relatedId}, #{reportedId}, #{reportedName},
                 #{reportedContent}, #{reportType.code},
                 #{reason}, #{evidence}, #{anonymous}, #{reportStatus.code}, #{handleResult.code}, #{handleReason},
                 #{handlerId},

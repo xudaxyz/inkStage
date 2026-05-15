@@ -126,13 +126,13 @@
           AND deleted = 0
     </select>
 
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO notification_template (code, template_name, notification_type, notification_channel, title_template,
+    <insert id="insert">
+        INSERT INTO notification_template (id, code, template_name, notification_type, notification_channel, title_template,
                                            content_template, action_url_template, description, priority, status,
                                            extra_data,
                                            create_user_id, update_user_id, create_username, update_username,
                                            template_version, create_time, update_time, deleted)
-        VALUES (#{code}, #{templateName}, #{notificationType}, #{notificationChannel}, #{titleTemplate}, #{contentTemplate},
+        VALUES (#{id}, #{code}, #{templateName}, #{notificationType}, #{notificationChannel}, #{titleTemplate}, #{contentTemplate},
                 #{actionUrlTemplate}, #{description}, #{priority},
                 #{status}, #{extraData},
                 #{createUserId}, #{updateUserId}, #{createUsername}, #{updateUsername}, #{templateVersion},

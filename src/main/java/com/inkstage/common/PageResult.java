@@ -94,7 +94,7 @@ public class PageResult<T> implements Serializable {
         pageSize = pageSize == null ? 10 : pageSize;
 
         // 确保pageSize在合理范围内(1-100)
-        pageSize = Math.max(1, Math.min(100, pageSize));
+        pageSize = Math.clamp(pageSize, 1, 100);
 
         // 计算总页数
         int pages = total == 0 ? 0 : (int) Math.ceil((double) total / pageSize);

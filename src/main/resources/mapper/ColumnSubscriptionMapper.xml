@@ -73,9 +73,9 @@
     </select>
 
     <!-- 插入订阅关系 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.ColumnSubscription" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO column_subscription (user_id, column_id, subscription_time, create_time, update_time, deleted)
-        VALUES (#{userId}, #{columnId}, #{subscriptionTime}, #{createTime}, #{updateTime}, #{deleted})
+    <insert id="insert" parameterType="com.inkstage.entity.model.ColumnSubscription">
+        INSERT INTO column_subscription (id, user_id, column_id, subscription_time, create_time, update_time, deleted)
+        VALUES (#{id}, #{userId}, #{columnId}, #{subscriptionTime}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <!-- 删除订阅关系（物理删除） -->

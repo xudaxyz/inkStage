@@ -8,6 +8,7 @@ import com.inkstage.mapper.ArticleTagMapper;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.service.ArticleTagService;
 import com.inkstage.service.TagService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class ArticleTagServiceImpl implements ArticleTagService {
     private final ArticleTagMapper articleTagMapper;
     private final TagMapper tagMapper;
     private final TagService tagService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public List<Tag> getTagsByArticleId(Long articleId) {
@@ -89,6 +91,9 @@ public class ArticleTagServiceImpl implements ArticleTagService {
                 }
 
                 // 批量插入
+                for (ArticleTag articleTag : articleTags) {
+                    articleTag.setId(snowflakeIdGenerator.nextId());
+                }
                 articleTagMapper.batchInsert(articleTags);
             }
 

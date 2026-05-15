@@ -15,7 +15,7 @@ FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user`
 (
-    `id`                          bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`                          bigint                                                        NOT NULL COMMENT '主键ID',
     `username`                    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '用户名',
     `password`                    varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '加密后的密码, 用于身份验证',
     `nickname`                    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '昵称',
@@ -58,7 +58,7 @@ CREATE TABLE `user`
 DROP TABLE IF EXISTS `user_auth`;
 CREATE TABLE `user_auth`
 (
-    `id`                    bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`                    bigint                                                        NOT NULL COMMENT '主键ID',
     `user_id`               bigint                                                        NOT NULL COMMENT '用户ID',
     `auth_type`             tinyint                                                       NOT NULL COMMENT '认证类型（username,email,phone,github,qq,wechat）',
     `auth_identifier`       varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '认证标识（用户名,邮箱,手机号,第三方用户ID）',
@@ -81,7 +81,7 @@ CREATE TABLE `user_auth`
 DROP TABLE IF EXISTS `role`;
 CREATE TABLE `role`
 (
-    `id`           bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint                                                       NOT NULL COMMENT '主键ID',
     `name`         varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '角色名称',
     `code`         varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '角色编码',
     `description`  text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '角色描述',
@@ -101,7 +101,7 @@ CREATE TABLE `role`
 DROP TABLE IF EXISTS `user_role`;
 CREATE TABLE `user_role`
 (
-    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint   NOT NULL COMMENT '主键ID',
     `user_id`      bigint   NOT NULL COMMENT '用户ID',
     `role_id`      bigint   NOT NULL COMMENT '角色ID',
     `assigned_by`  bigint NULL DEFAULT NULL COMMENT '分配角色的用户ID',
@@ -126,7 +126,7 @@ CREATE TABLE `user_role`
 DROP TABLE IF EXISTS `article`;
 CREATE TABLE `article`
 (
-    `id`                     bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`                     bigint                                                        NOT NULL COMMENT '主键ID',
     `user_id`                bigint                                                        NOT NULL COMMENT '作者ID',
     `title`                  varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文章标题',
     `summary`                text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '文章摘要',
@@ -175,7 +175,7 @@ CREATE TABLE `article`
 DROP TABLE IF EXISTS `category`;
 CREATE TABLE `category`
 (
-    `id`               bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`               bigint                                                       NOT NULL COMMENT '主键ID',
     `name`             varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '分类名称',
     `slug`             varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '分类别名（URL友好）',
     `parent_id`        bigint NULL DEFAULT 0 COMMENT '父分类ID（0表示顶级分类）',
@@ -198,7 +198,7 @@ CREATE TABLE `category`
 DROP TABLE IF EXISTS `tag`;
 CREATE TABLE `tag`
 (
-    `id`            bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`            bigint                                                       NOT NULL COMMENT '主键ID',
     `name`          varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '标签名称',
     `slug`          varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '标签别名（URL友好）',
     `description`   text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '标签描述',
@@ -219,7 +219,7 @@ CREATE TABLE `tag`
 DROP TABLE IF EXISTS `article_tag`;
 CREATE TABLE `article_tag`
 (
-    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint   NOT NULL COMMENT '主键ID',
     `article_id`   bigint   NOT NULL COMMENT '文章ID',
     `tag_id`       bigint   NOT NULL COMMENT '标签ID',
     `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -235,7 +235,7 @@ CREATE TABLE `article_tag`
 DROP TABLE IF EXISTS `article_like`;
 CREATE TABLE `article_like`
 (
-    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint   NOT NULL COMMENT '主键ID',
     `article_id`   bigint   NOT NULL COMMENT '文章ID',
     `user_id`      bigint   NOT NULL COMMENT '用户ID',
     `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -252,7 +252,7 @@ CREATE TABLE `article_like`
 DROP TABLE IF EXISTS `article_collection`;
 CREATE TABLE `article_collection`
 (
-    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint   NOT NULL COMMENT '主键ID',
     `article_id`   bigint   NOT NULL COMMENT '文章ID',
     `user_id`      bigint   NOT NULL COMMENT '用户ID',
     `folder_id`    bigint   NOT NULL COMMENT '收藏文件夹ID',
@@ -273,7 +273,7 @@ CREATE TABLE `article_collection`
 DROP TABLE IF EXISTS `collection_folder`;
 CREATE TABLE `collection_folder`
 (
-    `id`             bigint                                                       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`             bigint                                                       NOT NULL COMMENT '主键ID',
     `user_id`        bigint                                                       NOT NULL COMMENT '用户ID',
     `name`           varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '文件夹名称',
     `description`    text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL COMMENT '文件夹描述',
@@ -293,7 +293,7 @@ CREATE TABLE `collection_folder`
 DROP TABLE IF EXISTS `column`;
 CREATE TABLE `column`
 (
-    `id`            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`            BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`       BIGINT       NOT NULL COMMENT '专栏创建者ID',
     `name`          VARCHAR(100) NOT NULL COMMENT '专栏名称',
     `slug`          VARCHAR(100) NOT NULL UNIQUE COMMENT '专栏别名（URL友好）',
@@ -316,7 +316,7 @@ CREATE TABLE `column`
 DROP TABLE IF EXISTS `article_column`;
 CREATE TABLE `article_column`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`   BIGINT   NOT NULL COMMENT '文章ID',
     `column_id`    BIGINT   NOT NULL COMMENT '专栏ID',
     `sort_order`   INT               DEFAULT 0 COMMENT '文章在专栏内的排序顺序',
@@ -334,7 +334,7 @@ CREATE TABLE `article_column`
 DROP TABLE IF EXISTS `column_subscription`;
 CREATE TABLE `column_subscription`
 (
-    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`          BIGINT   NOT NULL COMMENT '订阅者用户ID',
     `column_id`        BIGINT   NOT NULL COMMENT '专栏ID',
     `subscription_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '订阅时间',
@@ -351,7 +351,7 @@ CREATE TABLE `column_subscription`
 DROP TABLE IF EXISTS `article_read_stat`;
 CREATE TABLE `article_read_stat`
 (
-    `id`            BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`            BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`    BIGINT      NOT NULL COMMENT '文章ID',
     `user_id`       BIGINT COMMENT '用户ID（未登录用户为NULL）',
     `ip_address`    VARCHAR(50) NOT NULL COMMENT '阅读IP地址',
@@ -377,7 +377,7 @@ CREATE TABLE `article_read_stat`
 DROP TABLE IF EXISTS `comment`;
 CREATE TABLE `comment`
 (
-    `id`               bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`               bigint   NOT NULL COMMENT '主键ID',
     `article_id`       bigint   NOT NULL COMMENT '文章ID',
     `user_id`          bigint   NOT NULL COMMENT '用户ID',
     `parent_id`        bigint NULL DEFAULT NULL COMMENT '父评论ID（NULL表示主评论）',
@@ -413,7 +413,7 @@ CREATE TABLE `comment`
 DROP TABLE IF EXISTS `comment_like`;
 CREATE TABLE `comment_like`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `comment_id`   BIGINT   NOT NULL COMMENT '评论ID',
     `user_id`      BIGINT   NOT NULL COMMENT '用户ID',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -433,7 +433,7 @@ CREATE TABLE `comment_like`
 DROP TABLE IF EXISTS `follow`;
 CREATE TABLE `follow`
 (
-    `id`           bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint   NOT NULL COMMENT '主键ID',
     `follower_id`  bigint   NOT NULL COMMENT '粉丝ID',
     `following_id` bigint   NOT NULL COMMENT '关注对象ID',
     `create_time`  datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '关注时间',
@@ -449,7 +449,7 @@ CREATE TABLE `follow`
 DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message`
 (
-    `id`              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `sender_id`       BIGINT      NOT NULL COMMENT '发送者ID',
     `receiver_id`     BIGINT      NOT NULL COMMENT '接收者ID',
     `content`         TEXT        NOT NULL COMMENT '私信内容',
@@ -474,7 +474,7 @@ CREATE TABLE `message`
 DROP TABLE IF EXISTS `notification`;
 CREATE TABLE `notification`
 (
-    `id`                    bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`                    bigint   NOT NULL COMMENT '主键ID',
     `user_id`               bigint   NOT NULL COMMENT '接收通知的用户ID',
     `notification_type`     int      NOT NULL COMMENT '通知类型',
     `notification_category` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '通知分类',
@@ -507,7 +507,7 @@ CREATE TABLE `notification`
 DROP TABLE IF EXISTS `notification_template`;
 CREATE TABLE `notification_template`
 (
-    `id`                   bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '模板ID',
+    `id`                   bigint                                                        NOT NULL COMMENT '模板ID',
     `code`                 varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '模板编码(唯一标识)',
     `template_name`        varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '模板名称',
     `notification_type`    int                                                           NOT NULL COMMENT '通知类型(对应NotificationType的code)',
@@ -545,7 +545,7 @@ CREATE TABLE `notification_template`
 DROP TABLE IF EXISTS `report`;
 CREATE TABLE `report`
 (
-    `id`            bigint       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`            bigint       NOT NULL COMMENT '主键ID',
     `reporter_id`   bigint       NOT NULL COMMENT '举报人ID',
     `reporter_name` varchar(50)  NOT NULL COMMENT '举报人昵称',
     `reported_type` tinyint      NOT NULL COMMENT '被举报对象类型',
@@ -577,7 +577,7 @@ CREATE TABLE `report`
 DROP TABLE IF EXISTS `report_type`;
 CREATE TABLE `report_type`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `name`         VARCHAR(50) NOT NULL COMMENT '举报类型名称',
     `code`         VARCHAR(50) NOT NULL UNIQUE COMMENT '举报类型编码',
     `description`  TEXT COMMENT '举报类型描述',
@@ -597,7 +597,7 @@ CREATE TABLE `report_type`
 DROP TABLE IF EXISTS `feedback`;
 CREATE TABLE `feedback`
 (
-    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`          BIGINT       NOT NULL COMMENT '反馈人ID',
     `feedback_type_id` BIGINT       NOT NULL COMMENT '反馈类型ID',
     `title`            VARCHAR(200) NOT NULL COMMENT '反馈标题',
@@ -620,7 +620,7 @@ CREATE TABLE `feedback`
 DROP TABLE IF EXISTS `feedback_type`;
 CREATE TABLE `feedback_type`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `name`         VARCHAR(50) NOT NULL COMMENT '反馈类型名称',
     `code`         VARCHAR(50) NOT NULL UNIQUE COMMENT '反馈类型编码',
     `description`  TEXT COMMENT '反馈类型描述',
@@ -637,7 +637,7 @@ CREATE TABLE `feedback_type`
 DROP TABLE IF EXISTS `feedback_reply`;
 CREATE TABLE `feedback_reply`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `feedback_id`  BIGINT   NOT NULL COMMENT '反馈ID',
     `user_id`      BIGINT   NOT NULL COMMENT '回复人ID',
     `content`      TEXT     NOT NULL COMMENT '回复内容',
@@ -657,7 +657,7 @@ CREATE TABLE `feedback_reply`
 DROP TABLE IF EXISTS `sensitive_word`;
 CREATE TABLE `sensitive_word`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `word`         VARCHAR(50) NOT NULL UNIQUE COMMENT '敏感词',
     `category`     VARCHAR(20) NOT NULL COMMENT '敏感词分类',
     `level`        TINYINT     NOT NULL COMMENT '敏感级别（0:低,1:中,2:高）',
@@ -676,7 +676,7 @@ CREATE TABLE `sensitive_word`
 DROP TABLE IF EXISTS `system_announcement`;
 CREATE TABLE `system_announcement`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `title`          VARCHAR(200) NOT NULL COMMENT '公告标题',
     `content`        TEXT         NOT NULL COMMENT '公告内容',
     `type`           TINYINT               DEFAULT 0 COMMENT '公告类型（0:系统公告,1:活动通知,2:维护通知）',
@@ -699,7 +699,7 @@ CREATE TABLE `system_announcement`
 DROP TABLE IF EXISTS `user_notification`;
 CREATE TABLE `user_notification`
 (
-    `id`              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`         BIGINT   NOT NULL COMMENT '用户ID',
     `notification_id` BIGINT   NOT NULL COMMENT '通知ID',
     `read_status`     TINYINT           DEFAULT 0 COMMENT '是否已读（0:未读,1:已读）',
@@ -716,7 +716,7 @@ CREATE TABLE `user_notification`
 DROP TABLE IF EXISTS `notification_setting`;
 CREATE TABLE `notification_setting`
 (
-    `id`                              bigint   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`                              bigint   NOT NULL COMMENT '主键ID',
     `user_id`                         bigint   NOT NULL COMMENT '用户ID',
     `article_publish_notification`    tinyint NULL DEFAULT 1 COMMENT '是否接收文章发布通知',
     `article_like_notification`       tinyint NULL DEFAULT 1 COMMENT '是否接收文章点赞通知',
@@ -745,7 +745,7 @@ CREATE TABLE `notification_setting`
 DROP TABLE IF EXISTS `email_template`;
 CREATE TABLE `email_template`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `code`           VARCHAR(50)  NOT NULL UNIQUE COMMENT '模板编码',
     `name`           VARCHAR(100) NOT NULL COMMENT '模板名称',
     `subject`        VARCHAR(200) NOT NULL COMMENT '邮件主题',
@@ -765,7 +765,7 @@ CREATE TABLE `email_template`
 DROP TABLE IF EXISTS `sms_template`;
 CREATE TABLE `sms_template`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `code`           VARCHAR(50)  NOT NULL UNIQUE COMMENT '模板编码',
     `name`           VARCHAR(100) NOT NULL COMMENT '模板名称',
     `content`        TEXT         NOT NULL COMMENT '短信内容模板',
@@ -784,7 +784,7 @@ CREATE TABLE `sms_template`
 DROP TABLE IF EXISTS `system_log`;
 CREATE TABLE `system_log`
 (
-    `id`              BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `log_type`        TINYINT      NOT NULL COMMENT '日志类型（0:操作日志,1:登录日志,2:错误日志,3:性能日志）',
     `user_id`         BIGINT COMMENT '操作用户ID',
     `username`        VARCHAR(50) COMMENT '操作用户名',
@@ -815,7 +815,7 @@ CREATE TABLE `system_log`
 DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `config_key`     VARCHAR(100) NOT NULL UNIQUE COMMENT '配置键',
     `config_value`   TEXT         NOT NULL COMMENT '配置值',
     `description`    TEXT COMMENT '配置描述',
@@ -836,7 +836,7 @@ CREATE TABLE `system_config`
 DROP TABLE IF EXISTS `statistics`;
 CREATE TABLE `statistics`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `stat_type`    VARCHAR(50) NOT NULL COMMENT '统计类型（daily,weekly,monthly,yearly）',
     `stat_date`    DATETIME    NOT NULL COMMENT '统计日期',
     `stat_data`    JSON        NOT NULL COMMENT '统计数据',
@@ -853,7 +853,7 @@ CREATE TABLE `statistics`
 DROP TABLE IF EXISTS `tag_stat`;
 CREATE TABLE `tag_stat`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `tag_id`       BIGINT   NOT NULL COMMENT '标签ID',
     `stat_date`    DATE     NOT NULL COMMENT '统计日期',
     `use_count`    INT               DEFAULT 0 COMMENT '使用次数',
@@ -870,7 +870,7 @@ CREATE TABLE `tag_stat`
 DROP TABLE IF EXISTS `search_history`;
 CREATE TABLE `search_history`
 (
-    `id`               BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`          BIGINT       NOT NULL COMMENT '用户ID',
     `keyword`          VARCHAR(100) NOT NULL COMMENT '搜索关键词',
     `search_type`      VARCHAR(20)  NOT NULL COMMENT '搜索类型（article,user,tag）',
@@ -890,7 +890,7 @@ CREATE TABLE `search_history`
 DROP TABLE IF EXISTS `search_hot_word`;
 CREATE TABLE `search_hot_word`
 (
-    `id`           BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `keyword`      VARCHAR(100) NOT NULL UNIQUE COMMENT '热词',
     `search_count` INT                   DEFAULT 0 COMMENT '搜索次数',
     `status`       TINYINT               DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
@@ -907,7 +907,7 @@ CREATE TABLE `search_hot_word`
 DROP TABLE IF EXISTS `recommendation_config`;
 CREATE TABLE `recommendation_config`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `config_type`    VARCHAR(50)  NOT NULL COMMENT '配置类型（article,tag,user）',
     `config_key`     VARCHAR(100) NOT NULL COMMENT '配置键',
     `config_value`   TEXT         NOT NULL COMMENT '配置值',
@@ -929,7 +929,7 @@ CREATE TABLE `recommendation_config`
 DROP TABLE IF EXISTS `article_recommendation`;
 CREATE TABLE `article_recommendation`
 (
-    `id`                  BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`                  BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`          BIGINT      NOT NULL COMMENT '文章ID',
     `related_article_id`  BIGINT      NOT NULL COMMENT '相关文章ID',
     `recommendation_type` VARCHAR(50) NOT NULL COMMENT '推荐类型（related,hot,new）',
@@ -949,7 +949,7 @@ CREATE TABLE `article_recommendation`
 DROP TABLE IF EXISTS `tag_recommendation`;
 CREATE TABLE `tag_recommendation`
 (
-    `id`             BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
     `tag_id`         BIGINT   NOT NULL COMMENT '标签ID',
     `related_tag_id` BIGINT   NOT NULL COMMENT '相关标签ID',
     `score` DOUBLE DEFAULT 0 COMMENT '推荐分数',
@@ -967,7 +967,7 @@ CREATE TABLE `tag_recommendation`
 DROP TABLE IF EXISTS `reading_history`;
 CREATE TABLE `reading_history`
 (
-    `id`              bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`              bigint NOT NULL COMMENT '主键ID',
     `user_id`         bigint NOT NULL COMMENT '用户ID',
     `article_id`      bigint NOT NULL COMMENT '文章ID',
     `progress`        int NULL DEFAULT 0 COMMENT '阅读进度（百分比）',
@@ -991,7 +991,7 @@ CREATE TABLE `reading_history`
 DROP TABLE IF EXISTS `dashboard_stats`;
 CREATE TABLE `dashboard_stats`
 (
-    `id`           bigint                                                        NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `id`           bigint                                                        NOT NULL COMMENT '主键ID',
     `stat_key`     varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '统计键（如 total_users、views_2026-04-02）',
     `stat_value`   varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '统计值（支持不同类型的数据）',
     `data_type`    varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci  NOT NULL COMMENT '数据类型（如 counter、trend、distribution）',

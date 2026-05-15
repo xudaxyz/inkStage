@@ -7,6 +7,7 @@ import com.inkstage.enums.common.DefaultStatus;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.CollectionFolderMapper;
 import com.inkstage.service.CollectionFolderService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ import java.util.List;
 public class CollectionFolderServiceImpl implements CollectionFolderService {
 
     private final CollectionFolderMapper collectionFolderMapper;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public Long createCollectionFolder(CollectArticleDTO collectArticleDTO) {
@@ -45,6 +47,7 @@ public class CollectionFolderServiceImpl implements CollectionFolderService {
         collectionFolder.setDefaultFolder(collectArticleDTO.getDefaultFolder());
         collectionFolder.setCreateTime(LocalDateTime.now());
         collectionFolder.setUpdateTime(LocalDateTime.now());
+        collectionFolder.setId(snowflakeIdGenerator.nextId());
         int result = collectionFolderMapper.insert(collectionFolder);
         if (result <= 0) {
             log.warn("用户: {} 创建收藏文件夹: {} 失败", userId, folderName);
@@ -72,6 +75,7 @@ public class CollectionFolderServiceImpl implements CollectionFolderService {
         collectionFolder.setDefaultFolder(DefaultStatus.YES);
         collectionFolder.setCreateTime(LocalDateTime.now());
         collectionFolder.setUpdateTime(LocalDateTime.now());
+        collectionFolder.setId(snowflakeIdGenerator.nextId());
         collectionFolderMapper.insert(collectionFolder);
     }
 

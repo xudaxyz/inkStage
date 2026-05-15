@@ -15,6 +15,7 @@ import com.inkstage.mapper.TagMapper;
 import com.inkstage.notification.param.TagDeleteParam;
 import com.inkstage.service.TagService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,7 @@ public class TagServiceImpl implements TagService {
     private final TagMapper tagMapper;
     private final NotificationService notificationService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public List<Tag> getAllTags() {
@@ -129,6 +131,7 @@ public class TagServiceImpl implements TagService {
             tag.setUserId(UserContext.getCurrentUserId());
             tag.setTagVersion(1); // 新标签版本号设为1
             tag.setCreateTime(LocalDateTime.now());
+            tag.setId(snowflakeIdGenerator.nextId());
             tagMapper.insert(tag);
 
             // 清除tag缓存
@@ -262,6 +265,8 @@ public class TagServiceImpl implements TagService {
             if (currentUser != null) {
                 tag.setUserId(currentUser.getId());
             }
+
+            tag.setId(snowflakeIdGenerator.nextId());
 
             tagMapper.insert(tag);
             log.info("创建新标签成功: {}", tag.getName());

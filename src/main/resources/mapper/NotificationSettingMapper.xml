@@ -55,6 +55,7 @@
 
     <insert id="insert" parameterType="com.inkstage.entity.model.NotificationSetting">
         INSERT INTO notification_setting (
+            id,
             user_id,
             article_publish_notification,
             article_like_notification,
@@ -74,6 +75,7 @@
             update_time,
             deleted
         ) VALUES (
+            #{id},
             #{userId},
             #{articlePublishNotification},
             #{articleLikeNotification},

@@ -17,6 +17,7 @@ import com.inkstage.mapper.UserAuthMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.*;
 import com.inkstage.utils.IPUtil;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.vo.TokenResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,7 @@ public class UserAuthServiceImpl implements UserAuthService {
     private final VerifyCodeService verifyCodeService;
     private final UserRoleService userRoleService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     private static final int MAX_LOGIN_ATTEMPTS = 5;
     private static final int LOCKOUT_TIME_MINUTES = 15;
@@ -242,6 +244,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         user.setDeleted(DeleteStatus.NOT_DELETED);
         user.setCreateTime(LocalDateTime.now());
         user.setUpdateTime(LocalDateTime.now());
+        user.setId(snowflakeIdGenerator.nextId());
 
         userMapper.insert(user);
         return user;
@@ -260,6 +263,7 @@ public class UserAuthServiceImpl implements UserAuthService {
         userAuth.setDeleted(DeleteStatus.NOT_DELETED);
         userAuth.setCreateTime(LocalDateTime.now());
         userAuth.setUpdateTime(LocalDateTime.now());
+        userAuth.setId(snowflakeIdGenerator.nextId());
 
         userAuthMapper.insert(userAuth);
     }

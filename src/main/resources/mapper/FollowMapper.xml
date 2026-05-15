@@ -55,8 +55,8 @@
 
     <!-- 插入关注关系 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Follow">
-        INSERT INTO follow (follower_id, following_id, create_time, update_time, deleted)
-        VALUES (#{followerId}, #{followingId}, #{createTime}, #{updateTime}, #{deleted})
+        INSERT INTO follow (id, follower_id, following_id, create_time, update_time, deleted)
+        VALUES (#{id}, #{followerId}, #{followingId}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <!-- 删除关注关系 -->

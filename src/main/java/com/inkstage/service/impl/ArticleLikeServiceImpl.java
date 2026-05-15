@@ -13,6 +13,7 @@ import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
     private final NotificationService notificationService;
     private final InteractionCacheService interactionCacheService;
     private final CacheClearService cacheClearService;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional
@@ -54,6 +56,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         articleLike.setUserId(userId);
         articleLike.setCreateTime(LocalDateTime.now());
         articleLike.setDeleted(DeleteStatus.NOT_DELETED);
+        articleLike.setId(snowflakeIdGenerator.nextId());
         int result = articleLikeMapper.insert(articleLike);
 
         if (result > 0) {

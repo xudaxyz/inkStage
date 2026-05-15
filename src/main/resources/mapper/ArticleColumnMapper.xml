@@ -112,11 +112,11 @@
     </select>
 
     <!-- 插入 -->
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert">
         INSERT INTO article_column
-        (article_id, column_id, sort_order, create_time, update_time)
+        (id, article_id, column_id, sort_order, create_time, update_time)
         VALUES
-        (#{articleId}, #{columnId}, #{sortOrder}, #{createTime}, #{updateTime})
+        (#{id}, #{articleId}, #{columnId}, #{sortOrder}, #{createTime}, #{updateTime})
     </insert>
 
     <!-- 更新 -->

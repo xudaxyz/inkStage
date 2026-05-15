@@ -111,13 +111,13 @@
     </update>
 
     <!-- 插入通知 -->
-    <insert id="insert" parameterType="com.inkstage.entity.model.Notification" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.inkstage.entity.model.Notification">
         INSERT INTO notification (
-            user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
-            sender_id, pushed_status, push_time, priority, action_url, extra_data, 
+            id, user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
+            sender_id, pushed_status, push_time, priority, action_url, extra_data,
             create_time, update_time, deleted
         ) VALUES (
-            #{userId}, #{notificationType}, #{title}, #{content}, #{readStatus}, #{readTime}, #{relatedId}, #{relatedType},
+            #{id}, #{userId}, #{notificationType}, #{title}, #{content}, #{readStatus}, #{readTime}, #{relatedId}, #{relatedType},
             #{senderId}, #{pushedStatus}, #{pushTime}, #{priority}, #{actionUrl}, #{extraData},
             #{createTime}, #{updateTime}, #{deleted}
         )
@@ -201,13 +201,13 @@
     <!-- 批量插入通知 -->
     <insert id="batchInsert" parameterType="java.util.List">
         INSERT INTO notification (
-            user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
-            sender_id, pushed_status, push_time, priority, action_url, extra_data, 
+            id, user_id, notification_type, title, content, read_status, read_time, related_id, related_type,
+            sender_id, pushed_status, push_time, priority, action_url, extra_data,
             create_time, update_time, deleted
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
-                #{item.userId}, #{item.notificationType}, #{item.title}, #{item.content}, #{item.readStatus}, #{item.readTime}, #{item.relatedId}, #{item.relatedType},
+                #{item.id}, #{item.userId}, #{item.notificationType}, #{item.title}, #{item.content}, #{item.readStatus}, #{item.readTime}, #{item.relatedId}, #{item.relatedType},
                 #{item.senderId}, #{item.pushedStatus}, #{item.pushTime}, #{item.priority}, #{item.actionUrl}, #{item.extraData},
                 NOW(), NOW(), 0
             )

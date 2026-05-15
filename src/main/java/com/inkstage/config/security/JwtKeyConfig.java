@@ -58,7 +58,7 @@ public class JwtKeyConfig {
      * 配置JwtEncoder Bean, 用于生成JWT令牌
      * 依赖于AuthorizationServerConfig提供的JWKSource
      *
-     * @param jwkSource JWKSource实例
+     * @param jwkSource JWK Source实例
      * @return JwtEncoder实例
      */
     @Bean

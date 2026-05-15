@@ -14,6 +14,7 @@ import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.NotificationTemplateMapper;
 import com.inkstage.service.AdminNotificationTemplateService;
 import com.inkstage.service.UserService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.SpELTemplateRender;
 import com.inkstage.utils.TemplateValidator;
 import com.inkstage.utils.UserContext;
@@ -45,6 +46,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     private final NotificationTemplateMapper templateMapper;
     private final UserService userService;
     private final RabbitTemplate rabbitTemplate;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     /**
      * 创建通知模板
@@ -69,6 +71,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
         // 设置创建信息
         User currentUser = UserContext.getCurrentUser();
+        template.setId(snowflakeIdGenerator.nextId());
         template.setCreateUserId(currentUser.getId());
         template.setUpdateUserId(currentUser.getId());
         template.setCreateUsername(currentUser.getNickname());

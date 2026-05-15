@@ -12,6 +12,7 @@ import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.FollowParam;
 import com.inkstage.service.FollowService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class FollowServiceImpl implements FollowService {
     private final UserMapper userMapper;
     private final NotificationService notificationService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     /**
      * 关注用户
@@ -57,6 +59,7 @@ public class FollowServiceImpl implements FollowService {
         follow.setFollowingId(followingId);
         follow.setCreateTime(LocalDateTime.now());
         follow.setDeleted(DeleteStatus.NOT_DELETED);
+        follow.setId(snowflakeIdGenerator.nextId());
 
         int result = followMapper.insert(follow);
         if (result > 0) {

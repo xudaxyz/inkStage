@@ -67,9 +67,9 @@
     <!-- 添加分类 -->
     <insert id="insert" parameterType="com.inkstage.entity.model.Category">
         INSERT INTO category (
-            name, slug, parent_id, sort_order, description, article_count, status, category_version
+            id, name, slug, parent_id, sort_order, description, article_count, status, category_version
         ) VALUES (
-            #{name}, #{slug}, #{parentId}, #{sortOrder}, #{description}, #{articleCount}, #{status}, #{categoryVersion}
+            #{id}, #{name}, #{slug}, #{parentId}, #{sortOrder}, #{description}, #{articleCount}, #{status}, #{categoryVersion}
         )
     </insert>
 

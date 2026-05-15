@@ -9,6 +9,7 @@ import com.inkstage.enums.AnnouncementType;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.mapper.SystemAnnouncementMapper;
 import com.inkstage.service.SystemAnnouncementService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     private final SystemAnnouncementMapper announcementMapper;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     @Transactional
@@ -40,6 +42,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         announcement.setStatus(StatusEnum.DISABLED);
         announcement.setReadCount(0);
 
+        announcement.setId(snowflakeIdGenerator.nextId());
         boolean result = announcementMapper.insert(announcement) > 0;
         
         cacheManager.deletePattern(CacheKey.HOT_ANNOUNCEMENT);

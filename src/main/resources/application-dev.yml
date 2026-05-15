@@ -185,4 +185,9 @@ jwt:
   expiration: 3600 # Access Token过期时间(秒), 默认1小时
   refresh-expiration: 2592000 # Refresh Token过期时间(秒), 默认30天
 
+# 雪花算法配置
+snowflake:
+  worker-id: 1
+  datacenter-id: 1
+
 

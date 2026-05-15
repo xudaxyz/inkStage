@@ -117,7 +117,7 @@ public class AuthorizationServerConfig {
      * 使用统一密钥管理的KeyPair, 避免每次生成新密钥
      *
      * @param keyPair 统一密钥管理的KeyPair实例
-     * @return JWKSource实例
+     * @return JWK Source实例
      */
     @Bean
     public JWKSource<SecurityContext> jwkSource(KeyPair keyPair) {

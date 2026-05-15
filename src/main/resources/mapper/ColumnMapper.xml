@@ -175,11 +175,11 @@
     </select>
 
     <!-- 插入专栏 -->
-    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert">
         INSERT INTO `column`
-        (user_id, name, slug, description, cover_image, article_count, subscription_count, read_count, sort_order, status, create_time, update_time)
+        (id, user_id, name, slug, description, cover_image, article_count, subscription_count, read_count, sort_order, status, create_time, update_time)
         VALUES
-        (#{userId}, #{name}, #{slug}, #{description}, #{coverImage}, #{articleCount}, #{subscriptionCount}, #{readCount}, #{sortOrder}, #{status},
+        (#{id}, #{userId}, #{name}, #{slug}, #{description}, #{coverImage}, #{articleCount}, #{subscriptionCount}, #{readCount}, #{sortOrder}, #{status},
         #{createTime}, #{updateTime})
     </insert>
 

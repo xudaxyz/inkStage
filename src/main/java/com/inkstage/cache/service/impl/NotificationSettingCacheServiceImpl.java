@@ -8,6 +8,7 @@ import com.inkstage.dto.front.NotificationSettingDTO;
 import com.inkstage.entity.model.NotificationSetting;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.NotificationSettingMapper;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ public class NotificationSettingCacheServiceImpl implements NotificationSettingC
 
     private final NotificationSettingMapper notificationSettingMapper;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     /**
      * 获取通知设置（带缓存）
@@ -44,7 +46,7 @@ public class NotificationSettingCacheServiceImpl implements NotificationSettingC
         if (setting == null) {
             // 如果用户没有设置，返回默认设置
             setting = getDefaultNotificationSetting(userId);
-            // 保存默认设置到数据库
+            setting.setId(snowflakeIdGenerator.nextId());
             notificationSettingMapper.insert(setting);
         }
 
@@ -65,6 +67,7 @@ public class NotificationSettingCacheServiceImpl implements NotificationSettingC
         int result;
         if (existingSetting == null) {
             // 插入新设置
+            setting.setId(snowflakeIdGenerator.nextId());
             result = notificationSettingMapper.insert(setting);
         } else {
             // 更新现有设置

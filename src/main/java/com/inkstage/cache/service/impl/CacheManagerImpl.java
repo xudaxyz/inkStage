@@ -130,9 +130,9 @@ public class CacheManagerImpl implements CacheManager {
                 pattern += pattern.endsWith(":") ? "*" : ":*";
             }
             redisUtil.deletePattern(pattern);
-            log.debug("模式匹配删除成功, pattern: {}", pattern);
+            log.debug("缓存删除成功, pattern: {}", pattern);
         } catch (Exception e) {
-            log.error("模式匹配删除失败, pattern: {}", pattern, e);
+            log.error("缓存删除失败, pattern: {}", pattern, e);
         }
     }
 
