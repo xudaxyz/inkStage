@@ -149,19 +149,19 @@
     </update>
 
     <!-- 根据ID删除 -->
-    <update id="deleteById">
-        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE id = #{id}
-    </update>
+    <delete id="deleteById">
+        DELETE FROM article_column WHERE id = #{id}
+    </delete>
 
     <!-- 根据文章ID删除 -->
-    <update id="deleteByArticleId">
-        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE article_id = #{articleId}
-    </update>
+    <delete id="deleteByArticleId">
+        DELETE FROM article_column WHERE article_id = #{articleId}
+    </delete>
 
     <!-- 根据专栏ID删除所有关联 -->
-    <update id="deleteByColumnId">
-        UPDATE article_column SET deleted = 1, deleted_time = NOW() WHERE column_id = #{columnId}
-    </update>
+    <delete id="deleteByColumnId">
+        DELETE FROM article_column WHERE column_id = #{columnId}
+    </delete>
 
     <!-- 统计专栏文章数量 -->
     <select id="countByColumnId" resultType="int">

@@ -393,6 +393,9 @@
         <result column="comment_count" property="commentCount"/>
         <!-- 作者信息 -->
         <result column="user_id" property="userId"/>
+        <!-- 专栏信息 -->
+        <result column="column_id" property="columnId"/>
+        <result column="column_name" property="columnName"/>
     </resultMap>
 
     <!-- 管理员文章列表结果映射 -->
@@ -415,34 +418,38 @@
     <!-- 当前用户文章列表查询 -->
     <select id="findMyArticles" resultMap="MyArticleListResultMap">
         SELECT
-        id,
-        title,
-        summary,
-        user_id,
-        article_status,
-        review_status,
-        visible,
-        original,
-        publish_time,
-        read_count,
-        like_count,
-        comment_count
+        a.id,
+        a.title,
+        a.summary,
+        a.user_id,
+        a.article_status,
+        a.review_status,
+        a.visible,
+        a.original,
+        a.publish_time,
+        a.read_count,
+        a.like_count,
+        a.comment_count,
+        ac.column_id,
+        c.name AS column_name
         FROM
-        article
+        article a
+        LEFT JOIN article_column ac ON ac.article_id = a.id AND ac.deleted = 0
+        LEFT JOIN `column` c ON c.id = ac.column_id AND c.deleted = 0
         <where>
-            deleted = 0 AND user_id = #{userId}
+            a.deleted = 0 AND a.user_id = #{userId}
             <if test="articleStatus != null and articleStatus.code == 0">
-                AND article_status IN (1,2,3,4)
+                AND a.article_status IN (1,2,3,4)
             </if>
             <if test="articleStatus != null and articleStatus.code != 0">
-                AND article_status = #{articleStatus.code}
+                AND a.article_status = #{articleStatus.code}
             </if>
             <if test="keyword != null and keyword != ''">
-                AND (title LIKE CONCAT('%', #{keyword}, '%') OR summary LIKE CONCAT('%', #{keyword}, '%'))
+                AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%'))
             </if>
         </where>
         ORDER BY
-        create_time DESC
+        a.create_time DESC
         LIMIT #{limit} OFFSET #{offset}
     </select>
 

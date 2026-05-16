@@ -77,4 +77,14 @@ public class MyArticleListVO implements Serializable {
      * 评论数
      */
     private Integer commentCount;
+
+    /**
+     * 所属专栏ID
+     */
+    private Long columnId;
+
+    /**
+     * 所属专栏名称
+     */
+    private String columnName;
 }

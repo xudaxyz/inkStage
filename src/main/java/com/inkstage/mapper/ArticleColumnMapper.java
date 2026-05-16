@@ -115,7 +115,7 @@ public interface ArticleColumnMapper {
     int batchUpdateSortOrder(@Param("columnId") Long columnId, @Param("list") List<ArticleColumn> list);
 
     /**
-     * 软删除文章专栏关联记录
+     * 删除文章专栏关联记录
      *
      * @param id 关联记录ID
      * @return 影响的行数
@@ -123,14 +123,14 @@ public interface ArticleColumnMapper {
     int deleteById(Long id);
 
     /**
-     * 根据文章ID软删除所有关联记录 - 用于文章删除时清理关联关系
+     * 根据文章ID删除所有关联记录 - 用于文章删除时清理关联关系
      *
      * @param articleId 文章ID
      */
     void deleteByArticleId(@Param("articleId") Long articleId);
 
     /**
-     * 根据专栏ID软删除所有关联记录
+     * 根据专栏ID删除所有关联记录
      * 用于专栏删除时清理关联关系
      *
      * @param columnId 专栏ID
