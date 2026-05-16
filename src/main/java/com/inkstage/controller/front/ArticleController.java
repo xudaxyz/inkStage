@@ -137,16 +137,16 @@ public class ArticleController {
      * 获取指定用户的文章列表
      *
      * @param userId 用户ID
-     * @param page   页码
-     * @param size   每页大小
+     * @param pageNum   页码
+     * @param pageSize   每页大小
      * @return 文章列表分页结果
      */
     @GetMapping("/user/{userId}")
     public Result<PageResult<ArticleListVO>> getUserArticles(@PathVariable Long userId,
-                                                             @RequestParam(defaultValue = "1") Integer page,
-                                                             @RequestParam(defaultValue = "10") Integer size) {
-        log.info("获取用户文章列表, 用户ID: {}, 页码: {}, 每页大小: {}", userId, page, size);
-        PageResult<ArticleListVO> pageResult = articleService.getUserArticles(userId, page, size);
+                                                             @RequestParam(defaultValue = "1") Integer pageNum,
+                                                             @RequestParam(defaultValue = "10") Integer pageSize) {
+        log.info("获取用户文章列表, 用户ID: {}, 页码: {}, 每页大小: {}", userId, pageNum, pageSize);
+        PageResult<ArticleListVO> pageResult = articleService.getUserArticles(userId, pageNum, pageSize);
         return Result.success(pageResult, ResponseMessage.ARTICLE_LIST_SUCCESS);
     }
 
