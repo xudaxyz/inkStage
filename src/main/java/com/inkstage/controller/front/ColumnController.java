@@ -270,20 +270,6 @@ public class ColumnController {
     }
 
     /**
-     * 更新专栏内文章的排序
-     *
-     * @param dto 包含专栏ID、文章ID和新的排序位置
-     * @return 更新成功返回true，失败返回false
-     */
-    @PutMapping("/article/sort")
-    @UserAccess
-    public Result<Boolean> updateArticleSort(@Valid @RequestBody UpdateColumnArticleDTO dto) {
-        log.info("更新专栏文章排序: {}", dto);
-        boolean success = columnService.updateArticleSort(dto.getColumnId(), dto.getArticleId(), dto.getSortOrder());
-        return success ? Result.success(true, "排序更新成功") : Result.error("排序更新失败");
-    }
-
-    /**
      * 批量更新专栏文章排序（用户拖拽排序后调用）
      *
      * @param columnId   专栏ID

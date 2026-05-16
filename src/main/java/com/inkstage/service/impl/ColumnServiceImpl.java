@@ -422,29 +422,6 @@ public class ColumnServiceImpl implements ColumnService {
 
     @Override
     @Transactional
-    public boolean updateArticleSort(Long columnId, Long articleId, Integer sortOrder) {
-        log.info("更新专栏文章排序: columnId={}, articleId={}, sortOrder={}", columnId, articleId, sortOrder);
-        try {
-            User user = UserContext.getCurrentUser();
-            checkColumnIsMine(columnId, user);
-
-            ArticleColumn articleColumn = articleColumnMapper.findByArticleAndColumn(articleId, columnId);
-            if (articleColumn == null) {
-                throw new BusinessException("文章不在此专栏中");
-            }
-
-            articleColumn.setSortOrder(sortOrder);
-            articleColumn.setUpdateTime(LocalDateTime.now());
-
-            return articleColumnMapper.update(articleColumn) > 0;
-        } catch (Exception e) {
-            log.error("更新专栏文章排序失败", e);
-            throw new BusinessException("更新专栏文章排序失败", e);
-        }
-    }
-
-    @Override
-    @Transactional
     public boolean batchUpdateColumnArticleSort(Long columnId, List<Long> articleIds) {
         log.info("批量更新专栏文章排序: columnId={}, articleCount={}", columnId, articleIds.size());
         try {
@@ -460,9 +437,13 @@ public class ColumnServiceImpl implements ColumnService {
                 list.add(ac);
             }
 
-            // 使用 INNER JOIN + UNION ALL 批量更新，一次性执行
+            // 使用 INNER JOIN + UNION ALL 批量更新
             int updatedCount = articleColumnMapper.batchUpdateSortOrder(columnId, list);
             log.info("批量更新专栏文章排序完成: 更新了{}条记录", updatedCount);
+            if (updatedCount > 0) {
+                cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
+                cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + columnId);
+            }
             return updatedCount > 0;
         } catch (Exception e) {
             log.error("批量更新专栏文章排序失败", e);

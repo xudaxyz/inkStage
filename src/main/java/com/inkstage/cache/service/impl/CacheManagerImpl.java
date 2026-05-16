@@ -59,11 +59,7 @@ public class CacheManagerImpl implements CacheManager {
     @Override
     public <T> T get(String key, Class<T> clazz) {
         try {
-            T value = redisUtil.get(key, clazz);
-            if (value != null) {
-                log.debug("从缓存获取clazz: {} 成功, key: {}", clazz, key);
-            }
-            return value;
+            return redisUtil.get(key, clazz);
         } catch (Exception e) {
             log.error("从缓存获取失败, key: {}", key, e);
             return null;
@@ -73,11 +69,7 @@ public class CacheManagerImpl implements CacheManager {
     @Override
     public <T> T getWithType(String key, TypeReference<T> typeRef) {
         try {
-            T value = redisUtil.getWithType(key, typeRef);
-            if (value != null) {
-                log.debug("从缓存获取成功(泛型), key: {}", key);
-            }
-            return value;
+            return redisUtil.getWithType(key, typeRef);
         } catch (Exception e) {
             log.error("从缓存获取失败(泛型), key: {}", key, e);
             return null;
@@ -87,11 +79,7 @@ public class CacheManagerImpl implements CacheManager {
     @Override
     public Object get(String key) {
         try {
-            Object value = redisUtil.get(key);
-            if (value != null) {
-                log.debug("从缓存获取成功, key: {}", key);
-            }
-            return value;
+            return redisUtil.get(key);
         } catch (Exception e) {
             log.error("从缓存获取失败, key: {}", key, e);
             return null;

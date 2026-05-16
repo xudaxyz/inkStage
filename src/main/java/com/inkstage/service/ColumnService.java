@@ -143,16 +143,6 @@ public interface ColumnService {
     boolean removeArticleFromColumn(Long columnId, Long articleId);
 
     /**
-     * 更新专栏内文章的排序
-     *
-     * @param columnId  专栏ID
-     * @param articleId 文章ID
-     * @param sortOrder 新的排序位置
-     * @return 更新成功返回true，失败返回false
-     */
-    boolean updateArticleSort(Long columnId, Long articleId, Integer sortOrder);
-
-    /**
      * 批量更新专栏文章排序（用户拖拽排序后调用）
      * 传入按新顺序排列的文章ID列表，自动计算并更新排序值
      *
