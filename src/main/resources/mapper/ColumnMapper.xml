@@ -199,20 +199,20 @@
 
     <!-- 更新文章数量 -->
     <update id="updateArticleCount">
-        UPDATE `column` SET article_count = article_count + #{offset}, update_time = NOW() WHERE id = #{id}
+        UPDATE `column` SET article_count = article_count + #{delta}, update_time = NOW() WHERE id = #{id}
     </update>
 
     <!-- 更新阅读量 -->
     <update id="updateReadCount">
-        UPDATE `column` SET read_count = read_count + #{offset}, update_time = NOW() WHERE id = #{id}
+        UPDATE `column` SET read_count = read_count + #{delta}, update_time = NOW() WHERE id = #{id}
     </update>
 
     <!-- 更新订阅数 -->
     <update id="updateSubscriptionCount">
-        UPDATE `column` SET subscription_count = subscription_count + #{offset}, update_time = NOW() WHERE id = #{id}
+        UPDATE `column` SET subscription_count = subscription_count + #{delta}, update_time = NOW() WHERE id = #{id}
     </update>
 
-    <!-- 用户删除专栏（软删除） -->
+    <!-- 用户删除专栏 -->
     <update id="deleteById">
         UPDATE `column` SET deleted = 1, deleted_time = NOW() WHERE id = #{id} AND user_id = #{userId}
     </update>

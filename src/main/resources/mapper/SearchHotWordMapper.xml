@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.inkstage.mapper.SearchHotWordMapper">
+    <resultMap id="BaseResultMap" type="com.inkstage.entity.model.SearchHotWord">
+        <id column="id" property="id"/>
+        <result column="keyword" property="keyword"/>
+        <result column="search_count" property="searchCount"/>
+        <result column="hot_score" property="hotScore"/>
+        <result column="status" property="status" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="deleted" property="deleted" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="deleted_time" property="deletedTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 更新搜索热词搜索次数 -->
+    <update id="updateSearchCount">
+        UPDATE search_hot_word
+        SET search_count = search_count + #{delta}
+        WHERE id = #{id}
+          AND deleted = 0
+    </update>
+
+</mapper>

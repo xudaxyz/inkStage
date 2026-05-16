@@ -129,7 +129,7 @@
     <!-- 更新分类文章数量 -->
     <update id="updateArticleCount">
         UPDATE category SET
-            article_count = article_count + #{increment}
+            article_count = article_count + #{delta}
         WHERE id = #{categoryId}
     </update>
 

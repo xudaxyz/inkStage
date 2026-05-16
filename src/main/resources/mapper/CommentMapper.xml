@@ -177,15 +177,19 @@
             AND deleted = 0
     </select>
 
-    <!-- 更新评论的回复数 -->
+    <!-- 更新评论点赞数 -->
+    <update id="updateLikeCount">
+        UPDATE comment SET like_count = like_count + #{delta}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新评论回复数 -->
     <update id="updateReplyCount">
-        UPDATE comment
-        SET
-            reply_count = #{replyCount},
-            update_time = NOW()
-        WHERE
-            id = #{id}
-            AND deleted = 0
+        UPDATE comment SET reply_count = reply_count + #{delta}, update_time = NOW() WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新评论举报数 -->
+    <update id="updateReportCount">
+        UPDATE comment SET report_count = report_count + #{delta}, update_time = NOW() WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 管理员评论列表查询 -->

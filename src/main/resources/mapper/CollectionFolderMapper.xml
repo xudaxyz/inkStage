@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.inkstage.mapper.CollectionFolderMapper">
 
     <resultMap id="collectionFolderResultMap" type="com.inkstage.entity.model.CollectionFolder">
@@ -12,6 +12,8 @@
         <result column="default_folder" property="defaultFolder"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="deleted_time" property="deletedTime"/>
     </resultMap>
 
     <select id="selectById" resultMap="collectionFolderResultMap">
@@ -46,7 +48,7 @@
 
     <update id="updateArticleCount">
         UPDATE collection_folder
-        SET article_count = article_count + #{count}, update_time = NOW()
+        SET article_count = article_count + #{delta}, update_time = NOW()
         WHERE id = #{folderId}
     </update>
 

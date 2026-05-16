@@ -7,6 +7,7 @@ import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.dto.front.MyArticleQueryDTO;
 import com.inkstage.exception.BusinessException;
+import com.inkstage.enums.CountType;
 import com.inkstage.service.*;
 import com.inkstage.utils.ArticleUtils;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -30,7 +31,7 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleCommandService articleCommandService;
     private final ArticleQueryService articleQueryService;
     private final ArticleManagementService articleManagementService;
-    private final ArticleStatsService articleStatsService;
+    private final CountService countService;
 
     @Override
     public Long createArticle(ArticleCreateDTO articleCreateDTO) {
@@ -68,7 +69,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public void incrementArticleReadCount(Long articleId, int count) {
-        articleStatsService.incrementArticleReadCount(articleId, count);
+        countService.updateCount(CountType.ARTICLE_READ, articleId, count);
     }
 
     @Override

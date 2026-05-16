@@ -191,4 +191,22 @@ public interface TagMapper {
                              @Param("articleCount") int articleCount,
                              @Param("usageCount") int usageCount);
 
+    /**
+     * 更新标签文章数
+     *
+     * @param tagId 标签ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateArticleCount(@Param("tagId") Long tagId, @Param("delta") int delta);
+
+    /**
+     * 更新标签使用数
+     *
+     * @param tagId 标签ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateUsageCount(@Param("tagId") Long tagId, @Param("delta") int delta);
+
 }

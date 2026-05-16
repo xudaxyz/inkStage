@@ -220,4 +220,14 @@
         AND deleted = 0
     </update>
 
+    <!-- 更新标签文章数 -->
+    <update id="updateArticleCount">
+        UPDATE tag SET article_count = article_count + #{delta}, update_time = now() WHERE id = #{tagId} AND deleted = 0
+    </update>
+
+    <!-- 更新标签使用数 -->
+    <update id="updateUsageCount">
+        UPDATE tag SET usage_count = usage_count + #{delta}, update_time = now() WHERE id = #{tagId} AND deleted = 0
+    </update>
+
 </mapper>

@@ -1,6 +1,7 @@
 package com.inkstage.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 /**
  * 搜索热词Mapper接口
@@ -8,5 +9,13 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface SearchHotWordMapper {
 
+    /**
+     * 更新搜索热词搜索次数
+     *
+     * @param id 热词ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateSearchCount(@Param("id") Long id, @Param("delta") int delta);
 
 }

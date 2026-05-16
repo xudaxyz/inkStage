@@ -6,21 +6,26 @@ import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
-import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.ArticlePublishParam;
-import com.inkstage.service.*;
+import com.inkstage.service.ArticleCommandService;
+import com.inkstage.service.ArticleTagService;
+import com.inkstage.service.ColumnService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -39,10 +44,9 @@ import java.time.LocalDateTime;
 public class ArticleCommandServiceImpl implements ArticleCommandService {
 
     private final ArticleMapper articleMapper;
-    private final UserMapper userMapper;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
-    private final CategoryService categoryService;
+    private final ApplicationEventPublisher eventPublisher;
     private final ColumnService columnService;
     private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
     private final CacheClearService cacheClearService;
@@ -71,11 +75,12 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             articleTagService.handleArticleTags(article.getId(), articleCreateDTO.getTags());
 
+            // 更新分类文章数
             if (article.getCategoryId() != null) {
-                categoryService.updateArticleCount(article.getCategoryId(), 1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), 1));
             }
-
-            userMapper.incrementArticleCount(currentUser.getId(), 1);
+            // 更新用户文章数
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUser.getId(), 1));
 
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
 
@@ -146,7 +151,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             existingArticle.setTitle(articleCreateDTO.getTitle());
             existingArticle.setContent(articleCreateDTO.getContent());
             existingArticle.setContentHtml(null);
-            existingArticle.setSummary(null);
+            existingArticle.setSummary(articleCreateDTO.getSummary());
             existingArticle.setCategoryId(articleCreateDTO.getCategoryId());
             existingArticle.setCoverImage(articleCreateDTO.getCoverImage());
             existingArticle.setArticleStatus(articleCreateDTO.getStatus());
@@ -168,10 +173,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             if (!existingArticle.getCategoryId().equals(oldCategoryId)) {
                 if (oldCategoryId != null) {
-                    categoryService.updateArticleCount(oldCategoryId, -1);
+                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, oldCategoryId, -1));
                 }
                 if (existingArticle.getCategoryId() != null) {
-                    categoryService.updateArticleCount(existingArticle.getCategoryId(), 1);
+                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, existingArticle.getCategoryId(), 1));
                 }
             }
 
@@ -219,7 +224,11 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             int result = articleMapper.deleteById(articleId, currentUser.getId());
             boolean success = result > 0;
             if (success) {
-                userMapper.incrementArticleCount(currentUser.getId(), -1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUser.getId(), -1));
+
+                if (article.getCategoryId() != null) {
+                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                }
 
                 columnService.removeArticleColumnRelation(articleId);
 
@@ -264,7 +273,13 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             int result = articleMapper.permanentDeleteById(articleId, currentUserId);
             boolean success = result > 0;
             if (success) {
-                userMapper.incrementArticleCount(currentUserId, -1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUserId, -1));
+
+                if (article.getCategoryId() != null) {
+                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                }
+
+                columnService.removeArticleColumnRelation(articleId);
 
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override

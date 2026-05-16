@@ -5,8 +5,10 @@ import com.inkstage.cache.constant.CacheTTL;
 import com.inkstage.cache.service.CacheManager;
 import com.inkstage.entity.model.Follow;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.FollowMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.FollowParam;
@@ -15,6 +17,7 @@ import com.inkstage.service.NotificationService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -35,6 +38,7 @@ public class FollowServiceImpl implements FollowService {
     private final NotificationService notificationService;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 关注用户
@@ -63,31 +67,18 @@ public class FollowServiceImpl implements FollowService {
 
         int result = followMapper.insert(follow);
         if (result > 0) {
-            // 更新关注者的关注数
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOW, followerId, 1));
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOWER, followingId, 1));
+
             User follower = userMapper.findById(followerId);
-            if (follower != null) {
-                int followCount = follower.getFollowCount() != null ? follower.getFollowCount() : 0;
-                follower.setFollowCount(followCount + 1);
-                userMapper.updateByPrimaryKeySelective(follower);
-            }
-
-            // 更新被关注者的粉丝数
-            User following = userMapper.findById(followingId);
-            if (following != null) {
-                int followerCount = following.getFollowerCount() != null ? following.getFollowerCount() : 0;
-                following.setFollowerCount(followerCount + 1);
-                userMapper.updateByPrimaryKeySelective(following);
-
-                // 发送关注通知给被关注者
-                FollowParam param = FollowParam.builder()
-                        .userId(followingId)
-                        .followerId(followerId)
-                        .username(follower != null ? follower.getNickname() : "未知用户")
-                        .senderId(followerId)
-                        .notificationType(NotificationType.FOLLOW)
-                        .build();
-                notificationService.send(param);
-            }
+            FollowParam param = FollowParam.builder()
+                    .userId(followingId)
+                    .followerId(followerId)
+                    .username(follower != null ? follower.getNickname() : "未知用户")
+                    .senderId(followerId)
+                    .notificationType(NotificationType.FOLLOW)
+                    .build();
+            notificationService.send(param);
         }
 
         cacheManager.deletePattern(CacheKey.FOLLOW);
@@ -107,25 +98,8 @@ public class FollowServiceImpl implements FollowService {
     public boolean unfollowUser(Long followerId, Long followingId) {
         int result = followMapper.delete(followerId, followingId);
         if (result > 0) {
-            // 更新关注者的关注数
-            User follower = userMapper.findById(followerId);
-            if (follower != null) {
-                int followCount = follower.getFollowCount() != null ? follower.getFollowCount() : 0;
-                if (followCount > 0) {
-                    follower.setFollowCount(followCount - 1);
-                    userMapper.updateByPrimaryKeySelective(follower);
-                }
-            }
-
-            // 更新被关注者的粉丝数
-            User following = userMapper.findById(followingId);
-            if (following != null) {
-                int followerCount = following.getFollowerCount() != null ? following.getFollowerCount() : 0;
-                if (followerCount > 0) {
-                    following.setFollowerCount(followerCount - 1);
-                    userMapper.updateByPrimaryKeySelective(following);
-                }
-            }
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOW, followerId, -1));
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOWER, followingId, -1));
         }
 
         cacheManager.deletePattern(CacheKey.FOLLOW);

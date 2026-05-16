@@ -192,12 +192,44 @@ public interface UserMapper {
     // ==================== 统计（Count） ====================
     
     /**
-     * 原子更新用户文章数
+     * 更新用户文章数
      * @param id 用户ID
-     * @param increment 增量值（正数增加，负数减少）
+     * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
-    int incrementArticleCount(@Param("id") Long id, @Param("increment") int increment);
+    int updateArticleCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 更新用户关注数
+     * @param id 用户ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateFollowCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 更新用户粉丝数
+     * @param id 用户ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateFollowerCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 更新用户评论数
+     * @param id 用户ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateCommentCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 更新用户获赞数
+     * @param id 用户ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 统计用户总数

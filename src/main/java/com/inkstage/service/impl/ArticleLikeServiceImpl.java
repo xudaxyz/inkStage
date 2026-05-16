@@ -5,18 +5,20 @@ import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleLike;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.ArticleLikeParam;
 import com.inkstage.service.ArticleLikeService;
-import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,7 +34,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 
     private final ArticleLikeMapper articleLikeMapper;
     private final ArticleMapper articleMapper;
-    private final CountService countService;
+    private final ApplicationEventPublisher eventPublisher;
     private final NotificationService notificationService;
     private final InteractionCacheService interactionCacheService;
     private final CacheClearService cacheClearService;
@@ -61,14 +63,13 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 
         if (result > 0) {
             // 增加点赞数
-            countService.updateArticleLikeCount(articleId, 1);
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_LIKE, articleId, 1));
 
-            // 发送点赞通知
             String currentUserNickname = UserContext.getCurrentUser().getNickname();
-            // 从文章服务获取文章信息
             Article article = articleMapper.findById(articleId);
             if (article != null) {
                 Long articleUserId = article.getUserId();
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_LIKE, articleUserId, 1));
                 String articleTitle = article.getTitle();
 
                 // 只有当点赞者不是文章作者时才发送通知
@@ -111,9 +112,12 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         int result = articleLikeMapper.deleteByArticleIdAndUserId(articleId, userId);
 
         if (result > 0) {
-            // 减少点赞数
-            countService.updateArticleLikeCount(articleId, -1);
-            // 清理点赞状态缓存
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_LIKE, articleId, -1));
+            Article article = articleMapper.findById(articleId);
+            if (article != null) {
+                Long articleUserId = article.getUserId();
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_LIKE, articleUserId, -1));
+            }
             cacheClearService.clearArticleLikeCache(articleId, userId);
             log.info("取消点赞成功, 文章ID: {}, 用户ID: {}", articleId, userId);
             return true;

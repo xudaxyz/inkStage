@@ -8,6 +8,7 @@ import com.inkstage.exception.BusinessException;
 import com.inkstage.service.ArticleQueryService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.ArticleCollectionService;
+import com.inkstage.enums.CountType;
 import com.inkstage.service.CountService;
 import com.inkstage.cache.service.ArticleCacheService;
 import com.inkstage.utils.UserContext;
@@ -65,8 +66,8 @@ public class ArticleQueryServiceImpl implements ArticleQueryService {
         }
 
         // 更新点赞数和收藏数
-        articleDetailVO.setLikeCount(Math.toIntExact(countService.getArticleLikeCount(id)));
-        articleDetailVO.setCollectionCount(Math.toIntExact(countService.getArticleCollectionCount(id)));
+        articleDetailVO.setLikeCount(Math.toIntExact(countService.getCount(CountType.ARTICLE_LIKE, id)));
+        articleDetailVO.setCollectionCount(Math.toIntExact(countService.getCount(CountType.ARTICLE_COLLECTION, id)));
 
         return articleDetailVO;
     }

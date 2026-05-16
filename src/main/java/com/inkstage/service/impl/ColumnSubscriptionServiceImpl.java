@@ -9,8 +9,10 @@ import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.ColumnSubscription;
 import com.inkstage.entity.model.User;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
+import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.ColumnMapper;
 import com.inkstage.mapper.ColumnSubscriptionMapper;
 import com.inkstage.notification.NotificationParam;
@@ -26,6 +28,7 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.MyColumnSubscriptionVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -48,6 +51,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     private final FileService fileService;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -86,7 +90,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
         int result = columnSubscriptionMapper.insert(subscription);
         if (result > 0) {
             cacheClearService.clearColumnSubscriptionCache(columnId, user.getId());
-            columnMapper.updateSubscriptionCount(columnId, 1);
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_SUBSCRIPTION, columnId, 1));
 
             ColumnSubscriptionParam param = ColumnSubscriptionParam.builder()
                     .userId(column.getUserId())
@@ -111,7 +115,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
         int result = columnSubscriptionMapper.delete(userId, columnId);
         if (result > 0) {
             cacheClearService.clearColumnSubscriptionCache(columnId, userId);
-            columnMapper.updateSubscriptionCount(columnId, -1);
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_SUBSCRIPTION, columnId, -1));
         }
 
         log.info("用户 {} 取消订阅专栏 {} 结果: {}", userId, columnId, result > 0);

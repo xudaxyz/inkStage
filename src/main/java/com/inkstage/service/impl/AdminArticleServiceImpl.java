@@ -8,9 +8,11 @@ import com.inkstage.dto.admin.AdminArticleQueryDTO;
 import com.inkstage.dto.admin.AdminArticleUpdateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.*;
@@ -21,6 +23,7 @@ import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +43,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final NotificationService notificationService;
     private final CacheClearService cacheClearService;
     private final ColumnService columnService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -138,7 +142,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             int result = articleMapper.updateReviewStatus(id, ReviewStatus.APPROVED);
             ArticleUtils.checkOperationResult(result, id, "审核通过文章");
             // 更新文章状态为已发布
-            articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
+            int updated = articleMapper.updateStatus(id, ArticleStatus.PUBLISHED);
 
             // 发送文章审核通过通知
             ArticleReviewApproveParam param = ArticleReviewApproveParam.builder()
@@ -154,7 +158,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             clearCacheAfterAdminOperation(id);
 
             log.info("审核通过文章成功, 文章ID: {}", id);
-            return true;
+            return updated > 0;
         } catch (Exception e) {
             log.error("审核通过文章失败, 文章ID: {}", id, e);
             throw new BusinessException("审核通过文章失败");
@@ -408,8 +412,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.deleteByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
-            // 解除文章与专栏的关联,更新专栏文章数
+            // 解除文章与专栏的关联并更新专栏文章数
             columnService.removeArticleColumnRelation(id);
+            // 更新用户文章数
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, article.getUserId(), -1));
+            // 更新分类的文章数
+            if (article.getCategoryId() != null) {
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+            }
             ArticleDeleteParam param = ArticleDeleteParam.builder()
                     .userId(article.getUserId())
                     .senderId(UserContext.getCurrentUserId())
@@ -441,8 +451,14 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
             int i = articleMapper.permanentDeleteByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员彻底删除文章");
-            // 解除文章与专栏的关联,更新专栏文章数
+            // 解除文章与专栏的关联并更新专栏文章数
             columnService.removeArticleColumnRelation(id);
+            // 更新用户文章数
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, article.getUserId(), -1));
+            // 更新分类文章数
+            if (article.getCategoryId() != null) {
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+            }
             ArticleDeleteParam param = ArticleDeleteParam.builder()
                     .userId(article.getUserId())
                     .senderId(UserContext.getCurrentUserId())

@@ -60,5 +60,5 @@ public interface SystemAnnouncementMapper {
     /**
      * 增加阅读量
      */
-    int incrementReadCount(@Param("id") Long id);
+    int updateReadCount(@Param("id") Long id, @Param("delta") int delta);
 }

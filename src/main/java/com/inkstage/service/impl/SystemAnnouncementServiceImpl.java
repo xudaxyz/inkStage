@@ -6,13 +6,16 @@ import com.inkstage.cache.service.CacheManager;
 import com.inkstage.common.PageResult;
 import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.StatusEnum;
+import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.SystemAnnouncementMapper;
 import com.inkstage.service.SystemAnnouncementService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -31,6 +34,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     private final SystemAnnouncementMapper announcementMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -44,9 +48,9 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
         announcement.setId(snowflakeIdGenerator.nextId());
         boolean result = announcementMapper.insert(announcement) > 0;
-        
+
         cacheManager.deletePattern(CacheKey.HOT_ANNOUNCEMENT);
-        
+
         return result;
     }
 
@@ -62,9 +66,9 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         announcement.setUpdateTime(LocalDateTime.now());
 
         boolean result = announcementMapper.update(announcement) > 0;
-        
+
         cacheManager.deletePattern(CacheKey.HOT_ANNOUNCEMENT);
-        
+
         return result;
     }
 
@@ -72,9 +76,9 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     @Transactional
     public boolean deleteAnnouncement(Long id) {
         boolean result = announcementMapper.deleteById(id) > 0;
-        
+
         cacheManager.deletePattern(CacheKey.HOT_DATA + "announcement*");
-        
+
         return result;
     }
 
@@ -110,7 +114,8 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     @Override
     public List<SystemAnnouncement> getPublishedAnnouncements() {
         String cacheKey = CacheKey.keyForHotAnnouncementPublished();
-        List<SystemAnnouncement> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        List<SystemAnnouncement> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+        });
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -129,11 +134,11 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         announcement.setStatus(StatusEnum.ENABLED);
         announcement.setPublishTime(LocalDateTime.now());
         announcement.setUpdateUserId(UserContext.getCurrentUserId());
-        
+
         boolean result = announcementMapper.update(announcement) > 0;
-        
+
         cacheManager.deletePattern(CacheKey.HOT_DATA + "announcement*");
-        
+
         return result;
     }
 
@@ -145,17 +150,17 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
         announcement.setStatus(StatusEnum.DISABLED);
         announcement.setExpireTime(LocalDateTime.now());
         announcement.setUpdateUserId(UserContext.getCurrentUserId());
-        
+
         boolean result = announcementMapper.update(announcement) > 0;
-        
+
         cacheManager.deletePattern(CacheKey.HOT_DATA + "announcement*");
-        
+
         return result;
     }
 
     @Override
-    @Transactional
     public boolean incrementReadCount(Long id) {
-        return announcementMapper.incrementReadCount(id) > 0;
+        eventPublisher.publishEvent(CountEvent.of(this, CountType.ANNOUNCEMENT_READ, id, 1));
+        return true;
     }
 }

@@ -11,10 +11,12 @@ import com.inkstage.dto.front.CommentQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.Comment;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CommentMapper;
@@ -22,7 +24,6 @@ import com.inkstage.notification.param.ArticleCommentParam;
 import com.inkstage.notification.param.CommentReplyParam;
 import com.inkstage.notification.param.CommentReviewRejectParam;
 import com.inkstage.service.CommentService;
-import com.inkstage.service.CountService;
 import com.inkstage.service.FileService;
 import com.inkstage.service.NotificationService;
 import com.inkstage.utils.ArticleUtils;
@@ -31,6 +32,7 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,7 +48,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
     private final FileService fileService;
-    private final CountService countService;
+    private final ApplicationEventPublisher publisher;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
     private final CommentCacheService commentCacheService;
@@ -109,22 +111,17 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ResponseMessage.COMMENT_CREATE_FAILED);
             }
 
-            // 如果是回复评论，更新父评论的回复数
-            int updated = 1;
             if (comment.getParentId() != null && comment.getParentId() > 0) {
-                updated = updateParentCommentReplyCount(comment.getParentId());
+                publisher.publishEvent(CountEvent.of(this, CountType.COMMENT_REPLY, comment.getParentId(), 1));
             }
 
-            if (updated >= 1) {
-                // 增加文章评论数
-                countService.updateArticleCommentCount(comment.getArticleId(), 1);
-                // 发送评论回复通知
-                if (comment.getParentId() != null && comment.getParentId() > 0) {
-                    sendReplyCommentNotification(comment, currentUser);
-                } else {
-                    // 发送文章评论通知
-                    sendArticleCommentNotification(article, comment, currentUser);
-                }
+            publisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COMMENT, comment.getArticleId(), 1));
+            publisher.publishEvent(CountEvent.of(this, CountType.USER_COMMENT, comment.getUserId(), 1));
+
+            if (comment.getParentId() != null && comment.getParentId() > 0) {
+                sendReplyCommentNotification(comment, currentUser);
+            } else {
+                sendArticleCommentNotification(article, comment, currentUser);
             }
 
             // 清理文章评论缓存、父评论回复缓存
@@ -133,7 +130,7 @@ public class CommentServiceImpl implements CommentService {
                 cacheClearService.clearCommentReplyCache(comment.getParentId());
             }
 
-            return updated >= 1;
+            return true;
         } catch (Exception e) {
             log.error("创建评论失败, 文章ID: {}", commentDTO.getArticleId(), e);
             throw new BusinessException(ResponseMessage.COMMENT_CREATE_FAILED, e.getMessage());
@@ -162,17 +159,6 @@ public class CommentServiceImpl implements CommentService {
         return comment;
     }
 
-    /**
-     * 更新父评论的回复数
-     */
-    private int updateParentCommentReplyCount(Long parentId) {
-        Comment parentComment = commentMapper.findById(parentId);
-        if (parentComment != null) {
-            int newReplyCount = parentComment.getReplyCount() != null ? parentComment.getReplyCount() + 1 : 1;
-            return commentMapper.updateReplyCount(parentId, newReplyCount);
-        }
-        return 0;
-    }
 
     /**
      * 发送文章评论通知
@@ -307,6 +293,7 @@ public class CommentServiceImpl implements CommentService {
             // 保存评论信息用于后续清理缓存
             Long articleId = comment.getArticleId();
             Long parentId = comment.getParentId();
+            Long deletedUserId = comment.getUserId();
 
             // 删除评论
             int result = commentMapper.deleteById(commentId);
@@ -315,16 +302,12 @@ public class CommentServiceImpl implements CommentService {
                 throw new BusinessException(ResponseMessage.COMMENT_DELETE_FAILED);
             }
 
-            // 如果是回复评论，更新父评论的回复数
-            int updated = 1;
             if (parentId != null && parentId > 0) {
-                updated = updateParentCommentReplyCountDecrease(parentId);
+                publisher.publishEvent(CountEvent.of(this, CountType.COMMENT_REPLY, parentId, -1));
             }
 
-            if (updated >= 1) {
-                // 减少文章评论数
-                countService.updateArticleCommentCount(articleId, -1);
-            }
+            publisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COMMENT, articleId, -1));
+            publisher.publishEvent(CountEvent.of(this, CountType.USER_COMMENT, deletedUserId, -1));
 
             // 清理文章评论缓存、父评论回复缓存
             cacheClearService.clearArticleCommentCache(articleId);
@@ -332,23 +315,11 @@ public class CommentServiceImpl implements CommentService {
                 cacheClearService.clearCommentReplyCache(parentId);
             }
 
-            return updated >= 1;
+            return true;
         } catch (Exception e) {
             log.error("删除评论失败, 评论ID: {}", commentId, e);
             throw new BusinessException(ResponseMessage.COMMENT_DELETE_FAILED, e.getMessage());
         }
-    }
-
-    /**
-     * 减少父评论的回复数
-     */
-    private int updateParentCommentReplyCountDecrease(Long parentId) {
-        Comment parentComment = commentMapper.findById(parentId);
-        if (parentComment != null) {
-            int newReplyCount = parentComment.getReplyCount() != null && parentComment.getReplyCount() > 0 ? parentComment.getReplyCount() - 1 : 0;
-            return commentMapper.updateReplyCount(parentId, newReplyCount);
-        }
-        return 0;
     }
 
 

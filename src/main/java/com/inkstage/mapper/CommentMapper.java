@@ -16,7 +16,7 @@ import java.util.List;
 public interface CommentMapper {
 
     // ==================== 查询（Read） ====================
-    
+
     /**
      * 根据ID查询评论
      *
@@ -45,7 +45,7 @@ public interface CommentMapper {
      * 根据用户ID查询评论
      *
      * @param userId 用户ID
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 评论列表
      */
     List<ArticleCommentVO> findByUserId(@Param("userId") Long userId, @Param("limit") Integer limit);
@@ -67,7 +67,7 @@ public interface CommentMapper {
     Integer findMaxFloorByArticleId(Long articleId);
 
     // ==================== 新增（Create） ====================
-    
+
     /**
      * 插入评论
      *
@@ -77,7 +77,7 @@ public interface CommentMapper {
     int insert(Comment comment);
 
     // ==================== 更新（Update） ====================
-    
+
     /**
      * 根据ID更新评论
      *
@@ -89,36 +89,54 @@ public interface CommentMapper {
     /**
      * 更新评论状态
      *
-     * @param id 评论ID
-     * @param status 状态
+     * @param id           评论ID
+     * @param status       状态
      * @param reviewUserId 审核用户ID
      * @param reviewReason 审核原因
      * @return 影响行数
      */
-    int updateStatus(@Param("id") Long id, @Param("status") Integer status, 
-                          @Param("reviewUserId") Long reviewUserId, @Param("reviewReason") String reviewReason);
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status,
+                     @Param("reviewUserId") Long reviewUserId, @Param("reviewReason") String reviewReason);
 
     /**
      * 更新评论置顶状态
      *
-     * @param id 评论ID
-     * @param top 置顶状态
+     * @param id       评论ID
+     * @param top      置顶状态
      * @param topOrder 置顶顺序
      * @return 影响行数
      */
     int updateTop(@Param("id") Long id, @Param("top") Integer top, @Param("topOrder") Integer topOrder);
 
     /**
-     * 更新评论的回复数
+     * 原子更新评论点赞数
      *
-     * @param id 评论ID
-     * @param replyCount 回复数
+     * @param id    评论ID
+     * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
-    int updateReplyCount(@Param("id") Long id, @Param("replyCount") Integer replyCount);
+    int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 原子更新评论回复数
+     *
+     * @param id    评论ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateReplyCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 原子更新评论举报数
+     *
+     * @param id    评论ID
+     * @param delta 增量值（正数增加，负数减少）
+     * @return 影响行数
+     */
+    int updateReportCount(@Param("id") Long id, @Param("delta") int delta);
 
     // ==================== 删除（Delete） ====================
-    
+
     /**
      * 根据ID删除评论
      *
@@ -128,7 +146,7 @@ public interface CommentMapper {
     int deleteById(Long id);
 
     // ==================== 统计（Count） ====================
-    
+
     /**
      * 根据文章ID查询评论总数
      *
@@ -165,15 +183,15 @@ public interface CommentMapper {
      * 根据父评论ID查询子评论列表
      *
      * @param parentId 父评论ID
-     * @param offset 偏移量
-     * @param limit 限制数量
-     * @param sortBy 排序方式
+     * @param offset   偏移量
+     * @param limit    限制数量
+     * @param sortBy   排序方式
      * @return 子评论列表
      */
-    List<ArticleCommentVO> findRepliesByParentId(@Param("parentId") Long parentId, 
-                                               @Param("offset") int offset, 
-                                               @Param("limit") int limit, 
-                                               @Param("sortBy") String sortBy);
+    List<ArticleCommentVO> findRepliesByParentId(@Param("parentId") Long parentId,
+                                                 @Param("offset") int offset,
+                                                 @Param("limit") int limit,
+                                                 @Param("sortBy") String sortBy);
 
     /**
      * 根据父评论ID统计子评论总数

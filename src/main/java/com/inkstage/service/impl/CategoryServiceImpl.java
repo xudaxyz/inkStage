@@ -199,18 +199,4 @@ public class CategoryServiceImpl implements CategoryService {
         }
     }
 
-    @Override
-    public void updateArticleCount(Long categoryId, int increment) {
-        log.info("更新分类文章数量: {}, 增量: {}", categoryId, increment);
-        try {
-            if (categoryId == null) {
-                log.warn("更新分类文章数量失败, 分类ID为空");
-                return;
-            }
-            categoryMapper.updateArticleCount(categoryId, increment);
-        } catch (Exception e) {
-            log.error("更新分类文章数量失败", e);
-        }
-    }
-
 }

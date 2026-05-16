@@ -509,10 +509,42 @@
         AND DATE(create_time) = #{date}
     </select>
 
-    <!-- 原子更新用户文章数 -->
-    <update id="incrementArticleCount">
+    <!-- 更新用户文章数 -->
+    <update id="updateArticleCount">
         UPDATE user
-        SET article_count = COALESCE(article_count, 0) + #{increment},
+        SET article_count = COALESCE(article_count, 0) + #{delta},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新用户关注数 -->
+    <update id="updateFollowCount">
+        UPDATE user
+        SET follow_count = COALESCE(follow_count, 0) + #{delta},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新用户粉丝数 -->
+    <update id="updateFollowerCount">
+        UPDATE user
+        SET follower_count = COALESCE(follower_count, 0) + #{delta},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新用户评论数 -->
+    <update id="updateCommentCount">
+        UPDATE user
+        SET comment_count = COALESCE(comment_count, 0) + #{delta},
+            update_time = NOW()
+        WHERE id = #{id} AND deleted = 0
+    </update>
+
+    <!-- 更新用户获赞数 -->
+    <update id="updateLikeCount">
+        UPDATE user
+        SET like_count = COALESCE(like_count, 0) + #{delta},
             update_time = NOW()
         WHERE id = #{id} AND deleted = 0
     </update>

@@ -71,10 +71,10 @@ public interface CollectionFolderMapper {
      * 更新文件夹文章数量
      *
      * @param folderId 文件夹ID
-     * @param count    变更数量
+     * @param delta    变更数量
      * @return 影响行数
      */
-    int updateArticleCount(@Param("folderId") Long folderId, @Param("count") Integer count);
+    int updateArticleCount(@Param("folderId") Long folderId, @Param("delta") int delta);
 
     // ==================== 删除（Delete） ====================
     

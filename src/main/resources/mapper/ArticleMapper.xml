@@ -816,27 +816,27 @@
 
     <!-- 更新文章阅读数 -->
     <update id="updateReadCount">
-        UPDATE article SET read_count = read_count + #{increment} WHERE id = #{id} AND deleted = 0
+        UPDATE article SET read_count = read_count + #{delta} WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新文章点赞数 -->
     <update id="updateLikeCount">
-        UPDATE article SET like_count = like_count + #{offset} WHERE id = #{id} AND deleted = 0
+        UPDATE article SET like_count = like_count + #{delta} WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新文章评论数 -->
     <update id="updateCommentCount">
-        UPDATE article SET comment_count = comment_count + #{offset} WHERE id = #{id} AND deleted = 0
+        UPDATE article SET comment_count = comment_count + #{delta} WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新文章收藏数 -->
     <update id="updateCollectionCount">
-        UPDATE article SET collection_count = collection_count + #{offset} WHERE id = #{id} AND deleted = 0
+        UPDATE article SET collection_count = collection_count + #{delta} WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新文章分享数 -->
     <update id="updateShareCount">
-        UPDATE article SET share_count = share_count + #{offset} WHERE id = #{id} AND deleted = 0
+        UPDATE article SET share_count = share_count + #{delta} WHERE id = #{id} AND deleted = 0
     </update>
 
     <!-- 更新文章置顶状态 -->

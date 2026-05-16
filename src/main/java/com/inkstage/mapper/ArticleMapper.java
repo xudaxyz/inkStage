@@ -274,42 +274,46 @@ public interface ArticleMapper {
      * 更新文章阅读数
      *
      * @param id 文章ID
-     * @param increment 增加/减少的阅读数
+     * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
-    int updateReadCount(@Param("id") Long id, @Param("increment") int increment);
+    int updateReadCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 更新文章点赞数
      *
      * @param id 文章ID
-     * @param offset 增加/减少的点赞数
+     * @param delta 增量（正数增加，负数减少）
+     * @return 影响行数
      */
-    void updateLikeCount(@Param("id") Long id, @Param("offset") int offset);
+    int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 更新文章评论数
      *
      * @param id 文章ID
-     * @param offset 增加/减少的评论数
+     * @param delta 增量（正数增加，负数减少）
+     * @return 影响行数
      */
-    void updateCommentCount(@Param("id") Long id, @Param("offset") int offset);
+    int updateCommentCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 更新文章收藏数
      *
      * @param id 文章ID
-     * @param offset 增加/减少的收藏数
+     * @param delta 增量（正数增加，负数减少）
+     * @return 影响行数
      */
-    void updateCollectionCount(@Param("id") Long id, @Param("offset") int offset);
+    int updateCollectionCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 更新文章分享数
      *
      * @param id 文章ID
-     * @param offset 增加/减少的分享数
+     * @param delta 增量（正数增加，负数减少）
+     * @return 影响行数
      */
-    void updateShareCount(@Param("id") Long id, @Param("offset") int offset);
+    int updateShareCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
      * 更新文章置顶状态

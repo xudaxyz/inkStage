@@ -2,7 +2,9 @@ package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.ArticleTag;
 import com.inkstage.entity.model.Tag;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
+import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleTagMapper;
 import com.inkstage.mapper.TagMapper;
@@ -11,6 +13,7 @@ import com.inkstage.service.TagService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,7 @@ public class ArticleTagServiceImpl implements ArticleTagService {
     private final TagMapper tagMapper;
     private final TagService tagService;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<Tag> getTagsByArticleId(Long articleId) {
@@ -112,11 +116,13 @@ public class ArticleTagServiceImpl implements ArticleTagService {
      * @param tagsToAdd    需要增加统计数据的标签ID集合
      */
     private void updateTagStatistics(Set<Long> tagsToRemove, Set<Long> tagsToAdd) {
-        if (!tagsToRemove.isEmpty()) {
-            tagMapper.batchUpdateTagStats(new ArrayList<>(tagsToRemove), -1, -1);
+        for (Long tagId : tagsToRemove) {
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_ARTICLE, tagId, -1));
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_USAGE, tagId, -1));
         }
-        if (!tagsToAdd.isEmpty()) {
-            tagMapper.batchUpdateTagStats(new ArrayList<>(tagsToAdd), 1, 1);
+        for (Long tagId : tagsToAdd) {
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_ARTICLE, tagId, 1));
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_USAGE, tagId, 1));
         }
     }
 

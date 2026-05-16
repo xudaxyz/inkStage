@@ -11,11 +11,13 @@ import com.inkstage.dto.front.ColumnQueryDTO;
 import com.inkstage.entity.model.ArticleColumn;
 import com.inkstage.entity.model.Column;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.CountType;
 import com.inkstage.enums.VisibleStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.enums.user.UserRoleEnum;
+import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleColumnMapper;
 import com.inkstage.mapper.ColumnMapper;
@@ -30,6 +32,7 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +53,7 @@ public class ColumnServiceImpl implements ColumnService {
     private final CacheClearService cacheClearService;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -375,7 +379,7 @@ public class ColumnServiceImpl implements ColumnService {
             articleColumn.setId(snowflakeIdGenerator.nextId());
             boolean result = articleColumnMapper.insert(articleColumn) > 0;
             if (result) {
-                columnMapper.updateArticleCount(columnId, 1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_ARTICLE, columnId, 1));
                 cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
                 cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + columnId);
                 // 异步发送通知给订阅者
@@ -409,7 +413,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             int result = articleColumnMapper.deleteById(articleColumn.getId());
             if (result > 0) {
-                columnMapper.updateArticleCount(columnId, -1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_ARTICLE, columnId, -1));
                 cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
                 cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + columnId);
             }
@@ -479,7 +483,7 @@ public class ColumnServiceImpl implements ColumnService {
     public void incrementColumnReadCount(Long columnId) {
         log.info("增加专栏阅读量: columnId={}", columnId);
         try {
-            columnMapper.updateReadCount(columnId, 1);
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_READ, columnId, 1));
         } catch (Exception e) {
             log.error("增加专栏阅读量失败", e);
             throw new BusinessException("增加专栏阅读量失败", e);
@@ -507,7 +511,7 @@ public class ColumnServiceImpl implements ColumnService {
 
             if (oldColumnId != null) {
                 articleColumnMapper.deleteByArticleId(articleId);
-                columnMapper.updateArticleCount(oldColumnId, -1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_ARTICLE, oldColumnId, -1));
                 cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + oldColumnId);
                 cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + oldColumnId);
                 log.info("从旧专栏移除文章: articleId={}, oldColumnId={}", articleId, oldColumnId);
@@ -530,7 +534,7 @@ public class ColumnServiceImpl implements ColumnService {
                 articleColumn.setId(snowflakeIdGenerator.nextId());
                 boolean result = articleColumnMapper.insert(articleColumn) > 0;
                 if (result) {
-                    columnMapper.updateArticleCount(newColumnId, 1);
+                    eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_ARTICLE, newColumnId, 1));
                     cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + newColumnId);
                     cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + newColumnId);
                     log.info("文章移动到新专栏成功: articleId={}, newColumnId={}", articleId, newColumnId);
@@ -551,7 +555,7 @@ public class ColumnServiceImpl implements ColumnService {
             if (existingRelation != null) {
                 Long columnId = existingRelation.getColumnId();
                 articleColumnMapper.deleteByArticleId(articleId);
-                columnMapper.updateArticleCount(columnId, -1);
+                eventPublisher.publishEvent(CountEvent.of(this, CountType.COLUMN_ARTICLE, columnId, -1));
                 cacheClearService.clearColumnDetailCache(columnId);
                 cacheClearService.clearColumnArticlesCache(columnId);
                 log.info("文章与专栏关联已解除: articleId={}, columnId={}", articleId, columnId);

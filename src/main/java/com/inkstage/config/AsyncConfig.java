@@ -6,6 +6,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 异步任务配置
@@ -33,8 +34,25 @@ public class AsyncConfig {
         // 线程名称前缀
         executor.setThreadNamePrefix("notification-");
         // 拒绝策略：由调用线程处理
-        executor.setRejectedExecutionHandler(new java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy());
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         // 初始化
+        executor.initialize();
+        return executor;
+    }
+
+    /**
+     * 计数任务执行器
+     * <p>
+     * 用于处理计数相关的异步任务（Redis 同步到数据库）
+     */
+    @Bean("countTaskExecutor")
+    public Executor countTaskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(20);
+        executor.setQueueCapacity(2000);
+        executor.setThreadNamePrefix("count-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
         return executor;
     }

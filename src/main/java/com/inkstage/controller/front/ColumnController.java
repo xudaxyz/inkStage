@@ -324,7 +324,6 @@ public class ColumnController {
      * @return 文章所属的专栏关联信息（如果文章不在任何专栏中则返回null）
      */
     @GetMapping("/article/info")
-    @UserAccess
     public Result<ArticleColumn> getArticleColumn(@RequestParam Long articleId) {
         ArticleColumn articleColumn = columnService.getArticleColumn(articleId);
         return Result.success(articleColumn);

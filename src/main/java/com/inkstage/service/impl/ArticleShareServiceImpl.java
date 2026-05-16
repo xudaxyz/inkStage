@@ -1,9 +1,12 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.entity.model.Article;
+import com.inkstage.enums.CountType;
+import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.ArticleMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +21,7 @@ import java.util.UUID;
 public class ArticleShareServiceImpl {
 
     private final ArticleMapper articleMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 生成文章分享链接
@@ -74,8 +78,7 @@ public class ArticleShareServiceImpl {
             }
 
             // 增加分享数
-            article.setShareCount(article.getShareCount() != null ? article.getShareCount() + 1 : 1);
-            articleMapper.update(article);
+            eventPublisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_SHARE, article.getId(), 1));
             log.info("文章分享数增加成功，文章ID: {}", article.getId());
 
             return article;

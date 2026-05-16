@@ -2,96 +2,53 @@ package com.inkstage.service;
 
 import com.inkstage.enums.CountType;
 
+import java.util.List;
+
 /**
- * 文章计数服务接口
+ * 通用计数服务接口
+ * <p>
+ * 提供系统中所有计数字段的统一更新和查询能力。
+ * 支持单条和批量计数操作，采用 Redis 缓存 + 异步同步数据库的模式。
  */
 public interface CountService {
 
     /**
-     * 更新文章阅读数
+     * 更新计数（通用方法）
      *
-     * @param articleId 文章ID
-     * @param count     增加/减少的数量
+     * @param countType 计数类型
+     * @param targetId  目标记录ID
+     * @param delta     增量（正数增加，负数减少）
      */
-    void updateArticleReadCount(Long articleId, int count);
+    void updateCount(CountType countType, Long targetId, int delta);
 
     /**
-     * 增加/减少文章点赞数
+     * 批量更新计数
+     * <p>
+     * 一次业务操作触发多个计数更新时使用，确保所有计数在同一批次中完成。
      *
-     * @param articleId 文章ID
-     * @param count     增加/减少的数量
+     * @param countType 计数类型
+     * @param targetIds 目标记录ID列表
+     * @param delta     增量（正数增加，负数减少）
      */
-    void updateArticleLikeCount(Long articleId, int count);
+    void batchUpdate(CountType countType, List<Long> targetIds, int delta);
 
     /**
-     * 增加/减少文章收藏数
+     * 获取计数
      *
-     * @param articleId 文章ID
-     * @param count     增加/减少的数量
+     * @param countType 计数类型
+     * @param targetId  目标记录ID
+     * @return 计数值
      */
-    void updateArticleCollectionCount(Long articleId, int count);
+    long getCount(CountType countType, Long targetId);
 
     /**
-     * 增加/减少文章评论数
+     * 同步计数到数据库
+     * <p>
+     * 手动触发同步，用于补偿/修复场景
      *
-     * @param articleId 文章ID
-     * @param count     增加/减少的数量
+     * @param countType 计数类型
+     * @param targetId  目标记录ID
+     * @param delta     增量
      */
-    void updateArticleCommentCount(Long articleId, int count);
-
-    /**
-     * 增加/减少文章分享数
-     *
-     * @param articleId 文章ID
-     * @param count     增加/减少的数量
-     */
-    void updateArticleShareCount(Long articleId, int count);
-
-    /**
-     * 获取文章阅读数
-     *
-     * @param articleId 文章ID
-     * @return 阅读数
-     */
-    Long getArticleReadCount(Long articleId);
-
-    /**
-     * 获取文章点赞数
-     *
-     * @param articleId 文章ID
-     * @return 点赞数
-     */
-    Long getArticleLikeCount(Long articleId);
-
-    /**
-     * 获取文章评论数
-     *
-     * @param articleId 文章ID
-     * @return 评论数
-     */
-    Long getArticleCommentCount(Long articleId);
-
-    /**
-     * 获取文章收藏数
-     *
-     * @param articleId 文章ID
-     * @return 收藏数
-     */
-    Long getArticleCollectionCount(Long articleId);
-
-    /**
-     * 获取文章分享数
-     *
-     * @param articleId 文章ID
-     * @return 分享数
-     */
-    Long getArticleShareCount(Long articleId);
-
-    /**
-     * 异步缓存计数到数据库
-     *
-     * @param articleId 文章ID
-     * @param countType 计数类型: read, like, comment, collection, share
-     */
-    void syncArticleCount(Long articleId, CountType countType, int count);
+    void syncToDatabase(CountType countType, Long targetId, int delta);
 }

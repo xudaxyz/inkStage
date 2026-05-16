@@ -1,5 +1,7 @@
 package com.inkstage.cache.constant;
 
+import com.inkstage.enums.CountType;
+
 public final class CacheKey {
 
     private static final String PREFIX = "inkstage:";
@@ -74,6 +76,10 @@ public final class CacheKey {
     public static final String NOTIFICATION_UNREAD_COUNT_BY_CATEGORY = PREFIX + "notify:unread:category:";
     public static final String NOTIFICATION_RECENT_LIST = PREFIX + "notify:recent:list:";
     public static final String NOTIFICATION_SETTING = PREFIX + "notify:setting:";
+
+
+    // ==================== 通用计数相关 ====================
+    public static final String COUNT = PREFIX + "count:";
 
     // ==================== 键构建方法 ====================
 
@@ -234,9 +240,8 @@ public final class CacheKey {
         return SEND_RATE_LIMIT + type + ":" + account;
     }
 
-    // ==================== 文章计数相关 ====================
-    public static String keyForArticleCount(Long articleId, String countType) {
-        return ARTICLE + countType + ":" + articleId;
+    public static String keyForCount(CountType countType, Long targetId) {
+        return COUNT + countType.name().toLowerCase() + ":" + targetId;
     }
 
     // ==================== 公告相关 ====================
