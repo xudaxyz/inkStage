@@ -11,6 +11,7 @@ import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.ReadingHistoryMapper;
 import com.inkstage.service.FileService;
 import com.inkstage.service.ReadingHistoryService;
+import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReadingHistoryVO;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
     private final ArticleMapper articleMapper;
     private final FileService fileService;
     private final CacheManager cacheManager;
+    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public boolean saveOrUpdateReadingHistory(ReadingHistoryDTO dto) {
@@ -53,6 +55,7 @@ public class ReadingHistoryServiceImpl implements ReadingHistoryService {
 
             // 构建阅读历史实体
             ReadingHistory readingHistory = new ReadingHistory();
+            readingHistory.setId(snowflakeIdGenerator.nextId());
             readingHistory.setUserId(userId);
             readingHistory.setArticleId(dto.getArticleId());
             // 确保进度值在0-100之间
