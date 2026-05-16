@@ -6,6 +6,7 @@ import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.User;
+import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
@@ -356,7 +357,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setCoverImage(articleCreateDTO.getCoverImage());
         article.setCategoryId(articleCreateDTO.getCategoryId());
         article.setArticleStatus(articleCreateDTO.getStatus());
-        article.setReviewStatus(articleCreateDTO.getReviewStatus());
+        article.setReviewStatus(ReviewStatus.PENDING);
         article.setAllowComment(articleCreateDTO.getAllowComment());
         article.setOriginal(articleCreateDTO.getOriginal());
         article.setOriginalUrl(articleCreateDTO.getOriginalUrl());

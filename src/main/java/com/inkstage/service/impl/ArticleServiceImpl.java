@@ -33,7 +33,6 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleStatsService articleStatsService;
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public Long createArticle(ArticleCreateDTO articleCreateDTO) {
         return articleCommandService.createArticle(articleCreateDTO);
     }
