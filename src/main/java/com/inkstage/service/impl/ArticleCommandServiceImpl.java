@@ -88,7 +88,13 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 public void afterCommit() {
                     // 异步处理文章内容(将文章转换成HTML)
                     asyncArticleProcessService.processArticleContent(articleId, content);
-
+                    // 处理专栏
+                    if (columnId != null) {
+                        columnService.addArticleToColumn(columnId, articleId, null);
+                    }
+                    // 清除缓存
+                    cacheClearService.cleanCacheAfterArticleCreateAsync(articleId, userId);
+                    // 发送文章发布通知
                     ArticlePublishParam param = new ArticlePublishParam();
                     param.setUserId(userId);
                     param.setUsername(currentUser.getNickname());
@@ -98,11 +104,6 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     param.setNotificationType(NotificationType.ARTICLE_PUBLISH);
                     notificationService.send(param);
 
-                    cacheClearService.cleanCacheAfterArticleCreateAsync(articleId, userId);
-
-                    if (columnId != null) {
-                        columnService.addArticleToColumn(columnId, articleId, null);
-                    }
                 }
             });
         } catch (Exception e) {
