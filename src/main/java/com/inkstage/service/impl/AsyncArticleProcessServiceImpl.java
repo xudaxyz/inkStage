@@ -3,7 +3,6 @@ package com.inkstage.service.impl;
 import com.inkstage.entity.model.Article;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.utils.MarkdownUtils;
-import com.inkstage.utils.SummaryGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -21,9 +20,9 @@ public class AsyncArticleProcessServiceImpl {
     private final ArticleMapper articleMapper;
 
     /**
-     * 异步处理文章内容（Markdown转换 + 摘要生成）
+     * 异步处理文章内容（Markdown转换）
      *
-     * @param articleId 文章ID
+     * @param articleId       文章ID
      * @param markdownContent Markdown内容
      */
     @Async
@@ -33,12 +32,10 @@ public class AsyncArticleProcessServiceImpl {
 
         try {
             String htmlContent = MarkdownUtils.markdownToHtml(markdownContent);
-            String summary = SummaryGenerator.generateSummary(markdownContent);
 
             Article article = new Article();
             article.setId(articleId);
             article.setContentHtml(htmlContent);
-            article.setSummary(summary);
 
             int result = articleMapper.update(article);
             if (result > 0) {

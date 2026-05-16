@@ -17,6 +17,7 @@ import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.ArticlePublishParam;
 import com.inkstage.service.*;
 import com.inkstage.utils.SnowflakeIdGenerator;
+import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -354,7 +355,8 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
         article.setTitle(articleCreateDTO.getTitle());
         article.setContent(articleCreateDTO.getContent());
         article.setContentHtml(articleCreateDTO.getContent());
-        article.setSummary(null); // 异步生成摘要
+        // 生成摘要
+        article.setSummary(SummaryGenerator.generateSummary(articleCreateDTO.getContent()));
         article.setCoverImage(articleCreateDTO.getCoverImage());
         article.setCategoryId(articleCreateDTO.getCategoryId());
         article.setArticleStatus(articleCreateDTO.getStatus());
