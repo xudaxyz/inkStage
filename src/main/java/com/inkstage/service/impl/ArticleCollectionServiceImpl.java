@@ -1,6 +1,7 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.cache.service.CacheClearService;
+import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.CollectArticleDTO;
@@ -14,16 +15,11 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CollectionFolderMapper;
-import com.inkstage.service.ArticleCollectionService;
-import com.inkstage.service.CollectionFolderService;
-import com.inkstage.service.CountService;
-import com.inkstage.service.FileService;
-import com.inkstage.service.NotificationService;
-import com.inkstage.cache.service.InteractionCacheService;
+import com.inkstage.notification.param.ArticleCollectionParam;
+import com.inkstage.service.*;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
-import com.inkstage.notification.param.ArticleCollectionParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -106,14 +102,15 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
                 // 只有当收藏者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    ArticleCollectionParam param = new ArticleCollectionParam();
-                    param.setUserId(articleUserId);
-                    param.setCollectorName(currentUserNickname);
-                    param.setArticleTitle(articleTitle);
-                    param.setArticleId(collectArticleDTO.getArticleId());
-                    param.setArticleUrl(InkConstant.ARTICLE_URL + collectArticleDTO.getArticleId());
-                    param.setSenderId(userId);
-                    param.setNotificationType(NotificationType.ARTICLE_COLLECTION);
+                    ArticleCollectionParam param = ArticleCollectionParam.builder()
+                            .userId(articleUserId)
+                            .collectorName(currentUserNickname)
+                            .articleTitle(articleTitle)
+                            .articleId(collectArticleDTO.getArticleId())
+                            .articleUrl(InkConstant.ARTICLE_URL + collectArticleDTO.getArticleId())
+                            .senderId(userId)
+                            .notificationType(NotificationType.ARTICLE_COLLECTION)
+                            .build();
                     notificationService.send(param);
                 }
             }

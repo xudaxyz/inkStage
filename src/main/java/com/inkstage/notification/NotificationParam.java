@@ -1,9 +1,9 @@
 package com.inkstage.notification;
 
 import com.inkstage.enums.notification.NotificationType;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -13,7 +13,7 @@ import java.util.Map;
 @Slf4j
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
+@SuperBuilder
 public abstract class NotificationParam {
 
     /**

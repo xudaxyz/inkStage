@@ -96,13 +96,14 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     // 清除缓存
                     cacheClearService.cleanCacheAfterArticleCreateAsync(articleId, userId);
                     // 发送文章发布通知
-                    ArticlePublishParam param = new ArticlePublishParam();
-                    param.setUserId(userId);
-                    param.setUsername(currentUser.getNickname());
-                    param.setArticleTitle(article.getTitle());
-                    param.setArticleId(articleId);
-                    param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
-                    param.setNotificationType(NotificationType.ARTICLE_PUBLISH);
+                    ArticlePublishParam param = ArticlePublishParam.builder()
+                            .userId(userId)
+                            .username(currentUser.getNickname())
+                            .articleTitle(article.getTitle())
+                            .articleId(articleId)
+                            .articleUrl(InkConstant.ARTICLE_URL + articleId)
+                            .notificationType(NotificationType.ARTICLE_PUBLISH)
+                            .build();
                     notificationService.send(param);
 
                 }

@@ -590,14 +590,15 @@ public class ColumnServiceImpl implements ColumnService {
             return;
         }
 
-        ColumnArticlePublishParam param = new ColumnArticlePublishParam();
-        param.setColumnId(columnId);
-        param.setColumnName(column.getName());
-        param.setArticleId(articleId);
-        param.setArticleTitle(articleTitle);
-        param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
-        param.setSenderId(column.getUserId());
-        param.setNotificationType(NotificationType.COLUMN_ARTICLE_PUBLISH);
+        ColumnArticlePublishParam param = ColumnArticlePublishParam.builder()
+                .columnId(columnId)
+                .columnName(column.getName())
+                .articleId(articleId)
+                .articleTitle(articleTitle)
+                .articleUrl(InkConstant.ARTICLE_URL + articleId)
+                .senderId(column.getUserId())
+                .notificationType(NotificationType.COLUMN_ARTICLE_PUBLISH)
+                .build();
         columnSubscriptionService.notifySubscribers(columnId, param);
     }
 
@@ -610,12 +611,13 @@ public class ColumnServiceImpl implements ColumnService {
             return;
         }
 
-        ColumnDisabledParam param = new ColumnDisabledParam();
-        param.setColumnId(columnId);
-        param.setColumnName(column.getName());
-        param.setReason("专栏已下线");
-        param.setSenderId(column.getUserId());
-        param.setNotificationType(NotificationType.COLUMN_DISABLED);
+        ColumnDisabledParam param = ColumnDisabledParam.builder()
+                .columnId(columnId)
+                .columnName(column.getName())
+                .reason("专栏已下线")
+                .senderId(column.getUserId())
+                .notificationType(NotificationType.COLUMN_DISABLED)
+                .build();
         columnSubscriptionService.notifySubscribers(columnId, param);
     }
 
@@ -628,12 +630,13 @@ public class ColumnServiceImpl implements ColumnService {
             return;
         }
 
-        ColumnRestoredParam param = new ColumnRestoredParam();
-        param.setColumnId(columnId);
-        param.setColumnName(column.getName());
-        param.setActionUrl(InkConstant.COLUMN_URL + columnId);
-        param.setSenderId(column.getUserId());
-        param.setNotificationType(NotificationType.COLUMN_RESTORED);
+        ColumnRestoredParam param = ColumnRestoredParam.builder()
+                .columnId(columnId)
+                .columnName(column.getName())
+                .actionUrl(InkConstant.COLUMN_URL + columnId)
+                .senderId(column.getUserId())
+                .notificationType(NotificationType.COLUMN_RESTORED)
+                .build();
 
         columnSubscriptionService.notifySubscribers(columnId, param);
     }

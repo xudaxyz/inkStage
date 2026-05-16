@@ -1,10 +1,10 @@
 package com.inkstage.notification.param;
 
 import com.inkstage.notification.NotificationParam;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 /**
  * 专栏发布新文章通知参数
@@ -26,8 +26,8 @@ import lombok.NoArgsConstructor;
  * ====================================================================================
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class ColumnArticlePublishParam extends NotificationParam {
 

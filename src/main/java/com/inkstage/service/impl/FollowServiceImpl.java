@@ -79,12 +79,13 @@ public class FollowServiceImpl implements FollowService {
                 userMapper.updateByPrimaryKeySelective(following);
 
                 // 发送关注通知给被关注者
-                FollowParam param = new FollowParam();
-                param.setUserId(followingId);
-                param.setFollowerId(followerId);
-                param.setUsername(follower != null ? follower.getNickname() : "未知用户");
-                param.setSenderId(followerId);
-                param.setNotificationType(NotificationType.FOLLOW);
+                FollowParam param = FollowParam.builder()
+                        .userId(followingId)
+                        .followerId(followerId)
+                        .username(follower != null ? follower.getNickname() : "未知用户")
+                        .senderId(followerId)
+                        .notificationType(NotificationType.FOLLOW)
+                        .build();
                 notificationService.send(param);
             }
         }
@@ -164,7 +165,8 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public List<Long> getFollowingList(Long followerId, Integer offset, Integer limit) {
         String cacheKey = CacheKey.keyForFollowingList(followerId, offset, limit);
-        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+        });
         if (result != null && !result.isEmpty()) {
             return result;
         }
@@ -186,7 +188,8 @@ public class FollowServiceImpl implements FollowService {
     @Override
     public List<Long> getFollowerList(Long followingId, Integer offset, Integer limit) {
         String cacheKey = CacheKey.keyForFollowerList(followingId, offset, limit);
-        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+        List<Long> result = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+        });
         if (result != null && !result.isEmpty()) {
             return result;
         }

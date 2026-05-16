@@ -88,13 +88,14 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
             cacheClearService.clearColumnSubscriptionCache(columnId, user.getId());
             columnMapper.updateSubscriptionCount(columnId, 1);
 
-            ColumnSubscriptionParam param = new ColumnSubscriptionParam();
-            param.setUserId(column.getUserId());
-            param.setSenderId(user.getId());
-            param.setColumnId(columnId);
-            param.setColumnName(column.getName());
-            param.setSubscriberName(user.getNickname());
-            param.setNotificationType(NotificationType.COLUMN_SUBSCRIPTION);
+            ColumnSubscriptionParam param = ColumnSubscriptionParam.builder()
+                    .userId(column.getUserId())
+                    .senderId(user.getId())
+                    .columnId(columnId)
+                    .columnName(column.getName())
+                    .subscriberName(user.getNickname())
+                    .notificationType(NotificationType.COLUMN_SUBSCRIPTION)
+                    .build();
             notificationService.send(param);
         }
 
@@ -224,36 +225,36 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     private NotificationParam copyParam(NotificationParam param) {
         switch (param) {
             case ColumnArticlePublishParam p -> {
-                ColumnArticlePublishParam col = new ColumnArticlePublishParam();
-                col.setColumnId(p.getColumnId());
-                col.setColumnName(p.getColumnName());
-                col.setArticleId(p.getArticleId());
-                col.setArticleTitle(p.getArticleTitle());
-                col.setArticleUrl(p.getArticleUrl());
-                col.setUserId(p.getUserId());
-                col.setNotificationType(p.getNotificationType());
-                col.setSenderId(p.getSenderId());
-                return col;
+                return ColumnArticlePublishParam.builder()
+                        .columnId(p.getColumnId())
+                        .columnName(p.getColumnName())
+                        .articleId(p.getArticleId())
+                        .articleTitle(p.getArticleTitle())
+                        .articleUrl(p.getArticleUrl())
+                        .userId(p.getUserId())
+                        .senderId(p.getSenderId())
+                        .notificationType(p.getNotificationType())
+                        .build();
             }
             case ColumnDisabledParam p -> {
-                ColumnDisabledParam col = new ColumnDisabledParam();
-                col.setColumnId(p.getColumnId());
-                col.setColumnName(p.getColumnName());
-                col.setReason(p.getReason());
-                col.setUserId(p.getUserId());
-                col.setNotificationType(p.getNotificationType());
-                col.setSenderId(p.getSenderId());
-                return col;
+                return ColumnDisabledParam.builder()
+                        .columnId(p.getColumnId())
+                        .columnName(p.getColumnName())
+                        .reason(p.getReason())
+                        .userId(p.getUserId())
+                        .notificationType(p.getNotificationType())
+                        .senderId(p.getSenderId())
+                        .build();
             }
             case ColumnRestoredParam p -> {
-                ColumnRestoredParam col = new ColumnRestoredParam();
-                col.setColumnId(p.getColumnId());
-                col.setColumnName(p.getColumnName());
-                col.setActionUrl(p.getActionUrl());
-                col.setUserId(p.getUserId());
-                col.setNotificationType(p.getNotificationType());
-                col.setSenderId(p.getSenderId());
-                return col;
+                return ColumnRestoredParam.builder()
+                        .columnId(p.getColumnId())
+                        .columnName(p.getColumnName())
+                        .actionUrl(p.getActionUrl())
+                        .userId(p.getUserId())
+                        .notificationType(p.getNotificationType())
+                        .senderId(p.getSenderId())
+                        .build();
             }
             case null, default -> {
                 return param;

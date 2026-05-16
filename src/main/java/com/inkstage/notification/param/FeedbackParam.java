@@ -1,7 +1,7 @@
 package com.inkstage.notification.param;
 
 import com.inkstage.notification.NotificationParam;
-import lombok.AllArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
  * ======================================================================
  */
 @Data
-@AllArgsConstructor
+@SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class FeedbackParam extends NotificationParam {

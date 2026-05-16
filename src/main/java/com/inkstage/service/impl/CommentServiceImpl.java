@@ -185,15 +185,16 @@ public class CommentServiceImpl implements CommentService {
         Long articleUserId = article.getUserId();
         // 只有当评论者不是文章作者时才发送通知给文章作者
         if (!currentUser.getId().equals(articleUserId)) {
-            ArticleCommentParam param = new ArticleCommentParam();
-            param.setUserId(articleUserId);
-            param.setUsername(currentUser.getNickname());
-            param.setArticleTitle(article.getTitle());
-            param.setCommentContent(comment.getContent());
-            param.setArticleId(comment.getArticleId());
-            param.setArticleUrl(InkConstant.ARTICLE_URL + comment.getArticleId());
-            param.setSenderId(currentUser.getId());
-            param.setNotificationType(NotificationType.ARTICLE_COMMENT);
+            ArticleCommentParam param = ArticleCommentParam.builder()
+                    .userId(articleUserId)
+                    .username(currentUser.getNickname())
+                    .articleTitle(article.getTitle())
+                    .commentContent(comment.getContent())
+                    .articleId(comment.getArticleId())
+                    .articleUrl(InkConstant.ARTICLE_URL + comment.getArticleId())
+                    .senderId(currentUser.getId())
+                    .notificationType(NotificationType.ARTICLE_COMMENT)
+                    .build();
             notificationService.send(param);
         }
     }
@@ -208,15 +209,15 @@ public class CommentServiceImpl implements CommentService {
         Comment parentComment = commentMapper.findById(comment.getParentId());
         // 发送回复评论通知给父评论作者
         if (parentComment != null && !parentComment.getUserId().equals(currentUser.getId())) {
-            CommentReplyParam param = new CommentReplyParam();
-            param.setUserId(parentComment.getUserId());
-            param.setUsername(currentUser.getNickname());
-            param.setCommentContent(comment.getContent());
-
-            param.setArticleId(comment.getArticleId());
-            param.setArticleUrl(InkConstant.ARTICLE_URL + comment.getArticleId());
-            param.setSenderId(currentUser.getId());
-            param.setNotificationType(NotificationType.COMMENT_REPLY);
+            CommentReplyParam param = CommentReplyParam.builder()
+                    .userId(parentComment.getUserId())
+                    .username(currentUser.getNickname())
+                    .commentContent(comment.getContent())
+                    .articleId(comment.getArticleId())
+                    .articleUrl(InkConstant.ARTICLE_URL + comment.getArticleId())
+                    .senderId(currentUser.getId())
+                    .notificationType(NotificationType.COMMENT_REPLY)
+                    .build();
             notificationService.send(param);
         }
     }
@@ -404,12 +405,13 @@ public class CommentServiceImpl implements CommentService {
 
             // 评论审核拒绝通知
             if (status == ReviewStatus.REJECTED) {
-                CommentReviewRejectParam param = new CommentReviewRejectParam();
-                param.setUserId(comment.getUserId());
-                param.setReason(reviewReason);
-                param.setArticleId(comment.getArticleId());
-                param.setSenderId(UserContext.getCurrentUserId());
-                param.setNotificationType(NotificationType.COMMENT_REVIEW_REJECT);
+                CommentReviewRejectParam param = CommentReviewRejectParam.builder()
+                        .userId(comment.getUserId())
+                        .reason(reviewReason)
+                        .articleId(comment.getArticleId())
+                        .senderId(UserContext.getCurrentUserId())
+                        .notificationType(NotificationType.COMMENT_REVIEW_REJECT)
+                        .build();
                 notificationService.send(param);
             }
 

@@ -7,7 +7,9 @@ import com.inkstage.dto.admin.ReportHandleDTO;
 import com.inkstage.dto.front.ReportCreateDTO;
 import com.inkstage.entity.model.Report;
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.*;
+import com.inkstage.enums.ReportStatus;
+import com.inkstage.enums.ReportTargetType;
+import com.inkstage.enums.ReportTypeEnum;
 import com.inkstage.enums.common.DefaultStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
@@ -15,7 +17,8 @@ import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ReportMapper;
 import com.inkstage.notification.param.ReportParam;
 import com.inkstage.notification.param.ReportResultParam;
-import com.inkstage.service.*;
+import com.inkstage.service.NotificationService;
+import com.inkstage.service.ReportService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ReportListVO;
@@ -70,12 +73,13 @@ public class ReportServiceImpl implements ReportService {
         // 保存举报
         reportMapper.insert(report);
 
-        ReportParam param = new ReportParam();
-        param.setUserId(report.getReporterId());
-        param.setReportedContent(report.getReportedContent());
-        param.setRelatedId(report.getRelatedId());
-        param.setSenderId(currentUser.getId());
-        param.setNotificationType(NotificationType.REPORT);
+        ReportParam param = ReportParam.builder()
+                .userId(report.getReporterId())
+                .reportedContent(report.getReportedContent())
+                .relatedId(report.getRelatedId())
+                .senderId(currentUser.getId())
+                .notificationType(NotificationType.REPORT)
+                .build();
         notificationService.send(param);
 
         log.info("用户 {} 举报了 {} {}，举报类型：{}",
@@ -134,12 +138,13 @@ public class ReportServiceImpl implements ReportService {
         report.setUpdateTime(LocalDateTime.now());
         reportMapper.update(report);
 
-        ReportResultParam param = new ReportResultParam();
-        param.setUserId(report.getReporterId());
-        param.setHandleResult(report.getHandleResult().getDesc());
-        param.setRelatedId(report.getRelatedId());
-        param.setSenderId(handlerId);
-        param.setNotificationType(NotificationType.REPORT_RESULT);
+        ReportResultParam param = ReportResultParam.builder()
+                .userId(report.getReporterId())
+                .handleResult(report.getHandleResult().getDesc())
+                .relatedId(report.getRelatedId())
+                .senderId(handlerId)
+                .notificationType(NotificationType.REPORT_RESULT)
+                .build();
         notificationService.send(param);
 
 

@@ -13,8 +13,8 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.notification.param.TagDeleteParam;
-import com.inkstage.service.TagService;
 import com.inkstage.service.NotificationService;
+import com.inkstage.service.TagService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
@@ -96,7 +96,8 @@ public class TagServiceImpl implements TagService {
         log.info("获取激活状态标签列表");
         try {
             String cacheKey = CacheKey.keyForTagsActive();
-            List<Tag> tags = cacheManager.getWithType(cacheKey, new TypeReference<>() {});
+            List<Tag> tags = cacheManager.getWithType(cacheKey, new TypeReference<>() {
+            });
             if (tags != null) {
                 return tags;
             }
@@ -164,9 +165,9 @@ public class TagServiceImpl implements TagService {
                 tag.setSlug(tag.getSlug().toLowerCase());
             }
             tagMapper.update(tag);
-            
+
             cacheManager.deletePattern(CacheKey.TAG);
-            
+
             return tag;
         } catch (Exception e) {
             log.error("更新标签失败", e);
@@ -193,19 +194,20 @@ public class TagServiceImpl implements TagService {
 
             // 发送通知
             for (Long userId : userIds) {
-                TagDeleteParam param = new TagDeleteParam();
-                param.setUserId(userId);
-                param.setTagName(tag.getName());
-                param.setTagId(tag.getId());
-                param.setSenderId(tag.getUserId());
-                param.setNotificationType(NotificationType.TAG_DELETE);
+                TagDeleteParam param = TagDeleteParam.builder()
+                        .userId(userId)
+                        .tagName(tag.getName())
+                        .tagId(tag.getId())
+                        .senderId(tag.getUserId())
+                        .notificationType(NotificationType.TAG_DELETE)
+                        .build();
                 notificationService.send(param);
             }
 
             // 执行删除操作
             tagMapper.deleteById(id);
             log.info("删除标签并发送通知成功, 标签ID: {}", id);
-            
+
             cacheManager.deletePattern(CacheKey.TAG);
         } catch (BusinessException e) {
             throw e;
@@ -223,9 +225,9 @@ public class TagServiceImpl implements TagService {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
             tagMapper.updateStatus(id, status);
-            
+
             cacheManager.deletePattern(CacheKey.TAG);
-            
+
             return tagMapper.findById(id);
         } catch (Exception e) {
             log.error("更新标签状态失败", e);
@@ -247,9 +249,9 @@ public class TagServiceImpl implements TagService {
                 existingTag.setUsageCount(existingTag.getUsageCount() + 1);
                 existingTag.setUpdateTime(LocalDateTime.now());
                 tagMapper.update(existingTag);
-                
+
                 cacheManager.deletePattern(CacheKey.TAG);
-                
+
                 return existingTag.getId();
             }
 
@@ -270,9 +272,9 @@ public class TagServiceImpl implements TagService {
 
             tagMapper.insert(tag);
             log.info("创建新标签成功: {}", tag.getName());
-            
+
             cacheManager.deletePattern(CacheKey.TAG);
-            
+
             return tag.getId();
         } catch (Exception e) {
             log.error("创建标签失败", e);

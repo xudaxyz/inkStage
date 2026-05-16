@@ -1,5 +1,6 @@
 package com.inkstage.service.impl;
 
+import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.entity.model.Article;
@@ -9,7 +10,6 @@ import com.inkstage.enums.notification.NotificationType;
 import com.inkstage.mapper.ArticleLikeMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.ArticleLikeParam;
-import com.inkstage.cache.service.CacheClearService;
 import com.inkstage.service.ArticleLikeService;
 import com.inkstage.service.CountService;
 import com.inkstage.service.NotificationService;
@@ -73,14 +73,15 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
 
                 // 只有当点赞者不是文章作者时才发送通知
                 if (!userId.equals(articleUserId)) {
-                    ArticleLikeParam param = new ArticleLikeParam();
-                    param.setUserId(articleUserId);
-                    param.setUsername(currentUserNickname);
-                    param.setArticleTitle(articleTitle);
-                    param.setArticleId(articleId);
-                    param.setArticleUrl(InkConstant.ARTICLE_URL + articleId);
-                    param.setSenderId(userId);
-                    param.setNotificationType(NotificationType.ARTICLE_LIKE);
+                    ArticleLikeParam param = ArticleLikeParam.builder()
+                            .userId(articleUserId)
+                            .username(currentUserNickname)
+                            .articleTitle(articleTitle)
+                            .articleId(articleId)
+                            .articleUrl(InkConstant.ARTICLE_URL + articleId)
+                            .senderId(userId)
+                            .notificationType(NotificationType.ARTICLE_LIKE)
+                            .build();
                     notificationService.send(param);
                 }
             }
