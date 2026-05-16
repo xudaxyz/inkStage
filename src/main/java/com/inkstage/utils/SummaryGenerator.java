@@ -1,5 +1,6 @@
 package com.inkstage.utils;
 
+
 /**
  * 文章摘要生成工具类
  * 使用截断方式生成摘要，去除Markdown格式后取前200字符内的首句
@@ -7,6 +8,21 @@ package com.inkstage.utils;
 public class SummaryGenerator {
 
     private static final int MAX_LENGTH = 180;
+
+    // 终止符集合
+    private static final boolean[] STOP_CHARS = new boolean[65536];
+
+    static {
+        // 初始化终止符：只需要初始化一次
+        STOP_CHARS['.'] = true;     // 英文句号
+        STOP_CHARS['。'] = true;    // 中文句号
+        STOP_CHARS['?'] = true;     // 英文问号
+        STOP_CHARS['？'] = true;    // 中文问号
+        STOP_CHARS['!'] = true;     // 英文感叹号
+        STOP_CHARS['！'] = true;    // 中文感叹号
+        STOP_CHARS['\n'] = true;    // 换行
+        STOP_CHARS['\r'] = true;    // 回车
+    }
 
     /**
      * 生成文章摘要
@@ -18,23 +34,21 @@ public class SummaryGenerator {
         if (content == null || content.isEmpty()) {
             return null;
         }
-
         String plainText = removeFormatting(content);
         if (plainText.isEmpty()) {
             return null;
         }
+        int length = Math.min(plainText.length(), MAX_LENGTH);
 
-        if (plainText.length() <= MAX_LENGTH) {
-            return plainText;
+        for (int i = 0; i < length; i++) {
+            char c = plainText.charAt(i);
+            if (STOP_CHARS[c]) {
+                return plainText.substring(0, i + 1).trim();
+            }
         }
 
-        String sub = plainText.substring(0, MAX_LENGTH);
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile("[。！？.!?\n]").matcher(sub);
-        if (matcher.find()) {
-            return sub.substring(0, matcher.start() + 1);
-        }
-
-        return sub + "...";
+        // 没有终止符，返回全文并去空格
+        return plainText.substring(0, length).trim();
     }
 
     /**
