@@ -51,4 +51,16 @@ public interface CountService {
      * @param delta     增量
      */
     void syncToDatabase(CountType countType, Long targetId, int delta);
+
+    /**
+     * 从数据库直接获取计数
+     * <p>
+     * 直接查询数据库中的计数值，不经过Redis缓存。
+     * 用于对账、补偿等需要获取真实数据的场景。
+     *
+     * @param countType 计数类型
+     * @param targetId  目标记录ID
+     * @return 数据库中的计数值，如果记录不存在返回null
+     */
+    Long getCountFromDatabase(CountType countType, Long targetId);
 }

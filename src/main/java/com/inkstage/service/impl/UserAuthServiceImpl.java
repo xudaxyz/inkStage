@@ -304,7 +304,8 @@ public class UserAuthServiceImpl implements UserAuthService {
 
     private void incrementLoginAttempts(String account) {
         String attemptKey = LOGIN_ATTEMPT + account;
-        cacheManager.increment(attemptKey);
+        Long increment = cacheManager.increment(attemptKey);
+        log.info("增加用户[{}]尝试登录次数: {}", account,  increment);
         cacheManager.expire(attemptKey, Duration.ofMinutes(LOCKOUT_TIME_MINUTES));
     }
 

@@ -109,6 +109,16 @@ public class CacheManagerImpl implements CacheManager {
     }
 
     @Override
+    public Set<String> scanKeys(String pattern) {
+        try {
+            return redisUtil.scanKeys(pattern);
+        } catch (Exception e) {
+            log.error("缓存键扫描失败, pattern: {}", pattern, e);
+            return Collections.emptySet();
+        }
+    }
+
+    @Override
     public void deletePattern(String pattern) {
         try {
             if (pattern.isEmpty()) {

@@ -98,7 +98,8 @@ public class NotificationCacheServiceImpl implements NotificationCacheService {
     @Override
     public void incrementUnreadCount(Long userId) {
         String key = NOTIFICATION_UNREAD_COUNT + userId;
-        cacheManager.increment(key);
+        Long increment = cacheManager.increment(key);
+        log.info("增加用户[{}] 通知未读数量: {}", userId, increment);
     }
 
     @Override

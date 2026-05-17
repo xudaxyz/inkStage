@@ -120,10 +120,8 @@ public class CountServiceImpl implements CountService {
         log.info("同步计数到数据库成功, 更新条数: [{}], 计数类型: [{}], 目标ID: [{}], 增量: [{}]", result, countType, targetId, delta);
     }
 
-    /**
-     * 从数据库获取计数初始值
-     */
-    private Long getCountFromDatabase(CountType countType, Long targetId) {
+    @Override
+    public Long getCountFromDatabase(CountType countType, Long targetId) {
         Long result = null;
         switch (countType) {
             case ARTICLE_READ -> result = articleMapper.getReadCount(targetId);

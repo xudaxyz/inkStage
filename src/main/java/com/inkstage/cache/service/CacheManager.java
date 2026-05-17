@@ -92,6 +92,16 @@ public interface CacheManager {
     long batchDelete(List<String> keys);
 
     /**
+     * 模式匹配扫描缓存键
+     * <p>使用Redis的SCAN命令进行模式匹配，支持通配符*和?</p>
+     * <p>注意：在大规模缓存环境中使用需谨慎，可能影响性能</p>
+     *
+     * @param pattern 键模式，如"inkstage:count:*"
+     * @return 匹配的键集合
+     */
+    Set<String> scanKeys(String pattern);
+
+    /**
      * 模式匹配删除缓存键
      * <p>使用Redis的KEYS命令进行模式匹配，支持通配符*和?</p>
      * <p>注意：在大规模缓存环境中使用需谨慎，可能影响性能</p>
