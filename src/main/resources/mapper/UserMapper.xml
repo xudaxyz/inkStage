@@ -509,6 +509,26 @@
         AND DATE(create_time) = #{date}
     </select>
 
+    <select id="getArticleCount" resultType="java.lang.Long">
+        SELECT article_count FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getFollowCount" resultType="java.lang.Long">
+        SELECT follow_count FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getFollowerCount" resultType="java.lang.Long">
+        SELECT follower_count FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getCommentCount" resultType="java.lang.Long">
+        SELECT comment_count FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getLikeCount" resultType="java.lang.Long">
+        SELECT like_count FROM user WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新用户文章数 -->
     <update id="updateArticleCount">
         UPDATE user

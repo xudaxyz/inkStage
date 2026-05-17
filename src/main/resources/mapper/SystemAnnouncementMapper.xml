@@ -116,6 +116,10 @@
         WHERE id = #{id} AND deleted = 0
     </update>
 
+    <select id="getReadCount" resultType="java.lang.Long">
+        SELECT read_count FROM system_announcement WHERE id = #{id} AND deleted = 0
+    </select>
+
     <update id="updateReadCount">
         UPDATE system_announcement
         SET read_count = read_count + #{delta}

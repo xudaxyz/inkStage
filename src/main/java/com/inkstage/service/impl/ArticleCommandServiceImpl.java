@@ -12,7 +12,6 @@ import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.ArticlePublishParam;
@@ -25,7 +24,6 @@ import com.inkstage.utils.SummaryGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -46,7 +44,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
     private final ArticleMapper articleMapper;
     private final ArticleTagService articleTagService;
     private final NotificationService notificationService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
     private final ColumnService columnService;
     private final AsyncArticleProcessServiceImpl asyncArticleProcessService;
     private final CacheClearService cacheClearService;
@@ -77,10 +75,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             // 更新分类文章数
             if (article.getCategoryId() != null) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), 1));
+                countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), 1);
             }
             // 更新用户文章数
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUser.getId(), 1));
+            countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUser.getId(), 1);
 
             log.info("文章创建成功, 文章ID: {}, 用户ID: {}", article.getId(), currentUser.getId());
 
@@ -173,10 +171,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
             if (!existingArticle.getCategoryId().equals(oldCategoryId)) {
                 if (oldCategoryId != null) {
-                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, oldCategoryId, -1));
+                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, oldCategoryId, -1);
                 }
                 if (existingArticle.getCategoryId() != null) {
-                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, existingArticle.getCategoryId(), 1));
+                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, existingArticle.getCategoryId(), 1);
                 }
             }
 
@@ -224,10 +222,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             int result = articleMapper.deleteById(articleId, currentUser.getId());
             boolean success = result > 0;
             if (success) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUser.getId(), -1));
+                countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUser.getId(), -1);
 
                 if (article.getCategoryId() != null) {
-                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
                 }
 
                 columnService.removeArticleColumnRelation(articleId);
@@ -273,10 +271,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
             int result = articleMapper.permanentDeleteById(articleId, currentUserId);
             boolean success = result > 0;
             if (success) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, currentUserId, -1));
+                countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUserId, -1);
 
                 if (article.getCategoryId() != null) {
-                    eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
                 }
 
                 columnService.removeArticleColumnRelation(articleId);

@@ -8,14 +8,12 @@ import com.inkstage.entity.model.SystemAnnouncement;
 import com.inkstage.enums.AnnouncementType;
 import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.StatusEnum;
-import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.SystemAnnouncementMapper;
 import com.inkstage.service.SystemAnnouncementService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -34,7 +32,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
     private final SystemAnnouncementMapper announcementMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
 
     @Override
     @Transactional
@@ -160,7 +158,7 @@ public class SystemAnnouncementServiceImpl implements SystemAnnouncementService 
 
     @Override
     public boolean incrementReadCount(Long id) {
-        eventPublisher.publishEvent(CountEvent.of(this, CountType.ANNOUNCEMENT_READ, id, 1));
+        countProducer.sendCountMessage(CountType.ANNOUNCEMENT_READ, id, 1);
         return true;
     }
 }

@@ -177,6 +177,18 @@
             AND deleted = 0
     </select>
 
+    <select id="getLikeCount" resultType="java.lang.Long">
+        SELECT like_count FROM comment WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getReplyCount" resultType="java.lang.Long">
+        SELECT reply_count FROM comment WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getReportCount" resultType="java.lang.Long">
+        SELECT report_count FROM comment WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新评论点赞数 -->
     <update id="updateLikeCount">
         UPDATE comment SET like_count = like_count + #{delta}, update_time = NOW() WHERE id = #{id} AND deleted = 0

@@ -126,6 +126,10 @@
         </foreach>
     </select>
 
+    <select id="getArticleCount" resultType="java.lang.Long">
+        SELECT article_count FROM category WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新分类文章数量 -->
     <update id="updateArticleCount">
         UPDATE category SET

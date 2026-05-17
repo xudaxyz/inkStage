@@ -10,9 +10,17 @@ import org.apache.ibatis.annotations.Param;
 public interface SearchHotWordMapper {
 
     /**
-     * 更新搜索热词搜索次数
+     * 获取热词搜索数
      *
      * @param id 热词ID
+     * @return 搜索数
+     */
+    Long getSearchCount(@Param("id") Long id);
+
+    /**
+     * 更新搜索热词搜索次数
+     *
+     * @param id    热词ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */

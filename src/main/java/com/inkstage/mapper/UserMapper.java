@@ -22,9 +22,10 @@ import java.util.List;
 public interface UserMapper {
 
     // ==================== 查询（Read） ====================
-    
+
     /**
      * 根据主键查询用户
+     *
      * @param id 用户ID
      * @return 用户信息
      */
@@ -32,6 +33,7 @@ public interface UserMapper {
 
     /**
      * 根据用户ID查询用户版本号
+     *
      * @param id 用户ID
      * @return 用户版本号
      */
@@ -39,6 +41,7 @@ public interface UserMapper {
 
     /**
      * 根据用户名查询用户
+     *
      * @param username 用户名
      * @return 用户信息
      */
@@ -46,6 +49,7 @@ public interface UserMapper {
 
     /**
      * 根据邮箱查询用户
+     *
      * @param email 邮箱
      * @return 用户信息
      */
@@ -53,6 +57,7 @@ public interface UserMapper {
 
     /**
      * 根据手机号查询用户
+     *
      * @param phone 手机号
      * @return 用户信息
      */
@@ -60,17 +65,18 @@ public interface UserMapper {
 
     /**
      * 分页查询用户
-     * @param offset 偏移量
-     * @param pageSize 每页大小
-     * @param keyword 关键词
-     * @param role 角色
-     * @param status 状态
+     *
+     * @param offset    偏移量
+     * @param pageSize  每页大小
+     * @param keyword   关键词
+     * @param role      角色
+     * @param status    状态
      * @param startDate 开始日期
-     * @param endDate 结束日期
+     * @param endDate   结束日期
      * @return 用户列表
      */
     List<User> findByPage(
-            @Param("offset") Integer offset, 
+            @Param("offset") Integer offset,
             @Param("pageSize") Integer pageSize,
             @Param("keyword") String keyword,
             @Param("role") UserRoleEnum role,
@@ -81,6 +87,7 @@ public interface UserMapper {
 
     /**
      * 查询热门用户
+     *
      * @param limit 限制数量
      * @return 热门用户列表
      */
@@ -88,22 +95,25 @@ public interface UserMapper {
 
     /**
      * 查询用户最近发布的文章
+     *
      * @param userId 用户ID
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 最近文章列表
      */
     List<AdminUserArticleVO> findRecentArticles(@Param("userId") Long userId, @Param("limit") Integer limit);
 
     /**
      * 查询用户最近发布的评论
+     *
      * @param userId 用户ID
-     * @param limit 限制数量
+     * @param limit  限制数量
      * @return 最近评论列表
      */
     List<AdminUserCommentVO> findRecentComments(@Param("userId") Long userId, @Param("limit") Integer limit);
 
     /**
      * 批量查询用户
+     *
      * @param ids 用户ID列表
      * @return 用户列表
      */
@@ -111,7 +121,8 @@ public interface UserMapper {
 
     /**
      * 根据角色查询用户
-     * @param role 角色
+     *
+     * @param role  角色
      * @param limit 限制数量
      * @return 用户列表
      */
@@ -119,6 +130,7 @@ public interface UserMapper {
 
     /**
      * 管理员根据ID获取用户详情
+     *
      * @param id 用户ID
      * @return 用户详情
      */
@@ -126,24 +138,27 @@ public interface UserMapper {
 
     /**
      * 管理员分页查询用户列表
+     *
      * @param query 查询条件
      * @return 用户列表
      */
     List<AdminUserListVO> findAdminUserList(@Param("query") AdminUserQueryDTO query);
 
     // ==================== 新增（Create） ====================
-    
+
     /**
      * 新增用户
+     *
      * @param user 用户信息
      * @return 影响行数
      */
     int insert(User user);
 
     // ==================== 更新（Update） ====================
-    
+
     /**
      * 根据主键更新用户信息(选择性更新)
+     *
      * @param user 用户信息
      * @return 影响行数
      */
@@ -151,7 +166,8 @@ public interface UserMapper {
 
     /**
      * 更新用户状态
-     * @param id 用户ID
+     *
+     * @param id     用户ID
      * @param status 状态
      * @return 受影响的行数
      */
@@ -159,7 +175,8 @@ public interface UserMapper {
 
     /**
      * 更新用户最后登录时间
-     * @param id 用户ID
+     *
+     * @param id            用户ID
      * @param lastLoginTime 最后登录时间
      * @return 影响行数
      */
@@ -167,6 +184,7 @@ public interface UserMapper {
 
     /**
      * 管理员更新用户详情
+     *
      * @param userDetailVO 用户详情
      * @return 影响行数
      */
@@ -174,58 +192,105 @@ public interface UserMapper {
 
     /**
      * 管理员更新用户状态
-     * @param id 用户ID
+     *
+     * @param id     用户ID
      * @param status 状态
      * @return 影响行数
      */
     int updateUserStatus(@Param("id") Long id, @Param("status") UserStatus status);
 
     // ==================== 删除（Delete） ====================
-    
+
     /**
      * 根据ID删除用户
+     *
      * @param id 用户ID
      * @return 影响行数
      */
     int deleteById(@Param("id") Long id);
 
     // ==================== 统计（Count） ====================
-    
+
+    /**
+     * 获取用户文章数
+     *
+     * @param id 用户ID
+     * @return 文章数
+     */
+    Long getArticleCount(@Param("id") Long id);
+
     /**
      * 更新用户文章数
-     * @param id 用户ID
+     *
+     * @param id    用户ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
     int updateArticleCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
-     * 更新用户关注数
+     * 获取用户关注数
+     *
      * @param id 用户ID
+     * @return 关注数
+     */
+    Long getFollowCount(@Param("id") Long id);
+
+    /**
+     * 更新用户关注数
+     *
+     * @param id    用户ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
     int updateFollowCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
-     * 更新用户粉丝数
+     * 获取用户粉丝数
+     *
      * @param id 用户ID
+     * @return 粉丝数
+     */
+    Long getFollowerCount(@Param("id") Long id);
+
+    /**
+     * 更新用户粉丝数
+     *
+     * @param id    用户ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
     int updateFollowerCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
-     * 更新用户评论数
+     * 获取用户评论数
+     *
      * @param id 用户ID
+     * @return 评论数
+     */
+    Long getCommentCount(@Param("id") Long id);
+
+    /**
+     * 更新用户评论数
+     *
+     * @param id    用户ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
     int updateCommentCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
-     * 更新用户获赞数
+     * 获取用户获赞数
+     *
      * @param id 用户ID
+     * @return 获赞数
+     */
+    Long getLikeCount(@Param("id") Long id);
+
+    /**
+     * 更新用户获赞数
+     *
+     * @param id    用户ID
      * @param delta 增量值（正数增加，负数减少）
      * @return 影响行数
      */
@@ -233,11 +298,12 @@ public interface UserMapper {
 
     /**
      * 统计用户总数
-     * @param keyword 关键词
-     * @param role 角色
-     * @param status 状态
+     *
+     * @param keyword   关键词
+     * @param role      角色
+     * @param status    状态
      * @param startDate 开始日期
-     * @param endDate 结束日期
+     * @param endDate   结束日期
      * @return 总数
      */
     long countByCondition(
@@ -250,6 +316,7 @@ public interface UserMapper {
 
     /**
      * 管理员统计用户总数
+     *
      * @param query 查询条件
      * @return 总数
      */
@@ -257,6 +324,7 @@ public interface UserMapper {
 
     /**
      * 根据角色代码获取用户ID列表
+     *
      * @param roleCode 角色代码
      * @return 用户ID列表
      */
@@ -264,24 +332,28 @@ public interface UserMapper {
 
     /**
      * 获取所有用户ID列表
+     *
      * @return 所有用户ID列表
      */
     List<Long> findAllUserIds();
 
     /**
      * 统计所有用户总数
+     *
      * @return 用户总数
      */
     long countAll();
 
     /**
      * 统计待审核用户数量
+     *
      * @return 待审核用户数量
      */
     long countPendingReviews();
 
     /**
      * 统计指定日期新增用户数
+     *
      * @param date 日期（格式：yyyy-MM-dd）
      * @return 新增用户数
      */

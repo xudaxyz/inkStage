@@ -109,6 +109,14 @@ public interface CommentMapper {
     int updateTop(@Param("id") Long id, @Param("top") Integer top, @Param("topOrder") Integer topOrder);
 
     /**
+     * 获取评论点赞数
+     *
+     * @param id 评论ID
+     * @return 点赞数
+     */
+    Long getLikeCount(@Param("id") Long id);
+
+    /**
      * 原子更新评论点赞数
      *
      * @param id    评论ID
@@ -118,6 +126,14 @@ public interface CommentMapper {
     int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
+     * 获取评论回复数
+     *
+     * @param id 评论ID
+     * @return 回复数
+     */
+    Long getReplyCount(@Param("id") Long id);
+
+    /**
      * 原子更新评论回复数
      *
      * @param id    评论ID
@@ -125,6 +141,14 @@ public interface CommentMapper {
      * @return 影响行数
      */
     int updateReplyCount(@Param("id") Long id, @Param("delta") int delta);
+
+    /**
+     * 获取评论举报数
+     *
+     * @param id 评论ID
+     * @return 举报数
+     */
+    Long getReportCount(@Param("id") Long id);
 
     /**
      * 原子更新评论举报数

@@ -46,6 +46,10 @@
         WHERE id = #{id}
     </update>
 
+    <select id="getArticleCount" resultType="java.lang.Long">
+        SELECT article_count FROM collection_folder WHERE id = #{id} AND deleted = 0
+    </select>
+
     <update id="updateArticleCount">
         UPDATE collection_folder
         SET article_count = article_count + #{delta}, update_time = NOW()

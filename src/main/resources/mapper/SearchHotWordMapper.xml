@@ -13,6 +13,10 @@
         <result column="update_time" property="updateTime"/>
     </resultMap>
 
+    <select id="getSearchCount" resultType="java.lang.Long">
+        SELECT search_count FROM search_hot_word WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新搜索热词搜索次数 -->
     <update id="updateSearchCount">
         UPDATE search_hot_word

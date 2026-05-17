@@ -11,7 +11,6 @@ import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.common.StatusEnum;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.TagMapper;
 import com.inkstage.notification.param.TagDeleteParam;
@@ -21,7 +20,6 @@ import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +41,7 @@ public class TagServiceImpl implements TagService {
     private final NotificationService notificationService;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
 
     @Override
     public List<Tag> getAllTags() {
@@ -248,8 +246,8 @@ public class TagServiceImpl implements TagService {
             Tag existingTag = tagMapper.findByName(tag.getName());
             if (existingTag != null) {
                 log.info("标签已存在: {}", tag.getName());
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_ARTICLE, existingTag.getId(), 1));
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.TAG_USAGE, existingTag.getId(), 1));
+                countProducer.sendCountMessage(CountType.TAG_ARTICLE, existingTag.getId(), 1);
+                countProducer.sendCountMessage(CountType.TAG_USAGE, existingTag.getId(), 1);
 
                 cacheManager.deletePattern(CacheKey.TAG);
 

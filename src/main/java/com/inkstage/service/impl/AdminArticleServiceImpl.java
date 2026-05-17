@@ -12,7 +12,6 @@ import com.inkstage.enums.CountType;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.notification.param.*;
@@ -23,7 +22,6 @@ import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,7 +41,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     private final NotificationService notificationService;
     private final CacheClearService cacheClearService;
     private final ColumnService columnService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
 
     @Override
     public PageResult<AdminArticleVO> getAdminArticlesByPage(AdminArticleQueryDTO queryDTO) {
@@ -415,10 +413,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 解除文章与专栏的关联并更新专栏文章数
             columnService.removeArticleColumnRelation(id);
             // 更新用户文章数
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, article.getUserId(), -1));
+            countProducer.sendCountMessage(CountType.USER_ARTICLE, article.getUserId(), -1);
             // 更新分类的文章数
             if (article.getCategoryId() != null) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
             }
             ArticleDeleteParam param = ArticleDeleteParam.builder()
                     .userId(article.getUserId())
@@ -454,10 +452,10 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             // 解除文章与专栏的关联并更新专栏文章数
             columnService.removeArticleColumnRelation(id);
             // 更新用户文章数
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_ARTICLE, article.getUserId(), -1));
+            countProducer.sendCountMessage(CountType.USER_ARTICLE, article.getUserId(), -1);
             // 更新分类文章数
             if (article.getCategoryId() != null) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1));
+                countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
             }
             ArticleDeleteParam param = ArticleDeleteParam.builder()
                     .userId(article.getUserId())

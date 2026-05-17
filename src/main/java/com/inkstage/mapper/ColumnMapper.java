@@ -37,9 +37,9 @@ public interface ColumnMapper {
     /**
      * 分页查询专栏列表
      *
-     * @param queryDTO  查询条件（包含关键词、用户ID）
-     * @param offset    偏移量
-     * @param pageSize  每页大小
+     * @param queryDTO 查询条件（包含关键词、用户ID）
+     * @param offset   偏移量
+     * @param pageSize 每页大小
      * @return 专栏列表VO
      */
     List<ColumnListVO> findColumnList(@Param("query") ColumnQueryDTO queryDTO, @Param("offset") int offset, @Param("pageSize") int pageSize);
@@ -98,27 +98,51 @@ public interface ColumnMapper {
     int update(Column column);
 
     /**
+     * 获取专栏文章数
+     *
+     * @param id 专栏ID
+     * @return 文章数
+     */
+    Long getArticleCount(@Param("id") Long id);
+
+    /**
      * 更新专栏文章数量
      *
-     * @param id     专栏ID
+     * @param id    专栏ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响的行数
      */
     int updateArticleCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
+     * 获取专栏阅读数
+     *
+     * @param id 专栏ID
+     * @return 阅读数
+     */
+    Long getReadCount(@Param("id") Long id);
+
+    /**
      * 更新专栏阅读量
      *
-     * @param id     专栏ID
+     * @param id    专栏ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响的行数
      */
     int updateReadCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
+     * 获取专栏订阅数
+     *
+     * @param id 专栏ID
+     * @return 订阅数
+     */
+    Long getSubscriptionCount(@Param("id") Long id);
+
+    /**
      * 更新专栏订阅数
      *
-     * @param id     专栏ID
+     * @param id    专栏ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响的行数
      */
@@ -143,9 +167,10 @@ public interface ColumnMapper {
 
     /**
      * 统计当前用户的专栏列表数量
-     * @param userId 用户id
-     * @param keyword 关键词
-     * @param offset 偏移量
+     *
+     * @param userId   用户id
+     * @param keyword  关键词
+     * @param offset   偏移量
      * @param pageSize 每页数量
      * @return 当前用户的专栏列表数量
      */

@@ -8,7 +8,6 @@ import com.inkstage.entity.model.User;
 import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.FollowMapper;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.notification.param.FollowParam;
@@ -17,7 +16,6 @@ import com.inkstage.service.NotificationService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -38,7 +36,7 @@ public class FollowServiceImpl implements FollowService {
     private final NotificationService notificationService;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
 
     /**
      * 关注用户
@@ -67,8 +65,8 @@ public class FollowServiceImpl implements FollowService {
 
         int result = followMapper.insert(follow);
         if (result > 0) {
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOW, followerId, 1));
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOWER, followingId, 1));
+            countProducer.sendCountMessage(CountType.USER_FOLLOW, followerId, 1);
+            countProducer.sendCountMessage(CountType.USER_FOLLOWER, followingId, 1);
 
             User follower = userMapper.findById(followerId);
             FollowParam param = FollowParam.builder()
@@ -98,8 +96,8 @@ public class FollowServiceImpl implements FollowService {
     public boolean unfollowUser(Long followerId, Long followingId) {
         int result = followMapper.delete(followerId, followingId);
         if (result > 0) {
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOW, followerId, -1));
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.USER_FOLLOWER, followingId, -1));
+            countProducer.sendCountMessage(CountType.USER_FOLLOW, followerId, -1);
+            countProducer.sendCountMessage(CountType.USER_FOLLOWER, followingId, -1);
         }
 
         cacheManager.deletePattern(CacheKey.FOLLOW);

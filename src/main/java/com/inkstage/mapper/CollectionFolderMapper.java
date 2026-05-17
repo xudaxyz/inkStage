@@ -13,7 +13,7 @@ import java.util.List;
 public interface CollectionFolderMapper {
 
     // ==================== 查询（Read） ====================
-    
+
     /**
      * 根据ID查询收藏文件夹
      *
@@ -41,14 +41,15 @@ public interface CollectionFolderMapper {
 
     /**
      * 根据用户ID和文件夹ID查询收藏文件夹
-     * @param userId 用户ID
+     *
+     * @param userId   用户ID
      * @param folderId 文件夹ID
      * @return 收藏文件夹
      */
     CollectionFolder selectByUserIdAndFolderId(@Param("userId") Long userId, @Param("folderId") Long folderId);
 
     // ==================== 新增（Create） ====================
-    
+
     /**
      * 插入收藏文件夹
      *
@@ -58,7 +59,7 @@ public interface CollectionFolderMapper {
     int insert(CollectionFolder folder);
 
     // ==================== 更新（Update） ====================
-    
+
     /**
      * 更新收藏文件夹
      *
@@ -66,6 +67,14 @@ public interface CollectionFolderMapper {
      * @return 影响行数
      */
     int update(CollectionFolder folder);
+
+    /**
+     * 获取收藏夹文章数
+     *
+     * @param id 文件夹ID
+     * @return 文章数
+     */
+    Long getArticleCount(@Param("id") Long id);
 
     /**
      * 更新文件夹文章数量
@@ -77,7 +86,7 @@ public interface CollectionFolderMapper {
     int updateArticleCount(@Param("folderId") Long folderId, @Param("delta") int delta);
 
     // ==================== 删除（Delete） ====================
-    
+
     /**
      * 删除收藏文件夹
      *

@@ -13,18 +13,19 @@ import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.mapper.ArticleCollectionMapper;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CollectionFolderMapper;
 import com.inkstage.notification.param.ArticleCollectionParam;
-import com.inkstage.service.*;
+import com.inkstage.service.ArticleCollectionService;
+import com.inkstage.service.CollectionFolderService;
+import com.inkstage.service.FileService;
+import com.inkstage.service.NotificationService;
 import com.inkstage.utils.SnowflakeIdGenerator;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,7 +42,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
     private final ArticleCollectionMapper articleCollectionMapper;
     private final CollectionFolderMapper collectionFolderMapper;
-    private final ApplicationEventPublisher eventPublisher;
+    private final CountProducer countProducer;
     private final FileService fileService;
     private final CollectionFolderService collectionFolderService;
     private final NotificationService notificationService;
@@ -89,10 +90,10 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
         if (result > 0) {
             // 增加收藏数
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COLLECTION, collectArticleDTO.getArticleId(), 1));
+            countProducer.sendCountMessage(CountType.ARTICLE_COLLECTION, collectArticleDTO.getArticleId(), 1);
             // 更新收藏文件夹文章数量
             if (folderId != null && folderId > 0) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.FOLDER_ARTICLE, folderId, result));
+                countProducer.sendCountMessage(CountType.FOLDER_ARTICLE, folderId, result);
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 增加数量: {}", folderId, result);
             }
 
@@ -148,10 +149,10 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
         if (result > 0) {
             // 减少收藏数
-            eventPublisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COLLECTION, articleId, -1));
+            countProducer.sendCountMessage(CountType.ARTICLE_COLLECTION, articleId, -1);
             // 更新收藏文件夹文章数量
             if (folderId != null && folderId > 0) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.FOLDER_ARTICLE, folderId, -1));
+                countProducer.sendCountMessage(CountType.FOLDER_ARTICLE, folderId, -1);
                 log.info("更新收藏文件夹文章数量, 文件夹ID: {}, 减少数量: {}", folderId, result);
             }
             // 清理收藏状态缓存
@@ -262,13 +263,13 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         if (updateResult > 0) {
             // 更新源文件夹文章数量(减少)
             if (sourceFolderId != null && sourceFolderId > 0) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.FOLDER_ARTICLE, sourceFolderId, -1));
+                countProducer.sendCountMessage(CountType.FOLDER_ARTICLE, sourceFolderId, -1);
                 log.info("更新源收藏文件夹文章数量, 文件夹ID: {}, 减少数量: 1", sourceFolderId);
             }
 
             // 更新目标文件夹文章数量(增加)
             if (targetFolderId > 0) {
-                eventPublisher.publishEvent(CountEvent.of(this, CountType.FOLDER_ARTICLE, targetFolderId, 1));
+                countProducer.sendCountMessage(CountType.FOLDER_ARTICLE, targetFolderId, 1);
                 log.info("更新目标收藏文件夹文章数量, 文件夹ID: {}, 增加数量: 1", targetFolderId);
             }
 

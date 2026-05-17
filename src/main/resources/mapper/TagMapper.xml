@@ -220,6 +220,14 @@
         AND deleted = 0
     </update>
 
+    <select id="getArticleCount" resultType="java.lang.Long">
+        SELECT article_count FROM tag WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getUsageCount" resultType="java.lang.Long">
+        SELECT usage_count FROM tag WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新标签文章数 -->
     <update id="updateArticleCount">
         UPDATE tag SET article_count = article_count + #{delta}, update_time = now() WHERE id = #{tagId} AND deleted = 0

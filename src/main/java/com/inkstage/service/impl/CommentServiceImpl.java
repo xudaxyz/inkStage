@@ -16,7 +16,6 @@ import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.event.CountEvent;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.ArticleMapper;
 import com.inkstage.mapper.CommentMapper;
@@ -32,7 +31,6 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.ArticleCommentVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,7 +46,7 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentMapper commentMapper;
     private final FileService fileService;
-    private final ApplicationEventPublisher publisher;
+    private final CountProducer countProducer;
     private final NotificationService notificationService;
     private final ArticleMapper articleMapper;
     private final CommentCacheService commentCacheService;
@@ -112,11 +110,11 @@ public class CommentServiceImpl implements CommentService {
             }
 
             if (comment.getParentId() != null && comment.getParentId() > 0) {
-                publisher.publishEvent(CountEvent.of(this, CountType.COMMENT_REPLY, comment.getParentId(), 1));
+                countProducer.sendCountMessage(CountType.COMMENT_REPLY, comment.getParentId(), 1);
             }
 
-            publisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COMMENT, comment.getArticleId(), 1));
-            publisher.publishEvent(CountEvent.of(this, CountType.USER_COMMENT, comment.getUserId(), 1));
+            countProducer.sendCountMessage(CountType.ARTICLE_COMMENT, comment.getArticleId(), 1);
+            countProducer.sendCountMessage(CountType.USER_COMMENT, comment.getUserId(), 1);
 
             if (comment.getParentId() != null && comment.getParentId() > 0) {
                 sendReplyCommentNotification(comment, currentUser);
@@ -303,11 +301,11 @@ public class CommentServiceImpl implements CommentService {
             }
 
             if (parentId != null && parentId > 0) {
-                publisher.publishEvent(CountEvent.of(this, CountType.COMMENT_REPLY, parentId, -1));
+                countProducer.sendCountMessage(CountType.COMMENT_REPLY, parentId, -1);
             }
 
-            publisher.publishEvent(CountEvent.of(this, CountType.ARTICLE_COMMENT, articleId, -1));
-            publisher.publishEvent(CountEvent.of(this, CountType.USER_COMMENT, deletedUserId, -1));
+            countProducer.sendCountMessage(CountType.ARTICLE_COMMENT, articleId, -1);
+            countProducer.sendCountMessage(CountType.USER_COMMENT, deletedUserId, -1);
 
             // 清理文章评论缓存、父评论回复缓存
             cacheClearService.clearArticleCommentCache(articleId);

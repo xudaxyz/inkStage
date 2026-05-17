@@ -171,7 +171,7 @@ public interface TagMapper {
     /**
      * 更新标签统计数据
      *
-     * @param tagId              标签ID
+     * @param tagId        标签ID
      * @param articleCount 文章数量变化值
      * @param usageCount   使用次数变化值
      * @return 影响行数
@@ -183,13 +183,21 @@ public interface TagMapper {
     /**
      * 批量更新标签统计数据
      *
-     * @param tagIds           标签ID列表
+     * @param tagIds       标签ID列表
      * @param articleCount 文章数量变化值
      * @param usageCount   使用次数变化值
      */
     void batchUpdateTagStats(@Param("tagIds") List<Long> tagIds,
                              @Param("articleCount") int articleCount,
                              @Param("usageCount") int usageCount);
+
+    /**
+     * 获取标签文章数
+     *
+     * @param id 标签ID
+     * @return 文章数
+     */
+    Long getArticleCount(@Param("id") Long id);
 
     /**
      * 更新标签文章数
@@ -199,6 +207,14 @@ public interface TagMapper {
      * @return 影响行数
      */
     int updateArticleCount(@Param("tagId") Long tagId, @Param("delta") int delta);
+
+    /**
+     * 获取标签使用数
+     *
+     * @param id 标签ID
+     * @return 使用数
+     */
+    Long getUsageCount(@Param("id") Long id);
 
     /**
      * 更新标签使用数

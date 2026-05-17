@@ -197,6 +197,18 @@
         WHERE id = #{id}
     </update>
 
+    <select id="getArticleCount" resultType="java.lang.Long">
+        SELECT article_count FROM `column` WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getReadCount" resultType="java.lang.Long">
+        SELECT read_count FROM `column` WHERE id = #{id} AND deleted = 0
+    </select>
+
+    <select id="getSubscriptionCount" resultType="java.lang.Long">
+        SELECT subscription_count FROM `column` WHERE id = #{id} AND deleted = 0
+    </select>
+
     <!-- 更新文章数量 -->
     <update id="updateArticleCount">
         UPDATE `column` SET article_count = article_count + #{delta}, update_time = NOW() WHERE id = #{id}
