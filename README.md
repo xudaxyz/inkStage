@@ -21,7 +21,6 @@ https://www.inkstage.cn
 | MyBatis | 4.0.0 | ORM 框架 |
 | MySQL | 9.5.0 | 关系型数据库 |
 | Redis | - | 缓存系统 |
-| RabbitMQ | - | 消息队列 |
 | Spring Security | - | 安全框架 |
 | OAuth2 | - | 认证授权 |
 | JWT | 10.5 | 令牌管理 |
@@ -47,32 +46,40 @@ inkStage/
 │   ├── main/
 │   │   ├── java/com/inkstage/
 │   │   │   ├── annotation/        # 自定义注解
-│   │   │   ├── cache/            # 缓存相关
-│   │   │   ├── common/           # 通用类
-│   │   │   ├── config/           # 配置类
-│   │   │   ├── constant/         # 常量定义
-│   │   │   ├── controller/       # 控制器
-│   │   │   ├── dto/              # 数据传输对象
-│   │   │   ├── entity/           # 实体类
-│   │   │   ├── enums/            # 枚举类
-│   │   │   ├── event/            # 事件处理
-│   │   │   ├── exception/        # 异常处理
-│   │   │   ├── handler/          # 处理器
-│   │   │   ├── mapper/           # MyBatis 映射
-│   │   │   ├── security/         # 安全相关
-│   │   │   ├── service/          # 服务层
-│   │   │   ├── utils/            # 工具类
-│   │   │   ├── vo/               # 视图对象
+│   │   │   ├── cache/             # 缓存相关
+│   │   │   │   ├── constant/      # 缓存常量（CacheKey, CacheTTL）
+│   │   │   │   ├── service/       # 缓存服务接口（CacheManager）
+│   │   │   │   │   └── impl/      # 缓存服务实现（CacheManagerImpl）
+│   │   │   │   └── utils/         # Redis工具类（RedisUtil）
+│   │   │   ├── common/            # 通用类
+│   │   │   ├── config/            # 配置类
+│   │   │   │   ├── oauth2/        # OAuth2配置
+│   │   │   │   ├── redis/         # Redis配置及Stream常量
+│   │   │   │   ├── scheduled/     # 定时任务
+│   │   │   │   └── security/      # 安全配置
+│   │   │   ├── constant/          # 常量定义
+│   │   │   ├── controller/        # 控制器
+│   │   │   ├── dto/               # 数据传输对象
+│   │   │   ├── entity/            # 实体类
+│   │   │   ├── enums/             # 枚举类
+│   │   │   ├── event/             # 事件/消息
+│   │   │   ├── exception/         # 异常处理
+│   │   │   ├── handler/           # 处理器
+│   │   │   ├── mapper/            # MyBatis 映射
+│   │   │   ├── notification/      # 通知参数对象
+│   │   │   ├── service/           # 服务层
+│   │   │   ├── utils/             # 工具类
+│   │   │   ├── vo/                # 视图对象
 │   │   │   └── InkStageApplication.java # 应用入口
 │   │   └── resources/
-│   │       ├── mapper/           # MyBatis XML 映射文件
-│   │       ├── jwt-keys/         # JWT 密钥
-│   │       ├── templates/        # 邮件模板
-│   │       ├── application.yml   # 主配置文件
+│   │       ├── mapper/            # MyBatis XML 映射文件
+│   │       ├── jwt-keys/          # JWT 密钥
+│   │       ├── templates/         # 邮件模板
+│   │       ├── application.yml    # 主配置文件
 │   │       └── application-dev.yml # 开发环境配置
-│   └── test/                     # 测试代码
-├── pom.xml                       # Maven 配置
-└── doc/                          # 文档
+│   └── test/                      # 测试代码
+├── pom.xml                        # Maven 配置
+└── doc/                           # 文档
 ```
 
 ## 架构设计
@@ -95,16 +102,21 @@ inkStage/
 | 通知模块 | 系统通知、互动通知 | NotificationController, NotificationService |
 | 搜索模块 | 文章搜索、热门搜索 | SearchController, SearchService |
 | 推荐模块 | 文章推荐、个性化推荐 | RecommendController, PersonalRecommendService |
+| 计数模块 | 统一计数管理、缓存同步、对账补偿 | CountService, CountConsumer, CountReconciliationScheduled |
 | 后台管理 | 用户、文章、评论等管理 | AdminUserController, AdminArticleController |
 
 ### 3. 数据流
 
 ```
 HTTP 请求 → Controller → Service → Mapper → 数据库
-                                     ↓
-                                Redis 缓存
-                                     ↓
-                            RabbitMQ 消息队列
+                  ↓
+           CountService / NotificationService
+                  ↓
+           Redis Stream（消息队列）
+                  ↓
+           CountConsumer / NotificationConsumer（定时轮询消费）
+                  ↓
+           Redis 缓存 + 数据库同步
 ```
 
 ## 核心功能
@@ -179,10 +191,11 @@ HTTP 请求 → Controller → Service → Mapper → 数据库
 ### 2. 性能优化
 
 - **Redis 缓存**：缓存热点数据，减少数据库查询
-- **异步处理**：使用 RabbitMQ 处理异步任务
+- **Redis Stream 消息队列**：异步处理计数和通知，支持幂等消费和死信队列
 - **分页查询**：使用 PageHelper 优化分页性能
-- **延迟加载**：MyBatis 延迟加载，减少不必要的关联查询
 - **连接池**：使用 HikariCP 连接池优化数据库连接
+- **定时任务线程池**：独立的 ScheduledExecutorService（4线程），避免定时任务互相阻塞
+- **计数对账补偿**：每天凌晨自动扫描 Redis 计数 Key 与 DB 对账，确保数据一致性
 
 ### 3. 可扩展性
 
@@ -195,7 +208,8 @@ HTTP 请求 → Controller → Service → Mapper → 数据库
 
 - **异常处理**：全局异常处理，统一错误响应
 - **事务管理**：声明式事务管理，确保数据一致性
-- **消息确认**：RabbitMQ 消息确认机制，确保消息可靠送达
+- **消息确认**：Redis Stream 消费者确认机制 + 死信队列，确保消息可靠送达
+- **计数对账**：定时对账任务自动修正 Redis 与 DB 的计数不一致
 - **日志系统**：详细的日志记录，便于问题排查
 
 ## 配置管理
@@ -209,8 +223,7 @@ HTTP 请求 → Controller → Service → Mapper → 数据库
 ### 2. 核心配置
 
 - **数据库配置**：MySQL 连接信息
-- **Redis 配置**：缓存服务器连接信息
-- **RabbitMQ 配置**：消息队列连接信息
+- **Redis 配置**：缓存服务器连接信息及 Stream 消息队列
 - **MinIO 配置**：对象存储服务配置
 - **JWT 配置**：令牌生成和验证配置
 - **邮件配置**：SMTP 服务器配置
@@ -262,12 +275,6 @@ services:
     ports:
       - "6379:6379"
 
-  rabbitmq:
-    image: rabbitmq:3.8-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-
   minio:
     image: minio/minio
     environment:
@@ -285,7 +292,6 @@ services:
     depends_on:
       - mysql
       - redis
-      - rabbitmq
       - minio
 ```
 
@@ -294,7 +300,6 @@ services:
 - **服务器选择**：推荐使用云服务器，如阿里云、腾讯云
 - **数据库**：使用云数据库 RDS，提高可靠性
 - **缓存**：使用云 Redis 服务
-- **消息队列**：使用云消息队列服务
 - **对象存储**：使用云对象存储服务，如 OSS、COS 等
 - **负载均衡**：配置负载均衡，提高系统可用性
 - **SSL 证书**：配置 HTTPS，提高安全性
@@ -355,7 +360,7 @@ services:
 
 - **数据库连接问题**：检查数据库服务状态、连接配置
 - **Redis 连接问题**：检查 Redis 服务状态、网络连接
-- **RabbitMQ 问题**：检查消息队列状态、消息堆积情况
+- **Redis Stream 堆积**：检查 Stream 消费者状态、消息堆积情况
 - **文件上传问题**：检查 MinIO 服务状态、存储空间
 - **性能问题**：检查慢查询、缓存命中率、线程池状态
 
@@ -404,8 +409,9 @@ services:
 - **缓存策略**：使用 Redis 缓存热点数据
 - **数据库优化**：使用索引、优化查询语句
 - **连接池**：使用 HikariCP 优化数据库连接
-- **异步处理**：使用 RabbitMQ 处理异步任务
+- **异步处理**：使用 Redis Stream 处理异步任务（计数、通知）
 - **线程池**：优化线程池配置，提高并发处理能力
+- **计数对账**：定时对账任务确保缓存与数据库数据一致性
 
 ### 2. API 优化
 
@@ -451,7 +457,7 @@ services:
 
 ## 总结
 
-InkStage 后端项目是一个功能完整、架构清晰的现代化内容管理系统后端。它采用了当前流行的技术栈，包括 Spring Boot 4.0.2、MyBatis、Redis、RabbitMQ 等，实现了用户管理、文章管理、评论互动、通知系统等核心功能。
+InkStage 后端项目是一个功能完整、架构清晰的现代化内容管理系统后端。它采用了当前流行的技术栈，包括 Spring Boot 4.0.2、MyBatis、Redis 等，实现了用户管理、文章管理、评论互动、通知系统等核心功能。
 
 该项目具有以下特点：
 

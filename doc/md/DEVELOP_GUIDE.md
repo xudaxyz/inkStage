@@ -12,7 +12,6 @@
 - MyBatis + PageHelper
 - MySQL 9.5.0+
 - Redis (缓存)
-- RabbitMQ (消息队列)
 - Spring Security + OAuth2 (认证授权)
 - JWT (令牌管理)
 - MinIO (对象存储)
@@ -29,11 +28,16 @@
 ```
 src/main/java/com/inkstage/
 ├── annotation/         # 自定义注解
+├── cache/              # 缓存相关
+│   ├── constant/       # 缓存常量（CacheKey, CacheTTL）
+│   ├── service/        # 缓存服务接口（CacheManager）
+│   │   └── impl/       # 缓存服务实现（CacheManagerImpl）
+│   └── utils/          # Redis工具类（RedisUtil）
 ├── common/             # 通用工具类
 ├── config/             # 配置类
-│   ├── cache/          # 缓存配置
 │   ├── oauth2/         # OAuth2配置
-│   ├── rabbitmq/       # RabbitMQ配置
+│   ├── redis/          # Redis配置及Stream常量
+│   ├── scheduled/      # 定时任务
 │   └── security/       # 安全配置
 ├── constant/           # 常量定义
 ├── controller/         # 控制器
@@ -46,9 +50,10 @@ src/main/java/com/inkstage/
 │   ├── base/           # 基础实体
 │   └── model/          # 业务实体
 ├── enums/              # 枚举类
+├── event/              # 事件/消息（CountMessage, NotificationEvent）
 ├── exception/          # 异常处理
 ├── mapper/             # MyBatis映射器
-├── security/           # 安全相关
+├── notification/param/ # 通知参数对象
 ├── service/            # 服务层
 │   ├── impl/           # 服务实现
 │   └── strategy/       # 策略模式
@@ -212,26 +217,64 @@ src/main/java/com/inkstage/
 
 ### 7.1 缓存使用
 - 使用Redis作为缓存
-- 缓存键使用`RedisKeyConstants`中定义的常量
-- 缓存操作通过`RedisCacheManager`进行
+- 缓存键使用`CacheKey`中定义的常量（`com.inkstage.cache.constant.CacheKey`）
+- 缓存操作通过`CacheManager`进行（`com.inkstage.cache.service.CacheManager`）
+- 缓存TTL使用`CacheTTL`中定义的常量（`com.inkstage.cache.constant.CacheTTL`）
 - 数据变更时及时清除相关缓存
 
 ### 7.2 缓存策略
 - 热点数据使用缓存
-- 缓存过期时间合理设置
-- 避免缓存穿透和缓存雪崩
+- 缓存过期时间合理设置，使用`CacheTTL`中的业务语义常量
+- 避免缓存穿透和缓存雪崩（使用`setWithRandomOffset`添加随机偏移）
+- 计数缓存Key格式：`inkstage:count:{countType小写}:{targetId}`
+
+### 7.3 计数缓存规范
+- 计数更新通过`CountService.updateCount()`统一入口
+- 计数读取通过`CountService.getCount()`，优先从Redis获取，缓存未命中回源DB
+- 新增计数类型只需三步：
+  1. 在`CountType`枚举中添加一行
+  2. 在`CountServiceImpl.syncToDatabase()`中添加对应的Mapper更新调用
+  3. 在`CountServiceImpl.getCountFromDatabase()`中添加对应的查询逻辑
+- 计数对账由`CountReconciliationScheduled`定时任务自动完成（每天凌晨2点）
 
 ## 8. 消息队列规范
 
 ### 8.1 消息生产
-- 使用`NotificationProducer`发送消息
-- 消息内容清晰明确
-- 处理消息发送失败的情况
+- 使用Redis Stream作为消息队列
+- 计数消息通过`CountProducer.sendCountMessage()`发送到`inkstage:stream:count`
+- 通知消息通过`NotificationProducer`发送到`inkstage:stream:notification`
+- 消息内容清晰明确，包含幂等Key防止重复消费
 
 ### 8.2 消息消费
-- 使用`@RabbitListener`注解监听消息
-- 实现幂等性处理
-- 处理消息消费失败的情况
+- 使用`@Scheduled`轮询消费Redis Stream消息
+- `CountConsumer`：消费计数消息，每秒轮询
+- `NotificationConsumer`：消费通知消息，每秒轮询
+- 实现幂等性处理（基于幂等Key去重）
+- 消费失败的消息进入死信队列（DLQ），支持重试
+
+## 9. 定时任务规范
+
+### 9.1 线程池配置
+- 定时任务使用独立的`ScheduledExecutorService`线程池（4个线程）
+- 配置类：`ScheduleConfig`（`com.inkstage.config.ScheduleConfig`）
+- 线程分配：2个Stream消费者 + 1个定时发布 + 1个仪表盘/对账
+
+### 9.2 现有定时任务
+| 任务 | 类 | 调度策略 | 说明 |
+|------|---|---------|------|
+| 计数消息消费 | CountConsumer | fixedDelay=1s | 每秒消费计数Stream消息 |
+| 计数消息重试 | CountConsumer | fixedDelay=30s | 每30秒重试待处理计数消息 |
+| 通知消息消费 | NotificationConsumer | fixedDelay=1s | 每秒消费通知Stream消息 |
+| 通知消息重试 | NotificationConsumer | fixedDelay=30s | 每30秒重试待处理通知消息 |
+| 仪表盘统计 | DashboardStatsScheduled | cron=0 0 * * * ? | 每小时更新仪表盘数据 |
+| 定时发布文章 | ScheduledPublishServiceImpl | cron=0 */10 * * * ? | 每10分钟检查定时发布 |
+| 计数对账 | CountReconciliationScheduled | cron=0 0 2 * * ? | 每天凌晨2点对账Redis与DB计数 |
+
+### 9.3 新增定时任务
+- 定时任务类放在`com.inkstage.config.scheduled`包下
+- 类名以`Scheduled`结尾
+- 使用`@Scheduled`注解标记定时方法
+- 必须在方法内try-catch，避免异常导致任务终止
 
 
 ## 9. 文档规范

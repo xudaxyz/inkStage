@@ -212,11 +212,28 @@
 ### 7.5 CountType
 | 枚举值 | 编码 | 描述 |
 |-------|------|------|
-| READ | 1 | 阅读量 |
-| LIKE | 2 | 点赞数 |
-| COMMENT | 3 | 评论数 |
-| COLLECTION | 4 | 收藏数 |
-| SHARE | 5 | 分享数 |
+| ARTICLE_READ | 1 | 文章阅读数 |
+| ARTICLE_LIKE | 2 | 文章点赞数 |
+| ARTICLE_COMMENT | 3 | 文章评论数 |
+| ARTICLE_COLLECTION | 4 | 文章收藏数 |
+| ARTICLE_SHARE | 5 | 文章分享数 |
+| USER_ARTICLE | 6 | 用户文章数 |
+| USER_FOLLOW | 7 | 用户关注数 |
+| USER_FOLLOWER | 8 | 用户粉丝数 |
+| USER_COMMENT | 9 | 用户评论数 |
+| USER_LIKE | 10 | 用户获赞数 |
+| COMMENT_LIKE | 11 | 评论点赞数 |
+| COMMENT_REPLY | 12 | 评论回复数 |
+| COMMENT_REPORT | 13 | 评论举报数 |
+| COLUMN_ARTICLE | 14 | 专栏文章数 |
+| COLUMN_READ | 15 | 专栏阅读数 |
+| COLUMN_SUBSCRIPTION | 16 | 专栏订阅数 |
+| TAG_ARTICLE | 17 | 标签文章数 |
+| TAG_USAGE | 18 | 标签使用数 |
+| CATEGORY_ARTICLE | 19 | 分类文章数 |
+| FOLDER_ARTICLE | 20 | 收藏夹文章数 |
+| HOT_WORD_SEARCH | 21 | 热词搜索数 |
+| ANNOUNCEMENT_READ | 22 | 公告阅读数 |
 
 ### 7.6 FeedbackStatus
 | 枚举值 | 编码 | 描述 |
