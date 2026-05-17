@@ -105,7 +105,15 @@ public interface AdminArticleService {
     boolean updateArticleByAdmin(Long id, AdminArticleUpdateDTO updateDTO);
 
     /**
-     * 删除文章(管理员)
+     * 移至回收站（管理员）
+     *
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean moveToRecycleBinByAdmin(Long id);
+
+    /**
+     * 删除文章（管理员，物理删除）
      *
      * @param id 文章ID
      * @return 是否成功
@@ -113,10 +121,10 @@ public interface AdminArticleService {
     boolean deleteArticleByAdmin(Long id);
 
     /**
-     * 彻底删除文章(管理员)
+     * 恢复文章（管理员，从回收站恢复到原状态）
      *
      * @param id 文章ID
      * @return 是否成功
      */
-    boolean deleteArticlePermanentlyByAdmin(Long id);
+    boolean restoreArticleByAdmin(Long id);
 }

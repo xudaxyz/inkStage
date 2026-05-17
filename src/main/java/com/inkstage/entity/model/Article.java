@@ -61,6 +61,11 @@ public class Article extends BaseEntity {
     private ArticleStatus articleStatus;
 
     /**
+     * 移至回收站前的状态（用于恢复）
+     */
+    private ArticleStatus previousStatus;
+
+    /**
      * 审核状态(1:待审核,2:审核通过,3:审核拒绝,4:申诉中)
      */
     private ReviewStatus reviewStatus;

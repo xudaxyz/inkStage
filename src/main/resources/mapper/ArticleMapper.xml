@@ -13,6 +13,7 @@
         <result column="user_id" property="userId"/>
         <result column="category_id" property="categoryId"/>
         <result column="article_status" property="articleStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
+        <result column="previous_status" property="previousStatus" javaType="com.inkstage.enums.article.ArticleStatus"/>
         <result column="review_status" property="reviewStatus" javaType="com.inkstage.enums.ReviewStatus"/>
         <result column="publish_time" property="publishTime"/>
         <result column="read_count" property="readCount"/>
@@ -849,24 +850,40 @@
         UPDATE article SET recommended = #{recommendStatus} WHERE id = #{id} AND deleted = 0
     </update>
 
-    <!-- 根据ID删除文章 -->
-    <update id="deleteById">
-        update article set article_status = 5 where id = #{id} and user_id = #{userId}
+    <!-- 移至回收站(文章作者), 记录原状态和删除时间 -->
+    <update id="moveToRecycleBinById">
+        update article
+        set previous_status = article_status,
+        article_status = 5,
+        deleted_time = NOW()
+        where id = #{id}
+        and user_id = #{userId}
+        and article_status != 5
     </update>
 
-    <!-- 管理员根据文章ID删除文章 -->
-    <update id="deleteByAdmin">
-        update article set article_status = 5 where id = #{id}
+    <!-- 移至回收站(管理员)：记录原状态和删除时间 -->
+    <update id="moveToRecycleBinByAdmin">
+        update article set previous_status = article_status, article_status = 5, deleted_time = NOW() where id = #{id} and article_status != 5
     </update>
 
-    <!-- 管理员根据文章ID彻底删除文章 -->
-    <update id="permanentDeleteByAdmin">
-        update article set deleted = 1 where id = #{id}
+    <!-- 管理员删除文章 -->
+    <delete id="deleteByAdmin">
+        delete from article where id = #{id}
+    </delete>
+
+    <!-- 用户删除文章 -->
+    <delete id="deleteById">
+        delete from article where id = #{id} and user_id = #{userId}
+    </delete>
+
+    <!-- 用户恢复文章: 从回收站恢复到原状态 -->
+    <update id="restoreById">
+        update article set article_status = previous_status, previous_status = null, deleted_time = null where id = #{id} and user_id = #{userId} and article_status = 5
     </update>
 
-    <!-- 根据文章ID永久删除文章 -->
-    <update id="permanentDeleteById">
-        update article set deleted = 1 where id = #{id} and user_id = #{userId}
+    <!-- 管理员恢复文章: 从回收站恢复到原状态 -->
+    <update id="restoreByAdmin">
+        update article set article_status = previous_status, previous_status = null, deleted_time = null where id = #{id} and article_status = 5
     </update>
 
     <!-- 根据文章ID获取阅读数 -->

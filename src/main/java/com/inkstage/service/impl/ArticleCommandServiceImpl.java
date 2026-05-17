@@ -206,9 +206,9 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteArticle(Long articleId) {
+    public boolean moveToRecycleBin(Long articleId) {
         try {
-            log.debug("删除文章, 文章ID: {}", articleId);
+            log.debug("移至回收站, 文章ID: {}", articleId);
             User currentUser = UserContext.getCurrentUser();
             Article article = articleMapper.findById(articleId);
             if (article == null) {
@@ -216,10 +216,10 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 throw new BusinessException("文章不存在");
             }
             if (!article.getUserId().equals(currentUser.getId())) {
-                log.warn("无权删除他人文章, 用户ID: {}, 文章ID: {}", currentUser.getId(), articleId);
-                throw new BusinessException("无权删除他人文章");
+                log.warn("无权操作他人文章, 用户ID: {}, 文章ID: {}", currentUser.getId(), articleId);
+                throw new BusinessException("无权操作他人文章");
             }
-            int result = articleMapper.deleteById(articleId, currentUser.getId());
+            int result = articleMapper.moveToRecycleBinById(articleId, currentUser.getId());
             boolean success = result > 0;
             if (success) {
                 countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUser.getId(), -1);
@@ -243,42 +243,33 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     }
                 });
             }
-            log.info("删除文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
+            log.info("移至回收站{}, 文章ID: {}", success ? "成功" : "失败", articleId);
             return success;
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("删除文章失败, 文章ID: {}", articleId, e);
-            throw new BusinessException("删除文章失败");
+            log.error("移至回收站失败, 文章ID: {}", articleId, e);
+            throw new BusinessException("移至回收站失败");
         }
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean permanentDeleteArticle(Long articleId) {
+    public boolean deleteArticle(Long articleId) {
         try {
-            log.debug("彻底删除文章, 文章ID: {}", articleId);
+            log.debug("删除文章, 文章ID: {}", articleId);
             Long currentUserId = UserContext.getCurrentUserId();
             Article article = articleMapper.findById(articleId);
             if (article == null) {
-                log.warn("文章ID: {}不存在", articleId);
                 throw new BusinessException("文章不存在");
             }
             if (!article.getUserId().equals(currentUserId)) {
-                log.warn("无权彻底删除他人文章, 用户ID: {}, 文章ID: {}", currentUserId, articleId);
+                log.warn("无权删除他人文章, 用户ID: {}, 文章ID: {}", currentUserId, articleId);
                 throw new BusinessException("无权删除他人文章");
             }
-            int result = articleMapper.permanentDeleteById(articleId, currentUserId);
+            int result = articleMapper.deleteById(articleId, currentUserId);
             boolean success = result > 0;
             if (success) {
-                countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUserId, -1);
-
-                if (article.getCategoryId() != null) {
-                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
-                }
-
-                columnService.removeArticleColumnRelation(articleId);
-
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
                     @Override
                     public void afterCommit() {
@@ -291,13 +282,62 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                     }
                 });
             }
-            log.info("彻底删除文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
+            log.info("删除文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
             return success;
         } catch (BusinessException e) {
             throw e;
         } catch (Exception e) {
-            log.error("彻底删除文章失败, 文章ID: {}", articleId, e);
-            throw new BusinessException("彻底删除文章失败");
+            log.error("删除文章失败, 文章ID: {}", articleId, e);
+            throw new BusinessException("删除文章失败");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean restoreArticle(Long articleId) {
+        try {
+            log.debug("恢复文章, 文章ID: {}", articleId);
+            Long currentUserId = UserContext.getCurrentUserId();
+            Article article = articleMapper.findById(articleId);
+            if (article == null) {
+                throw new BusinessException("文章不存在");
+            }
+            if (!article.getUserId().equals(currentUserId)) {
+                log.warn("无权恢复他人文章, 用户ID: {}, 文章ID: {}", currentUserId, articleId);
+                throw new BusinessException("无权恢复他人文章");
+            }
+            if (article.getArticleStatus() != ArticleStatus.RECYCLE) {
+                log.warn("文章不在回收站中, 无法恢复, 文章ID: {}", articleId);
+                throw new BusinessException("文章不在回收站中，无法恢复");
+            }
+            int result = articleMapper.restoreById(articleId, currentUserId);
+            boolean success = result > 0;
+            if (success) {
+                countProducer.sendCountMessage(CountType.USER_ARTICLE, currentUserId, 1);
+
+                if (article.getCategoryId() != null) {
+                    countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), 1);
+                }
+
+                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                    @Override
+                    public void afterCommit() {
+                        cacheClearService.clearArticleDetailCache(articleId);
+                        cacheClearService.clearArticleListCache();
+                        cacheClearService.clearHotArticleCache();
+                        cacheClearService.clearLatestArticleCache();
+                        cacheClearService.clearUserArticleListCache(currentUserId);
+                        cacheClearService.clearArticleSearchCache();
+                    }
+                });
+            }
+            log.info("恢复文章{}, 文章ID: {}", success ? "成功" : "失败", articleId);
+            return success;
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("恢复文章失败, 文章ID: {}", articleId, e);
+            throw new BusinessException("恢复文章失败");
         }
     }
 

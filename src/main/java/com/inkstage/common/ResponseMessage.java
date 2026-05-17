@@ -108,19 +108,21 @@ public enum ResponseMessage {
     COLLECTION_FOLDER_EXIST("收藏夹{}已存在"),
 
     ALREADY_REPORTED("您已举报过相关内容"),
-    
+
     // 文章相关成功消息
     ARTICLE_LIST_SUCCESS("获取文章列表成功"),
     ARTICLE_DETAIL_SUCCESS("获取文章详情成功"),
     ARTICLE_CREATE_SUCCESS("创建文章成功"),
     ARTICLE_UPDATE_SUCCESS("更新文章成功"),
     ARTICLE_DELETE_SUCCESS("删除文章成功"),
+    ARTICLE_RESTORE_SUCCESS("恢复文章成功"),
+    ARTICLE_MOVE_TO_RECYCLE_BIN_SUCCESS("文章移至回收站成功"),
     ARTICLE_STATUS_UPDATE_SUCCESS("更新文章状态成功"),
     ARTICLE_DRAFT_SUCCESS("草稿保存成功"),
     ARTICLE_LIKE_SUCCESS("点赞成功"),
     ARTICLE_UNLIKE_SUCCESS("取消点赞成功"),
     ARTICLE_READ_COUNT_INCREMENT_SUCCESS("增加文章阅读数成功"),
-    
+
     // 分类相关成功消息
     CATEGORY_LIST_SUCCESS("获取分类列表成功"),
     CATEGORY_DETAIL_SUCCESS("获取分类详情成功"),
@@ -128,7 +130,7 @@ public enum ResponseMessage {
     CATEGORY_UPDATE_SUCCESS("更新分类成功"),
     CATEGORY_DELETE_SUCCESS("删除分类成功"),
     CATEGORY_STATUS_UPDATE_SUCCESS("更新分类状态成功"),
-    
+
     // 标签相关成功消息
     TAG_LIST_SUCCESS("获取标签列表成功"),
     TAG_DETAIL_SUCCESS("获取标签详情成功"),
@@ -136,7 +138,7 @@ public enum ResponseMessage {
     TAG_UPDATE_SUCCESS("更新标签成功"),
     TAG_DELETE_SUCCESS("删除标签成功"),
     TAG_STATUS_UPDATE_SUCCESS("更新标签状态成功"),
-    
+
     // 评论相关成功消息
     COMMENT_LIST_SUCCESS("获取评论列表成功"),
     COMMENT_CREATE_SUCCESS("创建评论成功"),
@@ -144,7 +146,7 @@ public enum ResponseMessage {
     COMMENT_DELETE_SUCCESS("删除评论成功"),
     COMMENT_REVIEW_STATUS_UPDATE_SUCCESS("更新评论审核状态成功"),
     COMMENT_TOP_UPDATE_SUCCESS("更新评论置顶状态成功"),
-    
+
     // 用户相关成功消息
     USER_LIST_SUCCESS("获取用户列表成功"),
     USER_DETAIL_SUCCESS("获取用户详情成功"),
@@ -153,7 +155,7 @@ public enum ResponseMessage {
     USER_STATUS_UPDATE_SUCCESS("更新用户状态成功"),
     USER_ROLE_UPDATE_SUCCESS("更新用户角色成功"),
     USER_PROFILE_UPDATE_SUCCESS("更新用户个人资料成功"),
-    
+
     // 收藏相关成功消息
     ARTICLE_COLLECT_SUCCESS("收藏成功"),
     ARTICLE_UN_COLLECT_SUCCESS("取消收藏成功"),
@@ -161,19 +163,21 @@ public enum ResponseMessage {
     COLLECTION_FOLDER_UPDATE_SUCCESS("更新收藏文件夹成功"),
     COLLECTION_FOLDER_DELETE_SUCCESS("删除收藏文件夹成功"),
     COLLECTION_ARTICLE_MOVE_SUCCESS("移动收藏文章成功"),
-    
+
     // 文件相关成功消息
     FILE_DELETE_SUCCESS("文件删除成功"),
     ARTICLE_TAGS_MAX_TEN("文章标签不能超过10个"),
-    
+
     // 令牌相关消息
     REFRESH_TOKEN_SUCCESS("令牌刷新成功"),
     REFRESH_TOKEN_FAILED("令牌刷新失败"),
-    
+
     // 登出相关消息
     LOGOUT_SUCCESS("登出成功"),
     LOGOUT_FAILED("登出失败"),
     ARTICLE_DELETE_ERROR("删除文章失败"),
+    ARTICLE_RESTORE_ERROR("恢复文章失败"),
+    ARTICLE_MOVE_TO_RECYCLE_BIN_ERROR("文章移至回收站失败"),
     ARTICLE_CREATE_FAILED("文章创建失败"),
     ADMIN_ONLY("仅管理员可访问"),
 
@@ -181,7 +185,8 @@ public enum ResponseMessage {
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID"),  // 刷新令牌无效，缺少用户ID
     REFRESH_TOKEN_NOT_FOUND("REFRESH_TOKEN_NOT_FOUND"), // 新令牌已过期或被撤销
     INVALID_AUDIENCE("INVALID_AUDIENCE"), // 刷新令牌缺少客户端信息
-    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"), ; // 刷新令牌失败，请重新登录
+    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"),
+    ; // 刷新令牌失败，请重新登录
 
     private final String message;
 

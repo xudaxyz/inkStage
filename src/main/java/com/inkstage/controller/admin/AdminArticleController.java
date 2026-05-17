@@ -54,7 +54,25 @@ public class AdminArticleController {
     }
 
     /**
-     * 删除文章
+     * 移至回收站
+     *
+     * @param id 文章ID
+     * @return 操作结果
+     */
+    @PutMapping("/move-to-recycle-bin/{id}")
+    @AdminAccess
+    public Result<?> moveToRecycleBin(@PathVariable Long id) {
+        log.info("管理员移至回收站, 文章ID: {}", id);
+        boolean result = adminArticleService.moveToRecycleBinByAdmin(id);
+        if (result) {
+            return Result.success(ResponseMessage.ARTICLE_MOVE_TO_RECYCLE_BIN_SUCCESS);
+        } else {
+            return Result.error(ResponseMessage.ARTICLE_MOVE_TO_RECYCLE_BIN_ERROR);
+        }
+    }
+
+    /**
+     * 删除文章（物理删除）
      *
      * @param id 文章ID
      * @return 删除结果
@@ -72,20 +90,20 @@ public class AdminArticleController {
     }
 
     /**
-     * 彻底删除文章
+     * 恢复文章（从回收站恢复到原状态）
      *
      * @param id 文章ID
-     * @return 删除结果
+     * @return 恢复结果
      */
-    @DeleteMapping("/permanent-delete/{id}")
+    @PutMapping("/restore/{id}")
     @AdminAccess
-    public Result<?> permanentDeleteArticle(@PathVariable Long id) {
-        log.info("管理员彻底删除文章, 文章ID: {}", id);
-        boolean deleted = adminArticleService.deleteArticlePermanentlyByAdmin(id);
-        if (deleted) {
-            return Result.success(ResponseMessage.ARTICLE_DELETE_SUCCESS);
+    public Result<?> restoreArticle(@PathVariable Long id) {
+        log.info("管理员恢复文章, 文章ID: {}", id);
+        boolean restored = adminArticleService.restoreArticleByAdmin(id);
+        if (restored) {
+            return Result.success(ResponseMessage.ARTICLE_RESTORE_SUCCESS);
         } else {
-            return Result.error(ResponseMessage.ARTICLE_DELETE_ERROR);
+            return Result.error(ResponseMessage.ARTICLE_RESTORE_ERROR);
         }
     }
 

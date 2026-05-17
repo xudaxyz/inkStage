@@ -135,6 +135,7 @@ CREATE TABLE `article`
     `cover_image`            varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '文章封面图URL',
     `category_id`            bigint NULL DEFAULT NULL COMMENT '分类ID',
     `article_status`         tinyint NULL DEFAULT 1 COMMENT '文章状态(1:草稿,2:待发布,3:已发布,4:已下架,5:回收站)',
+    `previous_status`        tinyint NULL COMMENT '文章之前状态(恢复文章时使用)',
     `review_status`          tinyint NULL DEFAULT NULL COMMENT '审核状态(0:待审核,1:审核通过,2:审核拒绝,3:申诉中,4:禁用)',
     `publish_time`           datetime NULL DEFAULT NULL COMMENT '发布时间',
     `read_count`             int NULL DEFAULT 0 COMMENT '阅读量',

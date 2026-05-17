@@ -20,32 +20,40 @@ public interface ArticleCommandService {
     /**
      * 更新文章
      *
-     * @param articleId 文章ID
+     * @param articleId        文章ID
      * @param articleCreateDTO 文章更新DTO
      * @return 是否更新成功
      */
     boolean updateArticle(Long articleId, ArticleCreateDTO articleCreateDTO);
 
     /**
-     * 删除文章（逻辑删除）
+     * 移至回收站
      *
      * @param articleId 文章ID
-     * @return 是否删除成功
+     * @return 是否成功
+     */
+    boolean moveToRecycleBin(Long articleId);
+
+    /**
+     * 删除文章
+     *
+     * @param articleId 文章ID
+     * @return 是否成功
      */
     boolean deleteArticle(Long articleId);
 
     /**
-     * 彻底删除文章（物理删除）
+     * 恢复文章（从回收站恢复到原状态）
      *
      * @param articleId 文章ID
-     * @return 是否删除成功
+     * @return 是否成功
      */
-    boolean permanentDeleteArticle(Long articleId);
+    boolean restoreArticle(Long articleId);
 
     /**
      * 保存草稿
      *
-     * @param id 草稿ID（新建时为null）
+     * @param id  草稿ID（新建时为null）
      * @param dto 草稿DTO
      * @return 保存的草稿ID
      */

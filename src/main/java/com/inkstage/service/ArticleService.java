@@ -34,12 +34,28 @@ public interface ArticleService {
     Long saveDraft(Long articleId, ArticleCreateDTO articleCreateDTO);
 
     /**
-     * 删除文章（软删除）
+     * 移至回收站
+     *
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean moveToRecycleBin(Long id);
+
+    /**
+     * 删除文章（物理删除）
      *
      * @param id 文章ID
      * @return 是否成功
      */
     boolean deleteArticle(Long id);
+
+    /**
+     * 恢复文章（从回收站恢复到原状态）
+     *
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean restoreArticle(Long id);
 
     /**
      * 获取文章列表
@@ -126,14 +142,6 @@ public interface ArticleService {
      * @param count     阅读数增量
      */
     void incrementArticleReadCount(Long articleId, int count);
-
-    /**
-     * 彻底删除文章
-     *
-     * @param id 文章ID
-     * @return 是否成功
-     */
-    boolean permanentDeleteArticle(Long id);
 
     /**
      * 搜索文章

@@ -5,8 +5,8 @@ import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.enums.ReviewStatus;
 import com.inkstage.enums.article.ArticleStatus;
-import com.inkstage.enums.article.TopStatus;
 import com.inkstage.enums.article.RecommendStatus;
+import com.inkstage.enums.article.TopStatus;
 import com.inkstage.vo.admin.AdminArticleDetailVO;
 import com.inkstage.vo.admin.AdminArticleVO;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -26,7 +26,7 @@ import java.util.Map;
 public interface ArticleMapper {
 
     // ==================== 查询（Read） ====================
-    
+
     /**
      * 根据ID查询文章
      *
@@ -119,9 +119,9 @@ public interface ArticleMapper {
      * 搜索文章
      *
      * @param keyword 搜索关键词
-     * @param sortBy 排序方式
-     * @param offset 偏移量
-     * @param limit 限制数量
+     * @param sortBy  排序方式
+     * @param offset  偏移量
+     * @param limit   限制数量
      * @return 文章列表
      */
     List<ArticleListVO> searchArticles(@Param("keyword") String keyword, @Param("sortBy") String sortBy, @Param("offset") int offset, @Param("limit") int limit);
@@ -129,7 +129,7 @@ public interface ArticleMapper {
     /**
      * 分页查询所有文章（管理员）
      *
-     * @param offset 偏移量
+     * @param offset   偏移量
      * @param pageSize 每页大小
      * @return 文章列表
      */
@@ -163,7 +163,7 @@ public interface ArticleMapper {
      * 根据分类查询文章
      *
      * @param categoryId 分类ID
-     * @param limit 限制数量
+     * @param limit      限制数量
      * @return 文章列表
      */
     List<ArticleListVO> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") Integer limit);
@@ -233,7 +233,7 @@ public interface ArticleMapper {
     long countReadsByDate(@Param("date") String date);
 
     // ==================== 新增（Create） ====================
-    
+
     /**
      * 插入文章
      *
@@ -243,7 +243,7 @@ public interface ArticleMapper {
     int insert(Article article);
 
     // ==================== 更新（Update） ====================
-    
+
     /**
      * 更新文章
      *
@@ -255,7 +255,7 @@ public interface ArticleMapper {
     /**
      * 更新文章状态
      *
-     * @param id 文章ID
+     * @param id     文章ID
      * @param status 文章状态
      * @return 影响行数
      */
@@ -264,7 +264,7 @@ public interface ArticleMapper {
     /**
      * 更新文章审核状态
      *
-     * @param id 文章ID
+     * @param id           文章ID
      * @param reviewStatus 审核状态
      * @return 影响行数
      */
@@ -273,7 +273,7 @@ public interface ArticleMapper {
     /**
      * 更新文章阅读数
      *
-     * @param id 文章ID
+     * @param id    文章ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
@@ -282,7 +282,7 @@ public interface ArticleMapper {
     /**
      * 更新文章点赞数
      *
-     * @param id 文章ID
+     * @param id    文章ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
@@ -291,7 +291,7 @@ public interface ArticleMapper {
     /**
      * 更新文章评论数
      *
-     * @param id 文章ID
+     * @param id    文章ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
@@ -300,7 +300,7 @@ public interface ArticleMapper {
     /**
      * 更新文章收藏数
      *
-     * @param id 文章ID
+     * @param id    文章ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
@@ -309,7 +309,7 @@ public interface ArticleMapper {
     /**
      * 更新文章分享数
      *
-     * @param id 文章ID
+     * @param id    文章ID
      * @param delta 增量（正数增加，负数减少）
      * @return 影响行数
      */
@@ -318,7 +318,7 @@ public interface ArticleMapper {
     /**
      * 更新文章置顶状态
      *
-     * @param id 文章ID
+     * @param id        文章ID
      * @param topStatus 置顶状态
      * @return 影响行数
      */
@@ -327,16 +327,33 @@ public interface ArticleMapper {
     /**
      * 更新文章推荐状态
      *
-     * @param id 文章ID
+     * @param id              文章ID
      * @param recommendStatus 推荐状态
      * @return 影响行数
      */
     int updateRecommendStatus(@Param("id") Long id, @Param("recommendStatus") RecommendStatus recommendStatus);
 
     // ==================== 删除（Delete） ====================
-    
+
     /**
-     * 根据ID删除文章
+     * 移至回收站（用户）
+     *
+     * @param id     文章ID
+     * @param userId 用户ID
+     * @return 影响行数
+     */
+    int moveToRecycleBinById(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * 移至回收站（管理员）
+     *
+     * @param id 文章ID
+     * @return 影响行数
+     */
+    int moveToRecycleBinByAdmin(@Param("id") Long id);
+
+    /**
+     * 物理删除文章（用户）
      *
      * @param id     文章ID
      * @param userId 用户ID
@@ -345,30 +362,32 @@ public interface ArticleMapper {
     int deleteById(@Param("id") Long id, @Param("userId") Long userId);
 
     /**
-     * 管理员删除文章
-     * @param articleId 文章ID
+     * 物理删除文章（管理员）
+     *
+     * @param id 文章ID
      * @return 影响行数
      */
-    int deleteByAdmin(@Param("id") Long articleId);
+    int deleteByAdmin(@Param("id") Long id);
 
     /**
-     * 管理员彻底删除文章
-     * @param articleId 文章ID
-     * @return 影响行数
-     */
-    int permanentDeleteByAdmin(@Param("id") Long articleId);
-
-    /**
-     * 根据文章ID永久删除文章
+     * 恢复文章（用户）：从回收站恢复到原状态
      *
      * @param id     文章ID
      * @param userId 用户ID
      * @return 影响行数
      */
-    int permanentDeleteById(@Param("id") Long id, @Param("userId") Long userId);
+    int restoreById(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * 恢复文章（管理员）：从回收站恢复到原状态
+     *
+     * @param id 文章ID
+     * @return 影响行数
+     */
+    int restoreByAdmin(@Param("id") Long id);
 
     // ==================== 统计（Count） ====================
-    
+
     /**
      * 查询文章总数
      *

@@ -78,12 +78,15 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     /**
      * 清理文章相关缓存（管理员操作后）
      */
-    private void clearCacheAfterAdminOperation(Long articleId) {
-        // 清理文章详情、列表、热门、搜索缓存
+    private void clearCacheAfterAdminOperation(Long articleId, Long userId) {
         cacheClearService.clearArticleDetailCache(articleId);
         cacheClearService.clearArticleListCache();
         cacheClearService.clearHotArticleCache();
+        cacheClearService.clearLatestArticleCache();
         cacheClearService.clearArticleSearchCache();
+        if (userId != null) {
+            cacheClearService.clearUserArticleListCache(userId);
+        }
     }
 
     @Override
@@ -120,7 +123,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             }
 
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("更新文章状态并发送通知成功, 文章ID: {}, 状态: {}", id, status.getDesc());
             return result > 0;
@@ -153,7 +156,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                     .build();
             notificationService.send(param);
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("审核通过文章成功, 文章ID: {}", id);
             return updated > 0;
@@ -263,7 +266,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                     .build();
             notificationService.send(param);
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("置顶文章并发送通知成功, 文章ID: {}", id);
             return true;
@@ -284,7 +287,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             int result = articleMapper.updateTopStatus(id, com.inkstage.enums.article.TopStatus.NOT_TOP);
             ArticleUtils.checkOperationResult(result, id, "取消置顶文章");
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("取消置顶文章成功, 文章ID: {}", id);
             return true;
@@ -315,7 +318,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                     .build();
             notificationService.send(param);
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("推荐文章并发送通知成功, 文章ID: {}", id);
             return true;
@@ -336,7 +339,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             int result = articleMapper.updateRecommendStatus(id, com.inkstage.enums.article.RecommendStatus.NOT_RECOMMENDED);
             ArticleUtils.checkOperationResult(result, id, "取消推荐文章");
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("取消推荐文章成功, 文章ID: {}", id);
             return true;
@@ -388,7 +391,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
             articleTagService.handleArticleTags(id, updateDTO.getTags());
 
             // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, null);
 
             log.info("管理员更新文章成功, 文章ID: {}", id);
             return true;
@@ -399,22 +402,19 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     }
 
     @Override
-    public boolean deleteArticleByAdmin(Long id) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean moveToRecycleBinByAdmin(Long id) {
         if (!UserContext.isAdmin()) {
             return false;
         }
 
         try {
-            log.debug("管理员删除文章, 文章ID: {}", id);
-            // 检查文章是否存在
+            log.debug("管理员将文章移至回收站, 文章ID: {}", id);
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
-            int i = articleMapper.deleteByAdmin(id);
-            ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
-            // 解除文章与专栏的关联并更新专栏文章数
+            int i = articleMapper.moveToRecycleBinByAdmin(id);
+            ArticleUtils.checkOperationResult(i, id, "管理员移至回收站");
             columnService.removeArticleColumnRelation(id);
-            // 更新用户文章数
             countProducer.sendCountMessage(CountType.USER_ARTICLE, article.getUserId(), -1);
-            // 更新分类的文章数
             if (article.getCategoryId() != null) {
                 countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
             }
@@ -427,10 +427,30 @@ public class AdminArticleServiceImpl implements AdminArticleService {
                     .notificationType(NotificationType.ARTICLE_DELETE)
                     .build();
             notificationService.send(param);
-            // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            clearCacheAfterAdminOperation(id, article.getUserId());
 
-            log.info("管理员删除文章并发送通知成功, 文章ID: {}", id);
+            log.info("管理员将文章移至回收站并发送通知成功, 文章ID: {}", id);
+            return i > 0;
+        } catch (Exception e) {
+            log.error("管理员将文章移至回收站失败, 文章ID: {}", id, e);
+            throw new BusinessException("移至回收站失败");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteArticleByAdmin(Long id) {
+        if (!UserContext.isAdmin()) {
+            return false;
+        }
+        try {
+            log.debug("管理员删除文章, 文章ID: {}", id);
+            Article article = ArticleUtils.getArticleSafely(articleMapper, id);
+            int i = articleMapper.deleteByAdmin(id);
+            ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
+            clearCacheAfterAdminOperation(id, article.getUserId());
+
+            log.info("管理员删除文章成功, 文章ID: {}", id);
             return i > 0;
         } catch (Exception e) {
             log.error("管理员删除文章失败, 文章ID: {}", id, e);
@@ -439,41 +459,30 @@ public class AdminArticleServiceImpl implements AdminArticleService {
     }
 
     @Override
-    public boolean deleteArticlePermanentlyByAdmin(Long id) {
+    @Transactional(rollbackFor = Exception.class)
+    public boolean restoreArticleByAdmin(Long id) {
         if (!UserContext.isAdmin()) {
             return false;
         }
         try {
-            log.debug("管理员彻底删除文章, 文章ID: {}", id);
-            // 检查文章是否存在
+            log.debug("管理员恢复文章, 文章ID: {}", id);
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
-            int i = articleMapper.permanentDeleteByAdmin(id);
-            ArticleUtils.checkOperationResult(i, id, "管理员彻底删除文章");
-            // 解除文章与专栏的关联并更新专栏文章数
-            columnService.removeArticleColumnRelation(id);
-            // 更新用户文章数
-            countProducer.sendCountMessage(CountType.USER_ARTICLE, article.getUserId(), -1);
-            // 更新分类文章数
-            if (article.getCategoryId() != null) {
-                countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), -1);
+            if (article.getArticleStatus() != ArticleStatus.RECYCLE) {
+                throw new BusinessException("文章不在回收站中，无法恢复");
             }
-            ArticleDeleteParam param = ArticleDeleteParam.builder()
-                    .userId(article.getUserId())
-                    .senderId(UserContext.getCurrentUserId())
-                    .articleTitle(article.getTitle())
-                    .articleId(article.getId())
-                    .reason("文章不符合平台内容规范,已被永久删除")
-                    .notificationType(NotificationType.ARTICLE_DELETE)
-                    .build();
-            notificationService.send(param);
-            // 清理相关缓存
-            clearCacheAfterAdminOperation(id);
+            int i = articleMapper.restoreByAdmin(id);
+            ArticleUtils.checkOperationResult(i, id, "管理员恢复文章");
+            countProducer.sendCountMessage(CountType.USER_ARTICLE, article.getUserId(), 1);
+            if (article.getCategoryId() != null) {
+                countProducer.sendCountMessage(CountType.CATEGORY_ARTICLE, article.getCategoryId(), 1);
+            }
+            clearCacheAfterAdminOperation(id, article.getUserId());
 
-            log.info("管理员彻底删除文章并发送通知成功, 文章ID: {}", id);
+            log.info("管理员恢复文章成功, 文章ID: {}", id);
             return i > 0;
         } catch (Exception e) {
-            log.error("管理员彻底删除文章失败, 文章ID: {}", id, e);
-            throw new BusinessException("彻底删除文章失败");
+            log.error("管理员恢复文章失败, 文章ID: {}", id, e);
+            throw new BusinessException("恢复文章失败");
         }
     }
 

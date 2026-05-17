@@ -25,13 +25,18 @@ public class ArticleManagementServiceImpl implements ArticleManagementService {
     private final ArticleCommandService articleCommandService;
 
     @Override
+    public boolean moveToRecycleBin(Long id) {
+        return articleCommandService.moveToRecycleBin(id);
+    }
+
+    @Override
     public boolean deleteArticle(Long id) {
         return articleCommandService.deleteArticle(id);
     }
 
     @Override
-    public boolean permanentDeleteArticle(Long id) {
-        return articleCommandService.permanentDeleteArticle(id);
+    public boolean restoreArticle(Long id) {
+        return articleCommandService.restoreArticle(id);
     }
 
     @Override

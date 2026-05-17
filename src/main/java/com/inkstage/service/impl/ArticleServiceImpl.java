@@ -6,8 +6,8 @@ import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.front.ArticleCreateDTO;
 import com.inkstage.dto.front.ArticleQueryDTO;
 import com.inkstage.dto.front.MyArticleQueryDTO;
-import com.inkstage.exception.BusinessException;
 import com.inkstage.enums.CountType;
+import com.inkstage.exception.BusinessException;
 import com.inkstage.service.*;
 import com.inkstage.utils.ArticleUtils;
 import com.inkstage.vo.front.ArticleDetailVO;
@@ -46,8 +46,8 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteArticle(Long id) {
-        return articleCommandService.deleteArticle(id);
+    public boolean moveToRecycleBin(Long id) {
+        return articleCommandService.moveToRecycleBin(id);
     }
 
     @Override
@@ -73,8 +73,15 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public boolean permanentDeleteArticle(Long id) {
-        return articleCommandService.permanentDeleteArticle(id);
+    @Transactional(rollbackFor = Exception.class)
+    public boolean deleteArticle(Long id) {
+        return articleCommandService.deleteArticle(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean restoreArticle(Long id) {
+        return articleCommandService.restoreArticle(id);
     }
 
     @Override

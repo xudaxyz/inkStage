@@ -90,7 +90,20 @@ public class ArticleController {
     }
 
     /**
-     * 删除文章(将文章移至回收站)
+     * 移至回收站
+     *
+     * @param id 文章ID
+     * @return 响应结果
+     */
+    @PutMapping("/move-to-recycle-bin/{id}")
+    @UserAccess
+    public Result<Boolean> moveToRecycleBin(@PathVariable Long id) {
+        boolean success = articleService.moveToRecycleBin(id);
+        return success ? Result.success(true, ResponseMessage.ARTICLE_MOVE_TO_RECYCLE_BIN_SUCCESS) : Result.error(ResponseMessage.ARTICLE_MOVE_TO_RECYCLE_BIN_ERROR);
+    }
+
+    /**
+     * 删除文章（物理删除）
      *
      * @param id 文章ID
      * @return 响应结果
@@ -99,20 +112,20 @@ public class ArticleController {
     @UserAccess
     public Result<Boolean> deleteArticle(@PathVariable Long id) {
         boolean success = articleService.deleteArticle(id);
-        return success ? Result.success(true, ResponseMessage.ARTICLE_DELETE_SUCCESS) : Result.error(ResponseMessage.ERROR);
+        return success ? Result.success(true, ResponseMessage.ARTICLE_DELETE_SUCCESS) : Result.error(ResponseMessage.ARTICLE_DELETE_ERROR);
     }
 
     /**
-     * 彻底删除文章
+     * 恢复文章（从回收站恢复到原状态）
      *
      * @param id 文章ID
      * @return 响应结果
      */
-    @DeleteMapping("/permanent-delete/{id}")
+    @PutMapping("/restore/{id}")
     @UserAccess
-    public Result<Boolean> permanentDeleteArticle(@PathVariable Long id) {
-        boolean success = articleService.permanentDeleteArticle(id);
-        return success ? Result.success(true, ResponseMessage.SUCCESS) : Result.error(ResponseMessage.ERROR);
+    public Result<Boolean> restoreArticle(@PathVariable Long id) {
+        boolean success = articleService.restoreArticle(id);
+        return success ? Result.success(true, ResponseMessage.ARTICLE_RESTORE_SUCCESS) : Result.error(ResponseMessage.ARTICLE_RESTORE_ERROR);
     }
 
     /**

@@ -11,7 +11,15 @@ import com.inkstage.vo.front.MyArticleListVO;
 public interface ArticleManagementService {
 
     /**
-     * 删除文章（软删除）
+     * 移至回收站
+     *
+     * @param id 文章ID
+     * @return 是否成功
+     */
+    boolean moveToRecycleBin(Long id);
+
+    /**
+     * 删除文章
      *
      * @param id 文章ID
      * @return 是否成功
@@ -19,19 +27,20 @@ public interface ArticleManagementService {
     boolean deleteArticle(Long id);
 
     /**
-     * 彻底删除文章
+     * 恢复文章（从回收站恢复到原状态）
+     *
      * @param id 文章ID
      * @return 是否成功
      */
-    boolean permanentDeleteArticle(Long id);
+    boolean restoreArticle(Long id);
 
     /**
      * 获取当前用户的文章列表，支持按状态过滤和搜索
      *
-     * @param articleStatus    文章状态
-     * @param keyword   搜索关键词
-     * @param page      页码
-     * @param size      每页数量
+     * @param articleStatus 文章状态
+     * @param keyword       搜索关键词
+     * @param page          页码
+     * @param size          每页数量
      * @return 分页结果
      */
     PageResult<MyArticleListVO> getMyArticles(ArticleStatus articleStatus, String keyword, Integer page, Integer size);
