@@ -46,12 +46,12 @@ public interface NotificationService {
     boolean deleteNotification(Long notificationId);
 
     /**
-     * 发送通知到rabbitmq(一般不对外开放)
+     * 发送通知到消息队列(一般不对外开放)
      */
     boolean sendNotification(Notification notification);
 
     /**
-     * 批量发送通知到rabbitmq(一般不对外开放)
+     * 批量发送通知到消息队列(一般不对外开放)
      *
      * @param notifications 通知列表
      * @return 是否发送成功

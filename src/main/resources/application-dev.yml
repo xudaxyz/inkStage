@@ -36,31 +36,6 @@ spring:
           min-idle: 0
 
 
-  # RabbitMQ配置
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-    virtual-host: /
-    # 连接工厂配置
-    connection-timeout: 30000
-    # 消息确认配置
-    publisher-confirm-type: correlated
-    publisher-returns: true
-    # 消费者配置
-    listener:
-      direct:
-        acknowledge-mode: auto
-      simple:
-        acknowledge-mode: auto
-        # 并发消费配置
-        concurrency: 5
-        max-concurrency: 10
-        # 批量消费配置
-        prefetch: 10
-        auto-startup: true
-
   # Jackson 配置
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss

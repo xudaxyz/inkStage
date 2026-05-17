@@ -1,38 +1,41 @@
 package com.inkstage.service.impl;
 
-import com.inkstage.config.rabbitmq.RabbitMQConfig;
+import com.inkstage.config.redis.RedisStreamConstants;
 import com.inkstage.entity.model.Notification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.redis.connection.stream.ObjectRecord;
+import org.springframework.data.redis.connection.stream.StreamRecords;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
 /**
- * 通知消息生产者
+ * 通知消息生产者（基于Redis Streams）
  */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationProducer {
 
-    private final RabbitTemplate rabbitTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final ObjectMapper objectMapper;
 
     /**
-     * 发送通知消息到RabbitMQ
+     * 发送通知消息到Redis Streams
      */
     public void sendNotification(Notification notification) {
         try {
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.NOTIFICATION_EXCHANGE,
-                    RabbitMQConfig.NOTIFICATION_ROUTING_KEY,
-                    notification
-            );
+            String json = objectMapper.writeValueAsString(notification);
+            ObjectRecord<String, String> record = StreamRecords.newRecord()
+                    .ofObject(json)
+                    .withStreamKey(RedisStreamConstants.NOTIFICATION_STREAM);
+            stringRedisTemplate.opsForStream().add(record);
             log.info("通知消息发送成功，用户ID: {}", notification.getUserId());
         } catch (Exception e) {
             log.error("通知消息发送失败，用户ID: {}", notification.getUserId(), e);
-            // 这里可以添加重试机制或存储到数据库作为备份
         }
     }
 

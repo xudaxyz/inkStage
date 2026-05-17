@@ -111,7 +111,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public boolean sendNotification(Notification notification) {
-        // 发送到RabbitMQ
+        // 发送到Redis Streams
         notificationProducer.sendNotification(notification);
         return true;
     }
@@ -134,7 +134,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public boolean sendBatchNotifications(List<Notification> notifications) {
         try {
-            // 批量发送到RabbitMQ
+            // 批量发送到Redis Streams
             if (!notifications.isEmpty()) {
                 notificationProducer.sendBatchNotifications(notifications);
             }

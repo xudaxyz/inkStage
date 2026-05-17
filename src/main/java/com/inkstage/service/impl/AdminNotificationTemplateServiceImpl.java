@@ -21,7 +21,6 @@ import com.inkstage.utils.UserContext;
 import com.inkstage.vo.admin.AdminNotificationTemplatePreviewVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.core.type.TypeReference;
@@ -31,9 +30,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.inkstage.config.rabbitmq.RabbitMQConfig.NOTIFICATION_EXCHANGE;
-import static com.inkstage.config.rabbitmq.RabbitMQConfig.NOTIFICATION_ROUTING_KEY;
 
 /**
  * 通知模板管理服务实现类
@@ -45,7 +41,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
 
     private final NotificationTemplateMapper templateMapper;
     private final UserService userService;
-    private final RabbitTemplate rabbitTemplate;
+    private final NotificationProducer notificationProducer;
     private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     /**
@@ -345,7 +341,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
                 notification.setSenderId(senderId != null ? senderId : 0L);
                 notification.setActionUrl(rendered.getActionUrl());
 
-                rabbitTemplate.convertAndSend(NOTIFICATION_EXCHANGE, NOTIFICATION_ROUTING_KEY, notification);
+                notificationProducer.sendNotification(notification);
                 successCount++;
             } catch (Exception e) {
                 log.error("发送通知失败，用户ID: {}", userId, e);
