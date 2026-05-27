@@ -11,7 +11,9 @@ import lombok.Getter;
 @Getter
 public enum AuthOperationType implements EnumCode {
     LOGIN(1, "登录"),
-    REGISTER(2, "注册");
+    REGISTER(2, "注册"),
+    CHANGE_PASSWORD(3, "修改密码"),
+    RESET_PASSWORD(4, "重置密码");
 
     private final Integer code;
     private final String desc;

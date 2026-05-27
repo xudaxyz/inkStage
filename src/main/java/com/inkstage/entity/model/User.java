@@ -161,4 +161,9 @@ public class User extends BaseEntity {
      * 用户资料版本号，用于缓存控制
      */
     private Integer userVersion = 1;
+
+    /**
+     * 计划删除时间(冷却期结束后执行硬删除)
+     */
+    private LocalDateTime scheduledDeleteTime;
 }

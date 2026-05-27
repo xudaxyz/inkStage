@@ -1,8 +1,10 @@
 package com.inkstage.controller;
 
+import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.AuthDTO;
+import com.inkstage.dto.ResetPasswordDTO;
 import com.inkstage.dto.SendCodeDTO;
 import com.inkstage.service.TokenService;
 import com.inkstage.service.UserAuthService;
@@ -125,6 +127,7 @@ public class AuthController {
      * @return 登出结果
      */
     @PostMapping("/logout")
+    @UserAccess
     public Result<?> logout(@RequestParam Long userId, @RequestParam(required = false) String refreshToken) {
         log.info("用户登出: {}", userId);
         try {
@@ -133,6 +136,26 @@ public class AuthController {
         } catch (Exception e) {
             log.error("用户登出失败: {}", e.getMessage());
             return Result.error(ResponseMessage.LOGOUT_FAILED);
+        }
+    }
+
+
+
+    /**
+     * 重置密码（忘记密码，通过验证码验证身份）
+     *
+     * @param dto 重置密码请求DTO
+     * @return 重置结果
+     */
+    @PostMapping("/reset-password")
+    public Result<?> resetPassword(@RequestBody @Valid ResetPasswordDTO dto) {
+        log.info("用户重置密码，账号: {}", dto.getAccount());
+        try {
+            userAuthService.resetPassword(dto);
+            return Result.success(ResponseMessage.PASSWORD_RESET_SUCCESS);
+        } catch (Exception e) {
+            log.error("用户重置密码失败: {}", e.getMessage());
+            return Result.error(e.getMessage());
         }
     }
 

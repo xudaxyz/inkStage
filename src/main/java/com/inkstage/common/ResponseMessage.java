@@ -185,8 +185,20 @@ public enum ResponseMessage {
     REFRESH_TOKEN_INVALID("REFRESH_TOKEN_INVALID"),  // 刷新令牌无效，缺少用户ID
     REFRESH_TOKEN_NOT_FOUND("REFRESH_TOKEN_NOT_FOUND"), // 新令牌已过期或被撤销
     INVALID_AUDIENCE("INVALID_AUDIENCE"), // 刷新令牌缺少客户端信息
-    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"),
-    ; // 刷新令牌失败，请重新登录
+    TOKEN_REFRESH_FAILED("TOKEN_REFRESH_FAILED"), // 刷新令牌失败，请重新登录
+
+    // 密码相关消息
+    PASSWORD_CHANGED("密码修改成功"),
+    PASSWORD_CHANGED_FAILED("密码修改失败"),
+    PASSWORD_SAME_AS_OLD("新密码不能与当前密码相同"),
+    PASSWORD_INCONSISTENT("两次输入的密码不一致"),
+    ACCOUNT_NOT_VERIFIED("该账号未绑定已验证的邮箱或手机号，无法自助找回密码"),
+    PASSWORD_RESET_SUCCESS("密码重置成功"),
+
+    // 删除账号相关消息
+    ACCOUNT_DELETED("账号已删除！"),
+    ACCOUNT_PENDING_DELETE("账号注销申请已提交！"),
+    ACCOUNT_RESTORED("您的账号已恢复， 请继续使用！");
 
     private final String message;
 

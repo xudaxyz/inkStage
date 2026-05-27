@@ -146,6 +146,8 @@ public class TokenServiceImpl implements TokenService {
         userInfo.setGender(user.getGender());
         userInfo.setBirthDate(user.getBirthDate());
         userInfo.setLocation(user.getLocation());
+        userInfo.setStatus(user.getStatus());
+        userInfo.setScheduledDeleteTime(user.getScheduledDeleteTime());
 
         // 设置用户角色
         if (!userRoles.isEmpty()) {

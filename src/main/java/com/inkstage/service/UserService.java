@@ -185,4 +185,26 @@ public interface UserService {
      * @return 所有用户ID列表
      */
     List<Long> getAllUserIds();
+
+    /**
+     * 用户自行删除账号（带冷却期）
+     *
+     * @param userId  用户ID
+     * @param password 当前密码（用于身份验证）
+     */
+    void deleteAccount(Long userId, String password);
+
+    /**
+     * 恢复待删除账号
+     *
+     * @param userId 用户ID
+     */
+    void restorePendingDeleteAccount(Long userId);
+
+    /**
+     * 清理冷却期已过的待删除账号（定时任务调用）
+     *
+     * @return 实际删除的账号数量
+     */
+    int cleanupExpiredPendingDeleteAccounts();
 }

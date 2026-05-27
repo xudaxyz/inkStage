@@ -2,6 +2,7 @@ package com.inkstage.vo;
 
 import com.inkstage.enums.user.Gender;
 import com.inkstage.enums.user.UserRoleEnum;
+import com.inkstage.enums.user.UserStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -101,4 +102,14 @@ public class UserInfo {
      * 用户角色ID
      */
     private Integer roleId;
+
+    /**
+     * 用户状态
+     */
+    private UserStatus status;
+
+    /**
+     * 计划删除时间（仅 PENDING_DELETE 状态时有值）
+     */
+    private LocalDateTime scheduledDeleteTime;
 }

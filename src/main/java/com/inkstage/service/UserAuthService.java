@@ -1,6 +1,8 @@
 package com.inkstage.service;
 
 import com.inkstage.dto.AuthDTO;
+import com.inkstage.dto.ChangePasswordDTO;
+import com.inkstage.dto.ResetPasswordDTO;
 import com.inkstage.vo.TokenResponse;
 
 /**
@@ -38,5 +40,20 @@ public interface UserAuthService {
      * @param refreshToken 刷新令牌
      */
     void logout(Long userId, String refreshToken);
+
+    /**
+     * 修改密码（已登录用户）
+     * @param userId 用户ID
+     * @param dto 修改密码请求DTO
+     * @return 修改结果
+     */
+    boolean changePassword(Long userId, ChangePasswordDTO dto);
+
+    /**
+     * 重置密码（忘记密码，通过验证码验证身份）
+     *
+     * @param dto 重置密码请求DTO
+     */
+    void resetPassword(ResetPasswordDTO dto);
 
 }

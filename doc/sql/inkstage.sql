@@ -48,6 +48,7 @@ CREATE TABLE `user`
     `user_version`                int NULL DEFAULT NULL COMMENT '版本号',
     `deleted`                     tinyint NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
     `deleted_time`                datetime NULL DEFAULT NULL COMMENT '删除时间',
+    `scheduled_delete_time`       datetime NULL DEFAULT NULL COMMENT '计划删除时间(冷却期结束后执行硬删除)',
     PRIMARY KEY (`id`) USING BTREE,
     UNIQUE INDEX `username`(`username` ASC) USING BTREE,
     UNIQUE INDEX `email`(`email` ASC) USING BTREE,

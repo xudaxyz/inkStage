@@ -33,6 +33,7 @@
         <result column="username_last_modified_time" property="usernameLastModifiedTime"/>
         <result column="role_id" property="roleId"/>
         <result column="user_version" property="userVersion"/>
+        <result column="scheduled_delete_time" property="scheduledDeleteTime"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
         <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
@@ -96,7 +97,7 @@
     <sql id="columns">
         id, username, password, nickname, email, email_verified, phone, phone_verified, avatar, cover_image, signature,
         gender, birth_date, location, website, follow_count, follower_count, article_count, comment_count, like_count,
-        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, role_id, user_version, create_time, update_time, deleted
+        last_login_time, last_login_ip, register_ip, register_time, privacy, status, username_last_modified_time, role_id, user_version, scheduled_delete_time, create_time, update_time, deleted
     </sql>
 
     <!-- 管理员用户详情列 -->
@@ -346,6 +347,7 @@
             <if test="usernameLastModifiedTime != null">username_last_modified_time = #{usernameLastModifiedTime},</if>
             <if test="roleId != null">role_id = #{roleId},</if>
             <if test="userVersion != null">user_version = #{userVersion},</if>
+            <if test="scheduledDeleteTime != null">scheduled_delete_time = #{scheduledDeleteTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="deleted != null">deleted = #{deleted},</if>
         </set>
@@ -568,5 +570,15 @@
             update_time = NOW()
         WHERE id = #{id} AND deleted = 0
     </update>
+
+    <!-- 查询冷却期已过的待删除用户ID列表 -->
+    <select id="findExpiredPendingDeleteUserIds" resultType="java.lang.Long">
+        SELECT id
+        FROM user
+        WHERE deleted = 0
+        AND status = 3
+        AND scheduled_delete_time IS NOT NULL
+        AND scheduled_delete_time <![CDATA[ <= ]]> #{now}
+    </select>
 
 </mapper>

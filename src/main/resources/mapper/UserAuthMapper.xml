@@ -68,4 +68,20 @@
         DELETE FROM user_auth
         WHERE user_id = #{userId}
     </delete>
+
+    <!-- 根据用户ID和认证类型更新认证凭证 -->
+    <update id="updateCredentialByUserIdAndType">
+        UPDATE user_auth
+        SET auth_credential = #{authCredential},
+            update_time = NOW()
+        WHERE user_id = #{userId} AND auth_type = #{authType} AND deleted = 0
+    </update>
+
+    <!-- 根据用户ID禁用所有认证方式 -->
+    <update id="disableByUserId">
+        UPDATE user_auth
+        SET deleted = 1,
+            update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 0
+    </update>
 </mapper>

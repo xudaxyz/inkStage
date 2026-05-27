@@ -72,4 +72,20 @@ public interface UserAuthMapper {
      */
     int deleteByUserId(@Param("userId") Long userId);
 
+    /**
+     * 根据用户ID和认证类型更新认证凭证
+     * @param userId 用户ID
+     * @param authType 认证类型
+     * @param authCredential 新的认证凭证
+     * @return 影响行数
+     */
+    int updateCredentialByUserIdAndType(@Param("userId") Long userId, @Param("authType") AuthType authType, @Param("authCredential") String authCredential);
+
+    /**
+     * 根据用户ID禁用所有认证方式
+     * @param userId 用户ID
+     * @return 影响行数
+     */
+    int disableByUserId(@Param("userId") Long userId);
+
 }

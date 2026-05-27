@@ -359,4 +359,12 @@ public interface UserMapper {
      */
     long countNewUsersByDate(@Param("date") String date);
 
+    /**
+     * 查询冷却期已过的待删除用户ID列表
+     *
+     * @param now 当前时间
+     * @return 已过冷却期的待删除用户ID列表
+     */
+    List<Long> findExpiredPendingDeleteUserIds(@Param("now") LocalDateTime now);
+
 }

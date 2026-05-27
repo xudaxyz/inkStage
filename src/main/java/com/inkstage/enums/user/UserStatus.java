@@ -7,7 +7,8 @@ import lombok.Getter;
 public enum UserStatus implements EnumCode {
     DISABLED(0, "禁用"),
     NORMAL(1, "正常"),
-    PENDING(2, "待审核");
+    PENDING(2, "待审核"),
+    PENDING_DELETE(3, "待删除");
 
     private final Integer code;
     private final String desc;

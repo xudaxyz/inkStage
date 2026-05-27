@@ -3,14 +3,15 @@ package com.inkstage.controller.front;
 import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
+import com.inkstage.dto.ChangePasswordDTO;
 import com.inkstage.dto.front.UserProfileDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FollowService;
+import com.inkstage.service.UserAuthService;
 import com.inkstage.service.UserService;
 import com.inkstage.utils.UserContext;
 import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.front.UserPublicProfileVO;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ public class UserController {
 
     private final UserService userService;
     private final FollowService followService;
+    private final UserAuthService userAuthService;
 
     /**
      * 获取当前用户个人资料
@@ -151,6 +153,63 @@ public class UserController {
         log.info("检查用户 {} 对用户 {} 的关注状态", currentUserId, userId);
         boolean status = followService.checkFollowStatus(currentUserId, userId);
         return Result.success(status, ResponseMessage.SUCCESS);
+    }
+
+    /**
+     * 修改密码
+     *
+     * @param dto 修改密码请求DTO
+     * @return 修改结果
+     */
+    @PostMapping("/change-password")
+    @UserAccess
+    public Result<?> changePassword(@RequestBody @Valid ChangePasswordDTO dto) {
+        Long userId = UserContext.getCurrentUserId();
+        log.info("用户修改密码，用户ID: {}", userId);
+        boolean result = userAuthService.changePassword(userId, dto);
+        return result ? Result.success(ResponseMessage.PASSWORD_CHANGED) : Result.error(ResponseMessage.PASSWORD_CHANGED_FAILED);
+    }
+
+    /**
+     * 用户自行删除账号（带冷却期）
+     *
+     * @param password 密码
+     * @return 删除结果
+     */
+    @DeleteMapping("/delete")
+    @UserAccess
+    public Result<?> deleteAccount(@RequestParam("password") String password) {
+        if (password == null || password.isBlank()) {
+            return Result.error(ResponseMessage.PASSWORD_REQUIRED);
+        }
+        Long userId = UserContext.getCurrentUserId();
+        log.info("用户申请删除账号，用户ID: {}", userId);
+        try {
+            userService.deleteAccount(userId, password);
+            return Result.success(ResponseMessage.ACCOUNT_PENDING_DELETE);
+        } catch (Exception e) {
+            log.error("用户删除账号失败: {}", e.getMessage());
+            return Result.error(e.getMessage());
+        }
+    }
+
+    /**
+     * 恢复待删除账号（撤销注销申请）
+     *
+     * @return 恢复结果
+     */
+    @PostMapping("/restore-account")
+    @UserAccess
+    public Result<?> restoreAccount() {
+        Long userId = UserContext.getCurrentUserId();
+        log.info("用户恢复待删除账号，用户ID: {}", userId);
+        try {
+            userService.restorePendingDeleteAccount(userId);
+            return Result.success(ResponseMessage.ACCOUNT_RESTORED);
+        } catch (Exception e) {
+            log.error("用户恢复账号失败: {}", e.getMessage());
+            return Result.error(e.getMessage());
+        }
     }
 
 }
