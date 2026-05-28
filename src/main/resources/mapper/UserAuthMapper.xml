@@ -38,12 +38,6 @@
         WHERE user_id = #{userId} AND deleted = 0
     </select>
 
-    <!-- 根据认证标识和类型查询认证信息 -->
-    <select id="findByIdentifierAndType" resultMap="ResultMap">
-        SELECT * FROM user_auth
-        WHERE auth_identifier = #{identifier} AND auth_type = #{authType} AND deleted = 0
-    </select>
-
     <!-- 更新用户认证信息 -->
     <update id="update" parameterType="com.inkstage.entity.model.UserAuth">
         UPDATE user_auth
@@ -58,13 +52,13 @@
     </update>
 
     <!-- 删除用户认证信息 -->
-    <delete id="deleteById" parameterType="java.lang.Long">
+    <delete id="purgeById" parameterType="java.lang.Long">
         DELETE FROM user_auth
         WHERE id = #{id}
     </delete>
 
     <!-- 根据用户ID删除所有认证信息 -->
-    <delete id="deleteByUserId" parameterType="java.lang.Long">
+    <delete id="purgeByUserId" parameterType="java.lang.Long">
         DELETE FROM user_auth
         WHERE user_id = #{userId}
     </delete>
@@ -77,11 +71,4 @@
         WHERE user_id = #{userId} AND auth_type = #{authType} AND deleted = 0
     </update>
 
-    <!-- 根据用户ID禁用所有认证方式 -->
-    <update id="disableByUserId">
-        UPDATE user_auth
-        SET deleted = 1,
-            update_time = NOW()
-        WHERE user_id = #{userId} AND deleted = 0
-    </update>
 </mapper>

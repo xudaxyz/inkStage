@@ -4,6 +4,7 @@ import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
 import com.inkstage.dto.ChangePasswordDTO;
+import com.inkstage.dto.DeleteAccountDTO;
 import com.inkstage.dto.front.UserProfileDTO;
 import com.inkstage.entity.model.User;
 import com.inkstage.service.FollowService;
@@ -173,19 +174,16 @@ public class UserController {
     /**
      * 用户自行删除账号（带冷却期）
      *
-     * @param password 密码
+     * @param deleteAccountDTO 清除账号DTO
      * @return 删除结果
      */
     @DeleteMapping("/delete")
     @UserAccess
-    public Result<?> deleteAccount(@RequestParam("password") String password) {
-        if (password == null || password.isBlank()) {
-            return Result.error(ResponseMessage.PASSWORD_REQUIRED);
-        }
+    public Result<?> deleteAccount(@RequestBody @Valid DeleteAccountDTO deleteAccountDTO) {
         Long userId = UserContext.getCurrentUserId();
         log.info("用户申请删除账号，用户ID: {}", userId);
         try {
-            userService.deleteAccount(userId, password);
+            userService.deleteAccount(userId, deleteAccountDTO.getPassword(), deleteAccountDTO.getCleanContent(), deleteAccountDTO.getCleanInteraction());
             return Result.success(ResponseMessage.ACCOUNT_PENDING_DELETE);
         } catch (Exception e) {
             log.error("用户删除账号失败: {}", e.getMessage());

@@ -31,14 +31,6 @@ public interface TagMapper {
     Tag findById(Long id);
 
     /**
-     * 根据标签ID查询标签版本号
-     *
-     * @param id 标签ID
-     * @return 标签版本号
-     */
-    Integer findTagVersionById(Long id);
-
-    /**
      * 获取所有激活状态的标签
      *
      * @return 激活状态的标签列表
@@ -64,14 +56,6 @@ public interface TagMapper {
     List<Tag> findByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
 
     /**
-     * 批量查询标签
-     *
-     * @param ids 标签ID列表
-     * @return 标签列表
-     */
-    List<Tag> findByIds(@Param("ids") List<Long> ids);
-
-    /**
      * 根据用户ID查询标签
      *
      * @param userId 用户ID
@@ -86,14 +70,6 @@ public interface TagMapper {
      * @return 标签对象
      */
     Tag findByName(@Param("name") String name);
-
-    /**
-     * 根据slug查询标签
-     *
-     * @param slug 标签slug
-     * @return 标签对象
-     */
-    Tag findBySlug(@Param("slug") String slug);
 
     // ==================== 新增（Create） ====================
 
@@ -133,7 +109,7 @@ public interface TagMapper {
      * @param id 标签ID
      * @return 影响行数
      */
-    int deleteById(Long id);
+    int purgeById(Long id);
 
 
     // ==================== 统计（Count） ====================
@@ -167,29 +143,6 @@ public interface TagMapper {
      * @return 待审核标签数量
      */
     long countPendingReviews();
-
-    /**
-     * 更新标签统计数据
-     *
-     * @param tagId        标签ID
-     * @param articleCount 文章数量变化值
-     * @param usageCount   使用次数变化值
-     * @return 影响行数
-     */
-    int updateTagStats(@Param("tagId") Long tagId,
-                       @Param("articleCount") int articleCount,
-                       @Param("usageCount") int usageCount);
-
-    /**
-     * 批量更新标签统计数据
-     *
-     * @param tagIds       标签ID列表
-     * @param articleCount 文章数量变化值
-     * @param usageCount   使用次数变化值
-     */
-    void batchUpdateTagStats(@Param("tagIds") List<Long> tagIds,
-                             @Param("articleCount") int articleCount,
-                             @Param("usageCount") int usageCount);
 
     /**
      * 获取标签文章数

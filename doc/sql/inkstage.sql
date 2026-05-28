@@ -281,7 +281,7 @@ CREATE TABLE `collection_folder`
     `article_count`  int NULL DEFAULT 0 COMMENT '文件夹内文章数量',
     `sort_order`     int NULL DEFAULT 0 COMMENT '排序顺序',
     `default_folder` tinyint NULL DEFAULT 0 COMMENT '是否默认文件夹（0:否,1:是）',
-    `status`         tinyint NOT NULL DEFAULT 0 COMMENT '收藏夹状态（0:公开,1:私密）',
+    `status`         tinyint                                                      NOT NULL DEFAULT 0 COMMENT '收藏夹状态（0:公开,1:私密）',
     `create_time`    datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`    datetime                                                     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
     `deleted`        tinyint NULL DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
@@ -295,30 +295,30 @@ CREATE TABLE `collection_folder`
 DROP TABLE IF EXISTS `column`;
 CREATE TABLE `column`
 (
-    `id`            BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
-    `user_id`       BIGINT       NOT NULL COMMENT '专栏创建者ID',
-    `name`          VARCHAR(100) NOT NULL COMMENT '专栏名称',
-    `slug`          VARCHAR(100) NOT NULL UNIQUE COMMENT '专栏别名（URL友好）',
-    `description`   TEXT COMMENT '专栏描述',
-    `cover_image`   VARCHAR(255) COMMENT '专栏封面图URL',
+    `id`                 BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `user_id`            BIGINT       NOT NULL COMMENT '专栏创建者ID',
+    `name`               VARCHAR(100) NOT NULL COMMENT '专栏名称',
+    `slug`               VARCHAR(100) NOT NULL UNIQUE COMMENT '专栏别名（URL友好）',
+    `description`        TEXT COMMENT '专栏描述',
+    `cover_image`        VARCHAR(255) COMMENT '专栏封面图URL',
     `article_count`      INT                   DEFAULT 0 COMMENT '专栏内文章数量',
     `subscription_count` INT                   DEFAULT 0 COMMENT '专栏订阅数',
     `read_count`         INT                   DEFAULT 0 COMMENT '专栏总阅读量',
     `sort_order`         INT                   DEFAULT 0 COMMENT '排序顺序',
-    `status`        TINYINT               DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
-    `create_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted`       TINYINT               DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
-    `deleted_time`  DATETIME COMMENT '删除时间',
-    KEY             `idx_user_id` (`user_id`),
-    KEY             `idx_status` (`status`)
+    `status`             TINYINT               DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
+    `create_time`        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`        DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`            TINYINT               DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
+    `deleted_time`       DATETIME COMMENT '删除时间',
+    KEY                  `idx_user_id` (`user_id`),
+    KEY                  `idx_status` (`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专栏表';
 
 -- 文章专栏关联表（article_column）
 DROP TABLE IF EXISTS `article_column`;
 CREATE TABLE `article_column`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`   BIGINT   NOT NULL COMMENT '文章ID',
     `column_id`    BIGINT   NOT NULL COMMENT '专栏ID',
     `sort_order`   INT               DEFAULT 0 COMMENT '文章在专栏内的排序顺序',
@@ -336,24 +336,24 @@ CREATE TABLE `article_column`
 DROP TABLE IF EXISTS `column_subscription`;
 CREATE TABLE `column_subscription`
 (
-    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
-    `user_id`          BIGINT   NOT NULL COMMENT '订阅者用户ID',
-    `column_id`        BIGINT   NOT NULL COMMENT '专栏ID',
+    `id`                BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `user_id`           BIGINT   NOT NULL COMMENT '订阅者用户ID',
+    `column_id`         BIGINT   NOT NULL COMMENT '专栏ID',
     `subscription_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '订阅时间',
-    `create_time`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`      DATETIME DEFAULT NULL COMMENT '更新时间',
-    `deleted`          TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
-    `deleted_time`     DATETIME COMMENT '删除时间',
+    `create_time`       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`       DATETIME          DEFAULT NULL COMMENT '更新时间',
+    `deleted`           TINYINT           DEFAULT 0 COMMENT '是否已删除（0:未删除,1:已删除）',
+    `deleted_time`      DATETIME COMMENT '删除时间',
     UNIQUE KEY `uk_user_column` (`user_id`, `column_id`),
-    KEY                `idx_user_id` (`user_id`),
-    KEY                `idx_column_id` (`column_id`)
+    KEY                 `idx_user_id` (`user_id`),
+    KEY                 `idx_column_id` (`column_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='专栏订阅表';
 
 -- 文章阅读统计表（article_read_stat）
 DROP TABLE IF EXISTS `article_read_stat`;
 CREATE TABLE `article_read_stat`
 (
-    `id`            BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`            BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`    BIGINT      NOT NULL COMMENT '文章ID',
     `user_id`       BIGINT COMMENT '用户ID（未登录用户为NULL）',
     `ip_address`    VARCHAR(50) NOT NULL COMMENT '阅读IP地址',
@@ -415,7 +415,7 @@ CREATE TABLE `comment`
 DROP TABLE IF EXISTS `comment_like`;
 CREATE TABLE `comment_like`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `comment_id`   BIGINT   NOT NULL COMMENT '评论ID',
     `user_id`      BIGINT   NOT NULL COMMENT '用户ID',
     `create_time`  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
@@ -451,7 +451,7 @@ CREATE TABLE `follow`
 DROP TABLE IF EXISTS `message`;
 CREATE TABLE `message`
 (
-    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `sender_id`       BIGINT      NOT NULL COMMENT '发送者ID',
     `receiver_id`     BIGINT      NOT NULL COMMENT '接收者ID',
     `content`         TEXT        NOT NULL COMMENT '私信内容',
@@ -547,39 +547,39 @@ CREATE TABLE `notification_template`
 DROP TABLE IF EXISTS `report`;
 CREATE TABLE `report`
 (
-    `id`            bigint       NOT NULL COMMENT '主键ID',
-    `reporter_id`   bigint       NOT NULL COMMENT '举报人ID',
-    `reporter_name` varchar(50)  NOT NULL COMMENT '举报人昵称',
-    `reported_type` tinyint      NOT NULL COMMENT '被举报对象类型',
-    `reported_id`   bigint       NOT NULL COMMENT '被举报对象ID',
-    `reported_name` varchar(50)  NOT NULL COMMENT '被举报对象用户名',
-    `related_id`    bigint                DEFAULT NULL COMMENT '相关对象ID(文章ID、评论ID、用户ID等)',
-    `reported_content` varchar(500)  NULL COMMENT '被举报内容',
-    `report_type`   tinyint      NOT NULL COMMENT '举报类型',
-    `reason`        varchar(500) NOT NULL COMMENT '举报理由',
-    `evidence`      text COMMENT '举报证据(JSON格式,包含图片、视频等链接)',
-    `anonymous`     tinyint NULL DEFAULT 0 COMMENT '是否匿名举报(0:否,1:是)',
-    `report_status` tinyint      NOT NULL COMMENT '举报状态',
-    `handle_result` tinyint               DEFAULT NULL COMMENT '处理结果',
-    `handle_reason` varchar(500)          DEFAULT NULL COMMENT '处理理由',
-    `handler_id`    bigint                DEFAULT NULL COMMENT '处理人ID',
-    `handler_name`  varchar(50)           DEFAULT NULL COMMENT '处理人昵称',
-    `handle_time`   datetime              DEFAULT NULL COMMENT '处理时间',
-    `create_time`   datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-    `update_time`   datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-    `deleted`       tinyint      NOT NULL DEFAULT 0 COMMENT '删除标识(0:未删除,1:已删除)',
-    `deleted_time`  datetime NULL DEFAULT NULL COMMENT '删除时间',
+    `id`               bigint       NOT NULL COMMENT '主键ID',
+    `reporter_id`      bigint       NOT NULL COMMENT '举报人ID',
+    `reporter_name`    varchar(50)  NOT NULL COMMENT '举报人昵称',
+    `reported_type`    tinyint      NOT NULL COMMENT '被举报对象类型',
+    `reported_id`      bigint       NOT NULL COMMENT '被举报对象ID',
+    `reported_name`    varchar(50)  NOT NULL COMMENT '被举报对象用户名',
+    `related_id`       bigint                DEFAULT NULL COMMENT '相关对象ID(文章ID、评论ID、用户ID等)',
+    `reported_content` varchar(500) NULL COMMENT '被举报内容',
+    `report_type`      tinyint      NOT NULL COMMENT '举报类型',
+    `reason`           varchar(500) NOT NULL COMMENT '举报理由',
+    `evidence`         text COMMENT '举报证据(JSON格式,包含图片、视频等链接)',
+    `anonymous`        tinyint NULL DEFAULT 0 COMMENT '是否匿名举报(0:否,1:是)',
+    `report_status`    tinyint      NOT NULL COMMENT '举报状态',
+    `handle_result`    tinyint               DEFAULT NULL COMMENT '处理结果',
+    `handle_reason`    varchar(500)          DEFAULT NULL COMMENT '处理理由',
+    `handler_id`       bigint                DEFAULT NULL COMMENT '处理人ID',
+    `handler_name`     varchar(50)           DEFAULT NULL COMMENT '处理人昵称',
+    `handle_time`      datetime              DEFAULT NULL COMMENT '处理时间',
+    `create_time`      datetime     NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`      datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
+    `deleted`          tinyint      NOT NULL DEFAULT 0 COMMENT '删除标识(0:未删除,1:已删除)',
+    `deleted_time`     datetime NULL DEFAULT NULL COMMENT '删除时间',
     PRIMARY KEY (`id`),
-    KEY             `idx_reporter_id` (`reporter_id`),
-    KEY             `idx_reported_id` (`reported_id`),
-    KEY             `idx_report_status` (`report_status`)
+    KEY                `idx_reporter_id` (`reporter_id`),
+    KEY                `idx_reported_id` (`reported_id`),
+    KEY                `idx_report_status` (`report_status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='举报表';
 
 -- 举报类型表（report_type）
 DROP TABLE IF EXISTS `report_type`;
 CREATE TABLE `report_type`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `name`         VARCHAR(50) NOT NULL COMMENT '举报类型名称',
     `code`         VARCHAR(50) NOT NULL UNIQUE COMMENT '举报类型编码',
     `description`  TEXT COMMENT '举报类型描述',
@@ -599,7 +599,7 @@ CREATE TABLE `report_type`
 DROP TABLE IF EXISTS `feedback`;
 CREATE TABLE `feedback`
 (
-    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`               BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`          BIGINT       NOT NULL COMMENT '反馈人ID',
     `feedback_type_id` BIGINT       NOT NULL COMMENT '反馈类型ID',
     `title`            VARCHAR(200) NOT NULL COMMENT '反馈标题',
@@ -622,7 +622,7 @@ CREATE TABLE `feedback`
 DROP TABLE IF EXISTS `feedback_type`;
 CREATE TABLE `feedback_type`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `name`         VARCHAR(50) NOT NULL COMMENT '反馈类型名称',
     `code`         VARCHAR(50) NOT NULL UNIQUE COMMENT '反馈类型编码',
     `description`  TEXT COMMENT '反馈类型描述',
@@ -639,7 +639,7 @@ CREATE TABLE `feedback_type`
 DROP TABLE IF EXISTS `feedback_reply`;
 CREATE TABLE `feedback_reply`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `feedback_id`  BIGINT   NOT NULL COMMENT '反馈ID',
     `user_id`      BIGINT   NOT NULL COMMENT '回复人ID',
     `content`      TEXT     NOT NULL COMMENT '回复内容',
@@ -659,7 +659,7 @@ CREATE TABLE `feedback_reply`
 DROP TABLE IF EXISTS `sensitive_word`;
 CREATE TABLE `sensitive_word`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `word`         VARCHAR(50) NOT NULL UNIQUE COMMENT '敏感词',
     `category`     VARCHAR(20) NOT NULL COMMENT '敏感词分类',
     `level`        TINYINT     NOT NULL COMMENT '敏感级别（0:低,1:中,2:高）',
@@ -678,7 +678,7 @@ CREATE TABLE `sensitive_word`
 DROP TABLE IF EXISTS `system_announcement`;
 CREATE TABLE `system_announcement`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `title`          VARCHAR(200) NOT NULL COMMENT '公告标题',
     `content`        TEXT         NOT NULL COMMENT '公告内容',
     `type`           TINYINT               DEFAULT 0 COMMENT '公告类型（0:系统公告,1:活动通知,2:维护通知）',
@@ -701,7 +701,7 @@ CREATE TABLE `system_announcement`
 DROP TABLE IF EXISTS `user_notification`;
 CREATE TABLE `user_notification`
 (
-    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`         BIGINT   NOT NULL COMMENT '用户ID',
     `notification_id` BIGINT   NOT NULL COMMENT '通知ID',
     `read_status`     TINYINT           DEFAULT 0 COMMENT '是否已读（0:未读,1:已读）',
@@ -747,7 +747,7 @@ CREATE TABLE `notification_setting`
 DROP TABLE IF EXISTS `email_template`;
 CREATE TABLE `email_template`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `code`           VARCHAR(50)  NOT NULL UNIQUE COMMENT '模板编码',
     `name`           VARCHAR(100) NOT NULL COMMENT '模板名称',
     `subject`        VARCHAR(200) NOT NULL COMMENT '邮件主题',
@@ -767,7 +767,7 @@ CREATE TABLE `email_template`
 DROP TABLE IF EXISTS `sms_template`;
 CREATE TABLE `sms_template`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `code`           VARCHAR(50)  NOT NULL UNIQUE COMMENT '模板编码',
     `name`           VARCHAR(100) NOT NULL COMMENT '模板名称',
     `content`        TEXT         NOT NULL COMMENT '短信内容模板',
@@ -786,7 +786,7 @@ CREATE TABLE `sms_template`
 DROP TABLE IF EXISTS `system_log`;
 CREATE TABLE `system_log`
 (
-    `id`              BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`              BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `log_type`        TINYINT      NOT NULL COMMENT '日志类型（0:操作日志,1:登录日志,2:错误日志,3:性能日志）',
     `user_id`         BIGINT COMMENT '操作用户ID',
     `username`        VARCHAR(50) COMMENT '操作用户名',
@@ -817,7 +817,7 @@ CREATE TABLE `system_log`
 DROP TABLE IF EXISTS `system_config`;
 CREATE TABLE `system_config`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `config_key`     VARCHAR(100) NOT NULL UNIQUE COMMENT '配置键',
     `config_value`   TEXT         NOT NULL COMMENT '配置值',
     `description`    TEXT COMMENT '配置描述',
@@ -838,7 +838,7 @@ CREATE TABLE `system_config`
 DROP TABLE IF EXISTS `statistics`;
 CREATE TABLE `statistics`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `stat_type`    VARCHAR(50) NOT NULL COMMENT '统计类型（daily,weekly,monthly,yearly）',
     `stat_date`    DATETIME    NOT NULL COMMENT '统计日期',
     `stat_data`    JSON        NOT NULL COMMENT '统计数据',
@@ -855,7 +855,7 @@ CREATE TABLE `statistics`
 DROP TABLE IF EXISTS `tag_stat`;
 CREATE TABLE `tag_stat`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `tag_id`       BIGINT   NOT NULL COMMENT '标签ID',
     `stat_date`    DATE     NOT NULL COMMENT '统计日期',
     `use_count`    INT               DEFAULT 0 COMMENT '使用次数',
@@ -872,7 +872,7 @@ CREATE TABLE `tag_stat`
 DROP TABLE IF EXISTS `search_history`;
 CREATE TABLE `search_history`
 (
-    `id`               BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`               BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `user_id`          BIGINT       NOT NULL COMMENT '用户ID',
     `keyword`          VARCHAR(100) NOT NULL COMMENT '搜索关键词',
     `search_type`      VARCHAR(20)  NOT NULL COMMENT '搜索类型（article,user,tag）',
@@ -892,7 +892,7 @@ CREATE TABLE `search_history`
 DROP TABLE IF EXISTS `search_hot_word`;
 CREATE TABLE `search_hot_word`
 (
-    `id`           BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`           BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `keyword`      VARCHAR(100) NOT NULL UNIQUE COMMENT '热词',
     `search_count` INT                   DEFAULT 0 COMMENT '搜索次数',
     `status`       TINYINT               DEFAULT 1 COMMENT '状态（0:禁用,1:正常）',
@@ -909,7 +909,7 @@ CREATE TABLE `search_hot_word`
 DROP TABLE IF EXISTS `recommendation_config`;
 CREATE TABLE `recommendation_config`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT       NOT NULL PRIMARY KEY COMMENT '主键ID',
     `config_type`    VARCHAR(50)  NOT NULL COMMENT '配置类型（article,tag,user）',
     `config_key`     VARCHAR(100) NOT NULL COMMENT '配置键',
     `config_value`   TEXT         NOT NULL COMMENT '配置值',
@@ -931,7 +931,7 @@ CREATE TABLE `recommendation_config`
 DROP TABLE IF EXISTS `article_recommendation`;
 CREATE TABLE `article_recommendation`
 (
-    `id`                  BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`                  BIGINT      NOT NULL PRIMARY KEY COMMENT '主键ID',
     `article_id`          BIGINT      NOT NULL COMMENT '文章ID',
     `related_article_id`  BIGINT      NOT NULL COMMENT '相关文章ID',
     `recommendation_type` VARCHAR(50) NOT NULL COMMENT '推荐类型（related,hot,new）',
@@ -951,7 +951,7 @@ CREATE TABLE `article_recommendation`
 DROP TABLE IF EXISTS `tag_recommendation`;
 CREATE TABLE `tag_recommendation`
 (
-    `id`             BIGINT NOT NULL PRIMARY KEY COMMENT '主键ID',
+    `id`             BIGINT   NOT NULL PRIMARY KEY COMMENT '主键ID',
     `tag_id`         BIGINT   NOT NULL COMMENT '标签ID',
     `related_tag_id` BIGINT   NOT NULL COMMENT '相关标签ID',
     `score` DOUBLE DEFAULT 0 COMMENT '推荐分数',
@@ -987,7 +987,7 @@ CREATE TABLE `reading_history`
     INDEX             `idx_last_read_time`(`last_read_time` ASC) USING BTREE,
     CONSTRAINT `fk_reading_history_article` FOREIGN KEY (`article_id`) REFERENCES `article` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT,
     CONSTRAINT `fk_reading_history_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE CASCADE ON UPDATE RESTRICT
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '阅读历史表' ROW_FORMAT = Dynamic;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '阅读历史表';
 
 -- 仪表盘统计数据表
 DROP TABLE IF EXISTS `dashboard_stats`;
@@ -1006,7 +1006,29 @@ CREATE TABLE `dashboard_stats`
     UNIQUE INDEX `uk_stat_key_time_value`(`stat_key` ASC, `time_value` ASC) USING BTREE,
     INDEX          `idx_data_type`(`data_type` ASC) USING BTREE,
     INDEX          `idx_time_value`(`time_value` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '仪表盘统计数据表' ROW_FORMAT = Dynamic;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '仪表盘统计数据表';
+
+-- 账号注销记录表
+DROP TABLE IF EXISTS `account_cancellation`;
+CREATE TABLE `account_cancellation`
+(
+    `id`                bigint   NOT NULL COMMENT '主键ID',
+    `user_id`           bigint   NOT NULL COMMENT '用户ID',
+    `clean_content`     tinyint NULL DEFAULT 0 COMMENT '是否清除内容（0:否,1:是）-文章/专栏/评论',
+    `clean_interaction` tinyint NULL DEFAULT 0 COMMENT '是否清除互动（0:否,1:是）-点赞/收藏/转发',
+    `apply_time`        datetime NOT NULL COMMENT '申请时间',
+    `scheduled_time`    datetime NOT NULL COMMENT '计划执行时间（apply_time + 30天）',
+    `status`            TINYINT  NOT NULL DEFAULT 0 COMMENT  '状态',
+    `create_time`       datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`       datetime NULL DEFAULT NULL COMMENT '更新时间',
+    `deleted`           tinyint  NOT NULL DEFAULT 0 COMMENT '是否已删除(0:未删除,1:已删除)',
+    `deleted_time`      datetime NULL DEFAULT NULL COMMENT '删除时间',
+    PRIMARY KEY (`id`) USING BTREE,
+    UNIQUE INDEX `uk_user_id` (`user_id` ASC) USING BTREE,
+    INDEX               `idx_status` (`status` ASC) USING BTREE,
+    INDEX               `idx_scheduled_time` (`scheduled_time` ASC) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT = '账号注销记录表';
+
 
 -- ----------------------------
 -- 7. 初始化数据

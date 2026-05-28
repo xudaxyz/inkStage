@@ -9,6 +9,7 @@ import com.inkstage.vo.front.MyColumnVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -62,14 +63,6 @@ public interface ColumnMapper {
                                    @Param("keyword") String keyword,
                                    @Param("offset") int offset,
                                    @Param("pageSize") int pageSize);
-
-    /**
-     * 根据slug查询专栏
-     *
-     * @param slug 专栏别名
-     * @return 专栏实体，如果不存在返回null
-     */
-    Column findBySlug(@Param("slug") String slug);
 
     /**
      * 根据名称和用户ID查询专栏
@@ -187,4 +180,27 @@ public interface ColumnMapper {
      * @return 专栏选项列表
      */
     List<ColumnOptionVO> findMyColumnOptions(@Param("userId") Long userId);
+
+    /**
+     * 软删除用户所有专栏
+     *
+     * @param userId 用户ID
+     */
+    void deleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * 恢复指定时间之后被软删除的用户专栏
+     *
+     * @param userId    用户ID
+     * @param afterTime 时间节点，恢复此时间之后被删除的专栏
+     */
+    void restoreByUserIdAfterTime(@Param("userId") Long userId, @Param("afterTime") LocalDateTime afterTime);
+
+    /**
+     * 彻底删除用户所有专栏
+     *
+     * @param userId 用户ID
+     */
+    void purgeByUserId(@Param("userId") Long userId);
+
 }

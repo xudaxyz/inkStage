@@ -76,7 +76,7 @@ public class ArticleTagServiceImpl implements ArticleTagService {
             tagsToAdd.removeAll(currentTagIds);
 
             // 删除文章现有的标签关联
-            articleTagMapper.deleteByArticleId(articleId);
+            articleTagMapper.purgeByArticleId(articleId);
 
             // 批量添加新的标签关联
             if (tagIds != null && !tagIds.isEmpty()) {
@@ -131,7 +131,7 @@ public class ArticleTagServiceImpl implements ArticleTagService {
             throw new IllegalArgumentException("文章ID不能为空");
         }
 
-        articleTagMapper.deleteByArticleId(articleId);
+        articleTagMapper.purgeByArticleId(articleId);
     }
 
     @Override

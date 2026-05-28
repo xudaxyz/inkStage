@@ -4,7 +4,6 @@ import com.inkstage.dto.admin.NotificationTemplateQueryDTO;
 import com.inkstage.entity.model.NotificationTemplate;
 import com.inkstage.enums.notification.NotificationChannel;
 import com.inkstage.enums.notification.NotificationType;
-import com.inkstage.enums.common.StatusEnum;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -27,11 +26,6 @@ public interface NotificationTemplateMapper {
     NotificationTemplate selectByCode(@Param("code") String code);
 
     /**
-     * 根据通知类型查询模板
-     */
-    List<NotificationTemplate> selectByType(@Param("notificationType") NotificationType notificationType);
-
-    /**
      * 根据通知类型和渠道查询模板
      */
     NotificationTemplate selectByTypeAndChannel(@Param("notificationType") NotificationType notificationType, @Param("notificationChannel") NotificationChannel notificationChannel);
@@ -40,11 +34,6 @@ public interface NotificationTemplateMapper {
      * 查询所有模板
      */
     List<NotificationTemplate> selectAll();
-
-    /**
-     * 根据状态查询模板
-     */
-    List<NotificationTemplate> selectByStatus(@Param("status") StatusEnum status);
 
     /**
      * 插入模板
@@ -59,7 +48,7 @@ public interface NotificationTemplateMapper {
     /**
      * 根据ID删除模板
      */
-    int deleteById(@Param("id") Long id);
+    int purgeById(@Param("id") Long id);
 
     /**
      * 分页查询模板列表

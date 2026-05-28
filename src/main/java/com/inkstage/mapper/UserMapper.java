@@ -2,7 +2,6 @@ package com.inkstage.mapper;
 
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.vo.admin.AdminUserArticleVO;
 import com.inkstage.vo.admin.AdminUserCommentVO;
@@ -32,14 +31,6 @@ public interface UserMapper {
     User findById(@Param("id") Long id);
 
     /**
-     * 根据用户ID查询用户版本号
-     *
-     * @param id 用户ID
-     * @return 用户版本号
-     */
-    Integer findUserVersionById(@Param("id") Long id);
-
-    /**
      * 根据用户名查询用户
      *
      * @param username 用户名
@@ -62,28 +53,6 @@ public interface UserMapper {
      * @return 用户信息
      */
     User findByPhone(@Param("phone") String phone);
-
-    /**
-     * 分页查询用户
-     *
-     * @param offset    偏移量
-     * @param pageSize  每页大小
-     * @param keyword   关键词
-     * @param role      角色
-     * @param status    状态
-     * @param startDate 开始日期
-     * @param endDate   结束日期
-     * @return 用户列表
-     */
-    List<User> findByPage(
-            @Param("offset") Integer offset,
-            @Param("pageSize") Integer pageSize,
-            @Param("keyword") String keyword,
-            @Param("role") UserRoleEnum role,
-            @Param("status") UserStatus status,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
-    );
 
     /**
      * 查询热门用户
@@ -110,23 +79,6 @@ public interface UserMapper {
      * @return 最近评论列表
      */
     List<AdminUserCommentVO> findRecentComments(@Param("userId") Long userId, @Param("limit") Integer limit);
-
-    /**
-     * 批量查询用户
-     *
-     * @param ids 用户ID列表
-     * @return 用户列表
-     */
-    List<User> findByIds(@Param("ids") List<Long> ids);
-
-    /**
-     * 根据角色查询用户
-     *
-     * @param role  角色
-     * @param limit 限制数量
-     * @return 用户列表
-     */
-    List<User> findByRole(@Param("role") UserRoleEnum role, @Param("limit") Integer limit);
 
     /**
      * 管理员根据ID获取用户详情
@@ -174,15 +126,6 @@ public interface UserMapper {
     int updateStatus(@Param("id") Long id, @Param("status") UserStatus status);
 
     /**
-     * 更新用户最后登录时间
-     *
-     * @param id            用户ID
-     * @param lastLoginTime 最后登录时间
-     * @return 影响行数
-     */
-    int updateLastLoginTime(@Param("id") Long id, @Param("lastLoginTime") LocalDateTime lastLoginTime);
-
-    /**
      * 管理员更新用户详情
      *
      * @param userDetailVO 用户详情
@@ -207,7 +150,7 @@ public interface UserMapper {
      * @param id 用户ID
      * @return 影响行数
      */
-    int deleteById(@Param("id") Long id);
+    int purgeById(@Param("id") Long id);
 
     // ==================== 统计（Count） ====================
 
@@ -297,24 +240,6 @@ public interface UserMapper {
     int updateLikeCount(@Param("id") Long id, @Param("delta") int delta);
 
     /**
-     * 统计用户总数
-     *
-     * @param keyword   关键词
-     * @param role      角色
-     * @param status    状态
-     * @param startDate 开始日期
-     * @param endDate   结束日期
-     * @return 总数
-     */
-    long countByCondition(
-            @Param("keyword") String keyword,
-            @Param("role") UserRoleEnum role,
-            @Param("status") UserStatus status,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
-    );
-
-    /**
      * 管理员统计用户总数
      *
      * @param query 查询条件
@@ -367,4 +292,11 @@ public interface UserMapper {
      */
     List<Long> findExpiredPendingDeleteUserIds(@Param("now") LocalDateTime now);
 
+    /**
+     * 注销用户账号（清空个人信息，状态改为已注销）
+     *
+     * @param id 用户ID
+     * @return 影响行数
+     */
+    int cancelUserAccount(@Param("id") Long id);
 }

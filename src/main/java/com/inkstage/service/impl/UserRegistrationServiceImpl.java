@@ -4,8 +4,6 @@ import com.inkstage.entity.model.User;
 import com.inkstage.exception.BusinessException;
 import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.UserRegistrationService;
-import com.inkstage.utils.SnowflakeIdGenerator;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Service;
 public class UserRegistrationServiceImpl implements UserRegistrationService {
 
     private final UserMapper userMapper;
-    private final SnowflakeIdGenerator snowflakeIdGenerator;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -60,36 +57,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService {
         } catch (Exception e) {
             log.error("检查手机号是否已存在失败, 手机号: {}", phone, e);
             throw new BusinessException("检查手机号失败");
-        }
-    }
-
-    @Override
-    public User createUser(User user) {
-        try {
-            log.debug("创建用户, 用户名: {}", user.getUsername());
-            // 检查用户名是否已存在
-            if (isUsernameExists(user.getUsername())) {
-                throw new BusinessException("用户名已存在");
-            }
-            // 检查邮箱是否已存在
-            if (user.getEmail() != null && isEmailExists(user.getEmail())) {
-                throw new BusinessException("邮箱已存在");
-            }
-            // 检查手机号是否已存在
-            if (user.getPhone() != null && isPhoneExists(user.getPhone())) {
-                throw new BusinessException("手机号已存在");
-            }
-            // 执行创建
-            user.setId(snowflakeIdGenerator.nextId());
-            int result = userMapper.insert(user);
-            if (result == 0) {
-                log.warn("创建用户失败, 用户名: {}", user.getUsername());
-                throw new BusinessException("创建用户失败");
-            }
-            return user;
-        } catch (Exception e) {
-            log.error("创建用户失败, 用户名: {}", user.getUsername(), e);
-            throw new BusinessException("创建用户失败");
         }
     }
 }

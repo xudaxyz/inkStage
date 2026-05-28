@@ -146,7 +146,7 @@ public class ColumnServiceImpl implements ColumnService {
             User user = UserContext.getCurrentUser();
             checkColumnIsMine(columnId, user);
 
-            articleColumnMapper.deleteByColumnId(columnId);
+            articleColumnMapper.purgeByColumnId(columnId);
             boolean result = columnMapper.deleteById(columnId, user.getId()) > 0;
             if (result) {
                 cacheManager.deletePattern(CacheKey.COLUMN);
@@ -409,7 +409,7 @@ public class ColumnServiceImpl implements ColumnService {
                 throw new BusinessException("文章不在此专栏中");
             }
 
-            int result = articleColumnMapper.deleteById(articleColumn.getId());
+            int result = articleColumnMapper.purgeById(articleColumn.getId());
             if (result > 0) {
                 countProducer.sendCountMessage(CountType.COLUMN_ARTICLE, columnId, -1);
                 cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + columnId);
@@ -508,7 +508,7 @@ public class ColumnServiceImpl implements ColumnService {
             }
 
             if (oldColumnId != null) {
-                articleColumnMapper.deleteByArticleId(articleId);
+                articleColumnMapper.purgeByArticleId(articleId);
                 countProducer.sendCountMessage(CountType.COLUMN_ARTICLE, oldColumnId, -1);
                 cacheManager.deletePattern(CacheKey.COLUMN_DETAIL + oldColumnId);
                 cacheManager.deletePattern(CacheKey.COLUMN_ARTICLES + oldColumnId);
@@ -552,7 +552,7 @@ public class ColumnServiceImpl implements ColumnService {
             ArticleColumn existingRelation = articleColumnMapper.findByArticleId(articleId);
             if (existingRelation != null) {
                 Long columnId = existingRelation.getColumnId();
-                articleColumnMapper.deleteByArticleId(articleId);
+                articleColumnMapper.purgeByArticleId(articleId);
                 countProducer.sendCountMessage(CountType.COLUMN_ARTICLE, columnId, -1);
                 cacheClearService.clearColumnDetailCache(columnId);
                 cacheClearService.clearColumnArticlesCache(columnId);

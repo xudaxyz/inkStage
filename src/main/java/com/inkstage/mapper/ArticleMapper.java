@@ -36,14 +36,6 @@ public interface ArticleMapper {
     Article findById(Long id);
 
     /**
-     * 根据文章ID查询文章版本号
-     *
-     * @param id 文章ID
-     * @return 文章版本号
-     */
-    Integer findArticleVersionById(Long id);
-
-    /**
      * 根据ID查询文章详情VO对象
      *
      * @param id 文章ID
@@ -126,22 +118,6 @@ public interface ArticleMapper {
      */
     List<ArticleListVO> searchArticles(@Param("keyword") String keyword, @Param("sortBy") String sortBy, @Param("offset") int offset, @Param("limit") int limit);
 
-    /**
-     * 分页查询所有文章（管理员）
-     *
-     * @param offset   偏移量
-     * @param pageSize 每页大小
-     * @return 文章列表
-     */
-    List<Article> findByPage(@Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
-
-    /**
-     * 分页查询所有文章（管理员）
-     *
-     * @param queryDTO 查询条件
-     * @return 文章列表
-     */
-    List<Article> findByPage(@Param("query") AdminArticleQueryDTO queryDTO);
 
     /**
      * 分页查询所有文章（管理员）
@@ -150,32 +126,6 @@ public interface ArticleMapper {
      * @return 文章列表
      */
     List<AdminArticleVO> findAdminArticlesByPage(@Param("query") AdminArticleQueryDTO queryDTO);
-
-    /**
-     * 批量查询文章
-     *
-     * @param ids 文章ID列表
-     * @return 文章列表
-     */
-    List<Article> findByIds(@Param("ids") List<Long> ids);
-
-    /**
-     * 根据分类查询文章
-     *
-     * @param categoryId 分类ID
-     * @param limit      限制数量
-     * @return 文章列表
-     */
-    List<ArticleListVO> findByCategory(@Param("categoryId") Long categoryId, @Param("limit") Integer limit);
-
-    /**
-     * 根据标签查询文章
-     *
-     * @param tagId 标签ID
-     * @param limit 限制数量
-     * @return 文章列表
-     */
-    List<ArticleListVO> findByTag(@Param("tagId") Long tagId, @Param("limit") Integer limit);
 
     /**
      * 根据文章ID获取阅读数
@@ -359,7 +309,7 @@ public interface ArticleMapper {
      * @param userId 用户ID
      * @return 影响行数
      */
-    int deleteById(@Param("id") Long id, @Param("userId") Long userId);
+    int purgeById(@Param("id") Long id, @Param("userId") Long userId);
 
     /**
      * 物理删除文章（管理员）
@@ -367,7 +317,7 @@ public interface ArticleMapper {
      * @param id 文章ID
      * @return 影响行数
      */
-    int deleteByAdmin(@Param("id") Long id);
+    int purgeByAdmin(@Param("id") Long id);
 
     /**
      * 恢复文章（用户）：从回收站恢复到原状态
@@ -474,5 +424,36 @@ public interface ArticleMapper {
      * @return 分类分布列表，包含分类名称和文章数量
      */
     List<Map<String, Object>> getCategoryDistribution();
+
+    /**
+     * 软删除用户所有文章
+     *
+     * @param userId 用户ID
+     */
+    void deleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * 恢复指定时间之后被软删除的用户文章
+     *
+     * @param userId    用户ID
+     * @param afterTime 时间节点，恢复此时间之后被删除的文章
+     */
+    void restoreByUserIdAfterTime(@Param("userId") Long userId, @Param("afterTime") java.time.LocalDateTime afterTime);
+
+    /**
+     * 彻底删除用户所有文章
+     *
+     * @param userId 用户ID
+     */
+    void purgeByUserId(@Param("userId") Long userId);
+
+    /**
+     * 查询指定用户在指定时间之后被软删除的文章ID列表
+     *
+     * @param userId    用户ID
+     * @param afterTime 时间节点
+     * @return 被软删除的文章ID列表
+     */
+    List<Long> findAfterDeletedIdsByUserId(@Param("userId") Long userId, @Param("afterTime") LocalDateTime afterTime);
 
 }

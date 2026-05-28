@@ -110,7 +110,7 @@ public class ColumnSubscriptionServiceImpl implements ColumnSubscriptionService 
     public boolean unsubscribeColumn(Long columnId) {
         Long userId = UserContext.getCurrentUserId();
 
-        int result = columnSubscriptionMapper.delete(userId, columnId);
+        int result = columnSubscriptionMapper.purge(userId, columnId);
         if (result > 0) {
             cacheClearService.clearColumnSubscriptionCache(columnId, userId);
             countProducer.sendCountMessage(CountType.COLUMN_SUBSCRIPTION, columnId, -1);

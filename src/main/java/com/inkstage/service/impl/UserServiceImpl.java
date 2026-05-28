@@ -1,16 +1,11 @@
 package com.inkstage.service.impl;
 
 import com.inkstage.common.PageResult;
-import com.inkstage.common.ResponseMessage;
 import com.inkstage.dto.admin.AdminUserQueryDTO;
 import com.inkstage.entity.model.User;
-import com.inkstage.entity.model.UserAuth;
-import com.inkstage.enums.auth.AuthType;
 import com.inkstage.enums.user.UserRoleEnum;
 import com.inkstage.enums.user.UserStatus;
 import com.inkstage.exception.BusinessException;
-import com.inkstage.mapper.UserAuthMapper;
-import com.inkstage.mapper.UserMapper;
 import com.inkstage.service.*;
 import com.inkstage.vo.UserInfo;
 import com.inkstage.vo.admin.AdminUserDetailVO;
@@ -19,7 +14,6 @@ import com.inkstage.vo.front.HotUserVO;
 import com.inkstage.vo.front.UserPublicProfileVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,15 +34,7 @@ public class UserServiceImpl implements UserService {
     private final UserProfileService userProfileService;
     private final AdminUserService adminUserService;
     private final UserStatsService userStatsService;
-    private final UserAuthMapper userAuthMapper;
-    private final UserMapper userMapper;
-    private final TokenStoreService tokenStoreService;
-    private final PasswordEncoder passwordEncoder;
-
-    /**
-     * 账号删除冷却期天数
-     */
-    private static final int ACCOUNT_DELETE_COOLING_DAYS = 30;
+    private final AccountCancellationService accountCancellationService;
 
     @Override
     public boolean isUsernameExists(String username) {
@@ -75,15 +61,6 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         return userRegistrationService.isPhoneExists(phone);
-    }
-
-    @Override
-    public User createUser(User user) {
-        if (user == null) {
-            log.warn("创建用户参数为空");
-            return null;
-        }
-        return userRegistrationService.createUser(user);
     }
 
     @Override
@@ -352,105 +329,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void deleteAccount(Long userId, String password) {
-        log.info("用户申请删除账号，用户ID: {}", userId);
-
-        if (userId == null || userId <= 0) {
-            throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
-        }
-        if (password == null || password.isEmpty()) {
-            throw new BusinessException(ResponseMessage.PASSWORD_REQUIRED);
-        }
-
-        // 1. 查询用户
-        User user = userProfileService.getUserById(userId);
-        if (user == null) {
-            throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
-        }
-
-        // 2. 检查用户是否已在待删除状态
-        if (user.getStatus() == UserStatus.PENDING_DELETE) {
-            throw new BusinessException("账号已在注销流程中");
-        }
-
-        // 3. 验证当前密码
-        UserAuth userAuth = userAuthMapper.findByUserIdAndType(userId, AuthType.USERNAME);
-        if (userAuth == null || !passwordEncoder.matches(password, userAuth.getAuthCredential())) {
-            throw new BusinessException(ResponseMessage.PASSWORD_ERROR);
-        }
-
-        // 4. 标记用户状态为待删除，设置计划删除时间
-        User userToUpdate = new User();
-        userToUpdate.setId(userId);
-        userToUpdate.setStatus(UserStatus.PENDING_DELETE);
-        userToUpdate.setScheduledDeleteTime(LocalDateTime.now().plusDays(ACCOUNT_DELETE_COOLING_DAYS));
-        userToUpdate.setUpdateTime(LocalDateTime.now());
-        userProfileService.updateUser(userToUpdate);
-
-        // 5. 撤销所有令牌（用户立即被踢下线）
-        tokenStoreService.revokeAllRefreshTokens(userId);
-
-        log.info("用户申请删除账号成功，用户ID: {}，计划删除时间: {}", userId, userToUpdate.getScheduledDeleteTime());
+    public void deleteAccount(Long userId, String password, Boolean cleanContent, Boolean cleanInteraction) {
+        accountCancellationService.deleteAccount(userId, password, cleanContent, cleanInteraction);
     }
 
     @Override
     @Transactional
     public void restorePendingDeleteAccount(Long userId) {
-        log.info("用户恢复待删除账号，用户ID: {}", userId);
-
-        if (userId == null || userId <= 0) {
-            throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
-        }
-
-        User user = userProfileService.getUserById(userId);
-        if (user == null) {
-            throw new BusinessException(ResponseMessage.USER_NOT_FOUND);
-        }
-
-        if (user.getStatus() != UserStatus.PENDING_DELETE) {
-            throw new BusinessException("账号不在注销流程中");
-        }
-
-        // 恢复正常状态，清除计划删除时间
-        User userToUpdate = new User();
-        userToUpdate.setId(userId);
-        userToUpdate.setStatus(UserStatus.NORMAL);
-        userToUpdate.setScheduledDeleteTime(null);
-        userToUpdate.setUpdateTime(LocalDateTime.now());
-        userProfileService.updateUser(userToUpdate);
-
-        log.info("用户恢复待删除账号成功，用户ID: {}", userId);
+        accountCancellationService.restoreAccount(userId);
     }
 
     @Override
     public int cleanupExpiredPendingDeleteAccounts() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Long> expiredUserIds = userMapper.findExpiredPendingDeleteUserIds(now);
-
-        if (expiredUserIds.isEmpty()) {
-            log.debug("没有需要清理的过期待删除账号");
-            return 0;
-        }
-
-        log.info("发现 {} 个过期待删除账号，开始清理", expiredUserIds.size());
-        int successCount = 0;
-
-        for (Long userId : expiredUserIds) {
-            try {
-                // 撤销所有令牌
-                tokenStoreService.revokeAllRefreshTokens(userId);
-                // 删除用户认证信息
-                userAuthMapper.deleteByUserId(userId);
-                // 删除用户(物理删除)
-                userMapper.deleteById(userId);
-                successCount++;
-                log.info("清理过期待删除账号成功，用户ID: {}", userId);
-            } catch (Exception e) {
-                log.error("清理过期待删除账号失败，用户ID: {}", userId, e);
-            }
-        }
-
-        log.info("过期待删除账号清理完成，成功: {}/{}", successCount, expiredUserIds.size());
-        return successCount;
+        return accountCancellationService.cleanupExpiredAccounts();
     }
 }

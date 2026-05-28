@@ -69,7 +69,7 @@ public interface ColumnSubscriptionMapper {
      * @param columnId 专栏ID
      * @return 影响行数
      */
-    int delete(@Param("userId") Long userId, @Param("columnId") Long columnId);
+    int purge(@Param("userId") Long userId, @Param("columnId") Long columnId);
 
     // ==================== 统计（Count） ====================
 

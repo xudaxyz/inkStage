@@ -207,7 +207,7 @@ public class TagServiceImpl implements TagService {
             }
 
             // 执行删除操作
-            tagMapper.deleteById(id);
+            tagMapper.purgeById(id);
             log.info("删除标签并发送通知成功, 标签ID: {}", id);
 
             cacheManager.deletePattern(CacheKey.TAG);

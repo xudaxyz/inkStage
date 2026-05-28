@@ -33,7 +33,7 @@ public interface UserRoleMapper {
      *
      * @param userId 用户ID
      */
-    void deleteByUserId(@Param("userId") Long userId);
+    void purgeByUserId(@Param("userId") Long userId);
 
     /**
      * 更新用户角色

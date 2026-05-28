@@ -106,7 +106,7 @@
     </update>
 
     <!-- 删除分类 -->
-    <delete id="deleteById" parameterType="java.lang.Long">
+    <delete id="purgeById" parameterType="java.lang.Long">
         DELETE FROM category WHERE id = #{id}
     </delete>
 
@@ -116,15 +116,6 @@
             status = #{status}
         WHERE id = #{id}
     </update>
-
-    <!-- 批量查询分类 -->
-    <select id="findByIds" parameterType="java.util.List" resultMap="ResultMap">
-        SELECT <include refid="baseColumns" /> FROM category
-        WHERE id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </select>
 
     <select id="getArticleCount" resultType="java.lang.Long">
         SELECT article_count FROM category WHERE id = #{id} AND deleted = 0
@@ -136,10 +127,5 @@
             article_count = article_count + #{delta}
         WHERE id = #{categoryId}
     </update>
-
-    <!-- 根据分类ID查询分类版本号 -->
-    <select id="findCategoryVersionById" resultType="java.lang.Integer">
-        SELECT category_version FROM category WHERE id = #{id}
-    </select>
 
 </mapper>

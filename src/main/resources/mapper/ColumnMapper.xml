@@ -160,13 +160,6 @@
         LIMIT #{offset}, #{pageSize}
     </select>
 
-    <!-- 根据slug查询专栏 -->
-    <select id="findBySlug" resultMap="ResultMap">
-        select
-        <include refid="baseColumns"/>
-        from `column` where slug = #{slug} and deleted = 0
-    </select>
-
     <!-- 根据名称和用户ID查询专栏 -->
     <select id="findByNameAndUserId" resultMap="ResultMap">
         select
@@ -261,4 +254,21 @@
         WHERE user_id = #{userId} AND deleted = 0 AND status = 1
         ORDER BY sort_order ASC, create_time DESC
     </select>
+
+    <update id="deleteByUserId">
+        UPDATE `column`
+        SET deleted = 1, deleted_time = NOW(), update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 0
+    </update>
+
+    <update id="restoreByUserIdAfterTime">
+        UPDATE `column`
+        SET deleted = 0, deleted_time = NULL, update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 1 AND deleted_time <![CDATA[ >= ]]> #{afterTime}
+    </update>
+
+    <delete id="purgeByUserId">
+        DELETE FROM `column` WHERE user_id = #{userId}
+    </delete>
+
 </mapper>

@@ -94,7 +94,7 @@ public class FollowServiceImpl implements FollowService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean unfollowUser(Long followerId, Long followingId) {
-        int result = followMapper.delete(followerId, followingId);
+        int result = followMapper.purge(followerId, followingId);
         if (result > 0) {
             countProducer.sendCountMessage(CountType.USER_FOLLOW, followerId, -1);
             countProducer.sendCountMessage(CountType.USER_FOLLOWER, followingId, -1);

@@ -79,7 +79,7 @@
     </insert>
 
     <!-- 删除订阅关系（物理删除） -->
-    <delete id="delete">
+    <delete id="purge">
         DELETE FROM column_subscription WHERE user_id = #{userId} AND column_id = #{columnId}
     </delete>
 

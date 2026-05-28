@@ -132,7 +132,7 @@ public class AdminNotificationTemplateServiceImpl implements AdminNotificationTe
     @Override
     @Transactional
     public boolean deleteTemplate(Long id) {
-        return templateMapper.deleteById(id) > 0;
+        return templateMapper.purgeById(id) > 0;
     }
 
     /**

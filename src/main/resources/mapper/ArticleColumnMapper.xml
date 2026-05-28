@@ -149,17 +149,17 @@
     </update>
 
     <!-- 根据ID删除 -->
-    <delete id="deleteById">
+    <delete id="purgeById">
         DELETE FROM article_column WHERE id = #{id}
     </delete>
 
     <!-- 根据文章ID删除 -->
-    <delete id="deleteByArticleId">
+    <delete id="purgeByArticleId">
         DELETE FROM article_column WHERE article_id = #{articleId}
     </delete>
 
     <!-- 根据专栏ID删除所有关联 -->
-    <delete id="deleteByColumnId">
+    <delete id="purgeByColumnId">
         DELETE FROM article_column WHERE column_id = #{columnId}
     </delete>
 

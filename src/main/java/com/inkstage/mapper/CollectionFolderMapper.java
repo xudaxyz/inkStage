@@ -39,15 +39,6 @@ public interface CollectionFolderMapper {
      */
     List<CollectionFolder> selectByUserId(Long userId);
 
-    /**
-     * 根据用户ID和文件夹ID查询收藏文件夹
-     *
-     * @param userId   用户ID
-     * @param folderId 文件夹ID
-     * @return 收藏文件夹
-     */
-    CollectionFolder selectByUserIdAndFolderId(@Param("userId") Long userId, @Param("folderId") Long folderId);
-
     // ==================== 新增（Create） ====================
 
     /**
@@ -93,7 +84,7 @@ public interface CollectionFolderMapper {
      * @param id 文件夹ID
      * @return 影响行数
      */
-    int deleteById(Long id);
+    int purgeById(Long id);
 
     /**
      * 批量更新收藏文件夹排序

@@ -35,7 +35,7 @@
     </select>
 
     <!-- 根据用户ID删除角色关联 -->
-    <delete id="deleteByUserId" parameterType="java.lang.Long">
+    <delete id="purgeByUserId" parameterType="java.lang.Long">
         DELETE FROM user_role
         WHERE user_id = #{userId}
     </delete>

@@ -19,7 +19,7 @@
     </insert>
     
     <!-- 根据文章ID和用户ID删除点赞记录 -->
-    <delete id="deleteByArticleIdAndUserId">
+    <delete id="purgeByArticleIdAndUserId">
         DELETE FROM article_like
         WHERE article_id = #{articleId} AND user_id = #{userId}
     </delete>
@@ -31,46 +31,6 @@
         WHERE article_id = #{articleId} AND user_id = #{userId} and deleted = 0
     </select>
 
-    <!-- 查询用户点赞的文章ID列表 -->
-    <select id="findArticleIdsByUserId" resultType="java.lang.Long">
-        SELECT
-            article_id
-        FROM
-            article_like
-        WHERE
-            user_id = #{userId}
-            AND deleted = 0
-        ORDER BY
-            create_time DESC
-        LIMIT #{limit} OFFSET #{offset}
-    </select>
-
-    <!-- 批量检查用户对文章的点赞状态 -->
-    <select id="findByUserIdAndArticleIds" parameterType="java.util.Map" resultMap="ArticleLikeMap">
-        SELECT
-            id, article_id, user_id, create_time, update_time, deleted, deleted_time
-        FROM
-            article_like
-        WHERE
-            user_id = #{userId}
-            AND article_id IN
-            <foreach collection="articleIds" item="articleId" open="(" separator="," close=")">
-                #{articleId}
-            </foreach>
-            AND deleted = 0
-    </select>
-
-    <!-- 统计文章的点赞数 -->
-    <select id="countByArticleId" resultType="java.lang.Long">
-        SELECT
-            COUNT(*)
-        FROM
-            article_like
-        WHERE
-            article_id = #{articleId}
-            AND deleted = 0
-    </select>
-
     <!-- 统计用户的点赞数 -->
     <select id="countByUserId" resultType="java.lang.Long">
         SELECT
@@ -80,6 +40,32 @@
         WHERE
             user_id = #{userId}
             AND deleted = 0
+    </select>
+
+    <update id="deleteByUserId">
+        UPDATE article_like
+        SET deleted = 1, deleted_time = NOW(), update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 0
+    </update>
+
+    <update id="restoreByUserIdAfterTime">
+        UPDATE article_like
+        SET deleted = 0, deleted_time = NULL, update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 1 AND deleted_time <![CDATA[ >= ]]> #{afterTime}
+    </update>
+
+    <delete id="purgeByUserId">
+        DELETE FROM article_like WHERE user_id = #{userId}
+    </delete>
+
+    <select id="findDeletedArticleIdsByUserId" resultType="java.lang.Long">
+        SELECT article_id FROM article_like
+        WHERE user_id = #{userId} AND deleted = 1
+    </select>
+
+    <select id="findDeletedArticleIdsByUserIdAfterTime" resultType="java.lang.Long">
+        SELECT article_id FROM article_like
+        WHERE user_id = #{userId} AND deleted = 1 AND deleted_time <![CDATA[ >= ]]> #{afterTime}
     </select>
     
 </mapper>

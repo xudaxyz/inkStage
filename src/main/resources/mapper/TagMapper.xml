@@ -114,7 +114,7 @@
     </update>
 
     <!-- 根据ID删除标签 -->
-    <delete id="deleteById" parameterType="java.lang.Long">
+    <delete id="purgeById" parameterType="java.lang.Long">
         DELETE FROM tag WHERE id = #{id}
     </delete>
 
@@ -124,17 +124,6 @@
         status = #{status}, update_time = #{updateTime}
         WHERE id = #{id}
     </update>
-
-    <!-- 批量查询标签 -->
-    <select id="findByIds" parameterType="java.util.List" resultMap="ResultMap">
-        SELECT
-        <include refid="baseColumns"/>
-        FROM tag
-        WHERE id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </select>
 
     <!-- 根据用户ID查询标签 -->
     <select id="findByUserId" resultMap="ResultMap">
@@ -157,27 +146,12 @@
         AND status = 1
     </select>
 
-    <!-- 根据slug查询标签 -->
-    <select id="findBySlug" resultMap="ResultMap">
-        SELECT
-        <include refid="baseColumns"/>
-        FROM tag
-        WHERE slug = #{slug}
-        AND deleted = 0
-        AND status = 1
-    </select>
-
     <!-- 根据标签ID获取使用该标签的所有用户ID -->
     <select id="findUserIdsByTagId" parameterType="java.lang.Long" resultType="java.lang.Long">
         SELECT DISTINCT a.user_id FROM article a
         JOIN article_tag at ON a.id = at.article_id
         WHERE at.tag_id = #{tagId}
         AND a.deleted = 0
-    </select>
-
-    <!-- 根据标签ID查询标签版本号 -->
-    <select id="findTagVersionById" resultType="java.lang.Integer">
-        SELECT tag_version FROM tag WHERE id = #{id}
     </select>
 
     <!-- 统计所有标签总数 -->
@@ -196,29 +170,6 @@
         WHERE deleted = 0
         AND (slug = '' or slug is null)
     </select>
-
-    <!-- 更新标签统计数据 -->
-    <update id="updateTagStats">
-        UPDATE tag SET
-        article_count = article_count + #{articleCount},
-        usage_count = usage_count + #{usageCount},
-        update_time = now()
-        WHERE id = #{tagId}
-        AND deleted = 0
-    </update>
-
-    <!-- 批量更新标签统计数据 -->
-    <update id="batchUpdateTagStats">
-        UPDATE tag SET
-        article_count = article_count + #{articleCount},
-        usage_count = usage_count + #{usageCount},
-        update_time = now()
-        WHERE id IN
-        <foreach collection="tagIds" item="tagId" open="(" separator="," close=")">
-            #{tagId}
-        </foreach>
-        AND deleted = 0
-    </update>
 
     <select id="getArticleCount" resultType="java.lang.Long">
         SELECT article_count FROM tag WHERE id = #{id} AND deleted = 0

@@ -43,14 +43,6 @@ public interface UserService {
     boolean isPhoneExists(String phone);
 
     /**
-     * 创建用户
-     *
-     * @param user 用户信息，包含用户名、密码、邮箱等
-     * @return 创建后的用户信息
-     */
-    User createUser(User user);
-    
-    /**
      * 根据用户名获取用户
      *
      * @param username 用户名
@@ -192,7 +184,7 @@ public interface UserService {
      * @param userId  用户ID
      * @param password 当前密码（用于身份验证）
      */
-    void deleteAccount(Long userId, String password);
+    void deleteAccount(Long userId, String password, Boolean cleanContent, Boolean cleanInteraction);
 
     /**
      * 恢复待删除账号

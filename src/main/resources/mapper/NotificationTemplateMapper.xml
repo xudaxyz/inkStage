@@ -49,13 +49,6 @@
         WHERE code = #{code} AND deleted = 0
     </select>
 
-    <select id="selectByType" resultMap="BaseResultMap">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM notification_template
-        WHERE notification_type = #{notificationType} AND deleted = 0
-        ORDER BY priority DESC, create_time DESC
-    </select>
 
     <select id="selectByTypeAndChannel" resultMap="BaseResultMap">
         SELECT
@@ -74,15 +67,6 @@
         <include refid="Base_Column_List"/>
         FROM notification_template
         WHERE deleted = 0
-        ORDER BY create_time DESC
-    </select>
-
-    <select id="selectByStatus" resultMap="BaseResultMap">
-        SELECT
-        <include refid="Base_Column_List"/>
-        FROM notification_template
-        WHERE status = #{status}
-        AND deleted = 0
         ORDER BY create_time DESC
     </select>
 
@@ -163,7 +147,7 @@
         WHERE id = #{id} AND deleted = 0
     </update>
 
-    <delete id="deleteById">
+    <delete id="purgeById">
         DELETE FROM notification_template
         WHERE id = #{id} AND deleted = 0
     </delete>

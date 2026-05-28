@@ -139,7 +139,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         Long folderId = collection != null ? collection.getFolderId() : null;
 
         // 删除收藏记录
-        int result = articleCollectionMapper.deleteByArticleIdAndUserId(articleId, userId);
+        int result = articleCollectionMapper.purgeByArticleIdAndUserId(articleId, userId);
 
         if (result > 0) {
             // 减少收藏数

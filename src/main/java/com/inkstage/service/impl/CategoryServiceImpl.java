@@ -172,7 +172,7 @@ public class CategoryServiceImpl implements CategoryService {
             if (id == null) {
                 throw new BusinessException(ResponseMessage.PARAM_ERROR);
             }
-            categoryMapper.deleteById(id);
+            categoryMapper.purgeById(id);
 
             cacheManager.deletePattern(CacheKey.CATEGORY);
         } catch (Exception e) {

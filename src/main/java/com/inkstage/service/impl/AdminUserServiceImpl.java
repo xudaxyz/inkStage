@@ -94,7 +94,7 @@ public class AdminUserServiceImpl implements AdminUserService {
                 throw new BusinessException("用户不存在");
             }
             // 执行删除
-            int result = userMapper.deleteById(id);
+            int result = userMapper.purgeById(id);
             if (result == 0) {
                 log.warn("删除用户失败, 用户ID: {}", id);
                 throw new BusinessException("删除用户失败");

@@ -153,7 +153,7 @@ public class CollectionFolderServiceImpl implements CollectionFolderService {
             if (InkConstant.COLLECT_DELETE_STRATEGY_DELETE.equals(strategy)) {
                 // 策略：同时取消该文件夹下所有收藏
                 for (ArticleCollection collection : collections) {
-                    articleCollectionMapper.deleteByArticleIdAndUserId(collection.getArticleId(), userId);
+                    articleCollectionMapper.purgeByArticleIdAndUserId(collection.getArticleId(), userId);
                     // 减少文章收藏数
                     countProducer.sendCountMessage(CountType.ARTICLE_COLLECTION, collection.getArticleId(), -1);
                 }
@@ -174,7 +174,7 @@ public class CollectionFolderServiceImpl implements CollectionFolderService {
             }
         }
 
-        int result = collectionFolderMapper.deleteById(folderId);
+        int result = collectionFolderMapper.purgeById(folderId);
         return result > 0;
     }
 

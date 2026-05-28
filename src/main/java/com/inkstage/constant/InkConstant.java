@@ -36,4 +36,9 @@ public class InkConstant {
      * 删除收藏夹时收藏夹内容移除策略 -- 同步删除收藏夹中的内容(取消收藏)
      */
     public static final String COLLECT_DELETE_STRATEGY_DELETE = "DELETE_COLLECTIONS";
+
+    /**
+     * 账号注销冷静期 - 30天
+     */
+    public static final int ACCOUNT_DELETE_COOLING_DAYS = 30;
 }

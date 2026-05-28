@@ -120,14 +120,14 @@ public interface ArticleColumnMapper {
      * @param id 关联记录ID
      * @return 影响的行数
      */
-    int deleteById(Long id);
+    int purgeById(Long id);
 
     /**
      * 根据文章ID删除所有关联记录 - 用于文章删除时清理关联关系
      *
      * @param articleId 文章ID
      */
-    void deleteByArticleId(@Param("articleId") Long articleId);
+    void purgeByArticleId(@Param("articleId") Long articleId);
 
     /**
      * 根据专栏ID删除所有关联记录
@@ -135,7 +135,7 @@ public interface ArticleColumnMapper {
      *
      * @param columnId 专栏ID
      */
-    void deleteByColumnId(@Param("columnId") Long columnId);
+    void purgeByColumnId(@Param("columnId") Long columnId);
 
     /**
      * 统计专栏内的文章数量

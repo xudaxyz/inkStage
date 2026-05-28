@@ -446,7 +446,7 @@ public class AdminArticleServiceImpl implements AdminArticleService {
         try {
             log.debug("管理员删除文章, 文章ID: {}", id);
             Article article = ArticleUtils.getArticleSafely(articleMapper, id);
-            int i = articleMapper.deleteByAdmin(id);
+            int i = articleMapper.purgeByAdmin(id);
             ArticleUtils.checkOperationResult(i, id, "管理员删除文章");
             clearCacheAfterAdminOperation(id, article.getUserId());
 

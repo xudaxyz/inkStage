@@ -107,7 +107,7 @@ public class ArticleLikeServiceImpl implements ArticleLikeService {
         }
 
         // 删除点赞记录
-        int result = articleLikeMapper.deleteByArticleIdAndUserId(articleId, userId);
+        int result = articleLikeMapper.purgeByArticleIdAndUserId(articleId, userId);
 
         if (result > 0) {
             countProducer.sendCountMessage(CountType.ARTICLE_LIKE, articleId, -1);

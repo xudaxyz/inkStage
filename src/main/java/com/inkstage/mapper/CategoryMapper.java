@@ -31,14 +31,6 @@ public interface CategoryMapper {
     Category findById(Long id);
 
     /**
-     * 根据分类ID查询分类版本号
-     *
-     * @param id 分类ID
-     * @return 分类版本号
-     */
-    Integer findCategoryVersionById(Long id);
-
-    /**
      * 获取所有激活状态的分类
      *
      * @return 激活状态的分类列表
@@ -54,14 +46,6 @@ public interface CategoryMapper {
      * @return 分类列表
      */
     List<Category> findByKeyword(@Param("keyword") String keyword, @Param("offset") Integer offset, @Param("pageSize") Integer pageSize);
-
-    /**
-     * 批量查询分类
-     *
-     * @param ids 分类ID列表
-     * @return 分类列表
-     */
-    List<Category> findByIds(@Param("ids") List<Long> ids);
 
     // ==================== 新增（Create） ====================
 
@@ -100,7 +84,7 @@ public interface CategoryMapper {
      * @param id 分类ID
      * @return 影响行数
      */
-    int deleteById(Long id);
+    int purgeById(Long id);
 
     // ==================== 统计（Count） ====================
 

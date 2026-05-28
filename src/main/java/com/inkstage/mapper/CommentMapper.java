@@ -51,14 +51,6 @@ public interface CommentMapper {
     List<ArticleCommentVO> findByUserId(@Param("userId") Long userId, @Param("limit") Integer limit);
 
     /**
-     * 批量查询评论
-     *
-     * @param ids 评论ID列表
-     * @return 评论列表
-     */
-    List<Comment> findByIds(@Param("ids") List<Long> ids);
-
-    /**
      * 查询文章的最大楼层号
      *
      * @param articleId 文章ID
@@ -246,5 +238,27 @@ public interface CommentMapper {
      * @return 待审核评论数量
      */
     long countPendingReviews();
+
+    /**
+     * 软删除用户所有评论
+     *
+     * @param userId 用户ID
+     */
+    void deleteByUserId(@Param("userId") Long userId);
+
+    /**
+     * 恢复指定时间之后被软删除的用户评论
+     *
+     * @param userId    用户ID
+     * @param afterTime 时间节点，恢复此时间之后被删除的评论
+     */
+    void restoreByUserIdAfterTime(@Param("userId") Long userId, @Param("afterTime") java.time.LocalDateTime afterTime);
+
+    /**
+     * 彻底删除用户所有评论
+     *
+     * @param userId 用户ID
+     */
+    void purgeByUserId(@Param("userId") Long userId);
 
 }

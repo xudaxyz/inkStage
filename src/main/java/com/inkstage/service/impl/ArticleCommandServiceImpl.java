@@ -267,7 +267,7 @@ public class ArticleCommandServiceImpl implements ArticleCommandService {
                 log.warn("无权删除他人文章, 用户ID: {}, 文章ID: {}", currentUserId, articleId);
                 throw new BusinessException("无权删除他人文章");
             }
-            int result = articleMapper.deleteById(articleId, currentUserId);
+            int result = articleMapper.purgeById(articleId, currentUserId);
             boolean success = result > 0;
             if (success) {
                 TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {

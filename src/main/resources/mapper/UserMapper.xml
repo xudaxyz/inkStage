@@ -115,14 +115,6 @@
         WHERE id = #{id} AND deleted = 0
     </select>
 
-    <!-- 根据用户ID查询用户版本号 -->
-    <select id="findUserVersionById" resultType="java.lang.Integer">
-        SELECT
-        user_version
-        FROM user
-        WHERE id = #{id} AND deleted = 0
-    </select>
-
     <!-- 根据用户名查询用户 -->
     <select id="findByUsername" resultMap="ResultMap">
         SELECT
@@ -145,33 +137,6 @@
         <include refid="columns"/>
         FROM user
         WHERE phone = #{phone} AND deleted = 0
-    </select>
-
-    <!-- 分页查询用户 -->
-    <select id="findByPage" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user
-        WHERE deleted = 0
-        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
-        <if test="keyword != null and keyword != ''">
-            AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
-        <if test="role != null">
-            AND role_id = #{role}
-        </if>
-        <if test="status != null">
-            AND status = #{status}
-        </if>
-        <if test="startDate != null">
-            AND create_time <![CDATA[ >= ]]>  #{startDate}
-        </if>
-        <if test="endDate != null">
-            AND create_time <![CDATA[ <= ]]> #{endDate}
-        </if>
-        ORDER BY
-        id DESC
-        LIMIT #{offset}, #{pageSize}
     </select>
 
     <!-- 查询热门用户 -->
@@ -225,34 +190,6 @@
         WHERE c.user_id = #{userId}
         AND c.deleted = 0
         ORDER BY c.create_time DESC
-        LIMIT #{limit}
-    </select>
-
-    <!-- 批量查询用户 -->
-    <select id="findByIds" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user
-        WHERE id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        AND deleted = 0
-        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
-    </select>
-
-    <!-- 根据角色查询用户 -->
-    <select id="findByRole" resultMap="ResultMap">
-        SELECT
-        <include refid="columns"/>
-        FROM user u
-        WHERE u.deleted = 0
-        AND u.id IN (
-            SELECT ur.user_id 
-            FROM user_role ur 
-            WHERE ur.role_id = #{role} AND ur.status = 1
-        )
-        ORDER BY u.id DESC
         LIMIT #{limit}
     </select>
 
@@ -364,16 +301,6 @@
         WHERE id = #{id}
     </update>
 
-    <!-- 更新用户最后登录时间 -->
-    <update id="updateLastLoginTime">
-        UPDATE user
-        <set>
-            last_login_time = #{lastLoginTime},
-            update_time = now()
-        </set>
-        WHERE id = #{id}
-    </update>
-
     <!-- 管理员更新用户详情 -->
     <update id="updateAdminUserDetail">
         UPDATE user
@@ -409,34 +336,10 @@
     </update>
 
     <!-- 根据ID删除用户 -->
-    <delete id="deleteById" parameterType="java.lang.Long">
+    <delete id="purgeById" parameterType="java.lang.Long">
         DELETE FROM user
         WHERE id = #{id}
     </delete>
-
-    <!-- 统计用户总数 -->
-    <select id="countByCondition" resultType="java.lang.Long">
-        SELECT
-        COUNT(*)
-        FROM user
-        WHERE deleted = 0
-        AND (role_id IS NULL OR role_id = 3) <!-- 只包含普通用户 -->
-        <if test="keyword != null and keyword != ''">
-            AND (username LIKE CONCAT('%', #{keyword}, '%') OR nickname LIKE CONCAT('%', #{keyword}, '%') OR email LIKE CONCAT('%', #{keyword}, '%') OR phone LIKE CONCAT('%', #{keyword}, '%'))
-        </if>
-        <if test="role != null">
-            AND role_id = #{role}
-        </if>
-        <if test="status != null">
-            AND status = #{status}
-        </if>
-        <if test="startDate != null">
-            AND create_time <![CDATA[ >= ]]> #{startDate}
-        </if>
-        <if test="endDate != null">
-            AND create_time <![CDATA[ <= ]]> #{endDate}
-        </if>
-    </select>
 
     <!-- 管理员统计用户总数 -->
     <select id="countAdminUserList" resultType="java.lang.Long">
@@ -580,5 +483,35 @@
         AND scheduled_delete_time IS NOT NULL
         AND scheduled_delete_time <![CDATA[ <= ]]> #{now}
     </select>
+
+    <update id="cancelUserAccount">
+        UPDATE user
+        SET username = CONCAT('cancelled_', id),
+            password = '',
+            nickname = '已注销用户',
+            email = NULL,
+            email_verified = 0,
+            phone = NULL,
+            phone_verified = 0,
+            avatar = NULL,
+            cover_image = NULL,
+            signature = NULL,
+            gender = 0,
+            birth_date = NULL,
+            location = NULL,
+            website = NULL,
+            follow_count = 0,
+            follower_count = 0,
+            article_count = 0,
+            comment_count = 0,
+            like_count = 0,
+            last_login_time = NULL,
+            last_login_ip = NULL,
+            register_ip = NULL,
+            status = 4,
+            scheduled_delete_time = NULL,
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
 
 </mapper>

@@ -199,7 +199,10 @@ public enum ResponseMessage {
     // 删除账号相关消息
     ACCOUNT_DELETED("账号已删除！"),
     ACCOUNT_PENDING_DELETE("账号注销申请已提交！"),
-    ACCOUNT_RESTORED("您的账号已恢复， 请继续使用！");
+    ACCOUNT_RESTORED("您的账号已恢复， 请继续使用！"),
+    ACCOUNT_CANCELLED("账号已注销"),
+    ACCOUNT_ALREADY_IN_CANCELLATION("账号已在注销流程中"),
+    ACCOUNT_NOT_IN_CANCELLATION("账号不在注销流程中");
 
     private final String message;
 

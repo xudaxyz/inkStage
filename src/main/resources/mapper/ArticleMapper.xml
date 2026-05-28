@@ -546,33 +546,6 @@
         AND (a.title LIKE CONCAT('%', #{keyword}, '%') OR a.summary LIKE CONCAT('%', #{keyword}, '%') OR a.content LIKE CONCAT('%', #{keyword}, '%'))
     </select>
 
-    <!-- 分页查询所有文章（管理员） -->
-    <select id="findByPage" resultMap="ResultMap">
-        SELECT
-        <include refid="baseColumns"/>
-        FROM
-        article a
-        WHERE
-        a.deleted = 0
-        <if test="offset != null and pageSize != null">
-            LIMIT #{offset}, #{pageSize}
-        </if>
-        <if test="query != null">
-            <if test="query.keyword != null and query.keyword != ''">
-                AND (a.title LIKE CONCAT('%', #{query.keyword}, '%') OR a.summary LIKE CONCAT('%', #{query.keyword}, '%'))
-            </if>
-            <if test="query.categoryId != null and query.categoryId != 0">
-                AND a.category_id = #{query.categoryId}
-            </if>
-            <if test="query.articleStatus != null">
-                AND a.article_status = #{query.articleStatus}
-            </if>
-            ORDER BY
-            a.create_time DESC
-            LIMIT #{query.offset}, #{query.pageSize}
-        </if>
-    </select>
-
     <!-- 统计所有文章总数（管理员） -->
     <select id="countAll" resultType="java.lang.Long">
         SELECT
@@ -642,92 +615,6 @@
         ORDER BY
         a.create_time DESC
         LIMIT #{query.offset}, #{query.pageSize}
-    </select>
-
-    <!-- 批量查询文章 -->
-    <select id="findByIds" resultMap="ResultMap">
-        SELECT
-        <include refid="baseColumns"/>
-        FROM article
-        WHERE id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        AND deleted = 0
-    </select>
-
-    <!-- 根据分类查询文章 -->
-    <select id="findByCategory" resultMap="ArticleListResultMap">
-        SELECT
-        a.id,
-        a.title,
-        a.summary,
-        a.cover_image,
-        a.article_status,
-        a.visible,
-        a.publish_time,
-        a.last_edit_time,
-        a.read_count,
-        a.like_count,
-        a.comment_count,
-        a.user_id,
-        a.category_id,
-        u.avatar,
-        u.nickname,
-        c.name as category_name
-        FROM
-        article a
-        LEFT JOIN
-        category c ON a.category_id = c.id
-        LEFT JOIN
-        user u ON a.user_id = u.id
-        WHERE
-        a.deleted = 0
-        AND a.category_id = #{categoryId}
-        AND a.article_status = 3 <!-- 已发布 -->
-        ORDER BY
-        a.top DESC,
-        a.publish_time DESC
-        LIMIT #{limit}
-    </select>
-
-    <!-- 根据标签查询文章 -->
-    <select id="findByTag" resultMap="ArticleListResultMap">
-        SELECT
-        a.id,
-        a.title,
-        a.summary,
-        a.cover_image,
-        a.article_status,
-        a.visible,
-        a.publish_time,
-        a.last_edit_time,
-        a.read_count,
-        a.like_count,
-        a.comment_count,
-        a.user_id,
-        a.category_id,
-        u.avatar,
-        u.nickname,
-        c.name as category_name
-        FROM
-        article a
-        LEFT JOIN
-        category c ON a.category_id = c.id
-        LEFT JOIN
-        user u ON a.user_id = u.id
-        LEFT JOIN
-        article_tag at ON a.id = at.article_id
-        WHERE
-        a.deleted = 0
-        AND at.tag_id = #{tagId}
-        AND a.article_status = 3 <!-- 已发布 -->
-        GROUP BY
-        a.id
-        ORDER BY
-        a.top DESC,
-        a.publish_time DESC
-        LIMIT #{limit}
     </select>
 
     <!-- 统计总阅读数 -->
@@ -867,12 +754,12 @@
     </update>
 
     <!-- 管理员删除文章 -->
-    <delete id="deleteByAdmin">
+    <delete id="purgeByAdmin">
         delete from article where id = #{id}
     </delete>
 
     <!-- 用户删除文章 -->
-    <delete id="deleteById">
+    <delete id="purgeById">
         delete from article where id = #{id} and user_id = #{userId}
     </delete>
 
@@ -909,11 +796,6 @@
     <!-- 根据文章ID获取分享数 -->
     <select id="getShareCount" resultType="java.lang.Long">
         SELECT share_count FROM article WHERE id = #{id} AND deleted = 0
-    </select>
-
-    <!-- 根据文章ID查询文章版本号 -->
-    <select id="findArticleVersionById" resultType="java.lang.Integer">
-        SELECT article_version FROM article WHERE id = #{id} AND deleted = 0
     </select>
 
     <!-- 查询到达定时发布时间且状态为待发布的文章 -->
@@ -1009,6 +891,27 @@
         GROUP BY c.id, c.name
         HAVING COUNT(a.id) > 0
         ORDER BY count DESC
+    </select>
+
+    <update id="deleteByUserId">
+        UPDATE article
+        SET deleted = 1, deleted_time = NOW(), update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 0
+    </update>
+
+    <update id="restoreByUserIdAfterTime">
+        UPDATE article
+        SET deleted = 0, deleted_time = NULL, update_time = NOW()
+        WHERE user_id = #{userId} AND deleted = 1 AND deleted_time <![CDATA[ >= ]]> #{afterTime}
+    </update>
+
+    <delete id="purgeByUserId">
+        DELETE FROM article WHERE user_id = #{userId}
+    </delete>
+
+    <select id="findAfterDeletedIdsByUserId" resultType="java.lang.Long">
+        SELECT id FROM article
+        WHERE user_id = #{userId} AND deleted = 1 AND deleted_time <![CDATA[ >= ]]> #{afterTime}
     </select>
 
 </mapper>

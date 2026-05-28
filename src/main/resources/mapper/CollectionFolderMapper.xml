@@ -60,7 +60,7 @@
         WHERE id = #{folderId} AND deleted = 0
     </update>
 
-    <delete id="deleteById">
+    <delete id="purgeById">
         DELETE FROM collection_folder
         WHERE id = #{id} AND deleted = 0
     </delete>

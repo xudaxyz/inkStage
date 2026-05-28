@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.inkstage.mapper.AccountCancellationMapper">
+
+    <resultMap id="ResultMap" type="com.inkstage.entity.model.AccountCancellation">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="clean_content" property="cleanContent"/>
+        <result column="clean_interaction" property="cleanInteraction"/>
+        <result column="apply_time" property="applyTime"/>
+        <result column="scheduled_time" property="scheduledTime"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="deleted" property="deleted"/>
+        <result column="deleted_time" property="deletedTime"/>
+    </resultMap>
+
+    <sql id="baseColumns">
+        id, user_id, clean_content, clean_interaction, apply_time, scheduled_time, status, create_time, update_time, deleted, deleted_time
+    </sql>
+
+    <select id="findByUserId" resultMap="ResultMap">
+        SELECT <include refid="baseColumns"/>
+        FROM account_cancellation
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.inkstage.entity.model.AccountCancellation">
+        INSERT INTO account_cancellation (id, user_id, clean_content, clean_interaction, apply_time, scheduled_time, status, create_time, update_time, deleted)
+        VALUES (#{id}, #{userId}, #{cleanContent}, #{cleanInteraction}, #{applyTime}, #{scheduledTime}, #{status}, #{createTime}, #{updateTime}, #{deleted})
+    </insert>
+
+    <update id="updateStatusByUserId">
+        UPDATE account_cancellation
+        SET status = #{status}, update_time = NOW()
+        WHERE user_id = #{userId} and deleted = 0
+    </update>
+
+    <delete id="purgeByUserId">
+        DELETE FROM account_cancellation WHERE user_id = #{userId} and deleted = 0
+    </delete>
+
+</mapper>
