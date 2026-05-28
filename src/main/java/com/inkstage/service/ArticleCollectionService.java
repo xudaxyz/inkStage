@@ -2,6 +2,7 @@ package com.inkstage.service;
 
 import com.inkstage.common.PageResult;
 import com.inkstage.dto.front.CollectArticleDTO;
+import com.inkstage.dto.front.MoveCollectionDTO;
 import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.vo.front.CollectionArticleVO;
 
@@ -66,10 +67,9 @@ public interface ArticleCollectionService {
     /**
      * 移动收藏文章到其他文件夹
      *
-     * @param articleId 文章ID
-     * @param targetFolderId 目标文件夹ID
+     * @param moveCollectionDTO 移动收藏DTO
      * @return 是否移动成功
      */
-    boolean moveCollectionArticle(Long articleId, Long targetFolderId);
+    boolean moveCollectionArticle(MoveCollectionDTO moveCollectionDTO);
 
 }

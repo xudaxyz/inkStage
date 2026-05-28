@@ -1,7 +1,6 @@
 package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
-import com.inkstage.enums.CollectionStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -32,11 +31,6 @@ public class ArticleCollection extends BaseEntity {
      * 收藏文件夹ID
      */
     private Long folderId;
-
-    /**
-     * 收藏状态
-     */
-    private CollectionStatus status;
 
     /**
      * 收藏时间

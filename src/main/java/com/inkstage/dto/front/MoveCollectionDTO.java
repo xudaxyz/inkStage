@@ -7,10 +7,10 @@ import java.io.Serial;
 import java.io.Serializable;
 
 /**
- * 收藏文章DTO
+ * 移动收藏文章DTO
  */
 @Data
-public class CollectArticleDTO implements Serializable {
+public class MoveCollectionDTO implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -22,7 +22,8 @@ public class CollectArticleDTO implements Serializable {
     private Long articleId;
 
     /**
-     * 文件夹ID（可选，不传则收藏到默认收藏夹）
+     * 目标文件夹ID
      */
-    private Long folderId;
+    @NotNull(message = "目标文件夹ID不能为空")
+    private Long targetFolderId;
 }

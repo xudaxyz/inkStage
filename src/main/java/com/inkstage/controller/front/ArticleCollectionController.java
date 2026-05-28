@@ -4,11 +4,16 @@ import com.inkstage.annotation.UserAccess;
 import com.inkstage.common.PageResult;
 import com.inkstage.common.ResponseMessage;
 import com.inkstage.common.Result;
+import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.CollectArticleDTO;
+import com.inkstage.dto.front.CollectionFolderDTO;
+import com.inkstage.dto.front.MoveCollectionDTO;
 import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.service.ArticleCollectionService;
 import com.inkstage.service.CollectionFolderService;
+import com.inkstage.utils.UserContext;
 import com.inkstage.vo.front.CollectionArticleVO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -125,14 +130,14 @@ public class ArticleCollectionController {
     /**
      * 移动收藏文章到其他文件夹
      *
-     * @param collectArticleDTO 移动收藏请求
+     * @param moveCollectionDTO 移动收藏请求
      * @return 响应结果
      */
     @PutMapping("/collections/move")
     @UserAccess
-    public Result<Boolean> moveCollectionArticle(@RequestBody CollectArticleDTO collectArticleDTO) {
-        log.info("移动收藏文章到其他文件夹, 文章ID: {}, 目标文件夹ID: {}", collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId());
-        boolean success = articleCollectionService.moveCollectionArticle(collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId());
+    public Result<Boolean> moveCollectionArticle(@Valid @RequestBody MoveCollectionDTO moveCollectionDTO) {
+        log.info("移动收藏文章到其他文件夹, 文章ID: {}, 目标文件夹ID: {}", moveCollectionDTO.getArticleId(), moveCollectionDTO.getTargetFolderId());
+        boolean success = articleCollectionService.moveCollectionArticle(moveCollectionDTO);
         return success ? Result.success(true, ResponseMessage.COLLECTION_ARTICLE_MOVE_SUCCESS) : Result.error(ResponseMessage.ERROR);
     }
 
@@ -140,33 +145,32 @@ public class ArticleCollectionController {
     /**
      * 创建收藏文件夹
      *
-     * @param collectArticleDTO 收藏文件夹信息
+     * @param collectionFolderDTO 收藏文件夹信息
      * @return 响应结果
      */
     @PostMapping("/collections/folders")
     @UserAccess
-    public Result<Long> createCollectionFolder(@RequestBody CollectArticleDTO collectArticleDTO) {
-        log.info("创建收藏文件夹: {}", collectArticleDTO.getFolderName());
-        Long folderId = collectionFolderService.createCollectionFolder(collectArticleDTO);
+    public Result<Long> createCollectionFolder(@Valid @RequestBody CollectionFolderDTO collectionFolderDTO) {
+        log.info("创建收藏文件夹: {}", collectionFolderDTO.getName());
+        Long folderId = collectionFolderService.createCollectionFolder(collectionFolderDTO);
         return Result.success(folderId, ResponseMessage.COLLECTION_FOLDER_CREATE_SUCCESS);
     }
 
     /**
      * 更新收藏文件夹
      *
-     * @param folderId    文件夹ID
-     * @param name        文件夹名称
-     * @param description 文件夹描述
+     * @param folderId            文件夹ID
+     * @param collectionFolderDTO 收藏文件夹DTO
      * @return 响应结果
      */
     @PutMapping("/collections/folders/{folderId}")
     @UserAccess
     public Result<Boolean> updateCollectionFolder(
             @PathVariable Long folderId,
-            @RequestParam String name,
-            @RequestParam(required = false) String description) {
-        log.info("更新收藏文件夹, 文件夹ID: {}, 名称: {}, 描述: {}", folderId, name, description);
-        boolean success = collectionFolderService.updateCollectionFolder(folderId, name, description);
+            @Valid @RequestBody CollectionFolderDTO collectionFolderDTO) {
+        log.info("更新收藏文件夹, 文件夹ID: {}, 名称: {}, 描述: {}, 状态: {}",
+                folderId, collectionFolderDTO.getName(), collectionFolderDTO.getDescription(), collectionFolderDTO.getStatus());
+        boolean success = collectionFolderService.updateCollectionFolder(folderId, collectionFolderDTO);
         return success ? Result.success(true, ResponseMessage.COLLECTION_FOLDER_UPDATE_SUCCESS) : Result.error(ResponseMessage.UPDATE_FAILED);
     }
 
@@ -174,14 +178,28 @@ public class ArticleCollectionController {
      * 删除收藏文件夹
      *
      * @param folderId 文件夹ID
-     * @return 响应结果
+     * @param strategy 删除策略（MOVE_TO_DEFAULT: 移至默认收藏夹, DELETE_COLLECTIONS: 同时取消收藏）
      */
     @DeleteMapping("/collections/folders/{folderId}")
     @UserAccess
-    public Result<Boolean> deleteCollectionFolder(@PathVariable Long folderId) {
-        log.info("删除收藏文件夹, 文件夹ID: {}", folderId);
-        boolean success = collectionFolderService.deleteCollectionFolder(folderId);
+    public Result<Boolean> deleteCollectionFolder(
+            @PathVariable Long folderId,
+            @RequestParam(defaultValue = InkConstant.COLLECT_DELETE_STRATEGY_MOVE) String strategy) {
+        log.info("删除收藏文件夹, 文件夹ID: {}, 策略: {}", folderId, strategy);
+        boolean success = collectionFolderService.deleteCollectionFolder(folderId, strategy);
         return success ? Result.success(true, ResponseMessage.COLLECTION_FOLDER_DELETE_SUCCESS) : Result.error(ResponseMessage.ERROR);
+    }
+
+    /**
+     * 批量更新收藏文件夹排序
+     */
+    @PutMapping("/collections/folders/sort")
+    @UserAccess
+    public Result<Boolean> batchUpdateFolderSort(@RequestBody List<Long> folderIds) {
+        log.info("批量更新收藏文件夹排序, 文件夹数量: {}", folderIds.size());
+        Long userId = UserContext.getCurrentUserId();
+        boolean success = collectionFolderService.batchUpdateFolderSort(userId, folderIds);
+        return success ? Result.success(true, "排序更新成功") : Result.error("排序更新失败");
     }
 
 }

@@ -95,4 +95,13 @@ public interface CollectionFolderMapper {
      */
     int deleteById(Long id);
 
+    /**
+     * 批量更新收藏文件夹排序
+     *
+     * @param userId 用户ID
+     * @param list   文件夹列表（包含id和sortOrder）
+     * @return 影响行数
+     */
+    int batchUpdateSortOrder(@Param("userId") Long userId, @Param("list") List<CollectionFolder> list);
+
 }

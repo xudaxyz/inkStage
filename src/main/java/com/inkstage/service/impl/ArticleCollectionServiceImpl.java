@@ -5,11 +5,11 @@ import com.inkstage.cache.service.InteractionCacheService;
 import com.inkstage.common.PageResult;
 import com.inkstage.constant.InkConstant;
 import com.inkstage.dto.front.CollectArticleDTO;
+import com.inkstage.dto.front.MoveCollectionDTO;
 import com.inkstage.entity.model.Article;
 import com.inkstage.entity.model.ArticleCollection;
 import com.inkstage.entity.model.CollectionFolder;
 import com.inkstage.entity.model.User;
-import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.CountType;
 import com.inkstage.enums.common.DeleteStatus;
 import com.inkstage.enums.notification.NotificationType;
@@ -54,8 +54,8 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
     @Override
     @Transactional
     public boolean collectArticle(CollectArticleDTO collectArticleDTO) {
-        log.info("收藏文章, 文章ID: {}, 文件夹ID: {}, 文件夹名称: {}",
-                collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId(), collectArticleDTO.getFolderName());
+        log.info("收藏文章, 文章ID: {}, 文件夹ID: {}",
+                collectArticleDTO.getArticleId(), collectArticleDTO.getFolderId());
 
         User currentUser = UserContext.getCurrentUser();
         Long userId = currentUser.getId();
@@ -66,12 +66,7 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         }
 
         Long folderId = collectArticleDTO.getFolderId();
-        // 处理文件夹
-        if (collectArticleDTO.getFolderName() != null && !collectArticleDTO.getFolderName().isEmpty()) {
-            // 创建新收藏夹
-            folderId = collectionFolderService.createCollectionFolder(collectArticleDTO);
-        } else if (folderId == null || folderId == 0) {
-            // 使用默认收藏夹
+        if (folderId == null || folderId == 0) {
             CollectionFolder defaultFolder = collectionFolderService.getDefaultFolder(userId);
             folderId = defaultFolder.getId();
         }
@@ -82,7 +77,6 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
         collection.setArticleId(collectArticleDTO.getArticleId());
         collection.setUserId(userId);
         collection.setFolderId(folderId);
-        collection.setStatus(CollectionStatus.PUBLIC);
         collection.setCollectTime(LocalDateTime.now());
         collection.setCreateTime(LocalDateTime.now());
         collection.setDeleted(DeleteStatus.NOT_DELETED);
@@ -228,7 +222,9 @@ public class ArticleCollectionServiceImpl implements ArticleCollectionService {
 
     @Override
     @Transactional
-    public boolean moveCollectionArticle(Long articleId, Long targetFolderId) {
+    public boolean moveCollectionArticle(MoveCollectionDTO moveCollectionDTO) {
+        Long articleId = moveCollectionDTO.getArticleId();
+        Long targetFolderId = moveCollectionDTO.getTargetFolderId();
         log.info("移动收藏文章到其他文件夹, 文章ID: {}, 目标文件夹ID: {}", articleId, targetFolderId);
 
         Long userId = UserContext.getCurrentUser().getId();

@@ -1,6 +1,7 @@
 package com.inkstage.entity.model;
 
 import com.inkstage.entity.base.BaseEntity;
+import com.inkstage.enums.CollectionStatus;
 import com.inkstage.enums.common.DefaultStatus;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -46,4 +47,9 @@ public class CollectionFolder extends BaseEntity {
      * 是否默认文件夹(0:否,1:是)
      */
     private DefaultStatus defaultFolder;
+
+    /**
+     * 收藏夹状态（公开/私密）
+     */
+    private CollectionStatus status;
 }

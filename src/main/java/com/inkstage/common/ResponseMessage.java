@@ -105,7 +105,7 @@ public enum ResponseMessage {
     RESOURCE_NOT_FOUND("资源不存在"),
     RESOURCE_EXISTS("资源已存在"),
     COLLECTION_DEFAULT_FOLDER_EXIST("默认收藏夹已存在"),
-    COLLECTION_FOLDER_EXIST("收藏夹{}已存在"),
+    COLLECTION_FOLDER_EXIST("收藏夹 {} 已存在"),
 
     ALREADY_REPORTED("您已举报过相关内容"),
 
@@ -162,6 +162,7 @@ public enum ResponseMessage {
     COLLECTION_FOLDER_CREATE_SUCCESS("创建收藏文件夹成功"),
     COLLECTION_FOLDER_UPDATE_SUCCESS("更新收藏文件夹成功"),
     COLLECTION_FOLDER_DELETE_SUCCESS("删除收藏文件夹成功"),
+    COLLECTION_FOLDER_SORT_SUCCESS("收藏文件夹排序更新成功"),
     COLLECTION_ARTICLE_MOVE_SUCCESS("移动收藏文章成功"),
 
     // 文件相关成功消息

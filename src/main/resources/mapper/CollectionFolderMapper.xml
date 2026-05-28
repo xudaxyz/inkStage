@@ -10,27 +10,28 @@
         <result column="article_count" property="articleCount"/>
         <result column="sort_order" property="sortOrder"/>
         <result column="default_folder" property="defaultFolder"/>
+        <result column="status" property="status" javaType="com.inkstage.enums.CollectionStatus"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
-        <result column="deleted" property="deleted" typeHandler="com.inkstage.handler.EnumCodeTypeHandler"/>
+        <result column="deleted" property="deleted" javaType="com.inkstage.enums.common.DeleteStatus"/>
         <result column="deleted_time" property="deletedTime"/>
     </resultMap>
 
     <select id="selectById" resultMap="collectionFolderResultMap">
-        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, status, create_time, update_time, deleted
         FROM collection_folder
-        WHERE id = #{id}
+        WHERE id = #{id} and deleted = 0
     </select>
 
     <select id="selectByUserIdAndName" resultMap="collectionFolderResultMap">
-        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, status, create_time, update_time, deleted
         FROM collection_folder
-        WHERE user_id = #{userId} AND name = #{name}
+        WHERE user_id = #{userId} AND name = #{name} and deleted = 0
     </select>
 
     <insert id="insert">
-        INSERT INTO collection_folder (id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time)
-        VALUES (#{id}, #{userId}, #{name}, #{description}, #{articleCount}, #{sortOrder}, #{defaultFolder}, #{createTime}, #{updateTime})
+        INSERT INTO collection_folder (id, user_id, name, description, article_count, sort_order, default_folder, status, create_time, update_time, deleted)
+        VALUES (#{id}, #{userId}, #{name}, #{description}, #{articleCount}, #{sortOrder}, #{defaultFolder}, #{status}, #{createTime}, #{updateTime}, #{deleted})
     </insert>
 
     <update id="update">
@@ -41,6 +42,9 @@
             <if test="articleCount != null">article_count = #{articleCount},</if>
             <if test="sortOrder != null">sort_order = #{sortOrder},</if>
             <if test="defaultFolder != null">default_folder = #{defaultFolder},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+            <if test="deletedTime != null">deleted_time = #{deletedTime},</if>
             update_time = #{updateTime}
         </set>
         WHERE id = #{id}
@@ -53,19 +57,32 @@
     <update id="updateArticleCount">
         UPDATE collection_folder
         SET article_count = article_count + #{delta}, update_time = NOW()
-        WHERE id = #{folderId}
+        WHERE id = #{folderId} AND deleted = 0
     </update>
 
     <delete id="deleteById">
         DELETE FROM collection_folder
-        WHERE id = #{id}
+        WHERE id = #{id} AND deleted = 0
     </delete>
 
     <select id="selectByUserId" resultMap="collectionFolderResultMap">
-        SELECT id, user_id, name, description, article_count, sort_order, default_folder, create_time, update_time
+        SELECT id, user_id, name, description, article_count, sort_order, default_folder, status, create_time, update_time
         FROM collection_folder
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND deleted = 0
         ORDER BY default_folder DESC, sort_order ASC, create_time DESC
     </select>
+
+    <!-- 批量更新收藏文件夹排序 -->
+    <update id="batchUpdateSortOrder">
+        UPDATE collection_folder cf
+        INNER JOIN (
+            <foreach collection="list" item="item" separator="UNION ALL">
+                SELECT #{item.id} AS id, #{item.sortOrder} AS sort_order
+            </foreach>
+        ) temp ON cf.id = temp.id
+        SET cf.sort_order = temp.sort_order,
+            cf.update_time = NOW()
+        WHERE cf.user_id = #{userId} AND cf.deleted = 0
+    </update>
 
 </mapper>

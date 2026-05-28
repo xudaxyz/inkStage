@@ -96,6 +96,15 @@ public interface ArticleCollectionMapper {
      */
     int deleteByArticleIdAndUserId(@Param("articleId") Long articleId, @Param("userId") Long userId);
 
+    /**
+     * 根据用户ID和文件夹ID查询收藏记录列表
+     *
+     * @param userId 用户ID
+     * @param folderId 文件夹ID
+     * @return 收藏记录列表
+     */
+    List<ArticleCollection> findByUserIdAndFolderId(@Param("userId") Long userId, @Param("folderId") Long folderId);
+
     // ==================== 统计（Count） ====================
     
     /**
